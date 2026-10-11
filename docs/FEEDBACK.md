@@ -12,3 +12,7 @@
 No lecturer feedback supplied yet. Suggestions are not automatically authorised changes. For new feedback record affected UI, logic, data/access, tests, effort and verification status.
 
 11 October 2026: user prefers selection cards and asks to avoid two backend codebases. Proposed one shared Python API for both interfaces plus managed Supabase services; single decision card sent. Selection pending. Do not interpret prior "can" as approval of unresolved backend structure, preview scope or privacy rules.
+
+Later 11 October 2026: user said "can" to the single-backend proposal; recorded as approval of one shared Python backend only. Preview selection then explicitly required more functions. Follow-up question asks for their list and real-versus-demo data expectations; answer pending. Privacy rules and complete initial implementation scope remain unapproved. Keeping the turn open allowed a selection response to arrive; continue one question at a time.
+
+Subsequent explicit selections: user requires core function plus appointment booking, patient queue, prescriptions and billing. User approves shared saved records between phone/dashboard, simulated AI/payment processing, and the proposed scoped clinical-access rules. Initial implementation scope/design now approved; hosting/private transfers still need scoped authorisation. Required report alignment recorded in REPORT_REVIEW; DOCX renderer unavailable during preflight, source unchanged.

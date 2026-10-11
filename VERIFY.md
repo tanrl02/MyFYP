@@ -13,7 +13,7 @@ Open MyFYP in File Explorer. Right-click -> TortoiseGit -> Check for Modificatio
 
 Expected current result: nine planning/review Markdown files plus .gitignore; no app/dependency/database changes. tmp/pdfs is ignored. Original report remains outside MyFYP unchanged.
 
-## Proposed preview checks - pending implementation and approval
+## Approved preview checks - pending implementation
 
 Exact launch commands and screen labels will be supplied after code exists. Use only synthetic/non-sensitive inputs.
 
@@ -24,7 +24,12 @@ Exact launch commands and screen labels will be supplied after code exists. Use 
 | Android picker | Take photo; choose gallery image; cancel selection | Correct preview; cancellation does not overwrite prior image |
 | Validation | Submit without photo; select unsupported/oversized input where possible | Clear rejection; no saved invalid record |
 | Persistence | Confirm/save result, close and reopen app/history | Record and durable local image still available |
-| Dashboard | Open synthetic record, save review/status, reload | Update persists locally; mobile does not synchronise yet |
+| Shared booking | Book available doctor slot on mobile; open staff dashboard | Same saved booking appears in queue; no duplicate or over-capacity booking |
+| Shared queue | Staff call/update patient status; refresh mobile | Patient retrieves saved queue update |
+| Cancellation | Cancel permitted booking; reload both interfaces | Consistent cancelled state; queue/capacity updated |
+| Prescription | Doctor saves sample prescription; authorised staff mark dispensed | Same record/status persists; repeat dispensing does not duplicate operation |
+| Billing | Generate sample bill and record simulated payment; reload mobile/dashboard | Same saved bill/payment status; simulation label; no real money transferred |
+| Dashboard | Open synthetic record, save authorised review/status, reload | Update persists in shared store and appears to authorised patient |
 | Honesty | Inspect result/role labels | Simulated prediction and demo roles are obvious |
 
 Agent checks: suitable static/build checks and browser interaction checks after implementation. Phone checks only pass after user confirms physical Android results. Demo role switching is not an access-control test.

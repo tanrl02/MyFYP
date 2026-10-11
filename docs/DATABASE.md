@@ -1,6 +1,6 @@
 # Data design
 
-Status: proposed only; no schema, migrations, hosted environment or implemented data access. Final scope retains all nine modules. Reference: report Figure 4.61, PDF 250; permissions in section 4.4 require reconciliation.
+Status: proposed entity/schema design; role boundaries and shared core preview approved. No schema, migrations, hosted environment or implemented data access. Final scope retains all nine modules. Reference: report Figure 4.61, PDF 250; report permissions need alignment with approved rules below.
 
 | Entity group | Relationships and purpose |
 | --- | --- |
@@ -17,12 +17,12 @@ Status: proposed only; no schema, migrations, hosted environment or implemented 
 
 This is a whole-system entity map, not a commitment to one table per item. Avoid speculative fields. Inventory's single current batch/expiry in the report needs review for multi-batch dispensing. Record sharing is not represented adequately by merely a user role.
 
-## Ownership and access proposal
+## Approved ownership and access boundaries
 
-Patients read/update allowed parts of their own profile and see only their authorised records. They cannot assign privileged roles. Doctors see assigned/shared records according to the agreed consent model; authored clinical notes are separate from AI results. Staff receive minimum queue/billing/pharmacy data needed, not blanket clinical access. Admin user operations and report access do not automatically imply unrestricted clinical browsing; final rule pending user discussion.
+Patients read/update allowed parts of their own profile and see their own records. They cannot assign privileged roles. Doctors see explicitly shared records or records authorised by patient booking; authored clinical notes are separate from AI results. Staff receive minimum queue/billing/pharmacy data needed, not blanket clinical access. Admin user operations and permitted reports do not imply unrestricted clinical browsing. Grant lifetime/revocation and report field details remain to specify.
 
 Private storage must enforce owner/grant access through backend policies. No public image URLs or privileged client credentials. Use migrations for schema/policies; verify cross-user denial, not only successful requests. Stock dispensing/payment updates require atomic/idempotent trusted operations; exact rules await detailed module audit.
 
-Proposed local preview contracts: session id, synthetic patient id, createdAt, image reference, status and prediction origin=`simulation`; ranked label/sample score; separate doctor-review author/body/status/timestamps. Use same field meanings on both UIs but independent local stores. Mobile image paths must be durable, not temporary picker URIs. None implemented.
+Proposed preview contracts: assessment session with synthetic patient, timestamps, image reference/status and prediction origin=`simulation`; separate doctor review; doctor slot/booking with capacity/state; queue entry with status/order; prescription/items with dispensing state; invoice/lines and payment mode=`simulation`. Both UIs must retrieve the same saved records through one shared backend. Mobile local image paths must be durable, not temporary picker URIs; local paths cannot serve as cross-device image URLs. Image transfer/storage needs authorised environment. None implemented.
 
-Migration status: none. Environment: none authorised. Data retention, consent, sharing revocation, admin privileges and record removal are unresolved. Prefer versioned corrections/soft removal over report's permanent deletion, subject to agreement.
+Migration status: none. Environment: none authorised. Data retention, sharing revocation, detailed grants and record removal are unresolved. Prefer versioned corrections/soft removal over report's permanent deletion, subject to agreement.

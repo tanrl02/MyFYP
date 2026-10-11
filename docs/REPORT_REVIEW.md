@@ -68,3 +68,9 @@ For training: record source/licence, exact labels, preprocessing and model versi
 ## Discussion decisions
 
 11 October 2026: user rejects narrowing final scope and requires review of the full project. All nine modules stay in final scope. Existing pretrained models plus fine-tuning are allowed/required to demonstrate effort. Common skin conditions intended; no dataset/model supplied. Exact prediction classes, initial architecture and preview implementation remain pending approval.
+
+Later decisions supersede initial pending notes: approved shared Python backend, mobile/web interfaces with managed Supabase services, five core preview workflows (skin assessment, booking, queue, prescriptions, billing), shared saved records, simulated AI/payment processing, and scoped patient/doctor/staff/admin clinical access. No coding/training/hosted work has occurred.
+
+Required report alignment batch: abstract/methodology and feasibility stack; incremental milestones; mobile framework rationale; deployment architecture; AI simulation versus future fine-tuning; shared workflow/persistence descriptions; security access rules including admin and staff; test criteria distinguishing target from achieved evidence. Do not delete final modules or claim prototype functionality before implementation.
+
+DOCX rendering preflight failed on 11 October 2026: packaged renderer could not find LibreOffice `soffice.exe`; cleanup also encountered temporary-folder permissions. No edited DOCX has been produced. Preserve source until a verified editing/rendering path exists. Rendering the historical PDF cannot verify changed DOCX layout.

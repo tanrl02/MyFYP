@@ -1,6 +1,6 @@
 # Smart Skin Disease System
 
-Updated: 11 October 2026 (Asia/Kuala_Lumpur). Stage A: report review and discussion. No implementation approval yet.
+Updated: 11 October 2026 (Asia/Kuala_Lumpur). Initial architecture, core preview scope and access rules approved. Detailed report audit and implementation remain to do.
 
 ## Authorised locations and source
 
@@ -36,40 +36,52 @@ Updated: 11 October 2026 (Asia/Kuala_Lumpur). Stage A: report review and discuss
 
 Details and unresolved contradictions: `docs/REPORT_REVIEW.md`. Inventory inclusion is not approval of every original technical claim.
 
-## Architecture proposal - pending explicit approval
+## Approved architecture
 
-Latest discussion: user wants to avoid maintaining two custom backend codebases and prefers selection cards rather than normal-chat questions. Revised option sent for approval: one shared Python API for mobile and dashboard, containing system logic and AI inference; Supabase supplies managed authentication/database/private storage. No separate Node.js business API. This option is not yet approved; earlier proposal below is retained as discussion context, not final architecture. Database permissions/migrations still require maintenance; a single custom backend does not eliminate managed services or deployment requirements.
+User approved one shared Python API for mobile and dashboard, containing system logic and AI inference; Supabase supplies managed authentication/database/private storage. No separate Node.js business API. User prefers selection cards; keep turn active while collecting answers because cards disappear after final responses. Database permissions/migrations still require maintenance; a single custom backend does not eliminate managed services or deployment requirements.
 
 One repository: `apps/mobile` (React Native + Expo + TypeScript, ImagePicker), `apps/dashboard` (Next.js + TypeScript + Tailwind + shadcn/ui), `packages/shared` (types, validation and workflow rules). Share contracts and logic, not all UI components. Data access must be separate from screens.
 
-Later hosted Supabase provides authentication, PostgreSQL and private file storage. Use versioned migrations and backend row-level permissions. Trusted server operations handle staff provisioning, privileged actions and transaction-sensitive workflows. A separate Python inference/training component is added only after selecting and evaluating an appropriate dataset/model. Training is reproducible and separate from the preview.
+Later hosted Supabase provides authentication, PostgreSQL and private file storage. Use versioned migrations and backend row-level permissions. The shared Python API handles staff provisioning, privileged actions, transaction-sensitive workflows and inference. Model training scripts are a separate offline workflow in the same repository, not a second application backend. Training is reproducible and separate from the preview.
 
 Reason to retain the user's provisional stack: one TypeScript language for both interfaces, camera/gallery support inside Expo Go, and fewer custom backend services. Flutter remains a valid alternative, but no demonstrated requirement currently warrants replacing the proposal. The report's Flutter/Node/Python/OpenCV claims must be revised if this proposal is approved. Exact dependency versions are not selected.
 
 Tradeoffs: two UIs still need independent testing; hosted permissions require careful verification; custom on-device ML/OCR may require a development build; Python model serving introduces later hosting cost. Expo Go is a testing host, not an independently installable APK. EAS APK builds and store publication are separate later activities.
 
-## Preview proposal - pending explicit approval
+## Approved core preview
 
-Demonstrate a patient opening a labelled demo, capturing/selecting a non-sensitive photo, previewing/confirming it, seeing a clearly simulated assessment, saving locally and reopening history. A doctor dashboard shows synthetic records and saves one review note/status locally. The two interfaces do not synchronise yet. Demo role selection is not authentication. No photos go to external services.
+User rejected the minimal photo-only preview and required the following core workflows. User approved shared saved records between phone and dashboard; AI predictions and payment processing remain simulated.
 
-Working: navigation, permission/cancellation handling, basic file validation, durable local image/record saving and dashboard update persistence. Simulated: prediction, confidence, identities and records. Deferred from preview only: real backend, model, OCR, scheduling/queue, pharmacy, billing/payment integration, feedback/report workflows and real access control. All remain in final scope.
+1. Patient skin assessment: capture/gallery, preview/confirmation, labelled simulated result and history.
+2. Appointment booking: sample doctor availability, booking and cancellation.
+3. Patient queue: queue number and staff call/status updates.
+4. Prescriptions: doctor creates prescription; authorised staff view and record dispensing.
+5. Billing: generate visit/prescription bill and record clearly simulated payment.
+
+These form one connected demonstration using synthetic patients, staff, medicines and prices. Saved bookings appear on the dashboard; queue/prescription/billing updates appear on mobile. Separate unsynchronised sample stores are no longer the approved target. Keep source of result (`simulation` versus model) separate from doctor findings and payment mode separate from real transactions. No clinical reliability or actual payment processing claims.
+
+Working target: navigation, permission/cancellation handling, basic file validation, durable saving, shared record retrieval/updates and five core workflow state transitions. Simulated: AI output, financial transactions, identities and clinical/sample data until real auth is connected. Deferred from preview only: trained inference, OCR, real payment gateway, complete inventory operations, feedback/reporting and remaining final-module details. All nine modules remain in final scope. Do not claim demo role selection verifies backend access control; real identity/access rules require implementation and separate tests.
 
 Preview completion: appropriate static/build checks pass; affected browser interactions verified; physical Android capture/gallery/cancel/deny/reopen tests confirmed by user; simulations clearly labelled. It is not a clinically validated diagnosis system.
 
-Next real increment after preview: authorised patient submission reaches dashboard; authorised doctor review persists and appears on mobile. Subsequent increments connect registration/records, prescription-stock-billing transactions, feedback/reporting and remaining account/OCR features. Avoid building every frontend before backend integration.
+Implementation starts with one shared booking/queue workflow, then extends the same saved data into records, prescriptions and billing; skin-photo/result workflow can be added with simulated inference independent of model research. Replace mocks gradually and connect real auth/private storage. Avoid building every frontend before backend integration.
 
 ## Costs and permission boundaries
 
-Local mocked preview avoids paid hosting and account setup. Later Supabase/EAS/Vercel/model hosting quotas and limitations must be rechecked before committing to deployment; zero long-term cost is not promised. No services have been created or accessed.
+Use local synthetic data during development. Shared records require a running common API/data store; hosting, development environment and account setup are still to be resolved. Supabase/EAS/Vercel/model hosting quotas and limitations must be rechecked before committing to deployment; zero long-term cost is not promised. No services have been created or accessed.
 
-Local inspection, planning documents and local checkpoints are authorised subject to the sandbox. Coding waits for explicit initial design/scope approval. Explain dependency downloads and install scripts before the first installation batch. Ask before external/private access beyond authorised scope, hosted changes, system installations, billing, publication, remote pushes, external photo/file transfer, destructive operations or broadening permissions. Never ask for secrets in chat.
+Local inspection, planning documents, approved core implementation and local checkpoints are authorised subject to the sandbox. Initial design/scope/access approval was received; do not request it again. Explain dependency downloads and install scripts before the first installation batch. Hosted environment and data transfers are not authorised by design approval. Ask before external/private access beyond authorised scope, hosted changes, system installations, billing, publication, remote pushes, external photo/file transfer, destructive operations or broadening permissions. Never ask for secrets in chat.
+
+## Approved clinical access
+
+Patients see their own records. Doctors access records through explicit sharing or patient-authorised booked visits. Staff see only necessary registration/queue, prescription and billing fields. Admins manage accounts and permitted reports without automatic access to all clinical notes/photos. Enforce permissions in the backend; unauthorised role/self-promotion and cross-patient access must be denied. Detailed grant lifetime/revocation still needs specification.
 
 ## Decisions still needed
 
-- Initial design/preview approval and whether lecturer expects more at the preview.
+- Hosted development environment and permitted external data transfers; preview deployment details.
 - Exact common-condition classes and legally usable, phone-photo-appropriate data.
 - Final deadline and minimum acceptance evidence for each final module.
-- Doctor access via explicit patient sharing versus assignment; staff prescription permissions; admin clinical access.
+- Detailed consent grant lifetime/revocation and report field visibility within approved role boundaries.
 - Record correction/removal semantics, retention and photo consent.
 - Appointment capacity, queue rules, payment provider/test mode, OCR approach and notification channel.
 
