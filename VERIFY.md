@@ -151,3 +151,9 @@ Automated:47 API tests, both TypeScript checks, dashboard build and Android Herm
 
 Android catalogue verification passed: user explicitly confirmed new cream details, reopening persistence and Noah isolation for Ava L00116Oct10am/RM55 unpaid simulation bill.
 
+## Appointment slots (12 October)
+54APItests, bothTS checks, finaldashboardbuild and browser flow passed. Android pending.
+1. Staff queue -> Appointment slots -> choose doctor, future Malaysia date/time, capacity1..20 -> Review slot -> Confirm new slot.
+2. Patient Book a visit sees created slot, confirms; staff queue selected doctor/date shows same queue number.
+3. Staff closes only empty slot with confirm. Public booking/reschedule omit closed slot. Any booking history prevents closure, including cancelled visits. Restart preserves closure; duplicate doctor/time rejects, safe creation retry does not duplicate.
+4. Android Ava My visits -> L00117Oct1:30pm Waiting; reopening retains; Noah hides it. Closed DrLim17Oct2:30pm absent Book a visit.

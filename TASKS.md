@@ -59,3 +59,4 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 12 October user-confirmed Android catalogue details/reopening/patient separation passed; previous pending catalogue status superseded. Local main15033a2; real auth/AI/Word still deferred.
 
+12 October appointment slots: Staff queue -> Appointment slots -> doctor/Malaysia date/time/capacity1..20 -> review/confirm; empty future slot closure with confirm. Shared patient booking/rescheduling excludes closed slots. All booking history protects closure, serialized race safe.54 API tests, both TypeScript checks, final dashboard build and browser create/close/book/sharedqueue/isolation passed. Android persistence/separation/closed-slot question pending. Slot editing/reopening, recurring schedules and holidays remain separate increments.

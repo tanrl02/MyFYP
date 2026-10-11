@@ -22,6 +22,7 @@ export type Care = { visit: Booking; prescription: Prescription | null; invoice:
 export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: ConsultationNote | null; feedback: Omit<VisitFeedback,"visit"> | null; replacement: Booking | null };
 export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; capacity: number; available: number };
+export type ManagedSlot = Slot & {closed:number;booking_count:number};
 export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; created_at: string; rescheduled_to_id: string | null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
 export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled" };
@@ -49,6 +50,9 @@ export class DemoApi {
     } finally { clearTimeout(timeout); }
   }
   slots() { return this.request<Slot[]>("/slots"); }
+  managedSlots() { return this.request<ManagedSlot[]>("/staff/slots"); }
+  addSlot(body:{doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;request_id:string}) { return this.request<ManagedSlot>("/staff/slots",body); }
+  closeSlot(id:string) { return this.request<ManagedSlot>(`/staff/slots/${encodeURIComponent(id)}/close`,{}); }
   bookings() { return this.request<Booking[]>("/bookings"); }
   visitDetails(id: string) { return this.request<VisitDetails>(`/bookings/${encodeURIComponent(id)}/details`); }
   book(slotId: string, requestId: string) { return this.request<Booking>("/bookings", { slot_id: slotId, request_id: requestId }); }

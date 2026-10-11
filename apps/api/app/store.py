@@ -81,6 +81,10 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            for column, definition in [('closed', 'INTEGER NOT NULL DEFAULT 0'),('request_id','TEXT')]:
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(slots)')}:
+                    db.execute(f'ALTER TABLE slots ADD COLUMN {column} {definition}')
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS slot_request ON slots(request_id) WHERE request_id IS NOT NULL')
             if 'booking_id' not in {row['name'] for row in db.execute('PRAGMA table_info(assessment_shares)')}:
                 db.execute('ALTER TABLE assessment_shares ADD COLUMN booking_id TEXT REFERENCES bookings(id)')
             db.execute('DROP INDEX IF EXISTS active_assessment_share')
@@ -128,16 +132,62 @@ class Store:
                     for hour in (9, 10, 11):
                         start = (local + timedelta(days=day)).replace(hour=hour, minute=0, second=0, microsecond=0)
                         key = f'{doctor}-{start:%Y%m%d}-{hour}'
-                        db.execute('INSERT OR IGNORE INTO slots VALUES(?,?,?,?,?)',
+                        db.execute('INSERT OR IGNORE INTO slots(id,doctor_id,starts_at,clinic_date,capacity) VALUES(?,?,?,?,?)',
                                    (key, doctor, start.isoformat(), start.date().isoformat(), 2))
 
     def slots(self):
         with self.connect() as db:
-            rows = db.execute('''SELECT s.*, s.capacity - COUNT(b.id) AS available
+            rows = db.execute('''SELECT s.id,s.doctor_id,s.starts_at,s.clinic_date,s.capacity, s.capacity - COUNT(b.id) AS available
                 FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id AND b.status!='cancelled'
-                WHERE s.starts_at > ? GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
+                WHERE s.starts_at > ? AND s.closed=0 GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
                 (datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
         return [dict(r, doctor_name=DOCTORS[r['doctor_id']]) for r in rows]
+
+    def managed_slot(self, db, slot_id):
+        row = db.execute('''SELECT s.*,COUNT(b.id) AS booking_count,
+                            s.capacity-SUM(CASE WHEN b.id IS NOT NULL AND b.status!='cancelled' THEN 1 ELSE 0 END) AS available
+                            FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id WHERE s.id=? GROUP BY s.id''',(slot_id,)).fetchone()
+        if not row:
+            raise RuleError('Slot not found.',404)
+        return {key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available')} | {'doctor_name':DOCTORS[row['doctor_id']]}
+
+    def managed_slots(self):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            rows=db.execute('SELECT id FROM slots WHERE starts_at>? ORDER BY starts_at,doctor_id',(datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
+            return [self.managed_slot(db,row['id']) for row in rows]
+
+    def add_slot(self, doctor, clinic_date, time, capacity, request_id):
+        start=datetime.fromisoformat(f'{clinic_date}T{time}:00+08:00')
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old=db.execute('SELECT id FROM slots WHERE request_id=?',(request_id,)).fetchone()
+            if old:
+                slot=self.managed_slot(db,old['id'])
+                if (slot['doctor_id'],slot['starts_at'],slot['capacity'])!=(doctor,start.isoformat(),capacity):
+                    raise RuleError('This request already saved different slot details.')
+                return slot
+            if start<=datetime.now(timezone.utc):
+                raise RuleError('Choose a future date and time.')
+            if db.execute('SELECT 1 FROM slots WHERE doctor_id=? AND starts_at=?',(doctor,start.isoformat())).fetchone():
+                raise RuleError('This doctor already has a slot at that time, including closed slots.')
+            slot_id=str(uuid4())
+            db.execute('INSERT INTO slots(id,doctor_id,starts_at,clinic_date,capacity,request_id) VALUES(?,?,?,?,?,?)',
+                       (slot_id,doctor,start.isoformat(),clinic_date,capacity,request_id))
+            return self.managed_slot(db,slot_id)
+
+    def close_slot(self, slot_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            slot=self.managed_slot(db,slot_id)
+            if slot['closed']:
+                return slot
+            if slot['booking_count']:
+                raise RuleError('This slot has booking history and cannot be closed. Its visit records are retained.')
+            if datetime.fromisoformat(slot['starts_at'])<=datetime.now(timezone.utc):
+                raise RuleError('This slot has already started.')
+            db.execute('UPDATE slots SET closed=1 WHERE id=?',(slot_id,))
+            return self.managed_slot(db,slot_id)
 
     def event(self, db, booking_id, actor, action):
         db.execute('INSERT INTO events VALUES(?,?,?,?,?)',
@@ -166,6 +216,8 @@ class Store:
             slot = db.execute('SELECT * FROM slots WHERE id=?', (slot_id,)).fetchone()
             if slot is None:
                 raise RuleError('Slot not found.', 404)
+            if slot['closed']:
+                raise RuleError('This slot is closed. Choose another time.')
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
                 raise RuleError('This slot has already started. Choose another time.')
             if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",
@@ -251,6 +303,8 @@ class Store:
             slot = db.execute('SELECT * FROM slots WHERE id=?',(slot_id,)).fetchone()
             if slot is None:
                 raise RuleError('Slot not found.',404)
+            if slot['closed']:
+                raise RuleError('This slot is closed. Choose another time.')
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
                 raise RuleError('This slot has already started. Choose another time.')
             if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",(old['patient_id'],slot_id)).fetchone():

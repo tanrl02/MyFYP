@@ -15,6 +15,13 @@ class BackgroundInput(BaseModel):
     conditions: str = Field(max_length=1000)
     version: int = Field(strict=True, ge=0)
 
+class SlotInput(BaseModel):
+    doctor_id: Literal['doctor-lim','doctor-anita']
+    clinic_date: date
+    time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
+    capacity: int = Field(strict=True,ge=1,le=20)
+    request_id: str = Field(min_length=8,max_length=100)
+
 class BookingInput(BaseModel):
     slot_id: str = Field(min_length=1, max_length=100)
     request_id: str = Field(min_length=8, max_length=100)
@@ -119,6 +126,18 @@ def create_app(path=None):
     @api.get('/slots')
     def slots():
         return store.slots()
+
+    @api.get('/staff/slots')
+    def managed_slots(who=Depends(staff)):
+        return store.managed_slots()
+
+    @api.post('/staff/slots',status_code=201)
+    def add_slot(payload: SlotInput,who=Depends(staff)):
+        return run(lambda: store.add_slot(payload.doctor_id,payload.clinic_date.isoformat(),payload.time,payload.capacity,payload.request_id))
+
+    @api.post('/staff/slots/{slot_id}/close')
+    def close_slot(slot_id: str,who=Depends(staff)):
+        return run(lambda: store.close_slot(slot_id))
 
     @api.get('/bookings')
     def bookings(who=Depends(patient)):
