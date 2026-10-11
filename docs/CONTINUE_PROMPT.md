@@ -25,3 +25,6 @@ Android development-server recovery: user reported Metro could not resolve ./Res
 
 
 Latest: visit feedback implemented on feat/visit-feedback frombd4975a. Patient My visits -> completed-visit rating/comment -> Review/Confirm; own saved records and staff /feedback latest100/average. One fixed submission pervisit; exact retries safe, edits conflict, server eligibility/ownership/role checks.35 API tests, TypeScript, dashboard build, Android export/livebundle and browser submission/persistence/isolation passed. Android card pending. API18501 PID84212, Expo91250, dashboard97093 remain running. No Word edit, real auth, new deps or hosted service. Git recovery previously caused missing-module Metro cache: avoid imported-file removal while Metro runs, restart --clear after recovery. Discuss next small task.
+
+12 October Android feedback verification: user explicitly confirmed submitting rating/comment, reopening persistence and Noah not seeing Ava feedback. Phone check passed; earlier pending feedback status superseded. Increment6a71290 ready for local main. All nine final modules remain required; Word/auth still deferred.
+

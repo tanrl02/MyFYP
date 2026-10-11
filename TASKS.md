@@ -39,3 +39,6 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 
 12 October visit feedback: own completed-visit rating/comment submission with confirmation, saved history and staff feedback tab implemented. One immutable submission per visit; editing/moderation/replies/reporting expansion deferred.35 API tests, TypeScript, dashboard build, Android export/development bundle and browser submission/persistence/separation passed. Android confirmation pending. This completes a first feedback function, not all final reporting/module requirements.
+
+12 October Android feedback verification: user explicitly confirmed submitting rating/comment, reopening persistence and Noah not seeing Ava feedback. Phone check passed; earlier pending feedback status superseded. Increment6a71290 ready for local main. All nine final modules remain required; Word/auth still deferred.
+
