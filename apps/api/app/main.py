@@ -111,6 +111,10 @@ def create_app(path=None):
     def bookings(who=Depends(patient)):
         return store.mine(who)
 
+    @api.get('/bookings/{booking_id}/details')
+    def visit_details(booking_id: str,who=Depends(patient)):
+        return run(lambda: store.visit_details(booking_id,who))
+
     @api.post('/bookings', status_code=201)
     def book(payload: BookingInput, who=Depends(patient)):
         return run(lambda: store.book(who, payload.slot_id, payload.request_id))

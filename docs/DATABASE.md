@@ -57,3 +57,7 @@ visit_feedback: id, unique booking_id(FK), patient_id, integer rating CHECK1..5,
 ## Stock receiving
 
 stock_receipts: id, medicine_id FK, positive quantity, reason, stock_before, stock_after, actor_id, unique request_id, created_at. POST /stock/receive staff-only strict integerquantity1-1000, nonblankreason<=300, request8-100. BEGIN IMMEDIATE adds to latest stock (cap100000) and inserts receipt atomically; identical retry returns saved receipt, mismatched content conflicts. Existing dispense transaction uses same medicines.stock and prevents negative balance/duplicate deduction. GET /stock staff-only returns medicines, latest100 named receipts and low_stock_threshold5. Receipts retain fixed snapshots independent of subsequent dispensing. No dispensing-ledger migration/new medicine/expiry tracking.
+
+## Patient visit details
+
+GET /bookings/{booking_id}/details patient-only, own booking enforced before child record queries; others404, staff/doctors403. One BEGIN read transaction bundles operational Booking, linked assessment_shares/reviews+simulation metadata(noBLOB), consultation note, prescription/items, invoice/lines, feedback and optional replacement Booking. Latest100 linked grants pervisit; direct shares excluded. Uses existing tables without migration. Revoked appointment review history retained; same-doctor rescheduling moves active grant, old visit links replacement; changed-doctor oldgrant revoked, newvisit not auto-shared.

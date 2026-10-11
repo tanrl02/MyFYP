@@ -16,6 +16,7 @@ export type PrescriptionItem = { medicine_id: string; quantity: number; directio
 export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & { name: string; price_cents: number })[] };
 export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
 export type Care = { visit: Booking; prescription: Prescription | null; invoice: Invoice | null };
+export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: ConsultationNote | null; feedback: Omit<VisitFeedback,"visit"> | null; replacement: Booking | null };
 export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; capacity: number; available: number };
 export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; created_at: string; rescheduled_to_id: string | null };
@@ -46,6 +47,7 @@ export class DemoApi {
   }
   slots() { return this.request<Slot[]>("/slots"); }
   bookings() { return this.request<Booking[]>("/bookings"); }
+  visitDetails(id: string) { return this.request<VisitDetails>(`/bookings/${encodeURIComponent(id)}/details`); }
   book(slotId: string, requestId: string) { return this.request<Booking>("/bookings", { slot_id: slotId, request_id: requestId }); }
   counterBook(patient: DemoPatient, slotId: string, requestId: string) { return this.request<Booking>("/counter-bookings", { patient_id: patient, slot_id: slotId, request_id: requestId }); }
   cancel(id: string) { return this.request<Booking>(`/bookings/${encodeURIComponent(id)}/cancel`, {}); }

@@ -44,3 +44,5 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 
 12 October stock receiving implemented: staff confirmation, shared balance/low-stock indicators and immutable receiving history with duplicate-safe request keys.38 tests, TypeScript, dashboard build and browser receiving/reload passed. Staff-only feature; no phone UI changed. Full pharmacy remains incomplete: new medicines, expiry/suppliers, broader adjustments and inventory ledger are separate scope. Word/auth deferred.
+
+12 October appointment details implemented: tap My visits appointment to see that visit's linked assessment/review, note, prescription/bill, feedback; Back/replacement navigation and patient-switch clearing.41 API tests, TypeScript, Android export and browser checks passed. Android confirmation pending. Read-only integration, no real auth/photo sharing changes. Reports still pending; Word/auth deferred.

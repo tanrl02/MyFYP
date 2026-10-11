@@ -172,6 +172,24 @@ class Store:
             ids = db.execute('SELECT id FROM bookings WHERE patient_id=? ORDER BY created_at DESC', (patient,)).fetchall()
             return [self.record(db, r['id']) for r in ids]
 
+    def visit_details(self, booking_id, patient):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            visit=self.record(db,booking_id)
+            if patient not in PATIENTS or visit['patient_id']!=patient:
+                raise RuleError('Visit unavailable for this patient.',404)
+            note=db.execute('SELECT * FROM consultation_notes WHERE booking_id=?',(booking_id,)).fetchone()
+            linked=[]
+            for row in db.execute('SELECT id FROM assessment_shares WHERE booking_id=? ORDER BY created_at DESC LIMIT 100',(booking_id,)).fetchall():
+                share=self.share_record(db,row['id'],patient)
+                assessment=db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
+                linked.append(dict(share,assessment=self.assessment_metadata(assessment)))
+            feedback=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
+            replacement=self.record(db,visit['rescheduled_to_id']) if visit['rescheduled_to_id'] else None
+            return {'visit':visit,'linked_shares':linked,'note':dict(note) if note else None,
+                    'prescription':self.prescription(db,booking_id),'invoice':self.invoice(db,booking_id),
+                    'feedback':dict(feedback) if feedback else None,'replacement':replacement}
+
     def feedback(self, actor):
         if actor not in {*PATIENTS,'staff-demo'}:
             raise RuleError('Patient or staff demo identity required.',403)
