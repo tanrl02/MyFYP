@@ -33,3 +33,6 @@ Feedback checkpoint448c3b6 is now on local main. Stopping Metro before Git switc
 
 
 Latest increment pharmacy stock receiving from977b6db on feat/pharmacy-stock. Staff /care roleStaff -> Stock (/stock), positive receipt confirmation, sharedbalance, low<=5/out0, latest100 receipt audit, stable retries/concurrency withdispensing.38 API tests, bothTS checks, dashboard build and browser receipt/reload passed. Synthetic demo-a+3 receiptf04b598c changed17->20; demo-b18 unchanged. No mobilechange/exportrequired. API49333 PID79412, dashboard97093, Expo44858 latest before checkpointrestart. Real auth/Word remain deferred. Fullpharmacy expansion separate; discussnextsmallfunction. Stop owned development servers before Git switch/recovery to avoid locks/stale importedfiles.
+
+Stock receiving checkpoint9d2f6b1 is on local main; no push. Stopped owned Metro/dashboard before the fast-forward, which succeeded cleanly. Restored services: API49333 PID79412 port8000, dashboard73908 port3000, Expo3449 port8081 same phoneURL. Stock page reloaded successfully after restart and retained20/18 balances and receipt history. Latest service record supersedes earlier IDs.
+
