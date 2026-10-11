@@ -111,3 +111,6 @@ GET /bookings/{id}/details requires own patient identity; staff/doctors denied. 
 
 12 October Android appointment-details verification: user explicitly confirmed opening L003 linked assessment/published review/consultation, Back, L001 dispensed prescription/RM40 paid simulation bill, reopening details and Noah isolation. Physical check passed; earlier pending status superseded. Implementationa012648 ready for local main. Word/auth still deferred; discuss next manageable function.
 
+
+Appointment details checkpoint4da7b22 is on local main. Owned services restored after clean fast-forward: API3183 PID82616 port8000, dashboard60923 port3000, Expo26570 port8081 (same phoneURL). Latest IDs supersede earlier runtime notes. Automated/browser/explicit Android checks passed. No remote push or Word edits.
+
