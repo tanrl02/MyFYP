@@ -61,6 +61,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS assessment_reviews (
                   id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
                   doctor_id TEXT NOT NULL, note TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS consultation_notes (
+                  id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
+                  doctor_id TEXT NOT NULL, findings TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
             if 'booking_id' not in {row['name'] for row in db.execute('PRAGMA table_info(assessment_shares)')}:
                 db.execute('ALTER TABLE assessment_shares ADD COLUMN booking_id TEXT REFERENCES bookings(id)')
@@ -337,6 +340,58 @@ class Store:
             db.execute('INSERT INTO assessment_reviews VALUES(?,?,?,?,?,?)',
                        (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
             return self.share_record(db, share_id, doctor)
+
+    def consultation_record(self, db, booking_id, actor, include_photo=False):
+        if actor not in {*PATIENTS,*DOCTORS}:
+            raise RuleError('Patient or doctor identity required.', 403)
+        visit = self.record(db, booking_id)
+        if (actor in PATIENTS and visit['patient_id'] != actor) or (actor in DOCTORS and visit['doctor_id'] != actor):
+            raise RuleError('Consultation unavailable for this identity.', 404)
+        note = db.execute('SELECT * FROM consultation_notes WHERE booking_id=?', (booking_id,)).fetchone()
+        if (actor in PATIENTS and not note) or (actor in DOCTORS and visit['status'] not in ('called','completed')):
+            raise RuleError('Consultation not available yet.', 404)
+        linked = None
+        if actor in DOCTORS:
+            share = db.execute('SELECT id FROM assessment_shares WHERE booking_id=? AND revoked_at IS NULL', (booking_id,)).fetchone()
+            if share:
+                linked = self.share_record(db, share['id'], actor)
+                if include_photo:
+                    import base64
+                    photo = db.execute('SELECT * FROM assessments WHERE id=?', (linked['assessment_id'],)).fetchone()
+                    linked['assessment'] = self.assessment_metadata(photo) | {'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')}
+        return {'visit':visit, 'note':dict(note) if note else None, 'linked_share':linked}
+
+    def consultations(self, actor):
+        if actor not in {*PATIENTS,*DOCTORS}:
+            raise RuleError('Patient or doctor identity required.', 403)
+        with self.connect() as db:
+            if actor in PATIENTS:
+                rows = db.execute('''SELECT b.id FROM bookings b JOIN consultation_notes n ON n.booking_id=b.id
+                                    WHERE b.patient_id=? ORDER BY n.created_at DESC''', (actor,)).fetchall()
+            else:
+                rows = db.execute('''SELECT b.id FROM bookings b JOIN slots s ON s.id=b.slot_id
+                                    WHERE s.doctor_id=? AND b.status IN ('called','completed') ORDER BY b.created_at DESC''', (actor,)).fetchall()
+            return [self.consultation_record(db,row['id'],actor) for row in rows]
+
+    def consultation(self, booking_id, actor):
+        with self.connect() as db:
+            return self.consultation_record(db,booking_id,actor,include_photo=True)
+
+    def publish_consultation(self, booking_id, doctor, findings, follow_up):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            record = self.consultation_record(db,booking_id,doctor)
+            existing = record['note']
+            if existing:
+                if (existing['findings'],existing['follow_up']) != (findings,follow_up):
+                    raise RuleError('Consultation note already published. It cannot be replaced.')
+                return record
+            if record['visit']['status'] != 'called':
+                raise RuleError('Publish the consultation note while the visit is called.')
+            db.execute('INSERT INTO consultation_notes VALUES(?,?,?,?,?,?)',
+                       (str(uuid4()),booking_id,doctor,findings,follow_up,datetime.now(timezone.utc).isoformat()))
+            self.event(db,booking_id,doctor,'consultation-published')
+            return self.consultation_record(db,booking_id,doctor)
 
     def prescription(self, db, booking_id):
         row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()

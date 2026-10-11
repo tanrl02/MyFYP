@@ -3,6 +3,7 @@ import { ActivityIndicator, AppState, Pressable, SafeAreaView, ScrollView, Style
 import { StatusBar } from "expo-status-bar";
 import CareView from "./CareView";
 import SkinView from "./SkinView";
+import VisitNotes from "./VisitNotes";
 import { Booking, DemoApi, DemoPatient, Slot, patientNames, queueToken, statusLabels, visitTime } from "@smart-skin/shared";
 import { apiBase as base } from "./apiConfig";
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
       <View style={styles.between}><Text style={styles.title}>My visits</Text><Pressable accessibilityRole="button" onPress={()=>refresh().catch(e=>setError(e.message))}><Text style={styles.link}>Refresh</Text></Pressable></View><Text style={[styles.muted,{marginBottom:18}]}>Queue changes refresh every few seconds.</Text>
       {bookings.map(b=><View key={b.id} style={styles.card}><View style={styles.between}><Text style={styles.queue}>{queueToken(b)}</Text><Text style={styles.status}>{statusLabels[b.status]}</Text></View><Text style={styles.cardTitle}>{b.doctor_name}</Text><Text style={styles.muted}>{visitTime(b.starts_at)}</Text>{b.status==="waiting"?(cancelId===b.id?<><Text style={styles.body}>Cancel this visit and release your place?</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={()=>act(()=>api.cancel(b.id),"Visit cancelled. Your slot is available again.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm cancellation"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={()=>setCancelId(null)}><Text style={styles.link}>Keep my booking</Text></Pressable></>:<Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setCancelId(b.id)}><Text style={styles.link}>Cancel visit</Text></Pressable>):null}</View>)}
       {!loading&&bookings.length===0?<View style={styles.card}><Text style={styles.cardTitle}>No visits yet</Text><Text style={styles.body}>Choose Book a visit to select a doctor and time.</Text></View>:null}
+      <VisitNotes key={patient} patient={patient}/>
     </>}
     <Text style={styles.footnote}>Shared skin assessment history, booking, queue, prescriptions and billing. AI results and payments are simulated; identities are demo only.</Text>
   </ScrollView></SafeAreaView>;

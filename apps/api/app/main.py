@@ -39,6 +39,10 @@ class AppointmentLinkInput(BaseModel):
     patient_message: str = Field(max_length=1000)
     request_id: str = Field(min_length=8, max_length=100)
 
+class ConsultationInput(BaseModel):
+    findings: str = Field(min_length=1, max_length=2000, pattern=r'\S')
+    follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -172,6 +176,18 @@ def create_app(path=None):
     @api.post('/prescriptions/{prescription_id}/dispense')
     def dispense(prescription_id: str, who=Depends(staff)):
         return run(lambda: store.dispense(prescription_id, who))
+
+    @api.get('/consultations')
+    def consultations(who=Depends(actor)):
+        return run(lambda: store.consultations(who))
+
+    @api.get('/visits/{booking_id}/consultation')
+    def consultation(booking_id: str, who=Depends(actor)):
+        return run(lambda: store.consultation(booking_id, who))
+
+    @api.post('/visits/{booking_id}/consultation')
+    def publish_consultation(booking_id: str, payload: ConsultationInput, who=Depends(doctor)):
+        return run(lambda: store.publish_consultation(booking_id,who,payload.findings.strip(),payload.follow_up.strip()))
 
     @api.post('/visits/{booking_id}/invoice')
     def invoice(booking_id: str, who=Depends(staff)):
