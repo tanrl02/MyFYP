@@ -7,6 +7,7 @@ export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anit
 export type Medicine = { id: string; name: string; price_cents: number; stock: number };
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; low_stock_threshold: number };
+export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: Record<Status | "rescheduled" | "total",number>; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; items: { medicine_id: string; name: string; received: number; dispensed: number }[] }; feedback: { count: number; average_rating: number | null } };
 export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"; example_category: string; message: string; photo_uri?: string };
 export type DemoDoctor = "doctor-lim" | "doctor-anita";
 export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim (demo)", "doctor-anita": "Dr. Anita (demo)" };
@@ -72,6 +73,7 @@ export class DemoApi {
   publishReview(id: string, note: string, followUp: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/review`, { note, follow_up: followUp }); }
   medicines() { return this.request<Medicine[]>("/medicines"); }
   stock() { return this.request<StockOverview>("/stock"); }
+  dailyReport(date: string) { return this.request<DailyReport>(`/reports/daily?clinic_date=${encodeURIComponent(date)}`); }
   receiveStock(medicineId: string,quantity: number,reason: string,requestId: string) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId}); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
   dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }

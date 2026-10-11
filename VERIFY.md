@@ -127,3 +127,9 @@ Patient My visits -> tap appointment summary/View visit details. Sections show a
 
 12 October Android appointment-details verification: user explicitly confirmed opening L003 linked assessment/published review/consultation, Back, L001 dispensed prescription/RM40 paid simulation bill, reopening details and Noah isolation. Physical check passed; earlier pending status superseded. Implementationa012648 ready for local main. Word/auth still deferred; discuss next manageable function.
 
+
+## Small increment: daily clinic report — 12 October 2026
+
+Staff Patient queue footer -> Daily reports -> date -> View report. Current summary polls10seconds. Dates use Malaysia UTC+8. Visits are selected appointment-date booking records by current status; rescheduled original separate from cancelled. Billing for that appointment cohort uses current paid/unpaid status (not collection-date cashflow). Stock uses receiving/dispensing timestamp day; feedback uses submission day. Quantities represent movement, not ending balance. Explicit labels, empty0/nullaverage and Retry; no patient/clinical details returned.
+
+44 API tests passed including mixed invoicing/visits/reschedules totals, aggregation without join double-count, staff-only/invalid-date denial, emptydate, reopen, no clinical fields and exact Malaysia midnight inclusion/exclusion. Both TypeScript checks and final dashboard production build passed. Browser queue navigation,12Oct totals,2000-01-01 zero/empty report and explicit return12Oct passed. Screenshot tmp/daily-report-verified.png. No production mutations. Mobile unchanged, no Android export/phone check required. Exporting/charts/date-range/adminaccess remain future tasks. This is a current report snapshot, not frozen day-end history.

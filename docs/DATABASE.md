@@ -61,3 +61,7 @@ stock_receipts: id, medicine_id FK, positive quantity, reason, stock_before, sto
 ## Patient visit details
 
 GET /bookings/{booking_id}/details patient-only, own booking enforced before child record queries; others404, staff/doctors403. One BEGIN read transaction bundles operational Booking, linked assessment_shares/reviews+simulation metadata(noBLOB), consultation note, prescription/items, invoice/lines, feedback and optional replacement Booking. Latest100 linked grants pervisit; direct shares excluded. Uses existing tables without migration. Revoked appointment review history retained; same-doctor rescheduling moves active grant, old visit links replacement; changed-doctor oldgrant revoked, newvisit not auto-shared.
+
+## Daily report
+
+No new tables. Staff-only GET /reports/daily validated clinic_date returns single-read-transaction aggregates. Booking count grouped by current status except EXISTS(reschedules.old_booking_id) => rescheduled. Billing SUM invoices joined to appointment slots; paid+unpaid=billed. Stock independently aggregates receipt quantity by date(created_at,'+8 hours') and dispensed prescription-item quantity by date(dispensed_at,'+8 hours'), preventing invoice-line join duplication. Feedback COUNT/AVG by Malaysia submission date. Empty totals0/average null. Aggregate operational output only; no patient names, clinical text/photo or comment values. generated_at UTC snapshot timestamp, displayed Malaysia time. No frozen historical status model/cashflow ledger implied.

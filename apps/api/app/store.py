@@ -313,6 +313,33 @@ class Store:
         with self.connect() as db:
             return [dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
 
+    def daily_report(self, clinic_date):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            visits={key:0 for key in ('waiting','called','completed','cancelled','rescheduled')}
+            for row in db.execute('''SELECT CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
+                    THEN 'rescheduled' ELSE b.status END AS state,COUNT(*) AS total
+                FROM bookings b JOIN slots s ON s.id=b.slot_id WHERE s.clinic_date=? GROUP BY state''',(clinic_date,)):
+                visits[row['state']]=row['total']
+            visits['total']=sum(visits.values())
+            billing=dict(db.execute('''SELECT COUNT(*) AS invoice_count,
+                COALESCE(SUM(i.total_cents),0) AS billed_cents,
+                COALESCE(SUM(CASE WHEN i.status='paid' THEN i.total_cents ELSE 0 END),0) AS paid_cents,
+                COALESCE(SUM(CASE WHEN i.status='unpaid' THEN i.total_cents ELSE 0 END),0) AS unpaid_cents
+                FROM invoices i JOIN bookings b ON b.id=i.booking_id JOIN slots s ON s.id=b.slot_id
+                WHERE s.clinic_date=?''',(clinic_date,)).fetchone())
+            movements=[]
+            for medicine in db.execute('SELECT id,name FROM medicines ORDER BY id').fetchall():
+                received=db.execute("SELECT COALESCE(SUM(quantity),0) FROM stock_receipts WHERE medicine_id=? AND date(created_at,'+8 hours')=?",(medicine['id'],clinic_date)).fetchone()[0]
+                dispensed=db.execute('''SELECT COALESCE(SUM(i.quantity),0) FROM prescription_items i
+                    JOIN prescriptions p ON p.id=i.prescription_id
+                    WHERE i.medicine_id=? AND p.status='dispensed' AND date(p.dispensed_at,'+8 hours')=?''',(medicine['id'],clinic_date)).fetchone()[0]
+                movements.append({'medicine_id':medicine['id'],'name':medicine['name'],'received':received,'dispensed':dispensed})
+            feedback=db.execute("SELECT COUNT(*) AS total,AVG(rating) AS average FROM visit_feedback WHERE date(created_at,'+8 hours')=?",(clinic_date,)).fetchone()
+            return {'clinic_date':clinic_date,'timezone':'Asia/Kuala_Lumpur','generated_at':datetime.now(timezone.utc).isoformat(),
+                    'visits':visits,'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements)},
+                    'feedback':{'count':feedback['total'],'average_rating':round(feedback['average'],2) if feedback['average'] is not None else None}}
+
     def stock(self):
         with self.connect() as db:
             medicines=[dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]

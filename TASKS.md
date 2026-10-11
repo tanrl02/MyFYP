@@ -49,3 +49,5 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 12 October Android appointment-details verification: user explicitly confirmed opening L003 linked assessment/published review/consultation, Back, L001 dispensed prescription/RM40 paid simulation bill, reopening details and Noah isolation. Physical check passed; earlier pending status superseded. Implementationa012648 ready for local main. Word/auth still deferred; discuss next manageable function.
 
+
+12 October daily report implemented: staff date/View report, visit status/reschedule counts, invoice cohort paid/unpaid simulation balances, Malaysia activity-day receiving/dispensing and submission-day feedback.44 API tests, bothTS checks, final dashboard build and populated/empty/date-change browser checks passed. Read-only, no mobile change; exports/charts/adminauth separate scope. Word/auth deferred; final scope remains incomplete.

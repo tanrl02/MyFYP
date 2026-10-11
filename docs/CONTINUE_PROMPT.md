@@ -44,3 +44,5 @@ Latest small task patient appointment details fromcadebcf on feat/patient-visit-
 
 Appointment details checkpoint4da7b22 is on local main. Owned services restored after clean fast-forward: API3183 PID82616 port8000, dashboard60923 port3000, Expo26570 port8081 (same phoneURL). Latest IDs supersede earlier runtime notes. Automated/browser/explicit Android checks passed. No remote push or Word edits.
 
+
+Latest small increment daily reports from9311e9b on feat/daily-clinic-reports. Staff queue -> Daily reports ->date/Viewreport; current appointment-date visit/invoicecohort, Malaysia activityday stock/submissiondayfeedback; labels distinguish datebases.44 API tests, bothTS checks, finaldashboardbuild and populated/empty/datechangebrowser passed. No mobile/source changes requiring Android check, no productionwrites or migrations. API80301 PID68416,dashboard60923,Expo26570 beforecheckpointrestart. Word/authdeferred; reportingexports/charts/adminaccounts separate. Discussnextsmalltask; stop owned devservers before Git switch to avoid locks/staleimports.

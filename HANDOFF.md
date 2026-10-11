@@ -114,3 +114,11 @@ GET /bookings/{id}/details requires own patient identity; staff/doctors denied. 
 
 Appointment details checkpoint4da7b22 is on local main. Owned services restored after clean fast-forward: API3183 PID82616 port8000, dashboard60923 port3000, Expo26570 port8081 (same phoneURL). Latest IDs supersede earlier runtime notes. Automated/browser/explicit Android checks passed. No remote push or Word edits.
 
+
+## Small increment: daily clinic reports — 12 October 2026
+
+From9311e9b on feat/daily-clinic-reports. Staff Patient queue -> Daily reports -> date -> View report. Defaults to Malaysia today, explicit form submission preserves date draft during polling. Current summary refreshes10sec; error clears stale totals and offers Retry. Read-only staff endpoint GET /reports/daily?clinic_date=YYYY-MM-DD uses one read transaction. No patient names, notes, photos, feedback comments or clinical data in report payload.
+
+Visits use slot.clinic_date and current status; original reschedules separate from ordinary cancellations, total counts booking records. Billing uses invoices of selected appointment-date cohort and current paid/unpaid balances, explicitly not cash received that day. Stock sums receipts.created_at and prescriptions.dispensed_at by Malaysia activity day; feedback count/average uses submission day. UTC timestamps normalized through SQLite date(...,'+8 hours'), boundary tests included. Movement quantities are not closing balances. Empty feedback average null. No migration/dependency/export/chart/admin-account work.
+
+44 API tests, both TypeScript checks and final dashboard build passed. Browser navigated queue->Daily reports, verified populated12Oct report, selected2000-01-01 zero/empty view, applied12Oct again. Screenshot tmp/daily-report-verified.png. Snapshot observed13bookingrecords,1waiting/1called/6completed/3cancelled/2rescheduled,5invoices RM204billed/RM174paid/RM30unpaid simulation,7received/7dispensed units,2ratings avg4.50; live data may change. No production writes during report tests. Mobile unchanged; no Android export/test needed. API80301 PID68416, dashboard60923, Expo26570 running before checkpoint. Word and real auth deferred; reporting first version does not finish final nine-module scope. Discuss next small task.
