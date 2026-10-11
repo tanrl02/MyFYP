@@ -5,7 +5,9 @@ Updated: 11 October 2026 (Asia/Kuala_Lumpur). Stage A: report review and discuss
 ## Authorised locations and source
 
 - Project: `C:\Users\chenr\SmartSkinDiseaseSystem\MyFYP`.
-- Original report: `C:\Users\chenr\SmartSkinDiseaseSystem\BACS3403_FinalDoc_TanRiLi.docx.pdf` (302 PDF pages). Preserved unchanged. No editable DOCX was found in the workspace.
+- Current editable report: `C:\Users\chenr\SmartSkinDiseaseSystem\BACS3403_FinalDoc_TanRiLi.docx`, newly supplied by user. Treat this as the current report for all future edits/reviews; do not assume it matches the earlier PDF.
+- Earlier reference: `C:\Users\chenr\SmartSkinDiseaseSystem\BACS3403_FinalDoc_TanRiLi.docx.pdf` (302 PDF pages), preserved unchanged.
+- User authorises updating the editable report when approved design/project changes would make it inconsistent. Before the first edit save an untouched backup; preserve existing formatting and document report changes/verification. Do not describe pending proposals as approved or completed functionality.
 - User's starting instructions were provided as an attachment. Their operative requirements are recorded here and in the companion documents; do not rely on access to that attachment in a new chat.
 - Workspace-write sandbox is declared; network access is restricted and `.git` is a read-only protected path in the supplied permission profile. Branches do not provide security isolation.
 
@@ -18,6 +20,7 @@ Updated: 11 October 2026 (Asia/Kuala_Lumpur). Stage A: report review and discuss
 - Very low budget, Android phone, minimal manual setup, TortoiseGit for visual Git use.
 - Tentative preview: 22 October 2026. Final deadline unknown. Lecturer revisions expected.
 - Save continuity in this repository. Never invent implementation, measurements, citations, or phone test results.
+- Agent owns detailed report review and asks concise decision questions; user is not expected to audit documents line by line.
 
 ## Final scope inventory
 

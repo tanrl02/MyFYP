@@ -5,9 +5,10 @@ Updated 11 October 2026. Stage A review/discussion. User requires final scope to
 ## Actual state
 
 - Project path and preserved original report are in PROJECT.md.
+- Newly supplied current editable DOCX is recorded in PROJECT.md and REPORT_REVIEW.md. User authorises keeping it aligned with approved project changes; save an untouched backup before first edit. Current DOCX remains unchanged.
 - Branch: main, initially unborn (no commits); initial status reported upstream origin/main as gone. No remote connection/push attempted.
 - Latest verified application checkpoint: none. No code, runnable app, dependencies, model or backend exists.
-- Documentation checkpoint: this documentation-only baseline, titled `docs: record initial FYP review and full project scope`; obtain its exact hash from Git Show Log. No application is verified by this checkpoint.
+- Documentation baseline: `a889116`, titled `docs: record initial FYP review and full project scope`. Latest documentation checkpoint is titled `docs: track editable report and agent-led review`; resolve its hash through Git Show Log. Neither verifies an application.
 - Uncommitted changes at checkpoint: none expected; verify actual Git status on resume. Local extracted text/rendered pages are under ignored tmp/pdfs.
 - Agent verified: original report accessible, 302 pages, initial repository empty, selected report text and diagrams reviewed, public documentation/licence checks performed.
 - User Android/browser/acceptance testing: not performed. Working/mock features: none implemented.
@@ -22,6 +23,8 @@ Updated 11 October 2026. Stage A review/discussion. User requires final scope to
 ## Exact next task
 
 Discuss the review with user, complete full-scope requirements/diagram audit, and propose initial architecture/preview for explicit approval. Clarify lecturer expectations for 22 October and remaining permissions/consent rules. Success: final nine-module scope preserved, report contradictions recorded, feasible preview agreed, and approval explicitly recorded before scaffolding/installing dependencies.
+
+Three decision questions have been sent about overall architecture, preview scope and clinical-access rules. Do not ask user to review files line by line. Compare current DOCX with historical review evidence, then maintain DOCX as approved design/code evolves. Record report changes and render verification; no report edit is approved merely by treating an unapproved proposal as final.
 
 Continue early prediction feasibility separately: identify legally usable common-condition clinical-photo datasets and models, define labels, licences and fine-tuning/evaluation effort. No accuracy, hosting or suitability claims until verified.
 

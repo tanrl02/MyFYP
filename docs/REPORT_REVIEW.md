@@ -2,6 +2,14 @@
 
 Updated 11 October 2026. Initial substantive review, not a completed line-by-line audit. Original report preserved at the location in PROJECT.md. Locators below use PDF page numbers; the report's printed chapter page is generally PDF page minus 7. Front matter differs.
 
+## Current editable source and synchronisation
+
+User has now supplied `C:\Users\chenr\SmartSkinDiseaseSystem\BACS3403_FinalDoc_TanRiLi.docx` as the current editable report. Read-only OOXML inspection found 5,034 body/table paragraphs, 82 tables and 180 media files; no tracked insertions/deletions. SHA256 of supplied version: `d5920f36d0e730dc8368c4cceff9a9ed94bc8990e30d7b2759d85a71014168bd`.
+
+Confirmed in this DOCX: abstract still claims completed outcomes and Flutter implementation; algorithm still maps confidence to medical risk; no Supabase text found. Other differences from PDF have not yet been exhaustively compared. Existing PDF page references are historical locators, not verified DOCX pagination.
+
+User requires report updates alongside approved design/implementation changes. Save untouched DOCX backup before first edit, preserve report layout, update affected prose/tables/diagrams/references where necessary, render and visually verify edited report, and log actual changes here. No DOCX edits performed yet because initial design is still pending. Agent performs review; user answers decision questions rather than reviewing each paragraph.
+
 ## Coverage and limitations
 
 - Read abstract, contents, Chapter 1 objectives/scope/schedule (PDF 4, 6-20), technical feasibility (39-42), interview text (44-48), summary functional/nonfunctional requirements (182-186), AI use cases (134-142), selected account/medical use cases (67-71, 143-150), AI UI descriptions (237-244), security design (254-257) and algorithm text (278-279).

@@ -6,6 +6,8 @@ Final scope must retain all nine report modules; do not shrink it to AI/history 
 
 Current stage is report discussion. No implementation or initial architecture approval has been given. Complete remaining requirements/design review and present a feasible architecture/preview for explicit approval before coding or installing dependencies. Preserve source report and existing work.
 
+I have supplied a current editable Word report at the path in PROJECT.md. Keep it aligned with approved design and implementation changes, including relevant diagrams/tables and claims. Save an untouched backup before first edit and render/visually verify edits. The earlier PDF is historical reference; do not assume identical content/pagination. You own the detailed review: ask me concise decision questions instead of expecting a line-by-line audit.
+
 After approval implement one connected workflow at a time, starting with clearly labelled local simulations, then real backend incrementally. Handle routine choices yourself. Keep UI/data logic separate, private images private, and enforce real access control on backend. Record mocks and independent mobile/dashboard stores. Physical Android testing only passes when I confirm it.
 
 Use TortoiseGit explanations for user review; commands may be used internally within authority. Record starting/final checkpoints, inspect whole-task changes and never discard/reset/force-push without approval. Keep docs and handoff accurate; never store secrets or patient information.
