@@ -76,3 +76,6 @@ Android check is unresolved: user selected 'Something is wrong; I will describe 
 
 Android development-server recovery: user reported Metro could not resolve ./RescheduleView from App.tsx. Verified RescheduleView.tsx exists on main. Stopped owned Expo21814 and restarted with --clear --lan; current Expo session91250 port8081. Fresh Android development bundle /apps/mobile/index.bundle compiled successfully (HTTP200,4435971bytes). No source/dependency change needed. Phone retry confirmation pending. API31268 PID67616 and dashboard97093 unchanged. Avoid temporary removal of imported files while Metro runs during future Git recovery operations.
 
+
+12 October phone recovery confirmation: after the Expo cache restart, user replied 'ok already', confirming the reported missing-RescheduleView error is resolved. Rescheduling implementation and automated/browser verification are complete. Do not infer separate Android reopening/patient-isolation results beyond this brief confirmation; browser persistence/isolation were verified. Expo91250, API31268 PID67616 and dashboard97093 remain the latest owned services. Discuss the next small function with the user before starting it.
+

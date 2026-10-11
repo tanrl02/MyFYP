@@ -34,3 +34,6 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 
 12 October rescheduling: patient/staff confirmation flow implemented for future waiting visits, with shared new queue number/history, atomic capacity/duplicate protection and doctor-change appointment-grant revocation. 32 tests, TypeScript, dashboard build, Android export and browser staff/patient flows passed. Android creation/reopening/isolation confirmation pending. Real login and Word remain deferred.
+
+12 October phone recovery confirmation: after the Expo cache restart, user replied 'ok already', confirming the reported missing-RescheduleView error is resolved. Rescheduling implementation and automated/browser verification are complete. Do not infer separate Android reopening/patient-isolation results beyond this brief confirmation; browser persistence/isolation were verified. Expo91250, API31268 PID67616 and dashboard97093 remain the latest owned services. Discuss the next small function with the user before starting it.
+
