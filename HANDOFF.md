@@ -26,6 +26,8 @@ Discuss the review with user, complete full-scope requirements/diagram audit, an
 
 Three decision questions have been sent about overall architecture, preview scope and clinical-access rules. Do not ask user to review files line by line. Compare current DOCX with historical review evidence, then maintain DOCX as approved design/code evolves. Record report changes and render verification; no report edit is approved merely by treating an unapproved proposal as final.
 
+Latest question supersedes earlier architecture card: user wants one custom backend and selection cards. Proposed shared Python API (system logic and AI) plus managed Supabase auth/database/storage, without Node.js business API. Await selection; preview/privacy decisions also remain unresolved. Ask one selection question at a time to reduce UI friction.
+
 Continue early prediction feasibility separately: identify legally usable common-condition clinical-photo datasets and models, define labels, licences and fine-tuning/evaluation effort. No accuracy, hosting or suitability claims until verified.
 
 At resume, read all docs, inspect actual Git/code state, reconcile mismatches and do not restart or recreate services. Before any hosted changes identify environment and authority.

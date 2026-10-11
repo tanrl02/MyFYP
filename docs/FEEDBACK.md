@@ -10,3 +10,5 @@
 | 11 Oct 2026 | User: new editable BACS3403_FinalDoc_TanRiLi.docx must match project changes | Current DOCX is authoritative editable report; maintain it alongside approved changes with original backup | File located and inspected read-only; no report edits yet |
 
 No lecturer feedback supplied yet. Suggestions are not automatically authorised changes. For new feedback record affected UI, logic, data/access, tests, effort and verification status.
+
+11 October 2026: user prefers selection cards and asks to avoid two backend codebases. Proposed one shared Python API for both interfaces plus managed Supabase services; single decision card sent. Selection pending. Do not interpret prior "can" as approval of unresolved backend structure, preview scope or privacy rules.

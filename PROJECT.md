@@ -38,6 +38,8 @@ Details and unresolved contradictions: `docs/REPORT_REVIEW.md`. Inventory inclus
 
 ## Architecture proposal - pending explicit approval
 
+Latest discussion: user wants to avoid maintaining two custom backend codebases and prefers selection cards rather than normal-chat questions. Revised option sent for approval: one shared Python API for mobile and dashboard, containing system logic and AI inference; Supabase supplies managed authentication/database/private storage. No separate Node.js business API. This option is not yet approved; earlier proposal below is retained as discussion context, not final architecture. Database permissions/migrations still require maintenance; a single custom backend does not eliminate managed services or deployment requirements.
+
 One repository: `apps/mobile` (React Native + Expo + TypeScript, ImagePicker), `apps/dashboard` (Next.js + TypeScript + Tailwind + shadcn/ui), `packages/shared` (types, validation and workflow rules). Share contracts and logic, not all UI components. Data access must be separate from screens.
 
 Later hosted Supabase provides authentication, PostgreSQL and private file storage. Use versioned migrations and backend row-level permissions. Trusted server operations handle staff provisioning, privileged actions and transaction-sensitive workflows. A separate Python inference/training component is added only after selecting and evaluating an appropriate dataset/model. Training is reproducible and separate from the preview.
