@@ -38,3 +38,6 @@ Stock receiving checkpoint9d2f6b1 is on local main; no push. Stopped owned Metro
 
 
 Latest small task patient appointment details fromcadebcf on feat/patient-visit-details. Tap My visits appointment -> read-only linked assessment/review,note,Rx,bill,feedback; Back and replacement navigation; own-patient snapshot GET/bookings/id/details, no photos/directshares.41 API tests, bothTS checks, final Android export and browser checks passed. Existing synthetic L003 grant90ca94ec now has fictional published review for detail verification. Android opening/back/reopening/isolation card pending. API3183 PID82616, dashboard73908, Expo3449 running. Real auth/Word deferred; reports not yet implemented. Stop owned devservers before Git switch/recovery to avoid locks/stale imports. Discuss next small task.
+
+12 October Android appointment-details verification: user explicitly confirmed opening L003 linked assessment/published review/consultation, Back, L001 dispensed prescription/RM40 paid simulation bill, reopening details and Noah isolation. Physical check passed; earlier pending status superseded. Implementationa012648 ready for local main. Word/auth still deferred; discuss next manageable function.
+
