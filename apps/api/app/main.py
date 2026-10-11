@@ -2,7 +2,9 @@ from datetime import date
 import os
 from pathlib import Path
 from typing import Literal
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
+import hashlib
+from .photos import MAX_BYTES, normalise_photo
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .store import DOCTORS, PATIENTS, RuleError, Store
@@ -101,6 +103,25 @@ def create_app(path=None):
     @api.get('/care')
     def care(who=Depends(actor)):
         return store.care(who)
+
+    @api.get('/assessments')
+    def assessments(who=Depends(patient)):
+        return store.assessments(who)
+
+    @api.get('/assessments/{assessment_id}')
+    def assessment(assessment_id: str, who=Depends(patient)):
+        return run(lambda: store.assessment(assessment_id, who))
+
+    @api.post('/assessments', status_code=201)
+    def save_assessment(photo: UploadFile = File(), request_id: str = Form(min_length=8, max_length=100), who=Depends(patient)):
+        try:
+            content = photo.file.read(MAX_BYTES + 1)
+        finally:
+            photo.file.close()
+        def save():
+            clean, width, height = normalise_photo(content)
+            return store.save_assessment(who, request_id, hashlib.sha256(content).hexdigest(), clean, width, height)
+        return run(save)
 
     @api.get('/medicines')
     def medicines(who=Depends(operational)):

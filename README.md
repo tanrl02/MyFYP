@@ -16,3 +16,5 @@ editing is deferred at the user's request.
 Added care workflow: dashboard /care for assigned doctors and staff; patient Care & bills for shared prescription, dispensing status, itemised bill and confirmed simulated payment. Placeholder items only. New screen/device verification pending; see VERIFY.md. No real payment processing.
 
 12 October 2026: care browser checks and specified Android shared-record/persistence/patient-separation checks passed. See VERIFY.md for limits. Services currently running on ports8000/3000/8081. Skin assessment not yet implemented; original Word unchanged.
+
+Added Skin check: camera/gallery/photo confirmation, local-backend saved photo/history and explicit simulated result. AI model training/inference remains future work. Word unchanged. See VERIFY.md for tested versus pending behavior.

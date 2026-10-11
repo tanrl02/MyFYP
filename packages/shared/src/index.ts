@@ -2,6 +2,7 @@ export type Status = "waiting" | "called" | "completed" | "cancelled";
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
 export type Medicine = { id: string; name: string; price_cents: number; stock: number };
+export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"; example_category: string; message: string; photo_uri?: string };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
 export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & { name: string; price_cents: number })[] };
 export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
@@ -16,14 +17,14 @@ export const visitTime = (iso: string) => new Date(iso).toLocaleString("en-MY", 
 
 export class DemoApi {
   constructor(private baseUrl: string, private actor: DemoActor) {}
-  private async request<T>(path: string, body?: object): Promise<T> {
+  private async request<T>(path: string, body?: object | FormData): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}${path}`, {
         method: body ? "POST" : "GET", signal: controller.signal,
-        headers: { "Content-Type": "application/json", "X-Demo-Actor": this.actor },
-        ...(body ? { body: JSON.stringify(body) } : {}),
+        headers: { ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }), "X-Demo-Actor": this.actor },
+        ...(body ? { body: body instanceof FormData ? body : JSON.stringify(body) } : {}),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Please check your inputs and try again.");
@@ -42,6 +43,9 @@ export class DemoApi {
   callNext(doctor: string, date: string) { return this.request<Booking>("/queue/call-next", { doctor_id: doctor, clinic_date: date }); }
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
   care() { return this.request<Care[]>("/care"); }
+  assessments() { return this.request<Assessment[]>("/assessments"); }
+  assessment(id: string) { return this.request<Assessment>(`/assessments/${encodeURIComponent(id)}`); }
+  saveAssessment(body: FormData) { return this.request<Assessment>("/assessments", body); }
   medicines() { return this.request<Medicine[]>("/medicines"); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
   dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }

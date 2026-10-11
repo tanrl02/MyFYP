@@ -19,3 +19,5 @@ Saved data: ignored apps/api/data/demo.sqlite3, persists after restart; Git does
 ## Current care screens
 
 Dashboard queue page links to /care. Select an assigned doctor to issue, then Staff Demo to dispense/generate bill/record simulated payment. Patient app Care & bills shows the same saved records and supports explicitly confirmed simulated payment. Placeholder items and prices only. Restart the API after pulling code changes; existing SQLite rows are preserved and new tables created automatically. Stop only your old project windows if a port is occupied; do not reset/delete records or stop unrelated processes.
+
+Skin check added: Expo camera/gallery modules installed locally, compatible with SDK57. Restart Expo/API after this update; same QR/LAN address currently applies. Desktop localhost web uses localhost API automatically; Android keeps launcher LAN API. No photo upload goes to external services. Saved images are inside apps/api/data/demo.sqlite3, ignored by Git; preserve that file to keep demonstration history. Microphone permission disabled in image-picker configuration for later native builds; Expo Go host permissions are managed by Expo Go.

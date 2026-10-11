@@ -49,6 +49,10 @@ class Store:
                   id TEXT PRIMARY KEY, invoice_id TEXT NOT NULL REFERENCES invoices(id),
                   description TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity>0),
                   unit_price_cents INTEGER NOT NULL CHECK(unit_price_cents>=0));
+                CREATE TABLE IF NOT EXISTS assessments (
+                  id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, request_id TEXT NOT NULL,
+                  source_hash TEXT NOT NULL, photo BLOB NOT NULL, width INTEGER NOT NULL,
+                  height INTEGER NOT NULL, created_at TEXT NOT NULL, UNIQUE(patient_id, request_id));
             ''')
             db.executemany('INSERT OR IGNORE INTO medicines VALUES(?,?,?,?)', [
                 ('demo-a', 'Demo item A (not medication)', 500, 20),
@@ -186,6 +190,38 @@ class Store:
     def catalog(self):
         with self.connect() as db:
             return [dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
+
+    def assessment_metadata(self, row):
+        return {key: row[key] for key in ('id', 'patient_id', 'width', 'height', 'created_at')} | {
+            'origin': 'simulation', 'example_category': 'Acne (example only)',
+            'message': 'No image analysis was performed. This example is not a diagnosis.'}
+
+    def assessments(self, patient):
+        with self.connect() as db:
+            rows = db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
+            return [self.assessment_metadata(row) for row in rows]
+
+    def assessment(self, assessment_id, patient):
+        import base64
+        with self.connect() as db:
+            row = db.execute('SELECT * FROM assessments WHERE id=? AND patient_id=?', (assessment_id, patient)).fetchone()
+            if row is None:
+                raise RuleError('Assessment not found for this patient.', 404)
+            return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii')}
+
+    def save_assessment(self, patient, request_id, source_hash, photo, width, height):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing = db.execute('SELECT id,source_hash FROM assessments WHERE patient_id=? AND request_id=?', (patient, request_id)).fetchone()
+            if existing:
+                if existing['source_hash'] != source_hash:
+                    raise RuleError('This request already saved a different photo. Refresh history.')
+                assessment_id = existing['id']
+            else:
+                assessment_id = str(uuid4())
+                db.execute('INSERT INTO assessments VALUES(?,?,?,?,?,?,?,?)',
+                    (assessment_id, patient, request_id, source_hash, photo, width, height, datetime.now(timezone.utc).isoformat()))
+        return self.assessment(assessment_id, patient)
 
     def prescription(self, db, booking_id):
         row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()

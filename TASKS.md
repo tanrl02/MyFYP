@@ -8,9 +8,9 @@ Updated 11 October 2026. Increment starts from 87ad49d.
 | Initial report review | Partial coverage complete | Remaining review in docs/REPORT_REVIEW.md |
 | Word alignment | Deferred by user | Original unchanged; revisit after implementation |
 | Shared booking/queue | Implemented; checks in VERIFY.md | SQLite/API, mobile and dashboard; physical Android pending |
-| Prescription/dispensing | Implemented; UI/device checks pending | Assigned-doctor issue, stock-safe staff dispensing |
-| Billing/simulated payment | Implemented; UI/device checks pending | Saved itemised invoices, retry-safe simulation |
-| Skin photo/history/simulated AI | Pending | Capture/gallery and durable storage |
+| Prescription/dispensing | Implemented; browser and specified phone checks passed | Assigned-doctor issue, stock-safe staff dispensing |
+| Billing/simulated payment | Implemented; browser and specified phone checks passed | Saved itemised invoices, retry-safe simulation |
+| Skin photo/history/simulated AI | Implemented; browser and specified Android checks passed | Camera/gallery saving, reopening, own history |
 | Real auth/private storage | Pending | No Supabase environment selected/accessed |
 | Dataset/model/fine-tuning | Pending | Common conditions, exact classes/licences unresolved |
 | Remaining final modules | Required | Accounts/OCR, users, medical records, full pharmacy, feedback/reports and remaining workflow details |
@@ -21,3 +21,5 @@ See TortoiseGit Show Log for local checkpoints. No remote push/publication. Book
 Prescription/billing increment: implemented, automated checks passed; browser/Android verification pending. Doctor issues against assigned called/completed visit, staff dispenses once, completed visit generates frozen invoice, patient/staff records simulated payment. Next skin assessment/photo/history; entire five-flow preview still incomplete. Keep feat/prescriptions-billing until UI checks pass.
 
 12 October 2026: prescription/billing browser checks passed. User-confirmed Android opening, shared paid bill/dispensed prescription, reopening persistence and patient separation. Care increment ready for main; full physical booking/queue and camera still pending. Next implementation: skin assessment/photo/history. Word unchanged.
+
+Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, local-backend photo/history, labelled simulation. Automated/browser checks passed; user confirmed Android camera/gallery saving, reopening and patient separation after native upload correction. All five preview feature groups now have code, but full preview acceptance and final nine-module scope are not complete. Real auth, inference/fine-tuning, doctor review/sharing and remaining full-module operations still required.

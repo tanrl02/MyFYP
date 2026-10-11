@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Care, DemoApi, DemoPatient, money, queueToken, visitTime } from "@smart-skin/shared";
 
-const base = process.env.EXPO_PUBLIC_API_URL || "http://127.0.0.1:8000";
+import { apiBase as base } from "./apiConfig";
 export default function CareView({ patient }: { patient: DemoPatient }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [records, setRecords] = useState<Care[]>([]);

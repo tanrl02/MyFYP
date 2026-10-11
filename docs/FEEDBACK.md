@@ -27,3 +27,5 @@ User instructs stopping Word edits for now to save tokens/usage; focus on implem
 11 October 2026: user requests continuing implementation. Prescriptions/dispensing/simulated bills implemented on feature branch, no report edits. Automated checks passed; new browser/phone checks pending because test-process permissions were declined. No new dependencies or hosted services.
 
 12 October 2026: user asked agent to restart/test. Services launched; browser care workflow passed. User explicitly confirmed Android opens and shows saved paid bill/dispensed prescription, reopening persists and Noah cannot see Ava care data. Only those phone checks are confirmed; other physical workflows remain pending.
+
+12 October2026: user says continue; agent implements skin photo/history with labelled simulation, preserves Word. Installed camera/gallery/upload/image-validation packages after explaining downloads. Automated and browser checks passed; phone confirmation pending.

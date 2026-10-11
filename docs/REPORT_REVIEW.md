@@ -87,3 +87,7 @@ Implemented demo rules: two sample doctors, next two days seeded, two places per
 ## Prescription/billing demo assumptions
 
 Assigned doctor issues one fixed prescription after call; staff dispenses with atomic stock checks. Completed visit has one itemised bill; billing prevents adding late prescription items. Consultation-only bill allowed. Prescription must be dispensed before recording simulated payment, which can be recorded by own patient or staff. Prices are integer cents, sample consultation RM30, placeholder A RM5/B RM8, not real medicine recommendations. Corrections, voids/refunds, batch inventory/restocking, print/export and real payment gateway are not implemented here and remain final-scope work. No Word changes now.
+
+Skin assessment demo: JPEG/PNG/WebP<=5MB, min32px each side/max25MP; normalized<=1600px, metadata removed, saved in shared SQLite. Latest100 own history; gallery/camera preview with cancellation, confirmed save only. Fixed simulation example/no analysis, no confidence or diagnostic claim. Doctor review/sharing and real fine-tuned inference still final-scope work. User explicitly deferred Word edits.
+
+Implementation APIs checked against installed SDK57 source and official Expo ImagePicker/FileSystem documentation: https://docs.expo.dev/versions/latest/sdk/imagepicker/ and https://docs.expo.dev/versions/latest/sdk/filesystem/ .
