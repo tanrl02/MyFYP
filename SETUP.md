@@ -15,3 +15,7 @@ Launch scripts prefer the bundled Codex Node/pnpm runtime, otherwise pnpm on PAT
 If phone cannot connect, check Wi-Fi/client isolation, VPN and firewall settings; do not disable protections or enable public tunnels. Wrong adapter: set EXPO_PUBLIC_API_URL to http://COMPUTER-LAN-IP:8000 before launching scripts/run-component.ps1 mobile. Dashboard NEXT_PUBLIC_API_URL defaults to http://127.0.0.1:8000. Example environment files contain no secrets.
 
 Saved data: ignored apps/api/data/demo.sqlite3, persists after restart; Git does not back it up. Demo headers are NOT secure login: use synthetic data only on your private network. No private photos uploaded. Expo Go is a testing host; Android JavaScript export is not an APK or physical-device test.
+
+## Current care screens
+
+Dashboard queue page links to /care. Select an assigned doctor to issue, then Staff Demo to dispense/generate bill/record simulated payment. Patient app Care & bills shows the same saved records and supports explicitly confirmed simulated payment. Placeholder items and prices only. Restart the API after pulling code changes; existing SQLite rows are preserved and new tables created automatically. Stop only your old project windows if a port is occupied; do not reset/delete records or stop unrelated processes.

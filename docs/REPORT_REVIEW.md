@@ -83,3 +83,7 @@ Report editing paused by user until implementation completes. A 16-paragraph can
 ## Booking/queue implementation decisions, 11 October 2026
 
 Implemented demo rules: two sample doctors, next two days seeded, two places per slot; no past bookings; one active booking per patient/slot; cancellation only future waiting visits; capacity restored, history/token retained; call one patient per doctor/date, appointment-time order then token; only called visits complete. These are explicit demo assumptions pending full final-scope scheduling rules. Future dates can be rehearsed by staff. No counter registration/edit/reschedule/check-in or production consent/auth yet. Do not treat this increment as a full report audit. Word editing is deferred by user.
+
+## Prescription/billing demo assumptions
+
+Assigned doctor issues one fixed prescription after call; staff dispenses with atomic stock checks. Completed visit has one itemised bill; billing prevents adding late prescription items. Consultation-only bill allowed. Prescription must be dispensed before recording simulated payment, which can be recorded by own patient or staff. Prices are integer cents, sample consultation RM30, placeholder A RM5/B RM8, not real medicine recommendations. Corrections, voids/refunds, batch inventory/restocking, print/export and real payment gateway are not implemented here and remain final-scope work. No Word changes now.

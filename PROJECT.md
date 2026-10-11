@@ -95,3 +95,7 @@ User update: report editing is deferred until implementation is complete to save
 ## Implementation update, 11 October 2026
 
 Booking/queue code now exists, starting from 87ad49d. Synthetic SQLite is the local shared demo store; planned Supabase auth/PostgreSQL/private storage has not been connected. Demo identities are not secure authentication. Dependency versions are recorded in package manifests/lockfile and Python requirements. Remaining preview flows and all final modules still required. Original Word stays unchanged per latest user instruction.
+
+## Prescription/billing update
+
+Doctor/staff care dashboard and patient Care & bills now implemented against shared Python store. Placeholder medicines/sample prices, stock-safe dispensing, frozen bills and simulated payment only. Remaining screen/device verification recorded in VERIFY.md. Full pharmacy, corrections/voids/refunds/exports, real auth/payments and other final modules remain required. Final report editing remains deferred.

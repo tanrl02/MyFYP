@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, AppState, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import CareView from "./CareView";
 import { Booking, DemoApi, DemoPatient, Slot, patientNames, queueToken, statusLabels, visitTime } from "@smart-skin/shared";
 const base = process.env.EXPO_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function App() {
   const [patient,setPatient]=useState<DemoPatient>("patient-ava");
   const api=useMemo(()=>new DemoApi(base,patient),[patient]);
-  const [tab,setTab]=useState<"book"|"visits">("book");
+  const [tab,setTab]=useState<"book"|"visits"|"care">("book");
   const [slots,setSlots]=useState<Slot[]>([]),[bookings,setBookings]=useState<Booking[]>([]);
   const [selected,setSelected]=useState<Slot|null>(null),[cancelId,setCancelId]=useState<string|null>(null);
   const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
@@ -29,11 +30,11 @@ export default function App() {
     <View style={styles.header}><View><Text style={styles.logo}>Smart Skin</Text><Text style={styles.muted}>Your next visit, made simpler.</Text></View><Text style={styles.demoPill}>DEMO</Text></View>
     <View style={styles.warning}><Text style={styles.warningText}>Synthetic patient demo. This is not secure login. Do not enter real patient information.</Text></View>
     <Text style={styles.label}>DEMO PATIENT</Text><View style={styles.row}>{(Object.keys(patientNames) as DemoPatient[]).map(id=><Pressable key={id} accessibilityRole="button" disabled={busy} onPress={()=>setPatient(id)} style={[styles.patient,patient===id&&styles.activePatient]}><Text style={{color:patient===id?"#fff":"#176f5e",fontWeight:"600"}}>{patientNames[id]}</Text></Pressable>)}</View>
-    <View style={[styles.row,{marginVertical:20}]}>{(["book","visits"] as const).map(t=><Pressable accessibilityRole="button" key={t} onPress={()=>{setTab(t);setSelected(null);setCancelId(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="book"?"Book a visit":"My visits"}</Text></Pressable>)}</View>
+    <View style={[styles.row,{marginVertical:20}]}>{(["book","visits","care"] as const).map(t=><Pressable accessibilityRole="button" key={t} onPress={()=>{setTab(t);setSelected(null);setCancelId(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="book"?"Book a visit":t==="visits"?"My visits":"Care & bills"}</Text></Pressable>)}</View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text style={{color:"#9f2929"}}>{error}</Text><Pressable accessibilityRole="button" onPress={()=>{setLoading(true);refresh().catch(e=>setError(e.message)).finally(()=>setLoading(false));}}><Text style={styles.link}>Retry connection</Text></Pressable></View>:null}
     {notice?<View style={styles.success}><Text style={{color:"#176f5e"}}>{notice}</Text></View>:null}
     {loading?<ActivityIndicator color="#176f5e"/>:null}
-    {tab==="book"?<>
+    {tab==="care"?<CareView key={patient} patient={patient}/>:tab==="book"?<>
       <Text style={styles.title}>{selected?"Confirm your visit":"Find a consultation"}</Text><Text style={[styles.muted,{marginBottom:18}]}>Times shown in Malaysia time. Each demo slot has two places.</Text>
       {selected?<View style={styles.card}><Text style={styles.cardTitle}>{selected.doctor_name}</Text><Text style={styles.muted}>{visitTime(selected.starts_at)}</Text><Text style={styles.body}>Confirming saves a shared booking and issues your queue number.</Text><Pressable accessibilityRole="button" disabled={busy} style={[styles.button,busy&&styles.disabled]} onPress={()=>act(()=>api.book(selected.id,requestId),"Your visit is booked. Staff can now see it in the shared queue.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm booking"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setSelected(null)}><Text style={styles.link}>Back to available times</Text></Pressable></View>:slots.map(s=>{const duplicate=bookings.some(b=>b.slot_id===s.id&&b.status!=="cancelled");return <View style={styles.card} key={s.id}><View style={styles.between}><Text style={styles.cardTitle}>{s.doctor_name}</Text><Text style={styles.available}>{s.available} places</Text></View><Text style={styles.muted}>{visitTime(s.starts_at)}</Text><Pressable accessibilityRole="button" disabled={busy||s.available===0||duplicate} style={[styles.button,(s.available===0||duplicate)&&styles.disabled]} onPress={()=>choose(s)}><Text style={styles.buttonText}>{duplicate?"Already booked":s.available===0?"Slot full":"Select time"}</Text></Pressable></View>})}
       {!loading&&!selected&&slots.length===0?<Text style={styles.muted}>No available slots. Retry when the API is reachable.</Text>:null}
@@ -42,7 +43,7 @@ export default function App() {
       {bookings.map(b=><View key={b.id} style={styles.card}><View style={styles.between}><Text style={styles.queue}>{queueToken(b)}</Text><Text style={styles.status}>{statusLabels[b.status]}</Text></View><Text style={styles.cardTitle}>{b.doctor_name}</Text><Text style={styles.muted}>{visitTime(b.starts_at)}</Text>{b.status==="waiting"?(cancelId===b.id?<><Text style={styles.body}>Cancel this visit and release your place?</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={()=>act(()=>api.cancel(b.id),"Visit cancelled. Your slot is available again.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm cancellation"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={()=>setCancelId(null)}><Text style={styles.link}>Keep my booking</Text></Pressable></>:<Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setCancelId(b.id)}><Text style={styles.link}>Cancel visit</Text></Pressable>):null}</View>)}
       {!loading&&bookings.length===0?<View style={styles.card}><Text style={styles.cardTitle}>No visits yet</Text><Text style={styles.body}>Choose Book a visit to select a doctor and time.</Text></View>:null}
     </>}
-    <Text style={styles.footnote}>Booking and queue demonstration. Skin assessment, prescriptions and billing are not implemented yet.</Text>
+    <Text style={styles.footnote}>Shared booking, queue, prescriptions and simulated billing. Skin assessment is not implemented yet.</Text>
   </ScrollView></SafeAreaView>;
 }
 const styles=StyleSheet.create({

@@ -23,3 +23,5 @@ Subsequent explicit selections: user requires core function plus appointment boo
 User instructs stopping Word edits for now to save tokens/usage; focus on implementation and revisit report alignment after implementation. Original DOCX hash verified unchanged; prepared draft is not applied or delivered.
 
 11 October 2026: user approved starting shared booking-to-queue work. Local mobile/dashboard/API implemented with synthetic saved records. Six backend tests and TypeScript checks passed; later build/browser results in VERIFY.md, physical phone pending. This is the first increment, not completion of all five preview flows. Word work remains deferred.
+
+11 October 2026: user requests continuing implementation. Prescriptions/dispensing/simulated bills implemented on feature branch, no report edits. Automated checks passed; new browser/phone checks pending because test-process permissions were declined. No new dependencies or hosted services.

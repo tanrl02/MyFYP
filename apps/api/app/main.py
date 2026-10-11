@@ -15,6 +15,14 @@ class QueueInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
     clinic_date: date
 
+class PrescriptionItemInput(BaseModel):
+    medicine_id: str = Field(min_length=1, max_length=100)
+    quantity: int = Field(strict=True, ge=1, le=20)
+    directions: str = Field(min_length=1, max_length=300, pattern=r'\S')
+
+class PrescriptionInput(BaseModel):
+    items: list[PrescriptionItemInput] = Field(min_length=1, max_length=10)
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -23,7 +31,7 @@ def create_app(path=None):
         allow_methods=['GET','POST'], allow_headers=['Content-Type','X-Demo-Actor'])
 
     def actor(x_demo_actor: str = Header()):
-        if x_demo_actor not in {*PATIENTS, 'staff-demo'}:
+        if x_demo_actor not in {*PATIENTS, *DOCTORS, 'staff-demo'}:
             raise HTTPException(401, 'Choose a recognised demo identity.')
         return x_demo_actor
 
@@ -35,6 +43,21 @@ def create_app(path=None):
     def staff(who=Depends(actor)):
         if who != 'staff-demo':
             raise HTTPException(403, 'Staff demo identity required.')
+        return who
+
+    def doctor(who=Depends(actor)):
+        if who not in DOCTORS:
+            raise HTTPException(403, 'Doctor demo identity required.')
+        return who
+
+    def operational(who=Depends(actor)):
+        if who not in {*DOCTORS, 'staff-demo'}:
+            raise HTTPException(403, 'Doctor or staff demo identity required.')
+        return who
+
+    def payer(who=Depends(actor)):
+        if who not in {*PATIENTS, 'staff-demo'}:
+            raise HTTPException(403, 'Patient or staff demo identity required.')
         return who
 
     def run(action):
@@ -74,6 +97,30 @@ def create_app(path=None):
     @api.post('/queue/{booking_id}/complete')
     def complete(booking_id: str, who=Depends(staff)):
         return run(lambda: store.complete(booking_id, who))
+
+    @api.get('/care')
+    def care(who=Depends(actor)):
+        return store.care(who)
+
+    @api.get('/medicines')
+    def medicines(who=Depends(operational)):
+        return store.catalog()
+
+    @api.post('/visits/{booking_id}/prescription')
+    def prescribe(booking_id: str, payload: PrescriptionInput, who=Depends(doctor)):
+        return run(lambda: store.issue_prescription(booking_id, who, [i.model_dump() for i in payload.items]))
+
+    @api.post('/prescriptions/{prescription_id}/dispense')
+    def dispense(prescription_id: str, who=Depends(staff)):
+        return run(lambda: store.dispense(prescription_id, who))
+
+    @api.post('/visits/{booking_id}/invoice')
+    def invoice(booking_id: str, who=Depends(staff)):
+        return run(lambda: store.generate_invoice(booking_id, who))
+
+    @api.post('/invoices/{invoice_id}/pay-simulated')
+    def pay(invoice_id: str, who=Depends(payer)):
+        return run(lambda: store.pay_simulated(invoice_id, who))
 
     return api
 

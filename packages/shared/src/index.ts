@@ -1,6 +1,12 @@
 export type Status = "waiting" | "called" | "completed" | "cancelled";
 export type DemoPatient = "patient-ava" | "patient-noah";
-export type DemoActor = DemoPatient | "staff-demo";
+export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
+export type Medicine = { id: string; name: string; price_cents: number; stock: number };
+export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
+export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & { name: string; price_cents: number })[] };
+export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
+export type Care = { visit: Booking; prescription: Prescription | null; invoice: Invoice | null };
+export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; capacity: number; available: number };
 export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; created_at: string };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
@@ -35,4 +41,10 @@ export class DemoApi {
   queue(doctor: string, date: string) { return this.request<Booking[]>(`/queue?doctor_id=${encodeURIComponent(doctor)}&clinic_date=${encodeURIComponent(date)}`); }
   callNext(doctor: string, date: string) { return this.request<Booking>("/queue/call-next", { doctor_id: doctor, clinic_date: date }); }
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
+  care() { return this.request<Care[]>("/care"); }
+  medicines() { return this.request<Medicine[]>("/medicines"); }
+  prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
+  dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }
+  invoice(id: string) { return this.request<Invoice>(`/visits/${encodeURIComponent(id)}/invoice`, {}); }
+  paySimulated(id: string) { return this.request<Invoice>(`/invoices/${encodeURIComponent(id)}/pay-simulated`, {}); }
 }

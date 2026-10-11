@@ -26,3 +26,18 @@ Problem report: screen, steps, expected/actual and visible error; screenshots wi
 ## Completed agent verification
 
 Next.js production build passed. Expo Android Hermes bundle export passed (JavaScript bundle, NOT APK/device verification). Expo web build ran successfully. Browser interactions verified booking/confirmation, shared staff row, Called and Completed reflected in patient UI, second-patient empty history, cancellation reflected in both screens, and reload retaining saved state/availability. Synthetic Ava L001 completed and Noah L002 cancelled remain in the local demo store. Screenshot under ignored tmp/booking-queue-dashboard.png. Backend persistence after reopening is covered by tests; physical Android and LAN/firewall configuration remain unverified.
+
+## Prescription and billing checks
+
+Starting commit 15ab6e3, feature branch feat/prescriptions-billing. Code implemented; ten backend tests, TypeScript checks, Next build and Android bundle export passed. New browser interactions and physical Android remain PENDING because permissions to inspect processes and start an isolated test dashboard were declined. Do not confuse the previous booking-only browser checks with this increment.
+
+Close your old project service windows and reopen the three launchers in SETUP.md so the new Python endpoints load. No saved records need resetting. Dashboard queue -> Open prescriptions & billing:
+
+1. Book/call Ava with Dr. Lim. Choose Dr. Lim on care dashboard. Create prescription, quantity 2 of Demo item A, leave the sample directions and issue. Ava Care & bills should show Issued, same items/directions. Dr. Anita must not see this visit.
+2. Switch to Staff Demo. Confirm dispensing. Status becomes Dispensed on both interfaces; repeat requests must not deduct stock twice. Insufficient stock must leave all items/stock unchanged.
+3. Complete the visit on queue screen. Staff generates bill; quantity 2 item A plus demo consultation totals RM 40.00. Repeated generate requests return the same bill. Called/waiting/cancelled visits cannot be billed.
+4. Ava Care & bills -> Simulate payment -> Confirm simulated payment. Both interfaces show Paid · simulation, with saved receipt reference. No external checkout/bank/money transfer. Staff may also record the same simulation; repeat requests must not create extra payments.
+5. Noah Care & bills must not show Ava's records. Reload/restart API; saved prescription, stock, bill and receipt remain.
+6. Test no items, fractional/negative/out-of-range quantity, missing directions, wrong doctor, unavailable stock and API unavailable. Error should prevent invalid saved records and allow recovery.
+
+Fixed demo items: A RM 5.00, B RM 8.00; initial stock 20 each; consultation RM 30.00. These are sample numbers. Issued items are immutable, and a billed visit cannot receive a new prescription. Editing/voiding/refunds, stock batches/restocking and real auth/payments remain final-scope work.

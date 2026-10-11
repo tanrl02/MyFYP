@@ -30,7 +30,29 @@ class Store:
                 CREATE TABLE IF NOT EXISTS events (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL REFERENCES bookings(id),
                   actor_id TEXT NOT NULL, action TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS medicines (
+                  id TEXT PRIMARY KEY, name TEXT NOT NULL, price_cents INTEGER NOT NULL CHECK(price_cents>=0),
+                  stock INTEGER NOT NULL CHECK(stock>=0));
+                CREATE TABLE IF NOT EXISTS prescriptions (
+                  id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
+                  doctor_id TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('issued','dispensed')),
+                  created_at TEXT NOT NULL, dispensed_at TEXT);
+                CREATE TABLE IF NOT EXISTS prescription_items (
+                  prescription_id TEXT NOT NULL REFERENCES prescriptions(id), medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                  quantity INTEGER NOT NULL CHECK(quantity>0), directions TEXT NOT NULL,
+                  PRIMARY KEY(prescription_id,medicine_id));
+                CREATE TABLE IF NOT EXISTS invoices (
+                  id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
+                  total_cents INTEGER NOT NULL CHECK(total_cents>=0), status TEXT NOT NULL CHECK(status IN ('unpaid','paid')),
+                  created_at TEXT NOT NULL, paid_at TEXT, payment_mode TEXT);
+                CREATE TABLE IF NOT EXISTS invoice_lines (
+                  id TEXT PRIMARY KEY, invoice_id TEXT NOT NULL REFERENCES invoices(id),
+                  description TEXT NOT NULL, quantity INTEGER NOT NULL CHECK(quantity>0),
+                  unit_price_cents INTEGER NOT NULL CHECK(unit_price_cents>=0));
             ''')
+            db.executemany('INSERT OR IGNORE INTO medicines VALUES(?,?,?,?)', [
+                ('demo-a', 'Demo item A (not medication)', 500, 20),
+                ('demo-b', 'Demo item B (not medication)', 800, 20)])
         self.seed()
 
     @contextmanager
@@ -160,3 +182,128 @@ class Store:
             db.execute("UPDATE bookings SET status='completed' WHERE id=?", (booking_id,))
             self.event(db, booking_id, staff, 'completed')
             return self.record(db, booking_id)
+
+    def catalog(self):
+        with self.connect() as db:
+            return [dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
+
+    def prescription(self, db, booking_id):
+        row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()
+        if not row:
+            return None
+        items = db.execute('''SELECT i.medicine_id,i.quantity,i.directions,m.name,m.price_cents
+            FROM prescription_items i JOIN medicines m ON m.id=i.medicine_id
+            WHERE i.prescription_id=? ORDER BY i.medicine_id''', (row['id'],)).fetchall()
+        return dict(row, items=[dict(i) for i in items])
+
+    def invoice(self, db, booking_id):
+        row = db.execute('SELECT * FROM invoices WHERE booking_id=?', (booking_id,)).fetchone()
+        if not row:
+            return None
+        lines = db.execute('SELECT description,quantity,unit_price_cents FROM invoice_lines WHERE invoice_id=? ORDER BY rowid', (row['id'],)).fetchall()
+        return dict(row, lines=[dict(line) for line in lines])
+
+    def care(self, actor):
+        with self.connect() as db:
+            records = []
+            for row in db.execute('SELECT id FROM bookings ORDER BY created_at DESC').fetchall():
+                visit = self.record(db, row['id'])
+                if actor in PATIENTS and visit['patient_id'] != actor:
+                    continue
+                if actor in DOCTORS and visit['doctor_id'] != actor:
+                    continue
+                records.append({'visit': visit, 'prescription': self.prescription(db, row['id']),
+                                'invoice': self.invoice(db, row['id'])})
+            return records
+
+    def issue_prescription(self, booking_id, doctor, items):
+        # Immutable issued items keep dispensing/billing consistent. Retry same content safely.
+        normalised = sorted(items, key=lambda i: i['medicine_id'])
+        if len({i['medicine_id'] for i in items}) != len(items):
+            raise RuleError('Choose each demo item only once.', 422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit = self.record(db, booking_id)
+            if visit['doctor_id'] != doctor:
+                raise RuleError('This visit belongs to another doctor.', 403)
+            if visit['status'] not in ('called', 'completed'):
+                raise RuleError('Call the patient before issuing a prescription.')
+            existing = self.prescription(db, booking_id)
+            if existing:
+                saved = [{key: i[key] for key in ('medicine_id', 'quantity', 'directions')} for i in existing['items']]
+                if saved != normalised:
+                    raise RuleError('A prescription is already issued. Saved items cannot be replaced in this demo.')
+                return existing
+            if self.invoice(db, booking_id):
+                raise RuleError('This visit has been billed. A prescription cannot be added afterwards.')
+            for item in normalised:
+                if not db.execute('SELECT 1 FROM medicines WHERE id=?', (item['medicine_id'],)).fetchone():
+                    raise RuleError('Unknown demo item.', 422)
+            prescription_id = str(uuid4())
+            db.execute('INSERT INTO prescriptions VALUES(?,?,?,?,?,NULL)',
+                       (prescription_id, booking_id, doctor, 'issued', datetime.now(timezone.utc).isoformat()))
+            db.executemany('INSERT INTO prescription_items VALUES(?,?,?,?)',
+                [(prescription_id, i['medicine_id'], i['quantity'], i['directions']) for i in normalised])
+            self.event(db, booking_id, doctor, 'prescription-issued')
+            return self.prescription(db, booking_id)
+
+    def dispense(self, prescription_id, staff):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row = db.execute('SELECT booking_id FROM prescriptions WHERE id=?', (prescription_id,)).fetchone()
+            if not row:
+                raise RuleError('Prescription not found.', 404)
+            prescription = self.prescription(db, row['booking_id'])
+            if prescription['status'] == 'dispensed':
+                return prescription
+            for item in prescription['items']:
+                result = db.execute('UPDATE medicines SET stock=stock-? WHERE id=? AND stock>=?',
+                                    (item['quantity'], item['medicine_id'], item['quantity']))
+                if result.rowcount != 1:
+                    raise RuleError('Insufficient demo stock. Nothing was dispensed.')
+            db.execute("UPDATE prescriptions SET status='dispensed',dispensed_at=? WHERE id=?",
+                       (datetime.now(timezone.utc).isoformat(), prescription_id))
+            self.event(db, row['booking_id'], staff, 'prescription-dispensed')
+            return self.prescription(db, row['booking_id'])
+
+    def generate_invoice(self, booking_id, staff):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit = self.record(db, booking_id)
+            if visit['status'] != 'completed':
+                raise RuleError('Complete the visit before generating a bill.')
+            existing = self.invoice(db, booking_id)
+            if existing:
+                return existing
+            lines = [('Demo consultation', 1, 3000)]
+            prescription = self.prescription(db, booking_id)
+            if prescription:
+                lines.extend((i['name'], i['quantity'], i['price_cents']) for i in prescription['items'])
+            invoice_id = str(uuid4())
+            total = sum(quantity * price for _, quantity, price in lines)
+            db.execute('INSERT INTO invoices VALUES(?,?,?,?,?,NULL,NULL)',
+                       (invoice_id, booking_id, total, 'unpaid', datetime.now(timezone.utc).isoformat()))
+            db.executemany('INSERT INTO invoice_lines VALUES(?,?,?,?,?)',
+                [(str(uuid4()), invoice_id, name, quantity, price) for name, quantity, price in lines])
+            self.event(db, booking_id, staff, 'invoice-generated')
+            return self.invoice(db, booking_id)
+
+    def pay_simulated(self, invoice_id, actor):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row = db.execute('SELECT booking_id FROM invoices WHERE id=?', (invoice_id,)).fetchone()
+            if not row:
+                raise RuleError('Bill not found.', 404)
+            visit = self.record(db, row['booking_id'])
+            if actor != 'staff-demo' and visit['patient_id'] != actor:
+                raise RuleError('You cannot pay this bill.', 403)
+            invoice = self.invoice(db, row['booking_id'])
+            if invoice['status'] == 'paid':
+                return invoice
+            prescription = self.prescription(db, row['booking_id'])
+            if prescription and prescription['status'] != 'dispensed':
+                raise RuleError('Dispense the prescription before recording simulated payment.')
+            db.execute("UPDATE invoices SET status='paid',paid_at=?,payment_mode='simulation' WHERE id=?",
+                       (datetime.now(timezone.utc).isoformat(), invoice_id))
+            self.event(db, row['booking_id'], actor, 'payment-simulated')
+            return self.invoice(db, row['booking_id'])
