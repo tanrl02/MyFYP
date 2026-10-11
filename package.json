@@ -1,0 +1,5 @@
+{
+  "name": "smart-skin-fyp", "version": "0.1.0", "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": { "dashboard": "pnpm --filter @smart-skin/dashboard dev", "mobile": "pnpm --filter @smart-skin/mobile start", "typecheck": "pnpm -r typecheck", "build:dashboard": "pnpm --filter @smart-skin/dashboard build" }
+}

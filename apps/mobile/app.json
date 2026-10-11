@@ -1,0 +1,1 @@
+{ "expo": { "name": "Smart Skin Demo", "slug": "smart-skin-demo", "version": "0.1.0", "orientation": "portrait", "userInterfaceStyle": "light", "android": { "package": "com.smartskin.fyp.demo" } } }

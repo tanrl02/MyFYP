@@ -1,27 +1,19 @@
 # Tasks
 
-Updated 11 October 2026. Planning only.
+Updated 11 October 2026. Increment starts from 87ad49d.
 
-| Task | Status | Verification |
+| Task | Status | Evidence / remaining work |
 | --- | --- | --- |
-| Locate report and project; inspect existing state | Complete | PDF has 302 pages; MyFYP initially contains only .git, no commits |
-| Initial report review and source notes | Complete for stated coverage | Text review and six rendered pages; remaining audit tracked in REPORT_REVIEW |
-| Record user corrections and continuity documents | Complete | Final scope is all nine modules; no implementation claims |
-| Register newly supplied editable DOCX and report alignment requirement | Complete | OOXML inspected; supplied file unchanged; detailed comparison pending |
-| Update editable report to match approved changes | Ongoing obligation | First backup/edit/render pending design decisions; no changes yet |
-| Detailed full-scope requirements/diagram audit | Pending | Must cover remaining cases/UI/processes and reconcile role/data rules |
-| Dataset and pretrained-model feasibility | Started | HAM10000 mismatch and DermNet licence checked; no suitable model selected |
-| Initial architecture, core preview and access approval | Complete | One shared Python backend; five core flows; shared records; AI/payments simulated |
-| Core mobile/dashboard preview | Authorised, not started | Android/browser/persistence/access checks not run |
-| First shared booking/queue workflow | Next | No code, dependencies, authorised Supabase environment or migrations |
-| Remaining nine-module workflows and trained model | Planned | Final milestone dates/acceptance not agreed |
-| Lecturer preview checkpoint/tag | Planned | Tag only after verified demo and confirmed preview date |
+| Scope/design/access | Approved | Nine final modules, five preview workflows, one Python backend |
+| Initial report review | Partial coverage complete | Remaining review in docs/REPORT_REVIEW.md |
+| Word alignment | Deferred by user | Original unchanged; revisit after implementation |
+| Shared booking/queue | Implemented; checks in VERIFY.md | SQLite/API, mobile and dashboard; physical Android pending |
+| Prescription/dispensing | Next increment | Tie to shared visits and scoped doctor/staff roles |
+| Billing/simulated payment | Pending | Saved invoices, retry-safe payment actions |
+| Skin photo/history/simulated AI | Pending | Capture/gallery and durable storage |
+| Real auth/private storage | Pending | No Supabase environment selected/accessed |
+| Dataset/model/fine-tuning | Pending | Common conditions, exact classes/licences unresolved |
+| Remaining final modules | Required | Accounts/OCR, users, medical records, full pharmacy, feedback/reports and remaining workflow details |
+| Full preview | Incomplete | Five flows and phone confirmation needed; tentative 22 October |
 
-Task starting commit: none (unborn main). Final checkpoint: documentation baseline titled `docs: record initial FYP review and full project scope`; resolve its hash through Show Log. Documentation does not imply application verification.
-
-Latest discussion task starts from f815d11; decisions checkpoint titled `docs: approve shared core preview and access boundaries`. No application verification. Report rendering preflight failed because LibreOffice was unavailable; report edit/layout verification remains pending.
-
-
-## Update 11 October 2026 report work deferred
-
-Report alignment: deferred by explicit user request until implementation completes. Original unchanged. Candidate/QA files retained locally under ignored tmp/; no further report work authorised now.
+See TortoiseGit Show Log for local checkpoints. No remote push/publication. Booking/queue completion does not mean the full preview or FYP is finished.

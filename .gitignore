@@ -11,3 +11,11 @@ coverage/
 *.log
 *.pem
 *.key
+.venv/
+.pnpm-store/
+.pnpm-cache/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+apps/api/data/
+apps/api/.test-data/

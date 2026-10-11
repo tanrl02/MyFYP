@@ -79,3 +79,7 @@ DOCX rendering preflight failed on 11 October 2026: packaged renderer could not 
 ## Update 11 October 2026 report work deferred
 
 Report editing paused by user until implementation completes. A 16-paragraph candidate and unchanged backup were prepared; original DOCX remains byte-identical to supplied version. Word exported baseline/candidate (305 pages); PNG generation succeeded but renderer cleanup failed under sandbox. Outside-sandbox retry was declined. Visual QA incomplete; candidate is not applied or delivered. Stop further report QA/edits now.
+
+## Booking/queue implementation decisions, 11 October 2026
+
+Implemented demo rules: two sample doctors, next two days seeded, two places per slot; no past bookings; one active booking per patient/slot; cancellation only future waiting visits; capacity restored, history/token retained; call one patient per doctor/date, appointment-time order then token; only called visits complete. These are explicit demo assumptions pending full final-scope scheduling rules. Future dates can be rehearsed by staff. No counter registration/edit/reschedule/check-in or production consent/auth yet. Do not treat this increment as a full report audit. Word editing is deferred by user.

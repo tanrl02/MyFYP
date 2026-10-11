@@ -91,3 +91,7 @@ Official sources checked 11 October 2026: [Expo ImagePicker](https://docs.expo.d
 ## Update 11 October 2026 report work deferred
 
 User update: report editing is deferred until implementation is complete to save tokens/usage. Do not continue Word editing/rendering now. Preserve the original report for a later comparison with actual implementation. Prepared candidate is not applied.
+
+## Implementation update, 11 October 2026
+
+Booking/queue code now exists, starting from 87ad49d. Synthetic SQLite is the local shared demo store; planned Supabase auth/PostgreSQL/private storage has not been connected. Demo identities are not secure authentication. Dependency versions are recorded in package manifests/lockfile and Python requirements. Remaining preview flows and all final modules still required. Original Word stays unchanged per latest user instruction.
