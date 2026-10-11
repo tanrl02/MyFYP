@@ -45,3 +45,7 @@ Consultation notes increment: consultation_notes(id, unique booking_id FK, docto
 ## Counter booking
 
 POST /counter-bookings accepts patient_id, slot_id and request_id from staff-demo. It uses the existing bookings table and Store.book transaction, without migration. Shared patient/request keys prevent cross-channel duplicate retry; the existing active patient/slot and capacity rules apply to counter and phone bookings alike. New counter bookings log events.action=counter-booked and actor_id=staff-demo once; retries do not add events. The patient remains the booking owner. Demo headers remain spoofable and must be replaced before real data use.
+
+## Rescheduling
+
+New reschedules table: primary key(actor_id,request_id), old_booking_id/new_booking_id foreign keys, target slot_id, created_at. POST /bookings/{id}/reschedule uses BEGIN IMMEDIATE to check ownership/future-waiting state/target availability and duplicates, cancel old, create new queue token, update or revoke active appointment grants, insert mapping and paired rescheduled-from/to events atomically. No existing data removed. Booking responses derive nullable rescheduled_to_id for history display. Same-doctor grants move their booking_id; changed-doctor grants retain original booking_id and receive revoked_at. Direct grants untouched. Actor/request mapping persists retries independently of the new booking's later state.

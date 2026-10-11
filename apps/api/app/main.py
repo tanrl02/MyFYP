@@ -113,6 +113,12 @@ def create_app(path=None):
     def counter_book(payload: CounterBookingInput, who=Depends(staff)):
         return run(lambda: store.book(payload.patient_id,payload.slot_id,payload.request_id,created_by=who))
 
+    @api.post('/bookings/{booking_id}/reschedule')
+    def reschedule(booking_id: str, payload: BookingInput, who=Depends(actor)):
+        if who not in {*PATIENTS,'staff-demo'}:
+            raise HTTPException(403,'Patient or staff demo identity required.')
+        return run(lambda: store.reschedule(booking_id,who,payload.slot_id,payload.request_id))
+
     @api.get('/queue')
     def queue(doctor_id: Literal['doctor-lim','doctor-anita'], clinic_date: date, who=Depends(staff)):
         return store.queue(doctor_id, clinic_date.isoformat())

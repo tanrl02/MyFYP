@@ -88,3 +88,9 @@ Staff dashboard Patient queue -> New counter booking -> Ava/Noah, doctor, availa
 
 12 October Android confirmation: user reopened Smart Skin and confirmed Ava My visits shows L004 while Noah does not. The shared-record/reopening/patient-separation phone check passed. Counter booking checkpoint 76c8287 is on local main; no push. Previous pending Android status is superseded by this confirmation.
 
+
+## Small increment: appointment rescheduling — 12 October 2026
+
+Patient My visits -> Reschedule [token] -> choose time -> Confirm. Staff Patient queue -> Reschedule [token] -> select time -> Review -> Confirm. Original waiting booking stays intact on failure; successful move retains old history as Rescheduled and creates a new queue number. Server rejects other-patient/doctor access, non-waiting or started original/target, same slot, duplicate active patient/slot and full capacity. Retry uses the same request key; mismatched reuse conflicts. Same-doctor active appointment grant follows the replacement; changing doctors revokes only appointment grants and requires fresh patient linking. Direct grants remain active.
+
+32 API tests passed, including ownership/status/input denial, original preservation, SQLite reopen, request retry/event-once, shared history, same/change-doctor consent and concurrent phone/counter capacity. Both TypeScript checks, dashboard production build and Android Hermes export passed. Browser staff moved own synthetic L004 -> Lim/L00113Oct9am, patient -> Anita/A00114Oct9am; verified new shared queue, old Rescheduled history, reload retention and Noah separation. Screenshot tmp/reschedule-verified.png. Android creation/reopening/separation card pending. Other user visits untouched. Full nine-module final acceptance remains incomplete.

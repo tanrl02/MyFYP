@@ -15,3 +15,5 @@ Latest small increment (12 October): staff counter booking implemented on feat/c
 
 12 October Android confirmation: user reopened Smart Skin and confirmed Ava My visits shows L004 while Noah does not. The shared-record/reopening/patient-separation phone check passed. Counter booking checkpoint 76c8287 is on local main; no push. Previous pending Android status is superseded by this confirmation.
 
+
+Latest increment: rescheduling on feat/appointment-rescheduling from8207f2c. Patient/staff confirmation -> new waiting booking, old retained as Rescheduled; atomic capacity/duplicates/retries; same-doctor linked grant follows, changing doctors revokes appointment grant only. 32 API tests, both TS checks, dashboard build, Android export and browser flows passed. Synthetic Ava visit currently Anita/A00114Oct9am after L004 and Lim/L001 were rescheduled. Android test pending; user asked to move it to Lim14Oct11am and reopen/check Noah separation. API31268 PID67616, dashboard97093, Expo21814. Real auth/Word edits still deferred. One small function at a time; discuss next task.

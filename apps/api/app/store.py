@@ -30,6 +30,10 @@ class Store:
                 CREATE TABLE IF NOT EXISTS events (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL REFERENCES bookings(id),
                   actor_id TEXT NOT NULL, action TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS reschedules (
+                  actor_id TEXT NOT NULL, request_id TEXT NOT NULL, old_booking_id TEXT NOT NULL REFERENCES bookings(id),
+                  new_booking_id TEXT NOT NULL REFERENCES bookings(id), slot_id TEXT NOT NULL REFERENCES slots(id),
+                  created_at TEXT NOT NULL, PRIMARY KEY(actor_id,request_id));
                 CREATE TABLE IF NOT EXISTS medicines (
                   id TEXT PRIMARY KEY, name TEXT NOT NULL, price_cents INTEGER NOT NULL CHECK(price_cents>=0),
                   stock INTEGER NOT NULL CHECK(stock>=0));
@@ -120,7 +124,9 @@ class Store:
                           JOIN slots s ON s.id=b.slot_id WHERE b.id=?''', (booking_id,)).fetchone()
         if r is None:
             raise RuleError('Booking not found.', 404)
-        return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']])
+        replacement = db.execute('SELECT new_booking_id FROM reschedules WHERE old_booking_id=?',(booking_id,)).fetchone()
+        return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
+                    rescheduled_to_id=replacement['new_booking_id'] if replacement else None)
 
     def book(self, patient, slot_id, request_id, created_by=None):
         if patient not in PATIENTS:
@@ -156,6 +162,45 @@ class Store:
         with self.connect() as db:
             ids = db.execute('SELECT id FROM bookings WHERE patient_id=? ORDER BY created_at DESC', (patient,)).fetchall()
             return [self.record(db, r['id']) for r in ids]
+
+    def reschedule(self, booking_id, actor, slot_id, request_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old = self.record(db, booking_id)
+            if actor != 'staff-demo' and actor != old['patient_id']:
+                raise RuleError('You cannot reschedule this booking.', 403)
+            retry = db.execute('SELECT * FROM reschedules WHERE actor_id=? AND request_id=?', (actor,request_id)).fetchone()
+            if retry:
+                if retry['old_booking_id'] != booking_id or retry['slot_id'] != slot_id:
+                    raise RuleError('This reschedule request was already used for a different visit or time.')
+                return self.record(db,retry['new_booking_id'])
+            if old['status'] != 'waiting' or datetime.fromisoformat(old['starts_at']) <= datetime.now(timezone.utc):
+                raise RuleError('Only future waiting visits can be rescheduled.')
+            if old['slot_id'] == slot_id:
+                raise RuleError('Choose a different appointment time.')
+            slot = db.execute('SELECT * FROM slots WHERE id=?',(slot_id,)).fetchone()
+            if slot is None:
+                raise RuleError('Slot not found.',404)
+            if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
+                raise RuleError('This slot has already started. Choose another time.')
+            if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",(old['patient_id'],slot_id)).fetchone():
+                raise RuleError('This patient already has a booking for this slot.')
+            used = db.execute("SELECT COUNT(*) FROM bookings WHERE slot_id=? AND status!='cancelled'",(slot_id,)).fetchone()[0]
+            if used >= slot['capacity']:
+                raise RuleError('This slot is full. Your original booking is unchanged.')
+            number = db.execute('''SELECT COALESCE(MAX(b.queue_number),0)+1 FROM bookings b JOIN slots s ON s.id=b.slot_id
+                WHERE s.doctor_id=? AND s.clinic_date=?''',(slot['doctor_id'],slot['clinic_date'])).fetchone()[0]
+            new_id, now = str(uuid4()), datetime.now(timezone.utc).isoformat()
+            db.execute("UPDATE bookings SET status='cancelled' WHERE id=?",(booking_id,))
+            db.execute('INSERT INTO bookings VALUES(?,?,?,?,?,?,?)',(new_id,old['patient_id'],slot_id,number,'waiting',now,'reschedule-'+new_id))
+            if slot['doctor_id'] == old['doctor_id']:
+                db.execute('UPDATE assessment_shares SET booking_id=? WHERE booking_id=? AND revoked_at IS NULL',(new_id,booking_id))
+            else:
+                db.execute('UPDATE assessment_shares SET revoked_at=? WHERE booking_id=? AND revoked_at IS NULL',(now,booking_id))
+            db.execute('INSERT INTO reschedules VALUES(?,?,?,?,?,?)',(actor,request_id,booking_id,new_id,slot_id,now))
+            self.event(db,booking_id,actor,'rescheduled-from')
+            self.event(db,new_id,actor,'rescheduled-to')
+            return self.record(db,new_id)
 
     def queue(self, doctor, date):
         with self.connect() as db:

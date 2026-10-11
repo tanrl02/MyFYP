@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import CareView from "./CareView";
 import SkinView from "./SkinView";
 import VisitNotes from "./VisitNotes";
+import RescheduleView from "./RescheduleView";
 import { Booking, DemoApi, DemoPatient, Slot, patientNames, queueToken, statusLabels, visitTime } from "@smart-skin/shared";
 import { apiBase as base } from "./apiConfig";
 export default function App() {
@@ -15,10 +16,11 @@ export default function App() {
   const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
   const [error,setError]=useState(""),[notice,setNotice]=useState("");
   const [requestId,setRequestId]=useState("");
+  const [moving,setMoving]=useState<Booking|null>(null);
   const refresh=useCallback(async()=>{ const [s,b]=await Promise.all([api.slots(),api.bookings()]);setSlots(s);setBookings(b);setError(""); },[api]);
   useEffect(()=>{
     let active=true, fetching=false;
-    setSelected(null);setCancelId(null);setBookings([]);setNotice("");setLoading(true);
+    setSelected(null);setCancelId(null);setMoving(null);setBookings([]);setNotice("");setLoading(true);
     const load=async()=>{if(fetching)return;fetching=true;try{const [s,b]=await Promise.all([api.slots(),api.bookings()]);if(active){setSlots(s);setBookings(b);setError("");}}catch(e){if(active)setError(e instanceof Error ? e.message : "Unable to load.");}finally{fetching=false;if(active)setLoading(false);}};
     void load(); const timer=setInterval(load,3000); const subscription=AppState.addEventListener("change",state=>{if(state==="active")void load();});
     return()=>{active=false;clearInterval(timer);subscription.remove();};
@@ -32,7 +34,7 @@ export default function App() {
     <View style={styles.header}><View><Text style={styles.logo}>Smart Skin</Text><Text style={styles.muted}>Your next visit, made simpler.</Text></View><Text style={styles.demoPill}>DEMO</Text></View>
     <View style={styles.warning}><Text style={styles.warningText}>Synthetic patient demo. This is not secure login. Do not enter real patient information.</Text></View>
     <Text style={styles.label}>DEMO PATIENT</Text><View style={styles.row}>{(Object.keys(patientNames) as DemoPatient[]).map(id=><Pressable key={id} accessibilityRole="button" disabled={busy} onPress={()=>setPatient(id)} style={[styles.patient,patient===id&&styles.activePatient]}><Text style={{color:patient===id?"#fff":"#176f5e",fontWeight:"600"}}>{patientNames[id]}</Text></Pressable>)}</View>
-    <View style={[styles.row,{marginVertical:20}]}>{(["skin","book","visits","care"] as const).map(t=><Pressable accessibilityRole="button" key={t} onPress={()=>{setTab(t);setSelected(null);setCancelId(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="skin"?"Skin check":t==="book"?"Book a visit":t==="visits"?"My visits":"Care & bills"}</Text></Pressable>)}</View>
+    <View style={[styles.row,{marginVertical:20}]}>{(["skin","book","visits","care"] as const).map(t=><Pressable accessibilityRole="button" disabled={busy} key={t} onPress={()=>{setTab(t);setSelected(null);setCancelId(null);setMoving(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="skin"?"Skin check":t==="book"?"Book a visit":t==="visits"?"My visits":"Care & bills"}</Text></Pressable>)}</View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text style={{color:"#9f2929"}}>{error}</Text><Pressable accessibilityRole="button" onPress={()=>{setLoading(true);refresh().catch(e=>setError(e.message)).finally(()=>setLoading(false));}}><Text style={styles.link}>Retry connection</Text></Pressable></View>:null}
     {notice?<View style={styles.success}><Text style={{color:"#176f5e"}}>{notice}</Text></View>:null}
     {loading?<ActivityIndicator color="#176f5e"/>:null}
@@ -42,7 +44,8 @@ export default function App() {
       {!loading&&!selected&&slots.length===0?<Text style={styles.muted}>No available slots. Retry when the API is reachable.</Text>:null}
     </>:<>
       <View style={styles.between}><Text style={styles.title}>My visits</Text><Pressable accessibilityRole="button" onPress={()=>refresh().catch(e=>setError(e.message))}><Text style={styles.link}>Refresh</Text></Pressable></View><Text style={[styles.muted,{marginBottom:18}]}>Queue changes refresh every few seconds.</Text>
-      {bookings.map(b=><View key={b.id} style={styles.card}><View style={styles.between}><Text style={styles.queue}>{queueToken(b)}</Text><Text style={styles.status}>{statusLabels[b.status]}</Text></View><Text style={styles.cardTitle}>{b.doctor_name}</Text><Text style={styles.muted}>{visitTime(b.starts_at)}</Text>{b.status==="waiting"?(cancelId===b.id?<><Text style={styles.body}>Cancel this visit and release your place?</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={()=>act(()=>api.cancel(b.id),"Visit cancelled. Your slot is available again.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm cancellation"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={()=>setCancelId(null)}><Text style={styles.link}>Keep my booking</Text></Pressable></>:<Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setCancelId(b.id)}><Text style={styles.link}>Cancel visit</Text></Pressable>):null}</View>)}
+      {moving?<RescheduleView key={moving.id} api={api} booking={moving} slots={slots} busy={busy} onBusy={setBusy} onClose={()=>setMoving(null)} onSaved={saved=>{setMoving(null);setNotice(`Visit rescheduled: ${queueToken(saved)} · ${saved.doctor_name} · ${visitTime(saved.starts_at)}.`);void refresh().catch(e=>setError(e.message));}}/>:null}
+      {bookings.map(b=><View key={b.id} style={styles.card}><View style={styles.between}><Text style={styles.queue}>{queueToken(b)}</Text><Text style={styles.status}>{b.rescheduled_to_id?"Rescheduled":statusLabels[b.status]}</Text></View><Text style={styles.cardTitle}>{b.doctor_name}</Text><Text style={styles.muted}>{visitTime(b.starts_at)}</Text>{b.status==="waiting"?(cancelId===b.id?<><Text style={styles.body}>Cancel this visit and release your place?</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={()=>act(()=>api.cancel(b.id),"Visit cancelled. Your slot is available again.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm cancellation"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={()=>setCancelId(null)}><Text style={styles.link}>Keep my booking</Text></Pressable></>:<><Pressable accessibilityRole="button" disabled={busy||!!moving} style={styles.quietButton} onPress={()=>setCancelId(b.id)}><Text style={styles.link}>Cancel visit</Text></Pressable>{new Date(b.starts_at).getTime()>Date.now()?<Pressable accessibilityRole="button" disabled={busy||!!moving} style={styles.quietButton} onPress={()=>{setMoving(b);setCancelId(null);setNotice("");}}><Text style={styles.link}>Reschedule {queueToken(b)}</Text></Pressable>:null}</>):null}</View>)}
       {!loading&&bookings.length===0?<View style={styles.card}><Text style={styles.cardTitle}>No visits yet</Text><Text style={styles.body}>Choose Book a visit to select a doctor and time.</Text></View>:null}
       <VisitNotes key={patient} patient={patient}/>
     </>}

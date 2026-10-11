@@ -32,3 +32,5 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 12 October Android confirmation: user reopened Smart Skin and confirmed Ava My visits shows L004 while Noah does not. The shared-record/reopening/patient-separation phone check passed. Counter booking checkpoint 76c8287 is on local main; no push. Previous pending Android status is superseded by this confirmation.
 
+
+12 October rescheduling: patient/staff confirmation flow implemented for future waiting visits, with shared new queue number/history, atomic capacity/duplicate protection and doctor-change appointment-grant revocation. 32 tests, TypeScript, dashboard build, Android export and browser staff/patient flows passed. Android creation/reopening/isolation confirmation pending. Real login and Word remain deferred.

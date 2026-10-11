@@ -62,3 +62,11 @@ User approved one small task: staff counter booking, from main5973873 on feat/co
 
 12 October Android confirmation: user reopened Smart Skin and confirmed Ava My visits shows L004 while Noah does not. The shared-record/reopening/patient-separation phone check passed. Counter booking checkpoint 76c8287 is on local main; no push. Previous pending Android status is superseded by this confirmation.
 
+
+## Small increment: appointment rescheduling — 12 October 2026
+
+From8207f2c on feat/appointment-rescheduling. Patient My visits -> Reschedule [token] -> choose future time -> confirm; staff Patient queue -> Reschedule [token] -> time -> Review -> Confirm. Only own patient or staff may move a future waiting visit. The transaction creates a new waiting booking with a fresh doctor/day queue number and marks the old booking cancelled with a rescheduled_to_id history indicator. Capacity, duplicate prevention, old/new status and access updates commit together. Failure preserves the original visit. Actor/request keys make exact retries return the saved replacement; changed targets conflict. Concurrent moves cannot move the old visit twice.
+
+Active appointment-linked assessment grants move to the replacement only for the same doctor. A doctor change revokes these grants and requires a fresh patient link; direct shares stay active. Revoked grant history/published reviews remain retained. No automatic sharing with a new doctor. Consultation/dispensing/billing rules unchanged; called/completed visits cannot be moved.
+
+32 backend tests, both TypeScript checks, dashboard build and Android Hermes export passed. Browser staff moved synthetic Ava/L00412Oct11am -> Lim/L00113Oct9am, then patient moved it -> Anita/A00114Oct9am. Old visits show Rescheduled; destination queue, reopening persistence and Noah separation passed. Screenshot tmp/reschedule-verified.png. Android user creation/reopening/separation check pending. API31268 PID67616, dashboard97093, Expo21814; phone exp://192.168.0.4:8081. No new dependencies, hosted services, real auth/AI or Word edits. Next task requires discussion; do not batch roadmap.
