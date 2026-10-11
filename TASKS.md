@@ -37,3 +37,5 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 12 October phone recovery confirmation: after the Expo cache restart, user replied 'ok already', confirming the reported missing-RescheduleView error is resolved. Rescheduling implementation and automated/browser verification are complete. Do not infer separate Android reopening/patient-isolation results beyond this brief confirmation; browser persistence/isolation were verified. Expo91250, API31268 PID67616 and dashboard97093 remain the latest owned services. Discuss the next small function with the user before starting it.
 
+
+12 October visit feedback: own completed-visit rating/comment submission with confirmation, saved history and staff feedback tab implemented. One immutable submission per visit; editing/moderation/replies/reporting expansion deferred.35 API tests, TypeScript, dashboard build, Android export/development bundle and browser submission/persistence/separation passed. Android confirmation pending. This completes a first feedback function, not all final reporting/module requirements.

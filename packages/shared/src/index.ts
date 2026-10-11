@@ -1,6 +1,7 @@
 export type Status = "waiting" | "called" | "completed" | "cancelled";
 export type ConsultationNote = { id: string; booking_id: string; doctor_id: DemoDoctor; findings: string; follow_up: string; created_at: string };
 export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null };
+export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; visit: Booking };
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
 export type Medicine = { id: string; name: string; price_cents: number; stock: number };
@@ -52,6 +53,8 @@ export class DemoApi {
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
   care() { return this.request<Care[]>("/care"); }
   consultations() { return this.request<Consultation[]>("/consultations"); }
+  feedback() { return this.request<VisitFeedback[]>("/feedback"); }
+  submitFeedback(id: string,rating: number,comment: string) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback`,{rating,comment}); }
   consultation(id: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`); }
   publishConsultation(id: string, findings: string, followUp: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp }); }
   assessments() { return this.request<Assessment[]>("/assessments"); }

@@ -49,3 +49,7 @@ POST /counter-bookings accepts patient_id, slot_id and request_id from staff-dem
 ## Rescheduling
 
 New reschedules table: primary key(actor_id,request_id), old_booking_id/new_booking_id foreign keys, target slot_id, created_at. POST /bookings/{id}/reschedule uses BEGIN IMMEDIATE to check ownership/future-waiting state/target availability and duplicates, cancel old, create new queue token, update or revoke active appointment grants, insert mapping and paired rescheduled-from/to events atomically. No existing data removed. Booking responses derive nullable rescheduled_to_id for history display. Same-doctor grants move their booking_id; changed-doctor grants retain original booking_id and receive revoked_at. Direct grants untouched. Actor/request mapping persists retries independently of the new booking's later state.
+
+## Visit feedback
+
+visit_feedback: id, unique booking_id(FK), patient_id, integer rating CHECK1..5, comment, created_at. POST /visits/{id}/feedback requires own patient identity, completed booking, strict integer1-5 and comment<=1000. Transaction creates one immutable record and feedback-submitted event; exact content retry returns saved record; changed retry conflicts. GET /feedback allows own patient records or staff-demo latest100; doctors denied. Payload includes operational Booking metadata, never consultation text or assessment photos. Staff aggregate average is computed from displayed submissions only. Real account identity enforcement remains future work.

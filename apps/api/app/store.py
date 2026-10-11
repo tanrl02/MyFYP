@@ -68,6 +68,10 @@ class Store:
                 CREATE TABLE IF NOT EXISTS consultation_notes (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   doctor_id TEXT NOT NULL, findings TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS visit_feedback (
+                  id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
+                  patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+                  comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
             if 'booking_id' not in {row['name'] for row in db.execute('PRAGMA table_info(assessment_shares)')}:
                 db.execute('ALTER TABLE assessment_shares ADD COLUMN booking_id TEXT REFERENCES bookings(id)')
@@ -162,6 +166,34 @@ class Store:
         with self.connect() as db:
             ids = db.execute('SELECT id FROM bookings WHERE patient_id=? ORDER BY created_at DESC', (patient,)).fetchall()
             return [self.record(db, r['id']) for r in ids]
+
+    def feedback(self, actor):
+        if actor not in {*PATIENTS,'staff-demo'}:
+            raise RuleError('Patient or staff demo identity required.',403)
+        with self.connect() as db:
+            rows = db.execute('''SELECT * FROM visit_feedback WHERE (?='staff-demo' OR patient_id=?)
+                ORDER BY created_at DESC LIMIT 100''',(actor,actor)).fetchall()
+            return [dict(row,visit=self.record(db,row['booking_id'])) for row in rows]
+
+    def submit_feedback(self, booking_id, patient, rating, comment):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if patient not in PATIENTS or visit['patient_id']!=patient:
+                raise RuleError('You cannot submit feedback for this visit.',403)
+            if visit['status']!='completed':
+                raise RuleError('Feedback is available after the visit is completed.')
+            if type(rating) is not int or not 1<=rating<=5 or len(comment)>1000:
+                raise RuleError('Choose a rating from 1 to 5 and a comment up to 1000 characters.',422)
+            existing=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
+            if existing:
+                if existing['rating']!=rating or existing['comment']!=comment:
+                    raise RuleError('Feedback was already submitted for this visit. Refresh to view it.')
+                return dict(existing,visit=visit)
+            feedback_id=str(uuid4())
+            db.execute('INSERT INTO visit_feedback VALUES(?,?,?,?,?,?)',(feedback_id,booking_id,patient,rating,comment,datetime.now(timezone.utc).isoformat()))
+            self.event(db,booking_id,patient,'feedback-submitted')
+            return dict(db.execute('SELECT * FROM visit_feedback WHERE id=?',(feedback_id,)).fetchone(),visit=visit)
 
     def reschedule(self, booking_id, actor, slot_id, request_id):
         with self.connect() as db:

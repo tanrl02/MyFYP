@@ -46,6 +46,10 @@ class ConsultationInput(BaseModel):
     findings: str = Field(min_length=1, max_length=2000, pattern=r'\S')
     follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
 
+class FeedbackInput(BaseModel):
+    rating: int = Field(strict=True,ge=1,le=5)
+    comment: str = Field(max_length=1000)
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -193,6 +197,14 @@ def create_app(path=None):
     @api.get('/consultations')
     def consultations(who=Depends(actor)):
         return run(lambda: store.consultations(who))
+
+    @api.get('/feedback')
+    def feedback(who=Depends(actor)):
+        return run(lambda: store.feedback(who))
+
+    @api.post('/visits/{booking_id}/feedback',status_code=201)
+    def submit_feedback(booking_id: str,payload: FeedbackInput,who=Depends(patient)):
+        return run(lambda: store.submit_feedback(booking_id,who,payload.rating,payload.comment.strip()))
 
     @api.get('/visits/{booking_id}/consultation')
     def consultation(booking_id: str, who=Depends(actor)):
