@@ -50,3 +50,6 @@ Latest small increment daily reports from9311e9b on feat/daily-clinic-reports. S
 
 Daily reports checkpoint6f7129d is on local main. Owned launchers restored: API80301 PID68416 port8000, dashboard28246 port3000, Expo71682 port8081, exp://192.168.0.4:8081. Report reloaded successfully after restart. These service IDs supersede previous entries. All44 API tests, both TypeScript checks, dashboard build and populated/empty report browser checks passed. No remote push or Word edits. Discuss the next small function before starting another increment.
 
+
+
+Latest increment patient medical background from7cab2b4 on feat/patient-background. My profile three fields/review/confirm/reload + assigned doctor consultation detail current background. New additive table and revision conflicts; no staff/global lookup.47 API tests, bothTS checks, dashboardbuild, AndroidHermesexport and browserflows passed. Physical Android card pending. API96181 PID35516/dashboard93780/Expo77162 before checkpoint. Real auth,AI,Word still deferred; discuss next small function. Stop owned Metro/dashboard before git switch/merge.

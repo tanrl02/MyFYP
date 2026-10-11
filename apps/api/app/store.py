@@ -18,6 +18,9 @@ class Store:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript('''
+                CREATE TABLE IF NOT EXISTS patient_backgrounds (
+                  patient_id TEXT PRIMARY KEY, allergies TEXT NOT NULL, medicines TEXT NOT NULL,
+                  conditions TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS slots (
                   id TEXT PRIMARY KEY, doctor_id TEXT NOT NULL, starts_at TEXT NOT NULL,
                   clinic_date TEXT NOT NULL, capacity INTEGER NOT NULL CHECK(capacity > 0));
@@ -502,6 +505,36 @@ class Store:
                        (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
             return self.share_record(db, share_id, doctor)
 
+    def background_record(self, db, patient):
+        row = db.execute('SELECT * FROM patient_backgrounds WHERE patient_id=?', (patient,)).fetchone()
+        return dict(row) if row else {'patient_id':patient,'allergies':'','medicines':'','conditions':'','version':0,'updated_at':None}
+
+    def background(self, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            return self.background_record(db,patient)
+
+    def save_background(self, patient, allergies, medicines, conditions, version):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            current = self.background_record(db,patient)
+            values = (allergies, medicines, conditions)
+            if current['version'] != version:
+                if values == (current['allergies'],current['medicines'],current['conditions']):
+                    return current
+                raise RuleError('Background changed elsewhere. Reload the saved background before editing again.')
+            if current['version'] and values == (current['allergies'],current['medicines'],current['conditions']):
+                return current
+            db.execute('''INSERT INTO patient_backgrounds VALUES(?,?,?,?,?,?)
+                          ON CONFLICT(patient_id) DO UPDATE SET allergies=excluded.allergies,
+                          medicines=excluded.medicines,conditions=excluded.conditions,
+                          version=excluded.version,updated_at=excluded.updated_at''',
+                       (patient,*values,version+1,datetime.now(timezone.utc).isoformat()))
+            return self.background_record(db,patient)
+
     def consultation_record(self, db, booking_id, actor, include_photo=False):
         if actor not in {*PATIENTS,*DOCTORS}:
             raise RuleError('Patient or doctor identity required.', 403)
@@ -520,7 +553,10 @@ class Store:
                     import base64
                     photo = db.execute('SELECT * FROM assessments WHERE id=?', (linked['assessment_id'],)).fetchone()
                     linked['assessment'] = self.assessment_metadata(photo) | {'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')}
-        return {'visit':visit, 'note':dict(note) if note else None, 'linked_share':linked}
+        result = {'visit':visit, 'note':dict(note) if note else None, 'linked_share':linked}
+        if include_photo:
+            result['background'] = self.background_record(db,visit['patient_id'])
+        return result
 
     def consultations(self, actor):
         if actor not in {*PATIENTS,*DOCTORS}:
@@ -536,6 +572,7 @@ class Store:
 
     def consultation(self, booking_id, actor):
         with self.connect() as db:
+            db.execute('BEGIN')
             return self.consultation_record(db,booking_id,actor,include_photo=True)
 
     def publish_consultation(self, booking_id, doctor, findings, follow_up):

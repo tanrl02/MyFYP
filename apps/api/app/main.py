@@ -9,6 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .store import DOCTORS, PATIENTS, RuleError, Store
 
+class BackgroundInput(BaseModel):
+    allergies: str = Field(max_length=1000)
+    medicines: str = Field(max_length=1000)
+    conditions: str = Field(max_length=1000)
+    version: int = Field(strict=True, ge=0)
+
 class BookingInput(BaseModel):
     slot_id: str = Field(min_length=1, max_length=100)
     request_id: str = Field(min_length=8, max_length=100)
@@ -215,6 +221,14 @@ def create_app(path=None):
     @api.post('/prescriptions/{prescription_id}/dispense')
     def dispense(prescription_id: str, who=Depends(staff)):
         return run(lambda: store.dispense(prescription_id, who))
+
+    @api.get('/patient-background')
+    def background(who=Depends(patient)):
+        return run(lambda: store.background(who))
+
+    @api.post('/patient-background')
+    def save_background(payload: BackgroundInput, who=Depends(patient)):
+        return run(lambda: store.save_background(who,payload.allergies.strip(),payload.medicines.strip(),payload.conditions.strip(),payload.version))
 
     @api.get('/consultations')
     def consultations(who=Depends(actor)):

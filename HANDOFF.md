@@ -126,3 +126,12 @@ Visits use slot.clinic_date and current status; original reschedules separate fr
 
 Daily reports checkpoint6f7129d is on local main. Owned launchers restored: API80301 PID68416 port8000, dashboard28246 port3000, Expo71682 port8081, exp://192.168.0.4:8081. Report reloaded successfully after restart. These service IDs supersede previous entries. All44 API tests, both TypeScript checks, dashboard build and populated/empty report browser checks passed. No remote push or Word edits. Discuss the next small function before starting another increment.
 
+
+
+## Small increment: patient medical background — 12 October 2026
+
+From7cab2b4 on feat/patient-background. Patient My profile -> three fields (1000 characters each) -> Review background -> Confirm background. Blank is not provided, no implicit assertion of no allergies. Explicit Reload saved background discards edits. Saved timestamp and draft preservation on failure. Patient-key remount clears previous identity's background; tabs wrap to fit five choices.
+
+GET/POST /patient-background uses own patient header only. Additive patient_backgrounds table: patient_id, allergies, medicines, conditions, version, updated_at. Serialized optimistic revision saves reject stale changed values; identical retries return current version without duplicate write. Doctor consultation detail includes latest background only after existing assigned-doctor/called-or-completed checks. List summaries and staff care/report payloads exclude background; doctor switching clears detail. Current info explicitly labelled latest patient-provided, not visit snapshot; published notes unchanged. No broad profile lookup or direct-assessment-grant extension.
+
+47 API tests, both TS checks, dashboard build and Android Hermes export tmp/background-android-export passed. Browser Ava review/confirm/reload, Noah blank separation, Dr Lim L003 latest background and doctor-switch clearing passed. Saved only fictional Ava demo background. Screenshot tmp/patient-background-verified.png inspected. Physical Android save/reopen/isolation card pending; do not claim passed until user confirms. API96181 PID35516, dashboard93780, Expo77162 running before checkpoint. Real auth/AI/Word remain deferred; all nine modules still required.

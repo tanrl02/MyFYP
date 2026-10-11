@@ -51,3 +51,6 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 
 12 October daily report implemented: staff date/View report, visit status/reschedule counts, invoice cohort paid/unpaid simulation balances, Malaysia activity-day receiving/dispensing and submission-day feedback.44 API tests, bothTS checks, final dashboard build and populated/empty/date-change browser checks passed. Read-only, no mobile change; exports/charts/adminauth separate scope. Word/auth deferred; final scope remains incomplete.
+
+
+12 October patient medical background: My profile edits allergies/current medicines/existing conditions, review/confirm, shared persistence and stale-edit protection. Assigned doctors see latest patient-provided background only in called/completed consultation detail.47 API tests, both TypeScript checks, dashboard production build, Android Hermes export and browser save/reload/separation/doctor flow passed. Physical Android confirmation pending. Historical background versions/snapshots, profile demographics, real auth and Word alignment remain separate tasks.

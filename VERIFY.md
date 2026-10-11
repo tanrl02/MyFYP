@@ -133,3 +133,12 @@ Patient My visits -> tap appointment summary/View visit details. Sections show a
 Staff Patient queue footer -> Daily reports -> date -> View report. Current summary polls10seconds. Dates use Malaysia UTC+8. Visits are selected appointment-date booking records by current status; rescheduled original separate from cancelled. Billing for that appointment cohort uses current paid/unpaid status (not collection-date cashflow). Stock uses receiving/dispensing timestamp day; feedback uses submission day. Quantities represent movement, not ending balance. Explicit labels, empty0/nullaverage and Retry; no patient/clinical details returned.
 
 44 API tests passed including mixed invoicing/visits/reschedules totals, aggregation without join double-count, staff-only/invalid-date denial, emptydate, reopen, no clinical fields and exact Malaysia midnight inclusion/exclusion. Both TypeScript checks and final dashboard production build passed. Browser queue navigation,12Oct totals,2000-01-01 zero/empty report and explicit return12Oct passed. Screenshot tmp/daily-report-verified.png. No production mutations. Mobile unchanged, no Android export/phone check required. Exporting/charts/date-range/adminaccess remain future tasks. This is a current report snapshot, not frozen day-end history.
+
+
+## Patient medical background (12 October)
+Automated:47 API tests, both TypeScript checks, dashboard build and Android Hermes export passed. Browser save/review/reload and patient/doctor switching verified; physical Android pending.
+1. Android Ava -> My profile -> enter fictional allergies, medicines and conditions -> Review background -> Confirm background.
+2. Reopen app -> Ava -> My profile: saved values remain. Noah must not see Ava's values.
+3. Doctor dashboard /consultations -> Dr Lim -> L003: Patient background shows the latest Ava values and timestamp; published notes stay unchanged.
+4. Empty fields show Not provided. Staff and other patients cannot access Ava background. Unassigned doctor/uncalled visit rejects detail. Concurrent stale edits return conflict and require explicit reload, while identical save retries are safe.
+

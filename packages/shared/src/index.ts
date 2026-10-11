@@ -1,6 +1,7 @@
 export type Status = "waiting" | "called" | "completed" | "cancelled";
 export type ConsultationNote = { id: string; booking_id: string; doctor_id: DemoDoctor; findings: string; follow_up: string; created_at: string };
-export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null };
+export type PatientBackground = { patient_id: DemoPatient; allergies: string; medicines: string; conditions: string; version: number; updated_at: string | null };
+export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null; background?: PatientBackground };
 export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; visit: Booking };
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
@@ -58,6 +59,8 @@ export class DemoApi {
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
   care() { return this.request<Care[]>("/care"); }
   consultations() { return this.request<Consultation[]>("/consultations"); }
+  background() { return this.request<PatientBackground>("/patient-background"); }
+  saveBackground(body: Pick<PatientBackground,"allergies"|"medicines"|"conditions"|"version">) { return this.request<PatientBackground>("/patient-background",body); }
   feedback() { return this.request<VisitFeedback[]>("/feedback"); }
   submitFeedback(id: string,rating: number,comment: string) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback`,{rating,comment}); }
   consultation(id: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`); }

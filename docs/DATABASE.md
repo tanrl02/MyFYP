@@ -65,3 +65,7 @@ GET /bookings/{booking_id}/details patient-only, own booking enforced before chi
 ## Daily report
 
 No new tables. Staff-only GET /reports/daily validated clinic_date returns single-read-transaction aggregates. Booking count grouped by current status except EXISTS(reschedules.old_booking_id) => rescheduled. Billing SUM invoices joined to appointment slots; paid+unpaid=billed. Stock independently aggregates receipt quantity by date(created_at,'+8 hours') and dispensed prescription-item quantity by date(dispensed_at,'+8 hours'), preventing invoice-line join duplication. Feedback COUNT/AVG by Malaysia submission date. Empty totals0/average null. Aggregate operational output only; no patient names, clinical text/photo or comment values. generated_at UTC snapshot timestamp, displayed Malaysia time. No frozen historical status model/cashflow ledger implied.
+
+
+## Patient background addition
+patient_backgrounds(patient_id PRIMARY KEY, allergies TEXT, medicines TEXT, conditions TEXT, version INTEGER, updated_at TEXT UTC). Created additively at Store startup; no existing records changed. Empty/no row returns blank fields, version0, null timestamp. Own-patient read/write; BEGIN IMMEDIATE compare revision + upsert, stable same-value retries. Doctor access derived from assigned called/completed consultation, no staff access. This is latest patient-provided info, not a version history or immutable visit snapshot; it does not modify consultation notes.
