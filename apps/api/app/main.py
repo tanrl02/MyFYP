@@ -13,6 +13,9 @@ class BookingInput(BaseModel):
     slot_id: str = Field(min_length=1, max_length=100)
     request_id: str = Field(min_length=8, max_length=100)
 
+class CounterBookingInput(BookingInput):
+    patient_id: Literal['patient-ava','patient-noah']
+
 class QueueInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
     clinic_date: date
@@ -105,6 +108,10 @@ def create_app(path=None):
     @api.post('/bookings/{booking_id}/cancel')
     def cancel(booking_id: str, who=Depends(patient)):
         return run(lambda: store.cancel(booking_id, who))
+
+    @api.post('/counter-bookings', status_code=201)
+    def counter_book(payload: CounterBookingInput, who=Depends(staff)):
+        return run(lambda: store.book(payload.patient_id,payload.slot_id,payload.request_id,created_by=who))
 
     @api.get('/queue')
     def queue(doctor_id: Literal['doctor-lim','doctor-anita'], clinic_date: date, who=Depends(staff)):

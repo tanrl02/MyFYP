@@ -122,7 +122,9 @@ class Store:
             raise RuleError('Booking not found.', 404)
         return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']])
 
-    def book(self, patient, slot_id, request_id):
+    def book(self, patient, slot_id, request_id, created_by=None):
+        if patient not in PATIENTS:
+            raise RuleError('Choose a recognised demo patient.', 422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing = db.execute('SELECT id, slot_id FROM bookings WHERE patient_id=? AND request_id=?',
@@ -138,7 +140,7 @@ class Store:
                 raise RuleError('This slot has already started. Choose another time.')
             if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",
                           (patient, slot_id)).fetchone():
-                raise RuleError('You already have a booking for this slot.')
+                raise RuleError('This patient already has a booking for this slot.')
             used = db.execute("SELECT COUNT(*) FROM bookings WHERE slot_id=? AND status!='cancelled'", (slot_id,)).fetchone()[0]
             if used >= slot['capacity']:
                 raise RuleError('This slot is full. Please choose another time.')
@@ -147,7 +149,7 @@ class Store:
             booking_id = str(uuid4())
             db.execute('INSERT INTO bookings VALUES(?,?,?,?,?,?,?)',
                        (booking_id, patient, slot_id, number, 'waiting', datetime.now(timezone.utc).isoformat(), request_id))
-            self.event(db, booking_id, patient, 'booked')
+            self.event(db, booking_id, created_by or patient, 'counter-booked' if created_by else 'booked')
             return self.record(db, booking_id)
 
     def mine(self, patient):
