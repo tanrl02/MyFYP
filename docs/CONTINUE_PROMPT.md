@@ -53,3 +53,7 @@ Daily reports checkpoint6f7129d is on local main. Owned launchers restored: API8
 
 
 Latest increment patient medical background from7cab2b4 on feat/patient-background. My profile three fields/review/confirm/reload + assigned doctor consultation detail current background. New additive table and revision conflicts; no staff/global lookup.47 API tests, bothTS checks, dashboardbuild, AndroidHermesexport and browserflows passed. Physical Android card pending. API96181 PID35516/dashboard93780/Expo77162 before checkpoint. Real auth,AI,Word still deferred; discuss next small function. Stop owned Metro/dashboard before git switch/merge.
+
+
+Patient medical background checkpoint b56aa22 is on local main. Owned services restored: API96181 PID35516 port8000, dashboard55514 port3000, Expo63427 port8081 (same phone API http://192.168.0.4:8000). Dashboard /consultations returned200 after restart. Latest IDs supersede previous runtime entries. Physical Android question remains pending. No push or Word edits.
+
