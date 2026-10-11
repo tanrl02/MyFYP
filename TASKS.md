@@ -20,3 +20,8 @@ Updated 11 October 2026. Planning only.
 Task starting commit: none (unborn main). Final checkpoint: documentation baseline titled `docs: record initial FYP review and full project scope`; resolve its hash through Show Log. Documentation does not imply application verification.
 
 Latest discussion task starts from f815d11; decisions checkpoint titled `docs: approve shared core preview and access boundaries`. No application verification. Report rendering preflight failed because LibreOffice was unavailable; report edit/layout verification remains pending.
+
+
+## Update 11 October 2026 report work deferred
+
+Report alignment: deferred by explicit user request until implementation completes. Original unchanged. Candidate/QA files retained locally under ignored tmp/; no further report work authorised now.

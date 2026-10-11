@@ -16,3 +16,8 @@ No lecturer feedback supplied yet. Suggestions are not automatically authorised 
 Later 11 October 2026: user said "can" to the single-backend proposal; recorded as approval of one shared Python backend only. Preview selection then explicitly required more functions. Follow-up question asks for their list and real-versus-demo data expectations; answer pending. Privacy rules and complete initial implementation scope remain unapproved. Keeping the turn open allowed a selection response to arrive; continue one question at a time.
 
 Subsequent explicit selections: user requires core function plus appointment booking, patient queue, prescriptions and billing. User approves shared saved records between phone/dashboard, simulated AI/payment processing, and the proposed scoped clinical-access rules. Initial implementation scope/design now approved; hosting/private transfers still need scoped authorisation. Required report alignment recorded in REPORT_REVIEW; DOCX renderer unavailable during preflight, source unchanged.
+
+
+## Update 11 October 2026 report work deferred
+
+User instructs stopping Word edits for now to save tokens/usage; focus on implementation and revisit report alignment after implementation. Original DOCX hash verified unchanged; prepared draft is not applied or delivered.

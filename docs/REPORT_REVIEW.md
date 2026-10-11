@@ -74,3 +74,8 @@ Later decisions supersede initial pending notes: approved shared Python backend,
 Required report alignment batch: abstract/methodology and feasibility stack; incremental milestones; mobile framework rationale; deployment architecture; AI simulation versus future fine-tuning; shared workflow/persistence descriptions; security access rules including admin and staff; test criteria distinguishing target from achieved evidence. Do not delete final modules or claim prototype functionality before implementation.
 
 DOCX rendering preflight failed on 11 October 2026: packaged renderer could not find LibreOffice `soffice.exe`; cleanup also encountered temporary-folder permissions. No edited DOCX has been produced. Preserve source until a verified editing/rendering path exists. Rendering the historical PDF cannot verify changed DOCX layout.
+
+
+## Update 11 October 2026 report work deferred
+
+Report editing paused by user until implementation completes. A 16-paragraph candidate and unchanged backup were prepared; original DOCX remains byte-identical to supplied version. Word exported baseline/candidate (305 pages); PNG generation succeeded but renderer cleanup failed under sandbox. Outside-sandbox retry was declined. Visual QA incomplete; candidate is not applied or delivered. Stop further report QA/edits now.

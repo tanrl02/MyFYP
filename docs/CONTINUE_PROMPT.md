@@ -15,3 +15,8 @@ Use TortoiseGit explanations for user review; commands may be used internally wi
 Respect actual sandbox. Local planning is authorised; external accounts/services/hosted changes, publication/pushes, billing, system installation, external private-file/photo transfers and destructive operations require scope-specific approval. Explain first dependency batch and installation scripts. No Supabase target exists; verify environment and migration state before any hosted change. Do not recreate services because chat memory is missing.
 
 Tentative preview 22 October 2026; final deadline unknown. Next task and success criteria are in HANDOFF.md. Continue from verified state without repeating setup or restarting.
+
+
+## Update 11 October 2026 report work deferred
+
+Latest instruction: defer Word report editing/QA until implementation is complete to save tokens/usage. Original report is unchanged. Focus on approved core implementation; revisit original-versus-implementation report comparison later.

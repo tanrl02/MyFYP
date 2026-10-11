@@ -33,3 +33,8 @@ Audit booking/queue/prescription/billing detailed requirements in current DOCX, 
 Completion: patient booking appears in authorised staff queue; queue update persists and is retrieved on mobile; cancellation/capacity/duplicate-action cases handled; synthetic data; agent checks recorded, Android checks pending user confirmation. Extend prescriptions/billing with same saved records afterwards.
 
 Maintain report alignment plan while resolving verified DOCX editing/rendering. Preserve final nine-module scope and distinguish planned/achieved functionality. Continue dataset/model licence, modality and fine-tuning feasibility independently. No accuracy claims until measured.
+
+
+## Update 11 October 2026 report work deferred
+
+Latest user instruction supersedes report-alignment work: STOP editing/rendering Word until implementation completes to save tokens/usage. Original DOCX remains unchanged (verified SHA256 matches supplied version). Backup in parent report-backups; unverified candidate/QA under ignored tmp/docx. Helper scripts are unfinished report-work checkpoints, not application code. Current branch docs/report-alignment; return to main after saving checkpoint. Next task remains shared booking/queue implementation; do not reopen report QA.

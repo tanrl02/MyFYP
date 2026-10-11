@@ -86,3 +86,8 @@ Patients see their own records. Doctors access records through explicit sharing 
 - Appointment capacity, queue rules, payment provider/test mode, OCR approach and notification channel.
 
 Official sources checked 11 October 2026: [Expo ImagePicker](https://docs.expo.dev/versions/latest/sdk/imagepicker/), [Expo FAQ](https://docs.expo.dev/faq/), [Next.js](https://nextjs.org/docs), [Supabase storage access](https://supabase.com/docs/guides/storage/security/access-control), [Supabase pricing](https://supabase.com/pricing). Context7 failed with an invalid API key; official web documentation was used as fallback.
+
+
+## Update 11 October 2026 report work deferred
+
+User update: report editing is deferred until implementation is complete to save tokens/usage. Do not continue Word editing/rendering now. Preserve the original report for a later comparison with actual implementation. Prepared candidate is not applied.
