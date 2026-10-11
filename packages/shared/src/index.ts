@@ -6,7 +6,7 @@ export type Assessment = { id: string; patient_id: DemoPatient; width: number; h
 export type DemoDoctor = "doctor-lim" | "doctor-anita";
 export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim (demo)", "doctor-anita": "Dr. Anita (demo)" };
 export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDoctor; note: string; follow_up: string; created_at: string };
-export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment };
+export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
 export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & { name: string; price_cents: number })[] };
 export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
@@ -53,6 +53,7 @@ export class DemoApi {
   shares() { return this.request<AssessmentShare[]>("/assessment-shares"); }
   shareAssessment(id: string, doctor: DemoDoctor, message: string, requestId: string) { return this.request<AssessmentShare>(`/assessments/${encodeURIComponent(id)}/share`, { doctor_id: doctor, patient_message: message, request_id: requestId }); }
   revokeShare(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/revoke`, {}); }
+  linkAssessment(id: string, booking: string, message: string, requestId: string) { return this.request<AssessmentShare>(`/assessments/${encodeURIComponent(id)}/link-appointment`, { booking_id: booking, patient_message: message, request_id: requestId }); }
   sharedAssessment(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}`); }
   publishReview(id: string, note: string, followUp: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/review`, { note, follow_up: followUp }); }
   medicines() { return this.request<Medicine[]>("/medicines"); }

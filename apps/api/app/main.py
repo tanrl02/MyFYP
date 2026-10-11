@@ -34,6 +34,11 @@ class ReviewInput(BaseModel):
     note: str = Field(min_length=1, max_length=2000, pattern=r'\S')
     follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
 
+class AppointmentLinkInput(BaseModel):
+    booking_id: str = Field(min_length=1, max_length=100)
+    patient_message: str = Field(max_length=1000)
+    request_id: str = Field(min_length=8, max_length=100)
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -147,6 +152,10 @@ def create_app(path=None):
     @api.post('/assessment-shares/{share_id}/revoke')
     def revoke_share(share_id: str, who=Depends(patient)):
         return run(lambda: store.revoke_share(share_id, who))
+
+    @api.post('/assessments/{assessment_id}/link-appointment')
+    def link_assessment(assessment_id: str, payload: AppointmentLinkInput, who=Depends(patient)):
+        return run(lambda: store.link_assessment(assessment_id, who, payload.booking_id, payload.patient_message.strip(), payload.request_id))
 
     @api.get('/assessment-shares/{share_id}')
     def shared_assessment(share_id: str, who=Depends(doctor)):

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { AssessmentShare, DemoApi, DemoDoctor, doctorNames, visitTime } from "@smart-skin/shared";
+import { AssessmentShare, DemoApi, DemoDoctor, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
 
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function ReviewsPage() {
@@ -57,11 +57,12 @@ function ReviewInbox({ doctor }: { doctor: DemoDoctor }) {
     {loading ? <p className="muted">Loading shared assessments…</p> : null}
     <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]">
       <section className="panel"><h2 className="mb-4 text-lg font-semibold">Your inbox · {shares.length}</h2><p className="muted mb-4 text-xs">Latest 100 active shares. Refreshes every five seconds.</p>
-        {shares.map(share => <button key={share.id} disabled={busy} aria-label={`Open shared assessment ${share.id.slice(0,8)}`} onClick={() => open(share.id)} className={`mb-3 block w-full rounded-xl border p-4 text-left ${selected === share.id ? "border-[#176f5e] bg-[#edf4f1]" : "border-[#dce6e0]"}`}><strong className="block">{share.patient_name}</strong><span className="muted mt-2 block text-xs">Shared {visitTime(share.created_at)}</span><span className="badge mt-3 inline-block">{share.review ? "Reviewed" : "Awaiting review"}</span></button>)}
+        {shares.map(share => <button key={share.id} disabled={busy} aria-label={`Open shared assessment ${share.id.slice(0,8)}`} onClick={() => open(share.id)} className={`mb-3 block w-full rounded-xl border p-4 text-left ${selected === share.id ? "border-[#176f5e] bg-[#edf4f1]" : "border-[#dce6e0]"}`}><strong className="block">{share.patient_name}</strong><span className="muted mt-2 block text-xs">Shared {visitTime(share.created_at)}</span><span className="muted mt-2 block text-xs">{share.visit ? `Appointment ${queueToken(share.visit)} · ${visitTime(share.visit.starts_at)}` : "Direct doctor share"}</span><span className="badge mt-3 inline-block">{share.review ? "Reviewed" : "Awaiting review"}</span></button>)}
         {!loading && !shares.length ? <p className="muted">No active assessments shared with this doctor.</p> : null}
       </section>
       <section className="panel">{detail ? <>
         <h2 className="text-xl font-semibold">{detail.patient_name} · assessment</h2><p className="muted mt-2 text-sm">Saved {detail.assessment ? visitTime(detail.assessment.created_at) : ""}</p>
+        {detail.visit ? <p className="my-3 rounded-xl bg-[#edf4f1] p-3 text-sm">Linked appointment: {queueToken(detail.visit)} · {detail.visit.doctor_name} · {visitTime(detail.visit.starts_at)} · {detail.visit.status}</p> : <p className="muted mt-3 text-sm">Direct doctor share · no appointment linked</p>}
         {detail.assessment?.photo_uri ? <img alt="Patient-shared assessment photo" src={detail.assessment.photo_uri} className="my-5 max-h-80 w-full rounded-xl bg-[#f4f7f6] object-contain" /> : null}
         <div className="my-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900"><strong>AI result · SIMULATION</strong><p className="mt-2">{detail.assessment?.example_category}</p><p>{detail.assessment?.message}</p></div>
         <h3 className="font-semibold">Patient message</h3><p className="muted my-3 whitespace-pre-wrap">{detail.patient_message || "No message provided."}</p>

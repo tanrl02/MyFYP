@@ -58,12 +58,17 @@ class Store:
                   patient_id TEXT NOT NULL, doctor_id TEXT NOT NULL, patient_message TEXT NOT NULL,
                   request_id TEXT NOT NULL, created_at TEXT NOT NULL, revoked_at TEXT,
                   UNIQUE(patient_id,request_id));
-                CREATE UNIQUE INDEX IF NOT EXISTS active_assessment_share
-                  ON assessment_shares(assessment_id,doctor_id) WHERE revoked_at IS NULL;
                 CREATE TABLE IF NOT EXISTS assessment_reviews (
                   id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
                   doctor_id TEXT NOT NULL, note TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            if 'booking_id' not in {row['name'] for row in db.execute('PRAGMA table_info(assessment_shares)')}:
+                db.execute('ALTER TABLE assessment_shares ADD COLUMN booking_id TEXT REFERENCES bookings(id)')
+            db.execute('DROP INDEX IF EXISTS active_assessment_share')
+            db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS active_direct_share ON assessment_shares(assessment_id,doctor_id)
+                          WHERE revoked_at IS NULL AND booking_id IS NULL''')
+            db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS active_visit_share ON assessment_shares(booking_id)
+                          WHERE revoked_at IS NULL AND booking_id IS NOT NULL''')
             db.executemany('INSERT OR IGNORE INTO medicines VALUES(?,?,?,?)', [
                 ('demo-a', 'Demo item A (not medication)', 500, 20),
                 ('demo-b', 'Demo item B (not medication)', 800, 20)])
@@ -166,6 +171,8 @@ class Store:
             if datetime.fromisoformat(record['starts_at']) <= datetime.now(timezone.utc):
                 raise RuleError('This appointment has started. Contact staff.')
             db.execute("UPDATE bookings SET status='cancelled' WHERE id=?", (booking_id,))
+            db.execute('UPDATE assessment_shares SET revoked_at=? WHERE booking_id=? AND revoked_at IS NULL',
+                       (datetime.now(timezone.utc).isoformat(),booking_id))
             self.event(db, booking_id, patient, 'cancelled')
             return self.record(db, booking_id)
 
@@ -238,16 +245,21 @@ class Store:
         if row is None or (actor in PATIENTS and row['patient_id'] != actor) or (
             actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or actor not in {*PATIENTS, *DOCTORS}:
             raise RuleError('Shared assessment is unavailable for this identity.', 404)
+        visit = self.record(db, row['booking_id']) if row['booking_id'] else None
+        if actor in DOCTORS and visit and (visit['status'] == 'cancelled' or visit['doctor_id'] != actor):
+            raise RuleError('Appointment access is no longer available.', 404)
         review = db.execute('SELECT * FROM assessment_reviews WHERE share_id=?', (share_id,)).fetchone()
         return dict(row, patient_name=PATIENTS[row['patient_id']], doctor_name=DOCTORS[row['doctor_id']],
-                    review=dict(review) if review else None)
+                    review=dict(review) if review else None, visit=visit)
 
     def shares(self, actor):
         with self.connect() as db:
             if actor in PATIENTS:
                 rows = db.execute('SELECT id FROM assessment_shares WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (actor,))
             elif actor in DOCTORS:
-                rows = db.execute('SELECT id FROM assessment_shares WHERE doctor_id=? AND revoked_at IS NULL ORDER BY created_at DESC LIMIT 100', (actor,))
+                rows = db.execute('''SELECT s.id FROM assessment_shares s LEFT JOIN bookings b ON b.id=s.booking_id
+                    WHERE s.doctor_id=? AND s.revoked_at IS NULL AND (s.booking_id IS NULL OR b.status!='cancelled')
+                    ORDER BY s.created_at DESC LIMIT 100''', (actor,))
             else:
                 raise RuleError('Patient or doctor identity required.', 403)
             return [self.share_record(db, row['id'], actor) for row in rows.fetchall()]
@@ -259,17 +271,42 @@ class Store:
                 raise RuleError('Assessment not found for this patient.', 404)
             existing = db.execute('SELECT * FROM assessment_shares WHERE patient_id=? AND request_id=?', (patient,request_id)).fetchone()
             if existing:
-                if (existing['assessment_id'], existing['doctor_id'], existing['patient_message']) != (assessment_id,doctor,message):
+                if existing['booking_id'] is not None or (existing['assessment_id'], existing['doctor_id'], existing['patient_message']) != (assessment_id,doctor,message):
                     raise RuleError('This sharing request was already used. Refresh sharing history.')
                 return self.share_record(db, existing['id'], patient)
-            active = db.execute('SELECT * FROM assessment_shares WHERE assessment_id=? AND doctor_id=? AND revoked_at IS NULL', (assessment_id,doctor)).fetchone()
+            active = db.execute('SELECT * FROM assessment_shares WHERE assessment_id=? AND doctor_id=? AND revoked_at IS NULL AND booking_id IS NULL', (assessment_id,doctor)).fetchone()
             if active:
                 if active['patient_message'] != message:
                     raise RuleError('Already shared. Revoke before sharing an updated message.')
                 return self.share_record(db, active['id'], patient)
             share_id = str(uuid4())
-            db.execute('INSERT INTO assessment_shares VALUES(?,?,?,?,?,?,?,NULL)',
+            db.execute('INSERT INTO assessment_shares(id,assessment_id,patient_id,doctor_id,patient_message,request_id,created_at,revoked_at) VALUES(?,?,?,?,?,?,?,NULL)',
                        (share_id,assessment_id,patient,doctor,message,request_id,datetime.now(timezone.utc).isoformat()))
+            return self.share_record(db, share_id, patient)
+
+    def link_assessment(self, assessment_id, patient, booking_id, message, request_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit = self.record(db, booking_id)
+            if visit['patient_id'] != patient:
+                raise RuleError('Appointment not found for this patient.', 404)
+            if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?', (assessment_id,patient)).fetchone():
+                raise RuleError('Assessment not found for this patient.', 404)
+            previous = db.execute('SELECT * FROM assessment_shares WHERE patient_id=? AND request_id=?', (patient,request_id)).fetchone()
+            if previous:
+                if (previous['assessment_id'],previous['booking_id'],previous['patient_message']) != (assessment_id,booking_id,message):
+                    raise RuleError('This request was already used for another link.')
+                return self.share_record(db, previous['id'], patient)
+            if visit['status'] not in ('waiting','called') or (visit['status']=='waiting' and datetime.fromisoformat(visit['starts_at']) <= datetime.now(timezone.utc)):
+                raise RuleError('Choose a future waiting appointment or a called visit.')
+            active = db.execute('SELECT * FROM assessment_shares WHERE booking_id=? AND revoked_at IS NULL', (booking_id,)).fetchone()
+            if active:
+                if (active['assessment_id'],active['patient_message']) != (assessment_id,message):
+                    raise RuleError('This appointment already has an assessment. Revoke its link before replacing it.')
+                return self.share_record(db, active['id'], patient)
+            share_id = str(uuid4())
+            db.execute('''INSERT INTO assessment_shares(id,assessment_id,patient_id,doctor_id,patient_message,request_id,created_at,booking_id)
+                          VALUES(?,?,?,?,?,?,?,?)''', (share_id,assessment_id,patient,visit['doctor_id'],message,request_id,datetime.now(timezone.utc).isoformat(),booking_id))
             return self.share_record(db, share_id, patient)
 
     def revoke_share(self, share_id, patient):
