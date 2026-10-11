@@ -46,3 +46,7 @@ Appointment details checkpoint4da7b22 is on local main. Owned services restored 
 
 
 Latest small increment daily reports from9311e9b on feat/daily-clinic-reports. Staff queue -> Daily reports ->date/Viewreport; current appointment-date visit/invoicecohort, Malaysia activityday stock/submissiondayfeedback; labels distinguish datebases.44 API tests, bothTS checks, finaldashboardbuild and populated/empty/datechangebrowser passed. No mobile/source changes requiring Android check, no productionwrites or migrations. API80301 PID68416,dashboard60923,Expo26570 beforecheckpointrestart. Word/authdeferred; reportingexports/charts/adminaccounts separate. Discussnextsmalltask; stop owned devservers before Git switch to avoid locks/staleimports.
+
+
+Daily reports checkpoint6f7129d is on local main. Owned launchers restored: API80301 PID68416 port8000, dashboard28246 port3000, Expo71682 port8081, exp://192.168.0.4:8081. Report reloaded successfully after restart. These service IDs supersede previous entries. All44 API tests, both TypeScript checks, dashboard build and populated/empty report browser checks passed. No remote push or Word edits. Discuss the next small function before starting another increment.
+
