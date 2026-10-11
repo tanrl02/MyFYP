@@ -21,3 +21,9 @@ Ten API tests passed, including rollback when any stock is insufficient, concurr
 New browser checks are PENDING: API port occupied, existing dashboard connection refused, permission to inspect processes and start isolated test dashboard declined. Existing processes left alone. Agent-owned temporary servers stopped. Do not claim new screen interaction checks passed. Keep this increment on its feature branch until UI verification. Word unchanged; no new dependencies, hosted data or real money transfers.
 
 Next: verify UI with launchers, then skin capture/gallery/history with labelled simulated inference to complete the five-flow preview. Physical Android still pending. All nine final modules still required.
+
+## Verified care checkpoint — 12 October 2026
+
+Browser prescription/dispensing/bill/simulated-payment and reload/role filtering checks now passed. User confirmed physical Android opens, shows Ava dispensed prescription/RM40 paid bill, retains it after reopening and Noah cannot see Ava's care records. These specific phone checks passed; full physical booking/cancellation/queue and camera remain pending. VERIFY.md has evidence/limits. User authorised server start/restart in this turn, superseding earlier test-process permission denials.
+
+Move verified care increment to main after this documentation checkpoint; next task skin photo capture/gallery/simulated assessment/history. All nine final modules remain required, Word edits remain deferred. Active services: API session54295 PID55196 port8000; dashboard97093 port3000; Expo65885 port8081. Phone exp://192.168.0.4:8081. Do not start duplicates; Ctrl+C stops own service windows/sessions. Next dev generated apps/dashboard/AGENTS.md; retained in Git as tool-generated guidance and read before future dashboard edits. No new dependencies/hosted services.

@@ -41,3 +41,11 @@ Close your old project service windows and reopen the three launchers in SETUP.m
 6. Test no items, fractional/negative/out-of-range quantity, missing directions, wrong doctor, unavailable stock and API unavailable. Error should prevent invalid saved records and allow recovery.
 
 Fixed demo items: A RM 5.00, B RM 8.00; initial stock 20 each; consultation RM 30.00. These are sample numbers. Issued items are immutable, and a billed visit cannot receive a new prescription. Editing/voiding/refunds, stock batches/restocking and real auth/payments remain final-scope work.
+
+## Verification update — 12 October 2026
+
+Latest result supersedes the pending browser status above. User authorised service restart/checks. API launcher (8000), dashboard launcher (3000), Expo LAN launcher (8081) started successfully. Browser verified empty-prescription validation, Dr. Lim prescription issuing on synthetic L001/Ava, assigned-doctor filtering (Anita cannot see L001), shared patient prescription, RM40 itemised invoice, payment blocked before dispensing, staff dispensing, patient confirmation of simulated payment, saved receipt d9a8efec, dashboard reload persistence and Noah not seeing Ava care data. Screenshot tmp/care-browser-verified.png. Sample stock A reduced from 20 to 18; receipt/bill remain in local ignored database.
+
+Physical Android USER-CONFIRMED: Expo Go opens through LAN; Ava Care & bills shows dispensed prescription and RM40 Paid · simulation; closing/reopening retains records; switching Noah hides Ava's prescription/bill. This confirms those specific checks only. Fresh booking/cancellation/call-next/complete interactions on physical phone and camera tests are not yet confirmed. No secure-auth, real-payment or clinical-reliability claim.
+
+Services left running for continued use: API exec session 54295 (server PID55196), dashboard 97093, Expo 65885. Phone URL exp://192.168.0.4:8081, API http://192.168.0.4:8000. LAN address can change on another network. Restart through SETUP launchers if services later stop. No network security/firewall settings changed.

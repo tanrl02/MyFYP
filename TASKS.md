@@ -19,3 +19,5 @@ Updated 11 October 2026. Increment starts from 87ad49d.
 See TortoiseGit Show Log for local checkpoints. No remote push/publication. Booking/queue completion does not mean the full preview or FYP is finished.
 
 Prescription/billing increment: implemented, automated checks passed; browser/Android verification pending. Doctor issues against assigned called/completed visit, staff dispenses once, completed visit generates frozen invoice, patient/staff records simulated payment. Next skin assessment/photo/history; entire five-flow preview still incomplete. Keep feat/prescriptions-billing until UI checks pass.
+
+12 October 2026: prescription/billing browser checks passed. User-confirmed Android opening, shared paid bill/dispensed prescription, reopening persistence and patient separation. Care increment ready for main; full physical booking/queue and camera still pending. Next implementation: skin assessment/photo/history. Word unchanged.

@@ -25,3 +25,5 @@ User instructs stopping Word edits for now to save tokens/usage; focus on implem
 11 October 2026: user approved starting shared booking-to-queue work. Local mobile/dashboard/API implemented with synthetic saved records. Six backend tests and TypeScript checks passed; later build/browser results in VERIFY.md, physical phone pending. This is the first increment, not completion of all five preview flows. Word work remains deferred.
 
 11 October 2026: user requests continuing implementation. Prescriptions/dispensing/simulated bills implemented on feature branch, no report edits. Automated checks passed; new browser/phone checks pending because test-process permissions were declined. No new dependencies or hosted services.
+
+12 October 2026: user asked agent to restart/test. Services launched; browser care workflow passed. User explicitly confirmed Android opens and shows saved paid bill/dispensed prescription, reopening persists and Noah cannot see Ava care data. Only those phone checks are confirmed; other physical workflows remain pending.
