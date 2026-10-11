@@ -18,6 +18,11 @@ class Store:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript('''
+                CREATE TABLE IF NOT EXISTS patient_notifications (
+                  id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, kind TEXT NOT NULL,
+                  source_id TEXT NOT NULL, target_id TEXT NOT NULL, title TEXT NOT NULL,
+                  message TEXT NOT NULL, created_at TEXT NOT NULL, read_at TEXT,
+                  UNIQUE(patient_id,kind,source_id));
                 CREATE TABLE IF NOT EXISTS patient_backgrounds (
                   patient_id TEXT PRIMARY KEY, allergies TEXT NOT NULL, medicines TEXT NOT NULL,
                   conditions TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL);
@@ -193,6 +198,31 @@ class Store:
         db.execute('INSERT INTO events VALUES(?,?,?,?,?)',
                    (str(uuid4()), booking_id, actor, action, datetime.now(timezone.utc).isoformat()))
 
+    def notify(self, db, patient, kind, source_id, target_id, title, message):
+        db.execute('INSERT OR IGNORE INTO patient_notifications VALUES(?,?,?,?,?,?,?,?,NULL)',
+                   (str(uuid4()),patient,kind,source_id,target_id,title,message,datetime.now(timezone.utc).isoformat()))
+
+    def notifications(self, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            rows=db.execute('SELECT * FROM patient_notifications WHERE patient_id=? ORDER BY created_at DESC,id DESC LIMIT 100',(patient,)).fetchall()
+            unread=db.execute('SELECT COUNT(*) FROM patient_notifications WHERE patient_id=? AND read_at IS NULL',(patient,)).fetchone()[0]
+            return {'items':[dict(row) for row in rows],'unread_count':unread}
+
+    def read_notification(self, notification_id, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT * FROM patient_notifications WHERE id=? AND patient_id=?',(notification_id,patient)).fetchone()
+            if not row:
+                raise RuleError('Notification unavailable for this patient.',404)
+            if not row['read_at']:
+                db.execute('UPDATE patient_notifications SET read_at=? WHERE id=?',(datetime.now(timezone.utc).isoformat(),notification_id))
+            return dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
+
     def record(self, db, booking_id):
         r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date FROM bookings b
                           JOIN slots s ON s.id=b.slot_id WHERE b.id=?''', (booking_id,)).fetchone()
@@ -364,6 +394,10 @@ class Store:
                 raise RuleError('No patients are currently waiting.')
             db.execute("UPDATE bookings SET status='called' WHERE id=?", (row['id'],))
             self.event(db, row['id'], staff, 'called')
+            visit=self.record(db,row['id'])
+            token=f"{'L' if doctor=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            self.notify(db,visit['patient_id'],'queue_called',row['id'],row['id'],'Your queue number was called',
+                        f"{token} with {DOCTORS[doctor]} was called. Open the visit to check its current status.")
             return self.record(db, row['id'])
 
     def complete(self, booking_id, staff):
@@ -586,6 +620,8 @@ class Store:
                 return share
             db.execute('INSERT INTO assessment_reviews VALUES(?,?,?,?,?,?)',
                        (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
+            self.notify(db,share['patient_id'],'review_published',share_id,share['assessment_id'],'Doctor review is ready',
+                        f"{DOCTORS[doctor]} published a review. Open the assessment to read it.")
             return self.share_record(db, share_id, doctor)
 
     def background_record(self, db, patient):

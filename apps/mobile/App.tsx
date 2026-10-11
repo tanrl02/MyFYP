@@ -8,12 +8,13 @@ import VisitDetailsView from "./VisitDetailsView";
 import FeedbackView from "./FeedbackView";
 import RescheduleView from "./RescheduleView";
 import BackgroundView from "./BackgroundView";
+import NotificationsView from "./NotificationsView";
 import { Booking, DemoApi, DemoPatient, Slot, patientNames, queueToken, statusLabels, visitTime } from "@smart-skin/shared";
 import { apiBase as base } from "./apiConfig";
 export default function App() {
   const [patient,setPatient]=useState<DemoPatient>("patient-ava");
   const api=useMemo(()=>new DemoApi(base,patient),[patient]);
-  const [tab,setTab]=useState<"book"|"visits"|"care"|"skin"|"profile">("book");
+  const [tab,setTab]=useState<"book"|"visits"|"care"|"skin"|"profile"|"notifications">("book");
   const [slots,setSlots]=useState<Slot[]>([]),[bookings,setBookings]=useState<Booking[]>([]);
   const [selected,setSelected]=useState<Slot|null>(null),[cancelId,setCancelId]=useState<string|null>(null);
   const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
@@ -21,6 +22,8 @@ export default function App() {
   const [requestId,setRequestId]=useState("");
   const [moving,setMoving]=useState<Booking|null>(null);
   const [detailId,setDetailId]=useState<string|null>(null);
+  const [assessmentTarget,setAssessmentTarget]=useState<string|undefined>();
+  const [inboxReturn,setInboxReturn]=useState(false);
   const scrollRef=useRef<ScrollView>(null);
   useEffect(()=>{scrollRef.current?.scrollTo({y:0,animated:false});},[detailId,tab,patient]);
   const refresh=useCallback(async()=>{ const [s,b]=await Promise.all([api.slots(),api.bookings()]);setSlots(s);setBookings(b);setError(""); },[api]);
@@ -39,12 +42,13 @@ export default function App() {
   return <SafeAreaView style={styles.screen}><StatusBar style="dark"/><ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
     <View style={styles.header}><View><Text style={styles.logo}>Smart Skin</Text><Text style={styles.muted}>Your next visit, made simpler.</Text></View><Text style={styles.demoPill}>DEMO</Text></View>
     <View style={styles.warning}><Text style={styles.warningText}>Synthetic patient demo. This is not secure login. Do not enter real patient information.</Text></View>
-    <Text style={styles.label}>DEMO PATIENT</Text><View style={styles.row}>{(Object.keys(patientNames) as DemoPatient[]).map(id=><Pressable key={id} accessibilityRole="button" disabled={busy} onPress={()=>{setDetailId(null);setPatient(id);}} style={[styles.patient,patient===id&&styles.activePatient]}><Text style={{color:patient===id?"#fff":"#176f5e",fontWeight:"600"}}>{patientNames[id]}</Text></Pressable>)}</View>
-    <View style={[styles.row,{marginVertical:20}]}>{(["skin","book","visits","care","profile"] as const).map(t=><Pressable accessibilityRole="button" disabled={busy} key={t} onPress={()=>{setTab(t);setDetailId(null);setSelected(null);setCancelId(null);setMoving(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="skin"?"Skin check":t==="book"?"Book a visit":t==="visits"?"My visits":t==="profile"?"My profile":"Care & bills"}</Text></Pressable>)}</View>
+    <Text style={styles.label}>DEMO PATIENT</Text><View style={styles.row}>{(Object.keys(patientNames) as DemoPatient[]).map(id=><Pressable key={id} accessibilityRole="button" disabled={busy} onPress={()=>{setDetailId(null);setAssessmentTarget(undefined);setInboxReturn(false);setPatient(id);}} style={[styles.patient,patient===id&&styles.activePatient]}><Text style={{color:patient===id?"#fff":"#176f5e",fontWeight:"600"}}>{patientNames[id]}</Text></Pressable>)}</View>
+    <View style={[styles.row,{marginVertical:20}]}>{(["skin","book","visits","care","profile","notifications"] as const).map(t=><Pressable accessibilityRole="button" disabled={busy} key={t} onPress={()=>{setTab(t);setDetailId(null);setAssessmentTarget(undefined);setInboxReturn(false);setSelected(null);setCancelId(null);setMoving(null);}} style={[styles.tab,tab===t&&styles.activeTab]}><Text style={[styles.tabText,tab===t&&{color:"#176f5e"}]}>{t==="skin"?"Skin check":t==="book"?"Book a visit":t==="visits"?"My visits":t==="profile"?"My profile":t==="notifications"?"Notifications":"Care & bills"}</Text></Pressable>)}</View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text style={{color:"#9f2929"}}>{error}</Text><Pressable accessibilityRole="button" onPress={()=>{setLoading(true);refresh().catch(e=>setError(e.message)).finally(()=>setLoading(false));}}><Text style={styles.link}>Retry connection</Text></Pressable></View>:null}
     {notice?<View style={styles.success}><Text style={{color:"#176f5e"}}>{notice}</Text></View>:null}
     {loading?<ActivityIndicator color="#176f5e"/>:null}
-    {tab==="profile"?<BackgroundView key={patient} api={api}/>:tab==="skin"?<SkinView key={patient} patient={patient}/>:tab==="care"?<CareView key={patient} patient={patient}/>:tab==="book"?<>
+    {inboxReturn?<Pressable accessibilityRole="button" onPress={()=>{setTab("notifications");setDetailId(null);setAssessmentTarget(undefined);setInboxReturn(false);}}><Text style={styles.link}>← Back to Notifications</Text></Pressable>:null}
+    {tab==="notifications"?<NotificationsView key={patient} api={api} onBusy={setBusy} onOpen={item=>{setInboxReturn(true);if(item.kind==="queue_called"){setTab("visits");setDetailId(item.target_id);}else{setTab("skin");setAssessmentTarget(item.target_id);}}}/>:tab==="profile"?<BackgroundView key={patient} api={api}/>:tab==="skin"?<SkinView key={`${patient}-${assessmentTarget||""}`} patient={patient} initialAssessmentId={assessmentTarget}/>:tab==="care"?<CareView key={patient} patient={patient}/>:tab==="book"?<>
       <Text style={styles.title}>{selected?"Confirm your visit":"Find a consultation"}</Text><Text style={[styles.muted,{marginBottom:18}]}>Times shown in Malaysia time. Available places update automatically.</Text>
       {selected?<View style={styles.card}><Text style={styles.cardTitle}>{selected.doctor_name}</Text><Text style={styles.muted}>{visitTime(selected.starts_at)}</Text><Text style={styles.body}>Confirming saves a shared booking and issues your queue number.</Text><Pressable accessibilityRole="button" disabled={busy} style={[styles.button,busy&&styles.disabled]} onPress={()=>act(()=>api.book(selected.id,requestId),"Your visit is booked. Staff can now see it in the shared queue.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm booking"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setSelected(null)}><Text style={styles.link}>Back to available times</Text></Pressable></View>:slots.map(s=>{const duplicate=bookings.some(b=>b.slot_id===s.id&&b.status!=="cancelled");return <View style={styles.card} key={s.id}><View style={styles.between}><Text style={styles.cardTitle}>{s.doctor_name}</Text><Text style={styles.available}>{s.available} places</Text></View><Text style={styles.muted}>{visitTime(s.starts_at)}</Text><Pressable accessibilityRole="button" disabled={busy||s.available===0||duplicate} style={[styles.button,(s.available===0||duplicate)&&styles.disabled]} onPress={()=>choose(s)}><Text style={styles.buttonText}>{duplicate?"Already booked":s.available===0?"Slot full":"Select time"}</Text></Pressable></View>})}
       {!loading&&!selected&&slots.length===0?<Text style={styles.muted}>No available slots. Retry when the API is reachable.</Text>:null}

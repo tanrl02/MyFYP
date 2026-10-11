@@ -143,6 +143,14 @@ def create_app(path=None):
     def bookings(who=Depends(patient)):
         return store.mine(who)
 
+    @api.get('/notifications')
+    def notifications(who=Depends(patient)):
+        return store.notifications(who)
+
+    @api.post('/notifications/{notification_id}/read')
+    def read_notification(notification_id: str,who=Depends(patient)):
+        return run(lambda: store.read_notification(notification_id,who))
+
     @api.get('/bookings/{booking_id}/details')
     def visit_details(booking_id: str,who=Depends(patient)):
         return run(lambda: store.visit_details(booking_id,who))

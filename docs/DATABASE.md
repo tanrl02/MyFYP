@@ -76,3 +76,6 @@ prescription_items now has saved name, price_cents, strength, form. Legacy rows 
 
 ## Appointment slot management
 slots.closed INTEGER NOT NULL DEFAULT0; request_id nullable TEXT with unique filtered index. Existing rows remain open; seed inserts explicit original columns and INSERTORIGNORE preserves closure. Staff creation compares doctor/start timestamp in normalized Malaysia +08:00, stores fixed clinic_date/capacity, starts future only. Closure retains row and prohibits any booking history; BEGINIMMEDIATE shares serialization with book/reschedule. Public slots filter closed=0 and omit keys. Staff future view includes closed rows and all-history counts plus active availability. No deletion or changing booked slot identity/time/capacity.
+
+## Patient notifications
+patient_notifications(id PRIMARY KEY, patient_id, kind, source_id, target_id, title, message, created_at UTC, read_at nullable UTC), UNIQUE(patient_id,kind,source_id). Queue source_id/target_id=booking; review source_id=share,target_id=assessment. Created only for new queue calls and initial review publication inside source transaction. Generic messages omit clinical content/photos. Patient-only latest100 ordereddescending plus totalunread snapshot, serialized own-ID mark-read preserves first timestamp. No retroactive backfill or push delivery.

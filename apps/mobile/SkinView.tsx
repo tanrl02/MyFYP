@@ -7,7 +7,7 @@ import { Assessment, DemoApi, DemoPatient, visitTime } from "@smart-skin/shared"
 import { apiBase as base } from "./apiConfig";
 import SharingView from "./SharingView";
 type Draft = { uri: string; mime: string; file?: globalThis.File; request: string; local?: File };
-export default function SkinView({ patient }: { patient: DemoPatient }) {
+export default function SkinView({ patient, initialAssessmentId }: { patient: DemoPatient; initialAssessmentId?: string }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [history, setHistory] = useState<Assessment[]>([]);
@@ -18,6 +18,7 @@ export default function SkinView({ patient }: { patient: DemoPatient }) {
   const [denied, setDenied] = useState(false);
   useEffect(() => () => { if (draft?.local?.exists) draft.local.delete(); }, [draft]);
   useEffect(() => { let active = true; api.assessments().then(data => { if (active) setHistory(data); }).catch(e => { if (active) setError(e.message); }); return () => { active = false; }; }, [api]);
+  useEffect(()=>{if(!initialAssessmentId)return;let active=true;setBusy(true);setResult(null);api.assessment(initialAssessmentId).then(data=>{if(active)setResult(data);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setBusy(false);});return()=>{active=false;};},[api,initialAssessmentId]);
   async function refresh() {
     try { setHistory(await api.assessments()); setError(""); }
     catch (e) { setError(e instanceof Error ? e.message : "Cannot load history."); }

@@ -157,3 +157,10 @@ Android catalogue verification passed: user explicitly confirmed new cream detai
 2. Patient Book a visit sees created slot, confirms; staff queue selected doctor/date shows same queue number.
 3. Staff closes only empty slot with confirm. Public booking/reschedule omit closed slot. Any booking history prevents closure, including cancelled visits. Restart preserves closure; duplicate doctor/time rejects, safe creation retry does not duplicate.
 4. Android Ava My visits -> L00117Oct1:30pm Waiting; reopening retains; Noah hides it. Closed DrLim17Oct2:30pm absent Book a visit.
+
+## Patient notifications (12 October)
+57APItests, bothTS checks, AndroidHermesexport and browser tests passed; Android pending.
+1. Staff queue calls patient -> own Notifications receives unread queue message; Open visit opens matching record/current status, marks read; Back to Notifications.
+2. Doctor publishes review -> own Notifications receives generic review message; opens matching assessment with published history. Source retries do not duplicate messages.
+3. Android Ava: queue entry opens L00117Oct1:30pm; DrAnita review entry opens syntheticc5487b2f. Reopening keeps Read; Noah cannot see Ava notifications.
+4. Mark as read is idempotent; staff/doctor/otherpatient cannot read or mutate another inbox. Existing events before feature are not backfilled. In-app only; no push/email.
