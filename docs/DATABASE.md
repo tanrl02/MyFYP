@@ -53,3 +53,7 @@ New reschedules table: primary key(actor_id,request_id), old_booking_id/new_book
 ## Visit feedback
 
 visit_feedback: id, unique booking_id(FK), patient_id, integer rating CHECK1..5, comment, created_at. POST /visits/{id}/feedback requires own patient identity, completed booking, strict integer1-5 and comment<=1000. Transaction creates one immutable record and feedback-submitted event; exact content retry returns saved record; changed retry conflicts. GET /feedback allows own patient records or staff-demo latest100; doctors denied. Payload includes operational Booking metadata, never consultation text or assessment photos. Staff aggregate average is computed from displayed submissions only. Real account identity enforcement remains future work.
+
+## Stock receiving
+
+stock_receipts: id, medicine_id FK, positive quantity, reason, stock_before, stock_after, actor_id, unique request_id, created_at. POST /stock/receive staff-only strict integerquantity1-1000, nonblankreason<=300, request8-100. BEGIN IMMEDIATE adds to latest stock (cap100000) and inserts receipt atomically; identical retry returns saved receipt, mismatched content conflicts. Existing dispense transaction uses same medicines.stock and prevents negative balance/duplicate deduction. GET /stock staff-only returns medicines, latest100 named receipts and low_stock_threshold5. Receipts retain fixed snapshots independent of subsequent dispensing. No dispensing-ledger migration/new medicine/expiry tracking.

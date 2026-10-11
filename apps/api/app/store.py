@@ -37,6 +37,11 @@ class Store:
                 CREATE TABLE IF NOT EXISTS medicines (
                   id TEXT PRIMARY KEY, name TEXT NOT NULL, price_cents INTEGER NOT NULL CHECK(price_cents>=0),
                   stock INTEGER NOT NULL CHECK(stock>=0));
+                CREATE TABLE IF NOT EXISTS stock_receipts (
+                  id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                  quantity INTEGER NOT NULL CHECK(quantity>0), reason TEXT NOT NULL,
+                  stock_before INTEGER NOT NULL, stock_after INTEGER NOT NULL,
+                  actor_id TEXT NOT NULL, request_id TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS prescriptions (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   doctor_id TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('issued','dispensed')),
@@ -289,6 +294,38 @@ class Store:
     def catalog(self):
         with self.connect() as db:
             return [dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
+
+    def stock(self):
+        with self.connect() as db:
+            medicines=[dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
+            receipts=[dict(r) for r in db.execute('''SELECT r.*,m.name FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
+                ORDER BY r.created_at DESC LIMIT 100''')]
+            return {'medicines':medicines,'receipts':receipts,'low_stock_threshold':5}
+
+    def receive_stock(self, medicine_id, quantity, reason, request_id, staff):
+        if staff!='staff-demo':
+            raise RuleError('Staff demo identity required.',403)
+        if type(quantity) is not int or not 1<=quantity<=1000 or not reason.strip() or len(reason)>300:
+            raise RuleError('Enter a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
+        reason=reason.strip()
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM stock_receipts WHERE request_id=?',(request_id,)).fetchone()
+            if existing:
+                if (existing['medicine_id'],existing['quantity'],existing['reason'])!=(medicine_id,quantity,reason):
+                    raise RuleError('This receipt request already saved different details. Check the history.')
+                return dict(existing)
+            medicine=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if medicine is None:
+                raise RuleError('Stock item not found.',404)
+            after=medicine['stock']+quantity
+            if after>100000:
+                raise RuleError('This receipt would exceed the demo stock limit of 100000.')
+            receipt_id=str(uuid4())
+            db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
+            db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
+                (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat()))
+            return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
     def assessment_metadata(self, row):
         return {key: row[key] for key in ('id', 'patient_id', 'width', 'height', 'created_at')} | {

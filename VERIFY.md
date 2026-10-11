@@ -112,3 +112,9 @@ Patient My visits -> Visit feedback -> Give feedback [completed token/date] -> r
 
 12 October Android feedback verification: user explicitly confirmed submitting rating/comment, reopening persistence and Noah not seeing Ava feedback. Phone check passed; earlier pending feedback status superseded. Increment6a71290 ready for local main. All nine final modules remain required; Word/auth still deferred.
 
+
+## Small increment: stock receiving — 12 October 2026
+
+Staff Prescriptions & billing -> Demo role Staff -> Stock -> select item, whole quantity1-1000, fictional requiredreason(max300) -> Review -> Confirm. Invalid/empty fields disable Review; confirmation locks values, Keep editing/Cancel available. Saved receipt is fixed with before/after snapshots; current balances poll5sec and may differ after later operations. Low stock<=5, outofstock0; latest100 receiving history. Read/write endpoints /stock and /stock/receive restricted to staff. Failed saves preserve stock; same request/content retry adds only once; changed reuse conflicts. Total demo stock cap100000.
+
+38 API tests, both TypeScript checks and dashboard build passed. Browser navigated staff Stock, checkedzero quantity disabled, confirmed fictional receipt f04b598c for demo-a+3 (17->20), verified card/history and reload retention. Screenshot tmp/stock-verified.png. Low-stock branch supported by isolated low-stock fixture/threshold; no production low-stock display claim or depletion. Existing dispense-once/insufficient-stock and new concurrent receiving/dispensing checks passed. Mobile source unchanged; no physical Android action required. No new dependencies, real medication/prices/payment or Word changes. Receiving history does not include dispensing events; those remain existing booking events.

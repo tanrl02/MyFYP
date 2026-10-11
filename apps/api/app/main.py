@@ -50,6 +50,12 @@ class FeedbackInput(BaseModel):
     rating: int = Field(strict=True,ge=1,le=5)
     comment: str = Field(max_length=1000)
 
+class StockReceiptInput(BaseModel):
+    medicine_id: str = Field(min_length=1,max_length=100)
+    quantity: int = Field(strict=True,ge=1,le=1000)
+    reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+    request_id: str = Field(min_length=8,max_length=100)
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -161,6 +167,14 @@ def create_app(path=None):
     @api.get('/medicines')
     def medicines(who=Depends(operational)):
         return store.catalog()
+
+    @api.get('/stock')
+    def stock(who=Depends(staff)):
+        return store.stock()
+
+    @api.post('/stock/receive',status_code=201)
+    def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
+        return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))
 
     @api.get('/assessment-shares')
     def shares(who=Depends(actor)):

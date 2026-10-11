@@ -31,3 +31,5 @@ Latest: visit feedback implemented on feat/visit-feedback frombd4975a. Patient M
 
 Feedback checkpoint448c3b6 is now on local main. Stopping Metro before Git switch/fast-forward avoided the prior index-write failure and temporary missing-module state. Restarted Metro with --clear --lan: current Expo44858 port8081 (same phone URL), API18501 PID84212 port8000, dashboard97093 port3000. Use this latest runtime record; older service IDs superseded.
 
+
+Latest increment pharmacy stock receiving from977b6db on feat/pharmacy-stock. Staff /care roleStaff -> Stock (/stock), positive receipt confirmation, sharedbalance, low<=5/out0, latest100 receipt audit, stable retries/concurrency withdispensing.38 API tests, bothTS checks, dashboard build and browser receipt/reload passed. Synthetic demo-a+3 receiptf04b598c changed17->20; demo-b18 unchanged. No mobilechange/exportrequired. API49333 PID79412, dashboard97093, Expo44858 latest before checkpointrestart. Real auth/Word remain deferred. Fullpharmacy expansion separate; discussnextsmallfunction. Stop owned development servers before Git switch/recovery to avoid locks/stale importedfiles.

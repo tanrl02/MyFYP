@@ -42,3 +42,5 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 
 12 October Android feedback verification: user explicitly confirmed submitting rating/comment, reopening persistence and Noah not seeing Ava feedback. Phone check passed; earlier pending feedback status superseded. Increment6a71290 ready for local main. All nine final modules remain required; Word/auth still deferred.
 
+
+12 October stock receiving implemented: staff confirmation, shared balance/low-stock indicators and immutable receiving history with duplicate-safe request keys.38 tests, TypeScript, dashboard build and browser receiving/reload passed. Staff-only feature; no phone UI changed. Full pharmacy remains incomplete: new medicines, expiry/suppliers, broader adjustments and inventory ledger are separate scope. Word/auth deferred.
