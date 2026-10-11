@@ -5,7 +5,8 @@ export type Consultation = { visit: Booking; note: ConsultationNote | null; link
 export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; visit: Booking };
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
-export type Medicine = { id: string; name: string; price_cents: number; stock: number };
+export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number };
+export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; low_stock_threshold: number };
 export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: Record<Status | "rescheduled" | "total",number>; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; items: { medicine_id: string; name: string; received: number; dispensed: number }[] }; feedback: { count: number; average_rating: number | null } };
@@ -15,7 +16,7 @@ export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim 
 export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDoctor; note: string; follow_up: string; created_at: string };
 export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
-export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & { name: string; price_cents: number })[] };
+export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & Pick<Medicine,"name"|"strength"|"form"|"price_cents">)[] };
 export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
 export type Care = { visit: Booking; prescription: Prescription | null; invoice: Invoice | null };
 export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: ConsultationNote | null; feedback: Omit<VisitFeedback,"visit"> | null; replacement: Booking | null };
@@ -75,6 +76,7 @@ export class DemoApi {
   sharedAssessment(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}`); }
   publishReview(id: string, note: string, followUp: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/review`, { note, follow_up: followUp }); }
   medicines() { return this.request<Medicine[]>("/medicines"); }
+  addMedicine(body: Pick<Medicine,"name"|"strength"|"form"|"price_cents"> & {request_id:string}) { return this.request<Medicine>("/medicines",body); }
   stock() { return this.request<StockOverview>("/stock"); }
   dailyReport(date: string) { return this.request<DailyReport>(`/reports/daily?clinic_date=${encodeURIComponent(date)}`); }
   receiveStock(medicineId: string,quantity: number,reason: string,requestId: string) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId}); }

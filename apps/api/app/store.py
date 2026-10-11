@@ -88,9 +88,21 @@ class Store:
                           WHERE revoked_at IS NULL AND booking_id IS NULL''')
             db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS active_visit_share ON assessment_shares(booking_id)
                           WHERE revoked_at IS NULL AND booking_id IS NOT NULL''')
-            db.executemany('INSERT OR IGNORE INTO medicines VALUES(?,?,?,?)', [
+            for column, definition in [('strength',"TEXT NOT NULL DEFAULT ''"),('form',"TEXT NOT NULL DEFAULT ''"),('request_id','TEXT')]:
+                if column not in {r['name'] for r in db.execute('PRAGMA table_info(medicines)')}:
+                    db.execute(f'ALTER TABLE medicines ADD COLUMN {column} {definition}')
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS medicine_request ON medicines(request_id) WHERE request_id IS NOT NULL')
+            db.executemany('INSERT OR IGNORE INTO medicines(id,name,price_cents,stock) VALUES(?,?,?,?)', [
                 ('demo-a', 'Demo item A (not medication)', 500, 20),
                 ('demo-b', 'Demo item B (not medication)', 800, 20)])
+            for column, definition in [('name','TEXT'),('price_cents','INTEGER'),('strength','TEXT'),('form','TEXT')]:
+                if column not in {r['name'] for r in db.execute('PRAGMA table_info(prescription_items)')}:
+                    db.execute(f'ALTER TABLE prescription_items ADD COLUMN {column} {definition}')
+            db.execute('''UPDATE prescription_items SET
+                name=(SELECT name FROM medicines WHERE id=medicine_id),
+                price_cents=(SELECT price_cents FROM medicines WHERE id=medicine_id),
+                strength=(SELECT strength FROM medicines WHERE id=medicine_id),
+                form=(SELECT form FROM medicines WHERE id=medicine_id) WHERE name IS NULL''')
         self.seed()
 
     @contextmanager
@@ -314,7 +326,24 @@ class Store:
 
     def catalog(self):
         with self.connect() as db:
-            return [dict(r) for r in db.execute('SELECT * FROM medicines ORDER BY id')]
+            return [dict(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock FROM medicines ORDER BY id')]
+
+    def add_medicine(self, name, strength, form, price_cents, request_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old = db.execute('SELECT * FROM medicines WHERE request_id=?',(request_id,)).fetchone()
+            values = (name,strength,form,price_cents)
+            if old:
+                if tuple(old[k] for k in ('name','strength','form','price_cents')) != values:
+                    raise RuleError('This catalogue request was already saved with different details.')
+                return {k:old[k] for k in ('id','name','strength','form','price_cents','stock')}
+            if db.execute('''SELECT 1 FROM medicines WHERE lower(name)=lower(?)
+                             AND lower(strength)=lower(?) AND lower(form)=lower(?)''',values[:3]).fetchone():
+                raise RuleError('This name, strength and form already exist. Receive stock for the existing item.')
+            medicine_id = str(uuid4())
+            db.execute('INSERT INTO medicines(id,name,strength,form,price_cents,stock,request_id) VALUES(?,?,?,?,?,0,?)',
+                       (medicine_id,*values,request_id))
+            return {'id':medicine_id,'name':name,'strength':strength,'form':form,'price_cents':price_cents,'stock':0}
 
     def daily_report(self, clinic_date):
         with self.connect() as db:
@@ -595,8 +624,8 @@ class Store:
         row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()
         if not row:
             return None
-        items = db.execute('''SELECT i.medicine_id,i.quantity,i.directions,m.name,m.price_cents
-            FROM prescription_items i JOIN medicines m ON m.id=i.medicine_id
+        items = db.execute('''SELECT i.medicine_id,i.quantity,i.directions,i.name,i.price_cents,i.strength,i.form
+            FROM prescription_items i
             WHERE i.prescription_id=? ORDER BY i.medicine_id''', (row['id'],)).fetchall()
         return dict(row, items=[dict(i) for i in items])
 
@@ -646,8 +675,10 @@ class Store:
             prescription_id = str(uuid4())
             db.execute('INSERT INTO prescriptions VALUES(?,?,?,?,?,NULL)',
                        (prescription_id, booking_id, doctor, 'issued', datetime.now(timezone.utc).isoformat()))
-            db.executemany('INSERT INTO prescription_items VALUES(?,?,?,?)',
-                [(prescription_id, i['medicine_id'], i['quantity'], i['directions']) for i in normalised])
+            for item in normalised:
+                medicine = db.execute('SELECT * FROM medicines WHERE id=?',(item['medicine_id'],)).fetchone()
+                db.execute('INSERT INTO prescription_items(prescription_id,medicine_id,quantity,directions,name,price_cents,strength,form) VALUES(?,?,?,?,?,?,?,?)',
+                           (prescription_id,item['medicine_id'],item['quantity'],item['directions'],medicine['name'],medicine['price_cents'],medicine['strength'],medicine['form']))
             self.event(db, booking_id, doctor, 'prescription-issued')
             return self.prescription(db, booking_id)
 
@@ -682,7 +713,7 @@ class Store:
             lines = [('Demo consultation', 1, 3000)]
             prescription = self.prescription(db, booking_id)
             if prescription:
-                lines.extend((i['name'], i['quantity'], i['price_cents']) for i in prescription['items'])
+                lines.extend((' · '.join(v for v in (i['name'],i['strength'],i['form']) if v), i['quantity'], i['price_cents']) for i in prescription['items'])
             invoice_id = str(uuid4())
             total = sum(quantity * price for _, quantity, price in lines)
             db.execute('INSERT INTO invoices VALUES(?,?,?,?,?,NULL,NULL)',

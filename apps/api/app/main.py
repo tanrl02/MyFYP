@@ -56,6 +56,13 @@ class FeedbackInput(BaseModel):
     rating: int = Field(strict=True,ge=1,le=5)
     comment: str = Field(max_length=1000)
 
+class MedicineInput(BaseModel):
+    name: str = Field(min_length=1,max_length=100,pattern=r'\S')
+    strength: str = Field(min_length=1,max_length=60,pattern=r'\S')
+    form: str = Field(min_length=1,max_length=60,pattern=r'\S')
+    price_cents: int = Field(strict=True,ge=0,le=1000000)
+    request_id: str = Field(min_length=8,max_length=100)
+
 class StockReceiptInput(BaseModel):
     medicine_id: str = Field(min_length=1,max_length=100)
     quantity: int = Field(strict=True,ge=1,le=1000)
@@ -177,6 +184,10 @@ def create_app(path=None):
     @api.get('/medicines')
     def medicines(who=Depends(operational)):
         return store.catalog()
+
+    @api.post('/medicines',status_code=201)
+    def add_medicine(payload: MedicineInput,who=Depends(staff)):
+        return run(lambda: store.add_medicine(payload.name.strip(),payload.strength.strip(),payload.form.strip(),payload.price_cents,payload.request_id))
 
     @api.get('/stock')
     def stock(who=Depends(staff)):

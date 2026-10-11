@@ -69,3 +69,7 @@ No new tables. Staff-only GET /reports/daily validated clinic_date returns singl
 
 ## Patient background addition
 patient_backgrounds(patient_id PRIMARY KEY, allergies TEXT, medicines TEXT, conditions TEXT, version INTEGER, updated_at TEXT UTC). Created additively at Store startup; no existing records changed. Empty/no row returns blank fields, version0, null timestamp. Own-patient read/write; BEGIN IMMEDIATE compare revision + upsert, stable same-value retries. Doctor access derived from assigned called/completed consultation, no staff access. This is latest patient-provided info, not a version history or immutable visit snapshot; it does not modify consultation notes.
+
+## Medicine catalogue and issued snapshots
+Additive medicines columns strength/form (TEXT NOT NULL DEFAULT empty), request_id nullable with unique filtered index. POST creation stock0; duplicate name/strength/form checked case-insensitively in serialized transaction, identical request retry returns current item without adding stock. Public operational catalogue omits request key.
+prescription_items now has saved name, price_cents, strength, form. Legacy rows backfilled at first startup from current catalogue where name NULL; cannot reconstruct earlier unsaved catalogue history. Existing invoices remain unchanged. New prescriptions snapshot item identity/price at issue; dispensing still updates live stock, billing uses snapshot. Subsequent startup never refreshes saved snapshots. Catalogue edit/archive and supplier/batch expiry remain separate scope.
