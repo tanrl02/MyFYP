@@ -141,4 +141,3 @@ Automated:47 API tests, both TypeScript checks, dashboard build and Android Herm
 2. Reopen app -> Ava -> My profile: saved values remain. Noah must not see Ava's values.
 3. Doctor dashboard /consultations -> Dr Lim -> L003: Patient background shows the latest Ava values and timestamp; published notes stay unchanged.
 4. Empty fields show Not provided. Staff and other patients cannot access Ava background. Unassigned doctor/uncalled visit rejects detail. Concurrent stale edits return conflict and require explicit reload, while identical save retries are safe.
-
