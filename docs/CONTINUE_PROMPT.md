@@ -17,3 +17,6 @@ Latest small increment (12 October): staff counter booking implemented on feat/c
 
 
 Latest increment: rescheduling on feat/appointment-rescheduling from8207f2c. Patient/staff confirmation -> new waiting booking, old retained as Rescheduled; atomic capacity/duplicates/retries; same-doctor linked grant follows, changing doctors revokes appointment grant only. 32 API tests, both TS checks, dashboard build, Android export and browser flows passed. Synthetic Ava visit currently Anita/A00114Oct9am after L004 and Lim/L001 were rescheduled. Android test pending; user asked to move it to Lim14Oct11am and reopen/check Noah separation. API31268 PID67616, dashboard97093, Expo21814. Real auth/Word edits still deferred. One small function at a time; discuss next task.
+
+Android development-server recovery: user reported Metro could not resolve ./RescheduleView from App.tsx. Verified RescheduleView.tsx exists on main. Stopped owned Expo21814 and restarted with --clear --lan; current Expo session91250 port8081. Fresh Android development bundle /apps/mobile/index.bundle compiled successfully (HTTP200,4435971bytes). No source/dependency change needed. Phone retry confirmation pending. API31268 PID67616 and dashboard97093 unchanged. Avoid temporary removal of imported files while Metro runs during future Git recovery operations.
+

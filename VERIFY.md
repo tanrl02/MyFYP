@@ -97,3 +97,6 @@ Patient My visits -> Reschedule [token] -> choose time -> Confirm. Staff Patient
 
 Android check is unresolved: user selected 'Something is wrong; I will describe it'. A follow-up card asks for the failing step and exact error. Do not claim physical rescheduling passed. Implementation cdeeb66 is on local main; automated/browser checks passed. Diagnose the user's description before starting another function.
 
+
+Android development-server recovery: user reported Metro could not resolve ./RescheduleView from App.tsx. Verified RescheduleView.tsx exists on main. Stopped owned Expo21814 and restarted with --clear --lan; current Expo session91250 port8081. Fresh Android development bundle /apps/mobile/index.bundle compiled successfully (HTTP200,4435971bytes). No source/dependency change needed. Phone retry confirmation pending. API31268 PID67616 and dashboard97093 unchanged. Avoid temporary removal of imported files while Metro runs during future Git recovery operations.
+
