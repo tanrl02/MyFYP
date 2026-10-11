@@ -29,3 +29,6 @@ Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, loc
 12 October consultation notes: approved as separate manageable task. Implemented fixed publication on called visit, assigned-doctor consultation workspace/live authorized linked photo, own patient published notes under My visits. 25 tests/builds/browser checks passed; User confirmed Android note display/reopening/patient separation. Corrections/drafts/history expansion remain future separate tasks; login and Word still deferred.
 
 12 October counter booking: implemented staff confirmation flow using existing shared booking rules. 28 API tests, TypeScript and dashboard build passed; browser creation/shared queue/patient visibility/reload/separation/duplicate checks passed. Android confirmation pending. Full patient registration, rescheduling and real authentication remain separate tasks. Word unchanged.
+
+12 October Android confirmation: user reopened Smart Skin and confirmed Ava My visits shows L004 while Noah does not. The shared-record/reopening/patient-separation phone check passed. Counter booking checkpoint 76c8287 is on local main; no push. Previous pending Android status is superseded by this confirmation.
+
