@@ -148,3 +148,6 @@ Automated:47 API tests, both TypeScript checks, dashboard build and Android Herm
 2. Assigned doctor /care -> eligible unbilled visit -> Create prescription -> new item quantity/directions -> Issue. Staff dispenses; completed visit Generate bill uses saved issue price.
 3. Android Ava -> Care & bills -> L00116Oct10am: Fictional catalogue cream · 1% demo · Cream ×2, Dispensed, unpaid RM55 simulation. Reopen retains; Noah hides Ava record.
 4. Existing issued prescriptions and bills retain prior details/prices. Catalogue duplicates and changed-content request reuse reject; staff-only creation.
+
+Android catalogue verification passed: user explicitly confirmed new cream details, reopening persistence and Noah isolation for Ava L00116Oct10am/RM55 unpaid simulation bill.
+
