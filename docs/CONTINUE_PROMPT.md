@@ -28,3 +28,6 @@ Latest: visit feedback implemented on feat/visit-feedback frombd4975a. Patient M
 
 12 October Android feedback verification: user explicitly confirmed submitting rating/comment, reopening persistence and Noah not seeing Ava feedback. Phone check passed; earlier pending feedback status superseded. Increment6a71290 ready for local main. All nine final modules remain required; Word/auth still deferred.
 
+
+Feedback checkpoint448c3b6 is now on local main. Stopping Metro before Git switch/fast-forward avoided the prior index-write failure and temporary missing-module state. Restarted Metro with --clear --lan: current Expo44858 port8081 (same phone URL), API18501 PID84212 port8000, dashboard97093 port3000. Use this latest runtime record; older service IDs superseded.
+
