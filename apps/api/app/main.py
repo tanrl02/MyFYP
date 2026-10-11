@@ -25,6 +25,15 @@ class PrescriptionItemInput(BaseModel):
 class PrescriptionInput(BaseModel):
     items: list[PrescriptionItemInput] = Field(min_length=1, max_length=10)
 
+class ShareInput(BaseModel):
+    doctor_id: Literal['doctor-lim', 'doctor-anita']
+    patient_message: str = Field(max_length=1000)
+    request_id: str = Field(min_length=8, max_length=100)
+
+class ReviewInput(BaseModel):
+    note: str = Field(min_length=1, max_length=2000, pattern=r'\S')
+    follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
+
 def create_app(path=None):
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
@@ -126,6 +135,26 @@ def create_app(path=None):
     @api.get('/medicines')
     def medicines(who=Depends(operational)):
         return store.catalog()
+
+    @api.get('/assessment-shares')
+    def shares(who=Depends(actor)):
+        return run(lambda: store.shares(who))
+
+    @api.post('/assessments/{assessment_id}/share')
+    def share_assessment(assessment_id: str, payload: ShareInput, who=Depends(patient)):
+        return run(lambda: store.share_assessment(assessment_id, who, payload.doctor_id, payload.patient_message.strip(), payload.request_id))
+
+    @api.post('/assessment-shares/{share_id}/revoke')
+    def revoke_share(share_id: str, who=Depends(patient)):
+        return run(lambda: store.revoke_share(share_id, who))
+
+    @api.get('/assessment-shares/{share_id}')
+    def shared_assessment(share_id: str, who=Depends(doctor)):
+        return run(lambda: store.shared_assessment(share_id, who))
+
+    @api.post('/assessment-shares/{share_id}/review')
+    def publish_review(share_id: str, payload: ReviewInput, who=Depends(doctor)):
+        return run(lambda: store.publish_review(share_id, who, payload.note.strip(), payload.follow_up.strip()))
 
     @api.post('/visits/{booking_id}/prescription')
     def prescribe(booking_id: str, payload: PrescriptionInput, who=Depends(doctor)):

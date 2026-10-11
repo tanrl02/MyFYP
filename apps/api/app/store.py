@@ -53,6 +53,16 @@ class Store:
                   id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, request_id TEXT NOT NULL,
                   source_hash TEXT NOT NULL, photo BLOB NOT NULL, width INTEGER NOT NULL,
                   height INTEGER NOT NULL, created_at TEXT NOT NULL, UNIQUE(patient_id, request_id));
+                CREATE TABLE IF NOT EXISTS assessment_shares (
+                  id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id),
+                  patient_id TEXT NOT NULL, doctor_id TEXT NOT NULL, patient_message TEXT NOT NULL,
+                  request_id TEXT NOT NULL, created_at TEXT NOT NULL, revoked_at TEXT,
+                  UNIQUE(patient_id,request_id));
+                CREATE UNIQUE INDEX IF NOT EXISTS active_assessment_share
+                  ON assessment_shares(assessment_id,doctor_id) WHERE revoked_at IS NULL;
+                CREATE TABLE IF NOT EXISTS assessment_reviews (
+                  id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
+                  doctor_id TEXT NOT NULL, note TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
             db.executemany('INSERT OR IGNORE INTO medicines VALUES(?,?,?,?)', [
                 ('demo-a', 'Demo item A (not medication)', 500, 20),
@@ -222,6 +232,74 @@ class Store:
                 db.execute('INSERT INTO assessments VALUES(?,?,?,?,?,?,?,?)',
                     (assessment_id, patient, request_id, source_hash, photo, width, height, datetime.now(timezone.utc).isoformat()))
         return self.assessment(assessment_id, patient)
+
+    def share_record(self, db, share_id, actor):
+        row = db.execute('SELECT * FROM assessment_shares WHERE id=?', (share_id,)).fetchone()
+        if row is None or (actor in PATIENTS and row['patient_id'] != actor) or (
+            actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or actor not in {*PATIENTS, *DOCTORS}:
+            raise RuleError('Shared assessment is unavailable for this identity.', 404)
+        review = db.execute('SELECT * FROM assessment_reviews WHERE share_id=?', (share_id,)).fetchone()
+        return dict(row, patient_name=PATIENTS[row['patient_id']], doctor_name=DOCTORS[row['doctor_id']],
+                    review=dict(review) if review else None)
+
+    def shares(self, actor):
+        with self.connect() as db:
+            if actor in PATIENTS:
+                rows = db.execute('SELECT id FROM assessment_shares WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (actor,))
+            elif actor in DOCTORS:
+                rows = db.execute('SELECT id FROM assessment_shares WHERE doctor_id=? AND revoked_at IS NULL ORDER BY created_at DESC LIMIT 100', (actor,))
+            else:
+                raise RuleError('Patient or doctor identity required.', 403)
+            return [self.share_record(db, row['id'], actor) for row in rows.fetchall()]
+
+    def share_assessment(self, assessment_id, patient, doctor, message, request_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?', (assessment_id,patient)).fetchone():
+                raise RuleError('Assessment not found for this patient.', 404)
+            existing = db.execute('SELECT * FROM assessment_shares WHERE patient_id=? AND request_id=?', (patient,request_id)).fetchone()
+            if existing:
+                if (existing['assessment_id'], existing['doctor_id'], existing['patient_message']) != (assessment_id,doctor,message):
+                    raise RuleError('This sharing request was already used. Refresh sharing history.')
+                return self.share_record(db, existing['id'], patient)
+            active = db.execute('SELECT * FROM assessment_shares WHERE assessment_id=? AND doctor_id=? AND revoked_at IS NULL', (assessment_id,doctor)).fetchone()
+            if active:
+                if active['patient_message'] != message:
+                    raise RuleError('Already shared. Revoke before sharing an updated message.')
+                return self.share_record(db, active['id'], patient)
+            share_id = str(uuid4())
+            db.execute('INSERT INTO assessment_shares VALUES(?,?,?,?,?,?,?,NULL)',
+                       (share_id,assessment_id,patient,doctor,message,request_id,datetime.now(timezone.utc).isoformat()))
+            return self.share_record(db, share_id, patient)
+
+    def revoke_share(self, share_id, patient):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            self.share_record(db, share_id, patient)
+            db.execute('UPDATE assessment_shares SET revoked_at=? WHERE id=? AND revoked_at IS NULL',
+                       (datetime.now(timezone.utc).isoformat(),share_id))
+            return self.share_record(db, share_id, patient)
+
+    def shared_assessment(self, share_id, doctor):
+        import base64
+        with self.connect() as db:
+            share = self.share_record(db, share_id, doctor)
+            photo = db.execute('SELECT * FROM assessments WHERE id=?', (share['assessment_id'],)).fetchone()
+            return dict(share, assessment=self.assessment_metadata(photo) | {
+                'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')})
+
+    def publish_review(self, share_id, doctor, note, follow_up):
+        with self.connect() as db:
+            # Serializes publication and revocation: a revoked share cannot accept a new review.
+            db.execute('BEGIN IMMEDIATE')
+            share = self.share_record(db, share_id, doctor)
+            if share['review']:
+                if (share['review']['note'],share['review']['follow_up']) != (note,follow_up):
+                    raise RuleError('Review already published. Published reviews cannot be replaced.')
+                return share
+            db.execute('INSERT INTO assessment_reviews VALUES(?,?,?,?,?,?)',
+                       (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
+            return self.share_record(db, share_id, doctor)
 
     def prescription(self, db, booking_id):
         row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()

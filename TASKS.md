@@ -12,6 +12,7 @@ Updated 11 October 2026. Increment starts from 87ad49d.
 | Billing/simulated payment | Implemented; browser and specified phone checks passed | Saved itemised invoices, retry-safe simulation |
 | Skin photo/history/simulated AI | Implemented; browser and specified Android checks passed | Camera/gallery saving, reopening, own history |
 | Real auth/private storage | Pending | No Supabase environment selected/accessed |
+| Doctor sharing/review | Implemented; browser/automated and specified Android checks passed | Explicit per-assessment grants, publication and revocation |
 | Dataset/model/fine-tuning | Pending | Common conditions, exact classes/licences unresolved |
 | Remaining final modules | Required | Accounts/OCR, users, medical records, full pharmacy, feedback/reports and remaining workflow details |
 | Full preview | Incomplete | Five flows and phone confirmation needed; tentative 22 October |
@@ -23,3 +24,4 @@ Prescription/billing increment: implemented, automated checks passed; browser/An
 12 October 2026: prescription/billing browser checks passed. User-confirmed Android opening, shared paid bill/dispensed prescription, reopening persistence and patient separation. Care increment ready for main; full physical booking/queue and camera still pending. Next implementation: skin assessment/photo/history. Word unchanged.
 
 Skin assessment implemented on feat/skin-assessment: camera/gallery/preview, local-backend photo/history, labelled simulation. Automated/browser checks passed; user confirmed Android camera/gallery saving, reopening and patient separation after native upload correction. All five preview feature groups now have code, but full preview acceptance and final nine-module scope are not complete. Real auth, inference/fine-tuning, doctor review/sharing and remaining full-module operations still required.
+12 October user prioritisation: implement feature improvements and doctor sharing/review before real login/register. Real accounts remain required for final scope, scheduled later. Doctor review verified in browser; user confirmed Android sharing, review visibility, reopening and patient separation. Word remains deferred.
