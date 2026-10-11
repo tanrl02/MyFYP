@@ -1,0 +1,13 @@
+# Local report extraction and rendering; original report stays outside the repo.
+tmp/
+node_modules/
+.expo/
+.next/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+*.key
