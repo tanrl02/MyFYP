@@ -1,0 +1,11 @@
+target_class,exact_source_labels,selected_by_user,metadata_entries,train,val,test,evidence_level
+acne,acne|acne vulgaris,True,420,294,42,84,metadata only; image QA counts are separate
+eczema,eczema,True,176,123,18,35,metadata only; image QA counts are separate
+psoriasis,psoriasis,True,534,374,53,107,metadata only; image QA counts are separate
+folliculitis,folliculitis,True,182,127,18,37,metadata only; image QA counts are separate
+urticaria,urticaria,True,134,94,13,27,metadata only; image QA counts are separate
+allergic_contact_dermatitis,allergic contact dermatitis,True,314,220,31,63,metadata only; image QA counts are separate
+seborrheic_dermatitis,seborrheic dermatitis,True,113,79,11,23,metadata only; image QA counts are separate
+scabies,scabies,True,203,142,20,41,metadata only; image QA counts are separate
+rosacea,rosacea,False,79,55,8,16,metadata only; image QA counts are separate
+vitiligo,vitiligo,False,113,79,11,23,metadata only; image QA counts are separate

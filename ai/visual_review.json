@@ -1,0 +1,262 @@
+{
+  "reviewed_on": "2026-10-18",
+  "reviewer": "Codex visual technical triage; no clinician review",
+  "initial_manifest_sha256": "84330f6c9db5f3a2b2326101ada24edd36df30bf802c8b2cee40a70607f9d2ef",
+  "source_checkpoint": "ff908dc",
+  "flagged_image_ids": [
+    "3b3da93bdb3448afd0570afea24eae41",
+    "7d0afc8f76c352f1d55559c7f80b24f6",
+    "c2c7aed88ac1e56883b47538586e23e9",
+    "0d1eb56fcd67699b9d277c7c0b3f8a1d",
+    "1a95a0952dff3888dfafb444b9873081",
+    "357f42716662daa96288c90a65bca4ed",
+    "4a49b6df1eaa357ba4686208c25d4086",
+    "d9577a74fb4c4449c03806e8bcc395db",
+    "dc58dfc4d578778bf613b8d5793b9bbc",
+    "7fb43d3026266c7d4419208697c54667",
+    "23fc2126bc1f8799fccfb195d2af6141",
+    "50ba63f625928e9ad67efbd783891bb0",
+    "5196fc0377986050cd5e0644a3148241",
+    "99ef4fda3446d9504911973502a66e81",
+    "e18054ad4508a718dfddbd102a74a135",
+    "6fa3bc93ee85194c7a3972b43270ae23",
+    "8babc8e9dd502006beeba0a90f3df043",
+    "f20ccf2ee75f8b3b2f51c4215cd45216",
+    "0d03469c269b09952112b8d1990257cf",
+    "18c245164df495164203b83f8df9ee78",
+    "1f9e473d8f56a1204c6d6bd57e3d9bf1",
+    "3ac3d3c0d8f47f96cdb81e6182d41857",
+    "3befc60a8b079c071deba3386c7f3921",
+    "3e00be95682c981f5125826cddd3d088",
+    "3ef19b9127422482df1e2357ef48d3d9",
+    "423331edfe2cd837e00abb1ddbc67ab2",
+    "45a7b77523fed65af3668cc072364407",
+    "4c13340c2a4e28252816d39fa018bbc8",
+    "50c825e6e56ab72f1ecde0328ff77277",
+    "52527e8d12636fd64523b3dcbeb94d57",
+    "6c6d072123d56ce0ff132f48b5a17309",
+    "6d5a8f4d17c5cc9a3ac613ba2832cbd9",
+    "719c7887e69d70b74941405e4876d459",
+    "7ce754f03f84fd070e60a316ef4a9b5e",
+    "9dee2cefbd8aaae730c18425f277827d",
+    "a40fb61acc29b50d34decdd09e89e634",
+    "b9afa929d75b82cbd320d2fb73d7b059",
+    "c17a51bda5072f0586072b51a17af2a1",
+    "d3a460bfa3c7b968e0a9c73bdeb4d479",
+    "d48e8d81bc08026049768aa5c91ac752",
+    "d82402e38ff9ae1ba49111a4e257a0c7",
+    "e46b53d55aabf62f40feab5ee9923e0c",
+    "f1880c22ffacc0891a1c9ae3a89f164e",
+    "f5a3403a75fc51191d6d1c72bd5605f5",
+    "f6d6a19299f3b429df07c24c72c2d9fc",
+    "f7bd77631506ba1a61b50482d7cbaac1",
+    "f86cb4a75683abae76cefa622123f5f1",
+    "2cd328777af9ee59c90b18bec2be72e3",
+    "3235d994a0daba4be310565037080f56",
+    "cd67345f9cd8e83b80706726a076ce66",
+    "dfae71d76e84de3d240a296bd40ff341",
+    "e0a38024961fc28959c68774b661307f",
+    "f1a0afa59c9e2602366067da6fbb9bae",
+    "6f3da6176f21a21b57f55291754ac998",
+    "cdaf78ea2edf7ae6746af42786c672de",
+    "319abeb07c36d9307d4df3e801c52c5d",
+    "50ce89687aaec0c7303f6a39ae1f3558",
+    "5184fecc16ce56e9ae319f616fc474f7",
+    "5fa42e9ab996ca4c7b7adc7b57215a1a",
+    "63ccd5a4bdf88b4aaace888a0b772eec",
+    "65c28e2286d997bf54ae87d367e6e70c",
+    "6d6832f8245a1aa2d572b7c916cef48e",
+    "713106db09569840f65e3d40238c5043",
+    "78ac53146160f84de43d5b45f611f86c",
+    "7ab80c07bcf6271f0e81b35b19fcca14",
+    "c548aa9844a8a07678b4c9e3c0268bc5",
+    "cc348d5879bd27297a113cca35d2d3b5",
+    "d7d6c55a61235fcefbafc09db6c305cd",
+    "e34ef85c772594c2dc604746f9ade8ca",
+    "045465b6f4dacbe304d189889cd9ad1b",
+    "317eb01d1b031c60b1ae3797beaa941b",
+    "4b508d91599cbf2de4601d4ede0a56c3",
+    "a1eb1ad0342b04aa3ccf759916a4feb3",
+    "27bde4c6ec61895fe01e6d9877960739",
+    "3dd075b91dc39e1a3e36b3f3ac38aa06",
+    "724787c45ca1f3914838a64b521eb44a",
+    "baddb3713adf6d99cb53cddb95fe5c6d",
+    "e5ddd5cb1e3df22ae0524376faf63725"
+  ],
+  "sample_image_ids": [
+    "c26cfe58bbd48bbdc2542d2a0fe3fbf0",
+    "8381b542bef65a0f37c72c804bfc2cc3",
+    "a15409f6e9275ce53928eedb0493469d",
+    "55a70aca571d3938147b4bdf723abffc",
+    "9fa0afba0466d63c370ab72aa0f9bb5c",
+    "f05814b16c942870efac8b0a98d51a0f",
+    "9b915aac5ff3c00e394a5bf76cab76cd",
+    "364bf519149491d77d15929901e92741",
+    "b154af88c60c3870f5f5a6454e15a3ce",
+    "d190a369cf2c6c534ef11b6a18d0a404",
+    "3d8290e003f1cc86cbab8cf978b13876",
+    "51bc35ea07c27621b3abe3c1bf07a034",
+    "f15bc382e70cb3a1daec7092a79f4749",
+    "de0b8a88c10b392c990a4109d7483e95",
+    "92d2c383304c254db08deae655ea49d2",
+    "4da2816b2d03be31163f0575c8ef920a",
+    "000e8dd5ee75dd6668e978e7a4e6fe54",
+    "0f0677bfec94241971d0ecf98900b7ba",
+    "71828e02c5def1b432fc028a764c7192",
+    "d42fe805398af4dddf6497d346d75996",
+    "c2c8d2bd931021a5f16735f1f25d8474",
+    "0a38a43963c4cceca1dfb8c998d83a71",
+    "75ec263a2f60119eb0e1f580a7aaec12",
+    "5a138952d0d9258bb0612a2e6ff5c36d",
+    "4d0b19bb22cc951c9e3d4460a0e3d956",
+    "8b78427be35f580e7e664361c44d50ca",
+    "376d663d0ba6be6be066fb748fa3123f",
+    "cbe88539d67114ff5429558922f17bee",
+    "ebbb5a35ed84c1979be363aab1e41170",
+    "7b90b88817464067dc960f60eab7c66c",
+    "13370679ccbb07fc438553fdf2e85bd3",
+    "d8607d80d3f61919114def74f1ead0c0",
+    "1f6912306d5e1b64053096c0dacae9ac",
+    "782d690523c5680e4864e1ea1a8d3fde",
+    "c27fcb59da55b57e052e67b6334791c9",
+    "6890b76e5a02292933c820f8a7633c33",
+    "980a5e0b9736ee5349baf5fed18cabc6",
+    "c9520239ed47055409f8f9e0aabcbdbe",
+    "5d7ae93a8da7c027457fc17443e51433",
+    "e1279fe0040d8f71132cb9ddf7abee34"
+  ],
+  "sample_method": "For each original five-class/split stratum, sort SHA256(review-2026-10-18:MD5); select train4,val2,test2 from mechanically unflagged entries.",
+  "confirmed_visual_groups": [
+    {
+      "group": "visual-crop-01",
+      "members": [
+        "3befc60a8b079c071deba3386c7f3921",
+        "f1a0afa59c9e2602366067da6fbb9bae"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": true
+    },
+    {
+      "group": "visual-crop-02",
+      "members": [
+        "3e00be95682c981f5125826cddd3d088",
+        "e0a38024961fc28959c68774b661307f"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": true
+    },
+    {
+      "group": "visual-crop-03",
+      "members": [
+        "3ef19b9127422482df1e2357ef48d3d9",
+        "d48e8d81bc08026049768aa5c91ac752"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    },
+    {
+      "group": "visual-crop-04",
+      "members": [
+        "45a7b77523fed65af3668cc072364407",
+        "d3a460bfa3c7b968e0a9c73bdeb4d479"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    },
+    {
+      "group": "visual-crop-05",
+      "members": [
+        "50c825e6e56ab72f1ecde0328ff77277",
+        "f1880c22ffacc0891a1c9ae3a89f164e"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    },
+    {
+      "group": "visual-crop-06",
+      "members": [
+        "7ce754f03f84fd070e60a316ef4a9b5e",
+        "f86cb4a75683abae76cefa622123f5f1"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    },
+    {
+      "group": "visual-crop-07",
+      "members": [
+        "b9afa929d75b82cbd320d2fb73d7b059",
+        "f5a3403a75fc51191d6d1c72bd5605f5"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    },
+    {
+      "group": "visual-crop-08",
+      "members": [
+        "c17a51bda5072f0586072b51a17af2a1",
+        "dfae71d76e84de3d240a296bd40ff341"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": true
+    },
+    {
+      "group": "visual-crop-09",
+      "members": [
+        "e46b53d55aabf62f40feab5ee9923e0c",
+        "cd67345f9cd8e83b80706726a076ce66"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": true
+    },
+    {
+      "group": "visual-crop-10",
+      "members": [
+        "6f3da6176f21a21b57f55291754ac998",
+        "50ce89687aaec0c7303f6a39ae1f3558"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": true
+    },
+    {
+      "group": "visual-crop-11",
+      "members": [
+        "d82402e38ff9ae1ba49111a4e257a0c7",
+        "f7bd77631506ba1a61b50482d7cbaac1"
+      ],
+      "finding": "visually_matching_crop_or_resize",
+      "scope": "image-content comparison, not patient identity or diagnosis",
+      "cross_split": false
+    }
+  ],
+  "false_match_examples": [
+    {
+      "first": "0d03469c269b09952112b8d1990257cf",
+      "second": "6fa3bc93ee85194c7a3972b43270ae23",
+      "finding": "visually_distinct_photographs",
+      "reason": "Different visible structures and framing; simple difference-hash match is insufficient."
+    },
+    {
+      "first": "9dee2cefbd8aaae730c18425f277827d",
+      "second": "c2c7aed88ac1e56883b47538586e23e9",
+      "finding": "visually_distinct_photographs",
+      "reason": "Different visible structures and framing; simple difference-hash match is insufficient."
+    }
+  ],
+  "disposition": "Preserve all initial 78 quarantines for now. Recheck relationships after class expansion; no clinical label changes or automatic reinstatement.",
+  "observed_sample_limits": [
+    "Skin photographs with varied crops, lighting and backgrounds",
+    "Source watermarks and borders",
+    "Nail-only and intimate anatomical views alongside general skin photos",
+    "No clinical label correctness, patient independence or phone-domain performance established"
+  ]
+}

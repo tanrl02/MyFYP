@@ -2,15 +2,22 @@
   "archive_bytes": 1422904980,
   "counts": {
     "acne": {
-      "mechanical_checks_passed": 411,
-      "quarantined": 9,
+      "mechanical_checks_passed": 410,
+      "quarantined": 10,
       "test": 84,
       "train": 294,
       "val": 42
     },
+    "allergic_contact_dermatitis": {
+      "mechanical_checks_passed": 297,
+      "quarantined": 17,
+      "test": 63,
+      "train": 220,
+      "val": 31
+    },
     "eczema": {
-      "mechanical_checks_passed": 169,
-      "quarantined": 7,
+      "mechanical_checks_passed": 168,
+      "quarantined": 8,
       "test": 35,
       "train": 123,
       "val": 18
@@ -23,30 +30,43 @@
       "val": 18
     },
     "psoriasis": {
-      "mechanical_checks_passed": 514,
-      "quarantined": 20,
+      "mechanical_checks_passed": 510,
+      "quarantined": 24,
       "test": 107,
       "train": 374,
       "val": 53
     },
+    "scabies": {
+      "mechanical_checks_passed": 199,
+      "quarantined": 4,
+      "test": 41,
+      "train": 142,
+      "val": 20
+    },
+    "seborrheic_dermatitis": {
+      "mechanical_checks_passed": 113,
+      "test": 23,
+      "train": 79,
+      "val": 11
+    },
     "urticaria": {
-      "mechanical_checks_passed": 129,
-      "quarantined": 5,
+      "mechanical_checks_passed": 127,
+      "quarantined": 7,
       "test": 27,
       "train": 94,
       "val": 13
     }
   },
-  "duplicate_candidate_pairs": 101,
+  "duplicate_candidate_pairs": 159,
   "failures": [],
   "image_metadata_md5_verified": true,
   "pillow_version": "12.3.0",
   "published_whole_archive_md5": "8f2640a6a45bbaf5c9b776d2d68fccc6",
-  "quarantined_images": 78,
-  "selected_entries": 1446,
+  "quarantined_images": 107,
+  "selected_entries": 2076,
   "source_record": "https://zenodo.org/records/11101338",
   "training_ready": false,
-  "verified_images": 1446,
+  "verified_images": 2076,
   "visual_clinical_review": "not performed; pending for every image",
   "whole_archive_digest_verified": false
 }

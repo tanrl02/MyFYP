@@ -1,0 +1,25 @@
+{
+  "additional_images_visually_reviewed": 0,
+  "all_images_visually_reviewed": false,
+  "clinical_label_validation": false,
+  "false_hash_match_examples": 2,
+  "original_five_class_sample_thumbnails_reviewed": 40,
+  "original_flagged_thumbnails_reviewed": 78,
+  "original_manifest_checkpoint": "ff908dc",
+  "original_manifest_sha256": "84330f6c9db5f3a2b2326101ada24edd36df30bf802c8b2cee40a70607f9d2ef",
+  "reviewed_on": "2026-10-18",
+  "selected_classes": [
+    "acne",
+    "eczema",
+    "psoriasis",
+    "folliculitis",
+    "urticaria",
+    "allergic_contact_dermatitis",
+    "seborrheic_dermatitis",
+    "scabies"
+  ],
+  "selected_metadata_entries": 2076,
+  "training_ready": false,
+  "visually_matching_groups": 11,
+  "visually_matching_groups_across_splits": 5
+}

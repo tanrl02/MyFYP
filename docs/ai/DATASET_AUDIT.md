@@ -1,5 +1,7 @@
 # Skin dataset metadata audit — 18 October 2026
 
+Current class scope: [eight-class review checkpoint](EIGHT_CLASS_REVIEW.md). The table below records the initial five-class comparison; regenerated machine-readable class counts now include the three user-selected additions.
+
 Follow-up: the [source and label decision](SOURCE_AND_LABEL_DECISION.md) resolves the apparent licence conflict by distinguishing newer metadata from the older noncommercial image release. It records the working five-class preparation route and supersedes the initial acquisition hold below. Image preparation evidence is recorded separately; historical metadata counts remain unchanged.
 
 ## Decision

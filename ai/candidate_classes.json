@@ -1,16 +1,79 @@
 {
-  "status": "Working five-class preparation mapping; not a final clinical taxonomy or cap on future classes",
-  "scin_screen": {"minimum_top_weight": 0.6, "minimum_margin": 0.2},
+  "status": "Eight-class working scope selected by user on 2026-10-18; inherited research labels, pending complete image quality review",
+  "scin_screen": {
+    "minimum_top_weight": 0.6,
+    "minimum_margin": 0.2
+  },
   "classes": {
-    "acne": {"scin": ["Acne"], "fitzpatrick": ["acne", "acne vulgaris"]},
-    "eczema": {"scin": ["Eczema"], "fitzpatrick": ["eczema"]},
-    "psoriasis": {"scin": ["Psoriasis"], "fitzpatrick": ["psoriasis"]},
-    "folliculitis": {"scin": ["Folliculitis"], "fitzpatrick": ["folliculitis"]},
-    "urticaria": {"scin": ["Urticaria"], "fitzpatrick": ["urticaria"]}
+    "acne": {
+      "scin": [
+        "Acne"
+      ],
+      "fitzpatrick": [
+        "acne",
+        "acne vulgaris"
+      ]
+    },
+    "eczema": {
+      "scin": [
+        "Eczema"
+      ],
+      "fitzpatrick": [
+        "eczema"
+      ]
+    },
+    "psoriasis": {
+      "scin": [
+        "Psoriasis"
+      ],
+      "fitzpatrick": [
+        "psoriasis"
+      ]
+    },
+    "folliculitis": {
+      "scin": [
+        "Folliculitis"
+      ],
+      "fitzpatrick": [
+        "folliculitis"
+      ]
+    },
+    "urticaria": {
+      "scin": [
+        "Urticaria"
+      ],
+      "fitzpatrick": [
+        "urticaria"
+      ]
+    },
+    "allergic_contact_dermatitis": {
+      "scin": [
+        "Allergic Contact Dermatitis"
+      ],
+      "fitzpatrick": [
+        "allergic contact dermatitis"
+      ]
+    },
+    "seborrheic_dermatitis": {
+      "scin": [
+        "Seborrheic Dermatitis"
+      ],
+      "fitzpatrick": [
+        "seborrheic dermatitis"
+      ]
+    },
+    "scabies": {
+      "scin": [
+        "Scabies"
+      ],
+      "fitzpatrick": [
+        "scabies"
+      ]
+    }
   },
   "notes": [
     "For this preparation subset, acne combines the source labels acne and acne vulgaris. This is a documented project grouping, not clinical relabelling or independent label validation.",
-    "Do not silently include dyshidrotic eczema, contact dermatitis, pustular psoriasis, acneiform eruption or urticaria pigmentosa.",
+    "Keep allergic contact dermatitis and seborrheic dermatitis separate from eczema. Do not silently merge dyshidrotic eczema, pustular psoriasis, acneiform eruption or urticaria pigmentosa.",
     "SCIN weights are differential-label ranking weights, not calibrated disease probabilities.",
     "The screen is a sensitivity analysis, not confirmation of diagnosis, image quality, image availability or independence."
   ]

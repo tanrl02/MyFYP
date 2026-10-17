@@ -70,6 +70,48 @@
       "scin_screened_cases": 131,
       "scin_screened_image_references": 271,
       "scin_unique_top_cases": 175
+    },
+    {
+      "candidate_class": "allergic_contact_dermatitis",
+      "fitz_c_images": 314,
+      "fitz_c_test": 63,
+      "fitz_c_train": 220,
+      "fitz_c_val": 31,
+      "fitz_labels": "allergic contact dermatitis",
+      "fitz_original_images": 430,
+      "scin_any_weight_cases": 873,
+      "scin_labels": "Allergic Contact Dermatitis",
+      "scin_screened_cases": 111,
+      "scin_screened_image_references": 219,
+      "scin_unique_top_cases": 224
+    },
+    {
+      "candidate_class": "seborrheic_dermatitis",
+      "fitz_c_images": 113,
+      "fitz_c_test": 23,
+      "fitz_c_train": 79,
+      "fitz_c_val": 11,
+      "fitz_labels": "seborrheic dermatitis",
+      "fitz_original_images": 126,
+      "scin_any_weight_cases": 46,
+      "scin_labels": "Seborrheic Dermatitis",
+      "scin_screened_cases": 10,
+      "scin_screened_image_references": 22,
+      "scin_unique_top_cases": 14
+    },
+    {
+      "candidate_class": "scabies",
+      "fitz_c_images": 203,
+      "fitz_c_test": 41,
+      "fitz_c_train": 142,
+      "fitz_c_val": 20,
+      "fitz_labels": "scabies",
+      "fitz_original_images": 339,
+      "scin_any_weight_cases": 63,
+      "scin_labels": "Scabies",
+      "scin_screened_cases": 1,
+      "scin_screened_image_references": 2,
+      "scin_unique_top_cases": 5
     }
   ],
   "corrected_source_comparison": {

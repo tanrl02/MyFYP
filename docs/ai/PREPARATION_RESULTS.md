@@ -1,5 +1,7 @@
 # First image preparation checkpoint
 
+Historical first five-class batch. The [eight-class review checkpoint](EIGHT_CLASS_REVIEW.md) contains current counts and scope; the machine-readable files under `preparation/` now cover all eight selected classes. The original five-class files remain in Git checkpoint `ff908dc`.
+
 Completed 18 October 2026. See [the source/label decision](SOURCE_AND_LABEL_DECISION.md) for the noncommercial research route and working five-class mapping. These classes are the first preparation batch; additional classes remain open for a later audit.
 
 ## Verified local data

@@ -129,3 +129,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October source/label/preparation checkpoint complete: licence scopes distinguished using actual Zenodo releases, five-class working mapping documented,1446images acquired/MD5+CRC+decode verified with0failures.78flagged for review;1368mechanically unflagged are not clinically approved. See docs/ai/PREPARATION_RESULTS.md.13tests and byte-identical offline regeneration pass. Next: duplicate/visual review and final class list; training/fine-tuning/evaluation/integration remain pending. Word/auth deferred.
+
+
+18October eight-class review checkpoint: user selected8(original5+allergic contact dermatitis/seborrheic dermatitis/scabies). Added630images;2076hash/decode/CRC verified,0failures. Technical visual triage78originalflags+40sampledimages recorded11matching groups/5cross-split and2false hash examples. Expandedscreen107quarantines(29new)/1969unflagged.16tests+byte-identical11offlineoutputs pass. See docs/ai/EIGHT_CLASS_REVIEW.md. Next:29new-flag visual triage+sample3newclasses, conservative exclusions/frozen research manifests; no baseline training yet. Word/auth deferred.

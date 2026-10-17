@@ -1,5 +1,7 @@
 # Image source and working label decision
 
+Scope update: the user has selected [eight working classes](EIGHT_CLASS_REVIEW.md). That checkpoint supersedes the five-class preparation table below; the source/licence route is unchanged.
+
 Checked 18 October 2026. This decision supersedes the unresolved licence-scope question in the first metadata audit. It selects a local noncommercial research preparation route, not a commercial deployment licence or a final classifier.
 
 ## Licence scope resolved from the actual releases
