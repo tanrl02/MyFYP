@@ -47,3 +47,6 @@ If no suitable extra data is accessible, finish a reproducible FYP pipeline with
 Keep one manageable task per turn. First audit alternative data options and count genuinely usable candidates; do not bulk-download or retrain in this planning task. Application work can proceed independently with a clear model interface that will carry version, per-class scores and uncertainty once real inference is implemented. Keep simulated results explicitly labelled until that integration is implemented and verified. Neither data-access outcome calls for changing the mobile/web architecture or adding another application backend.
 
 Word report edits remain deferred until implementation and evaluation settle. Record the access attempt and measured limitations for the eventual report, without describing a pending dataset as acquired.
+
+
+Follow-up,18 October: at the user's request, [Kaggle Dermnet was audited](DERMNET_AUDIT.md) as another possible source. Eczema/urticaria folders are candidates for review, several other folders mix diseases, and source/use documentation remains unresolved. No images have been acquired or merged. The next independent fallback task remains SCIN label/metadata screening.

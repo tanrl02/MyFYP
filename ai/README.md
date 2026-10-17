@@ -60,3 +60,8 @@ Run `.venv-ai\Scripts\python.exe ai/analyze_errors.py --device cuda` to replay t
 ## Current offline choice and dataset-access plan
 
 `model_selection.json` records the user's current offline model preference: the previous centre-crop fine-tuned checkpoint. Experimental verifiers report metric winners in their own result folders and do not change this preference. This file does not deploy a model into the application. Read [the Fitzpatrick17k access and fallback plan](../docs/ai/DATA_ACCESS_PLAN.md) before acquiring more data or starting another experiment.
+
+
+## Kaggle Dermnet audit
+
+Read [the permissions and class-mapping findings](../docs/ai/DERMNET_AUDIT.md). `audit_dermnet.py` inspects public file-list JSON only; it never fetches images. Run it offline against cached metadata, or use `--fetch` for a bounded fresh public metadata audit. `dermnet_mapping_review.json` records review candidates and mixed/missing categories; it is not an approved training mapping. Current model/data remain unchanged.

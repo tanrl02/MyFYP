@@ -254,3 +254,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October model preference/data-access plan: verified the existing centre-crop fine-tuned checkpoint SHA against tracked evidence and recorded user-selected offline model/epoch/preprocessing/metrics in ai/model_selection.json. Rechecked original metadata SHA and recomputed all16577/eight-class2763 entry totals. No model weights, frozen data, test pixels, application code or dependencies changed. Full-frame experimental results retained unmodified. No repeated GPU training/tests required for this configuration/documentation update.
+
+
+18 October Dermnet metadata verification: fetched only public description/file-list JSON (98pages), checked dataset version/size stability, page/view SHA and exact sum1850517236bytes for19559 entries.23categories,15557train/4002test. Two focused audit tests pass; offline summary/lock reproduce byte-for-byte. Checked eight mapping records against saved summary hash and40 provisional training-folder references with zero image downloads.270 same-name/same-category/same-size cross-split pairs are metadata suspects only. No content/diagnosis/patient independence/actual leakage certification. No application, GPU training or phone checks needed; source models/frozen dataset untouched.

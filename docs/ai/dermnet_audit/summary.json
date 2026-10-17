@@ -1,0 +1,117 @@
+{
+  "audited_on": "2026-10-18",
+  "dataset_ref": "shubhamgoel27/dermnet",
+  "dataset_version": 1,
+  "uploader_declared_license": "Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)",
+  "publisher_total_bytes": 1850517236,
+  "metadata_manifest_sha256": "f54ac7e609308bfd7970ae17c3880d19aba0e878dba15751487c559a99f24799",
+  "metadata_pages": 98,
+  "file_entries": 19559,
+  "categories": {
+    "Acne and Rosacea Photos": {
+      "test": 312,
+      "train": 840
+    },
+    "Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions": {
+      "test": 288,
+      "train": 1149
+    },
+    "Atopic Dermatitis Photos": {
+      "test": 123,
+      "train": 489
+    },
+    "Bullous Disease Photos": {
+      "test": 113,
+      "train": 448
+    },
+    "Cellulitis Impetigo and other Bacterial Infections": {
+      "test": 73,
+      "train": 288
+    },
+    "Eczema Photos": {
+      "test": 309,
+      "train": 1235
+    },
+    "Exanthems and Drug Eruptions": {
+      "test": 101,
+      "train": 404
+    },
+    "Hair Loss Photos Alopecia and other Hair Diseases": {
+      "test": 60,
+      "train": 239
+    },
+    "Herpes HPV and other STDs Photos": {
+      "test": 102,
+      "train": 405
+    },
+    "Light Diseases and Disorders of Pigmentation": {
+      "test": 143,
+      "train": 568
+    },
+    "Lupus and other Connective Tissue diseases": {
+      "test": 105,
+      "train": 420
+    },
+    "Melanoma Skin Cancer Nevi and Moles": {
+      "test": 116,
+      "train": 463
+    },
+    "Nail Fungus and other Nail Disease": {
+      "test": 261,
+      "train": 1040
+    },
+    "Poison Ivy Photos and other Contact Dermatitis": {
+      "test": 65,
+      "train": 260
+    },
+    "Psoriasis pictures Lichen Planus and related diseases": {
+      "test": 352,
+      "train": 1405
+    },
+    "Scabies Lyme Disease and other Infestations and Bites": {
+      "test": 108,
+      "train": 431
+    },
+    "Seborrheic Keratoses and other Benign Tumors": {
+      "test": 343,
+      "train": 1371
+    },
+    "Systemic Disease": {
+      "test": 152,
+      "train": 606
+    },
+    "Tinea Ringworm Candidiasis and other Fungal Infections": {
+      "test": 325,
+      "train": 1300
+    },
+    "Urticaria Hives": {
+      "test": 53,
+      "train": 212
+    },
+    "Vascular Tumors": {
+      "test": 121,
+      "train": 482
+    },
+    "Vasculitis Photos": {
+      "test": 105,
+      "train": 416
+    },
+    "Warts Molluscum and other Viral Infections": {
+      "test": 272,
+      "train": 1086
+    }
+  },
+  "bytes_by_split": {
+    "test": 377213836,
+    "train": 1473303400
+  },
+  "basenames_shared_between_train_test": 397,
+  "category_basenames_shared_between_train_test": 270,
+  "same_category_name_size_pairs_by_category": {
+    "Acne and Rosacea Photos": 270
+  },
+  "basename_check_is_not_content_duplicate_check": true,
+  "image_bytes_downloaded": 0,
+  "image_existence_decode_hash_or_quality_verified": false,
+  "training_approved": false
+}

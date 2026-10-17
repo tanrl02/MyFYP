@@ -1,0 +1,85 @@
+{
+  "audited_on": "2026-10-18",
+  "dataset_ref": "shubhamgoel27/dermnet",
+  "dataset_version": 1,
+  "summary_sha256": "11bdcb24b7f35d8e371cb7da4da5898dc812bb968f9ab003fd94845562314aed",
+  "status": "metadata_review_only_not_a_training_class_mapping",
+  "training_approved": false,
+  "rights_status": "Kaggle uploader declares CC BY-NC-ND4.0; original-source authority and intended reuse scope not verified",
+  "mapping_review": [
+    {
+      "target_class": "acne",
+      "source_folder": "Acne and Rosacea Photos",
+      "publisher_counts": {
+        "test": 312,
+        "train": 840
+      },
+      "status": "mixed_category_requires_verified_image_labels",
+      "reason": "Folder combines acne and rosacea; cannot assign every image to acne."
+    },
+    {
+      "target_class": "eczema",
+      "source_folder": "Eczema Photos",
+      "publisher_counts": {
+        "test": 309,
+        "train": 1235
+      },
+      "status": "candidate_for_review_only",
+      "reason": "Closest folder-name match; subtype scope and individual image quality/labels remain unverified."
+    },
+    {
+      "target_class": "psoriasis",
+      "source_folder": "Psoriasis pictures Lichen Planus and related diseases",
+      "publisher_counts": {
+        "test": 352,
+        "train": 1405
+      },
+      "status": "mixed_category_requires_verified_image_labels",
+      "reason": "Folder includes lichen planus and other conditions; cannot treat all entries as psoriasis."
+    },
+    {
+      "target_class": "folliculitis",
+      "source_folder": null,
+      "publisher_counts": null,
+      "status": "no_dedicated_folder",
+      "reason": "The file list has no dedicated folliculitis folder; the broader bacterial-infections group does not establish folliculitis labels."
+    },
+    {
+      "target_class": "urticaria",
+      "source_folder": "Urticaria Hives",
+      "publisher_counts": {
+        "test": 53,
+        "train": 212
+      },
+      "status": "candidate_for_review_only",
+      "reason": "Closest folder-name match; individual images and label quality remain unverified."
+    },
+    {
+      "target_class": "allergic_contact_dermatitis",
+      "source_folder": "Poison Ivy Photos and other Contact Dermatitis",
+      "publisher_counts": {
+        "test": 65,
+        "train": 260
+      },
+      "status": "mixed_category_requires_verified_image_labels",
+      "reason": "Other contact dermatitis is not specified as allergic; no automatic mapping of the whole folder."
+    },
+    {
+      "target_class": "seborrheic_dermatitis",
+      "source_folder": null,
+      "publisher_counts": null,
+      "status": "no_dedicated_folder",
+      "reason": "Seborrheic Keratoses and other Benign Tumors is a different category name and must not be mapped to seborrhoeic dermatitis."
+    },
+    {
+      "target_class": "scabies",
+      "source_folder": "Scabies Lyme Disease and other Infestations and Bites",
+      "publisher_counts": {
+        "test": 108,
+        "train": 431
+      },
+      "status": "mixed_category_requires_verified_image_labels",
+      "reason": "Folder combines scabies, Lyme disease, infestations and bites; no automatic scabies label."
+    }
+  ]
+}
