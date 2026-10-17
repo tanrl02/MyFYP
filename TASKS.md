@@ -149,3 +149,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October full-frame comparison complete:33 AI tests, GPU smoke, all10epochs and independent three-checkpoint validation replay passed. Full-frame epoch8 wins macro-F1 narrowly (.5288 vs.5214), average precision53.28% vs53.07%, accuracy58.55% vs59.59%. Eczema recall6/16 vs3/16, but several other classes worsen; no90% claim. Read docs/ai/FULL_FRAME_COMPARISON.md. Selected offline model efficientnet-b0-full-frame-v1; app remains simulated,401test untouched. Next small task: audit permitted additional training-data options for weak eczema/dermatitis classes before acquisition/training. Keep8classes and version any future data change.
+
+
+18 October user preference overrides full-frame metric recommendation: current offline model is centre-crop efficientnet-b0-finetune-v1 epoch7, recorded in ai/model_selection.json after hash verification. See docs/ai/DATA_ACCESS_PLAN.md for both Fitzpatrick17k author-response outcomes. Our2076 corrected eight-class images are already acquired; original full archive is not automatically a larger useful training pool. Next small task: audit alternative permitted data/labels while awaiting reply, with no automatic downloads or training. Retain8classes/nine modules,401test reserved, app simulation and deferred Word/auth.

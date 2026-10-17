@@ -1,0 +1,18 @@
+{
+  "selected_on": "2026-10-18",
+  "status": "offline_development_only_not_integrated_into_app",
+  "run_id": "efficientnet-b0-finetune-v1",
+  "checkpoint_path": "ai/runs/efficientnet-b0-finetune-v1/best.pt",
+  "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+  "best_epoch": 7,
+  "preprocessing": "official_centre_crop",
+  "dataset_version": "eight-class-v1",
+  "reason": "Explicit user choice to return to previous centre-crop fine-tuned model while awaiting Fitzpatrick17k author response",
+  "validation_accuracy": 0.5958549222797928,
+  "validation_macro_precision": 0.5307430562241263,
+  "validation_macro_f1": 0.5214449327801965,
+  "test_images_evaluated": 0,
+  "retained_experiment": "efficientnet-b0-full-frame-v1",
+  "historical_comparison": "docs/ai/full_frame_results/summary.json records the metric-rule winner, not the current user-selected offline model",
+  "report": "docs/ai/DATA_ACCESS_PLAN.md"
+}

@@ -2,6 +2,8 @@
 
 Experiment date: 18 October 2026. Tests the framing hypothesis documented in [the error review](ERROR_ANALYSIS.md). This is a validation-based development experiment on all eight agreed classes, not a clinical or phone-domain evaluation.
 
+Current preference update, 18 October: the user subsequently chose to return to the centre-crop fine-tuned model. [The current selection and data-access plan](DATA_ACCESS_PLAN.md) supersede this experiment's recommendation for ongoing work; the comparison and metric-rule result below remain historical evidence.
+
 ## Fixed comparison procedure
 
 The candidate starts again from the **same frozen-head baseline epoch-8 checkpoint** as fine-tuning v1, not from the fine-tuned incumbent. Source SHA-256 is locked in `ai/full_frame_config.json`. The dataset remains frozen `eight-class-v1`: 1,374 training, 193 validation and 401 reserved test images.

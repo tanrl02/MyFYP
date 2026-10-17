@@ -55,3 +55,8 @@ Run `.venv-ai\Scripts\python.exe ai/analyze_errors.py --device cuda` to replay t
 ## Full-frame preprocessing comparison
 
 `train_finetune.py --experiment full-frame` selects `full_frame_config.json` for smoke/training. It fits the whole frame inside224 with mean-coloured padding and retains the earlier experiment's training settings. Verification uses each checkpoint's saved preprocessing, independently replays the baseline and incumbent, and writes to `docs/ai/full_frame_results`. See [the comparison procedure and results](../docs/ai/FULL_FRAME_COMPARISON.md). Old centre-crop checkpoints retain their original preprocessing.
+
+
+## Current offline choice and dataset-access plan
+
+`model_selection.json` records the user's current offline model preference: the previous centre-crop fine-tuned checkpoint. Experimental verifiers report metric winners in their own result folders and do not change this preference. This file does not deploy a model into the application. Read [the Fitzpatrick17k access and fallback plan](../docs/ai/DATA_ACCESS_PLAN.md) before acquiring more data or starting another experiment.
