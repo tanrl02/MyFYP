@@ -22,6 +22,46 @@ class WorkflowTests(unittest.TestCase):
         return self.client.post('/bookings', headers=actor or self.patient,
             json={'slot_id':self.slot['id'],'request_id':request})
 
+    def test_doctor_profiles_roles_validation_and_persistence(self):
+        self.assertEqual(self.client.get('/doctors').status_code,422)
+        profiles=self.client.get('/doctors',headers=self.patient).json()
+        self.assertEqual(len(profiles),2)
+        self.assertTrue(all(p['specialty']=='Not specified' and p['expertise']==[] for p in profiles))
+        payload={'specialty':' Dermatology (fictional) ','expertise':['acne','general'],'version':0}
+        url='/staff/doctors/doctor-lim'
+        for identity in (self.patient, self.other, {'X-Demo-Actor':'doctor-lim'}):
+            self.assertEqual(self.client.post(url,headers=identity,json=payload).status_code,403)
+        saved=self.client.post(url,headers=self.staff,json=payload).json()
+        self.assertEqual(saved['specialty'],'Dermatology (fictional)')
+        self.assertEqual(saved['version'],1)
+        self.assertEqual(self.client.post(url,headers=self.staff,json=payload).json(),saved)
+        reopened=TestClient(create_app(self.path))
+        self.assertIn(saved,reopened.get('/doctors',headers=self.other).json())
+        for changes in ({'specialty':' '},{'specialty':'x'*81},{'expertise':['unknown']},{'expertise':['acne','acne']},{'version':True}):
+            self.assertEqual(self.client.post(url,headers=self.staff,json=payload|changes).status_code,422)
+        self.assertEqual(self.client.post('/staff/doctors/missing',headers=self.staff,json=payload).status_code,404)
+
+    def test_doctor_profiles_stale_edits_do_not_overwrite(self):
+        url='/staff/doctors/doctor-anita'
+        original={'specialty':'Fictional dermatology','expertise':['eczema'],'version':0}
+        self.assertEqual(self.client.post(url,headers=self.staff,json=original).status_code,200)
+        stale=self.client.post(url,headers=self.staff,json=original|{'expertise':['psoriasis']})
+        self.assertEqual(stale.status_code,409)
+        saved=self.client.post(url,headers=self.staff,json=original|{'expertise':[],'version':1}).json()
+        self.assertEqual(saved['expertise'],[])
+        self.assertEqual(saved['version'],2)
+
+    def test_doctor_profile_concurrent_edits_only_one_wins(self):
+        store=Store(self.path)
+        def edit(specialty):
+            try:
+                return store.save_doctor_profile('doctor-lim',specialty,['general'],0)['version']
+            except RuleError as error:
+                return error.status
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes=list(pool.map(edit,['Fictional specialty one','Fictional specialty two']))
+        self.assertEqual(sorted(outcomes),[1,409])
+
     def test_connected_persistence_and_scoping(self):
         booking = self.book().json()
         self.assertEqual(self.book().json()['id'], booking['id'])

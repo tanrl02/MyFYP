@@ -3,10 +3,12 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import sqlite3
+import json
 from uuid import uuid4
 
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
 DOCTORS = {'doctor-lim': 'Dr. Lim (demo)', 'doctor-anita': 'Dr. Anita (demo)'}
+DOCTOR_CONCERNS = {'general', 'acne', 'eczema', 'psoriasis'}
 
 class RuleError(Exception):
     def __init__(self, message, status=409):
@@ -18,6 +20,9 @@ class Store:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript('''
+                CREATE TABLE IF NOT EXISTS doctor_profiles (
+                  doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
+                  version INTEGER NOT NULL, updated_at TEXT);
                 CREATE TABLE IF NOT EXISTS patient_notifications (
                   id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, kind TEXT NOT NULL,
                   source_id TEXT NOT NULL, target_id TEXT NOT NULL, title TEXT NOT NULL,
@@ -112,7 +117,38 @@ class Store:
                 price_cents=(SELECT price_cents FROM medicines WHERE id=medicine_id),
                 strength=(SELECT strength FROM medicines WHERE id=medicine_id),
                 form=(SELECT form FROM medicines WHERE id=medicine_id) WHERE name IS NULL''')
+            for doctor in DOCTORS:
+                db.execute('INSERT OR IGNORE INTO doctor_profiles VALUES(?,?,?,?,NULL)',
+                           (doctor, 'Not specified', '[]', 0))
         self.seed()
+
+    @staticmethod
+    def doctor_profile(row):
+        return dict(row, doctor_name=DOCTORS[row['doctor_id']], expertise=json.loads(row['expertise']))
+
+    def doctor_profiles(self):
+        with self.connect() as db:
+            return [self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
+
+    def save_doctor_profile(self, doctor, specialty, expertise, version):
+        specialty = specialty.strip()
+        if not specialty or len(specialty)>80 or not set(expertise)<=DOCTOR_CONCERNS or len(expertise)!=len(set(expertise)):
+            raise RuleError('Enter a specialty and choose distinct supported areas of expertise.', 422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row = db.execute('SELECT * FROM doctor_profiles WHERE doctor_id=?', (doctor,)).fetchone()
+            if row is None:
+                raise RuleError('Doctor not found.', 404)
+            current = self.doctor_profile(row)
+            expertise = sorted(expertise)
+            # A retry after a lost response is harmless, including an old version.
+            if (current['specialty'], sorted(current['expertise'])) == (specialty, expertise):
+                return current
+            if row['version'] != version:
+                raise RuleError('This profile changed. Reload profiles before editing again.')
+            db.execute('UPDATE doctor_profiles SET specialty=?,expertise=?,version=version+1,updated_at=? WHERE doctor_id=?',
+                       (specialty,json.dumps(expertise),datetime.now(timezone.utc).isoformat(),doctor))
+            return self.doctor_profile(db.execute('SELECT * FROM doctor_profiles WHERE doctor_id=?',(doctor,)).fetchone())
 
     @contextmanager
     def connect(self):

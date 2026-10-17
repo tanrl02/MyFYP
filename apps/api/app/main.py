@@ -15,6 +15,11 @@ class BackgroundInput(BaseModel):
     conditions: str = Field(max_length=1000)
     version: int = Field(strict=True, ge=0)
 
+class DoctorProfileInput(BaseModel):
+    specialty: str = Field(min_length=1,max_length=80,pattern=r'\S')
+    expertise: list[Literal['general','acne','eczema','psoriasis']] = Field(max_length=4)
+    version: int = Field(strict=True,ge=0)
+
 class SlotInput(BaseModel):
     doctor_id: Literal['doctor-lim','doctor-anita']
     clinic_date: date
@@ -126,6 +131,14 @@ def create_app(path=None):
     @api.get('/slots')
     def slots():
         return store.slots()
+
+    @api.get('/doctors')
+    def doctor_profiles(who=Depends(actor)):
+        return store.doctor_profiles()
+
+    @api.post('/staff/doctors/{doctor_id}')
+    def save_doctor_profile(doctor_id: str,payload: DoctorProfileInput,who=Depends(staff)):
+        return run(lambda: store.save_doctor_profile(doctor_id,payload.specialty,payload.expertise,payload.version))
 
     @api.get('/staff/slots')
     def managed_slots(who=Depends(staff)):
