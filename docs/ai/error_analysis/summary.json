@@ -1,0 +1,544 @@
+{
+  "run_id": "efficientnet-b0-finetune-v1",
+  "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+  "dataset_version": "eight-class-v1",
+  "test_images_read": 0,
+  "training_performed": false,
+  "validation_predictions_verified": true,
+  "statistics": {
+    "acne": {
+      "train": {
+        "images": 287,
+        "source_labels": {
+          "acne vulgaris": 204,
+          "acne": 83
+        },
+        "source_domains": {
+          "www.dermaamin.com": 284,
+          "atlasdermatologico.com.br": 3
+        },
+        "frame_retained_min": 0.3820662768031189,
+        "frame_retained_median": 0.5747800586510264,
+        "frame_below_half": 67,
+        "short_edge_below_224": 13
+      },
+      "val": {
+        "images": 42,
+        "source_labels": {
+          "acne vulgaris": 30,
+          "acne": 12
+        },
+        "source_domains": {
+          "www.dermaamin.com": 42
+        },
+        "frame_retained_min": 0.416135881104034,
+        "frame_retained_median": 0.5681923215891236,
+        "frame_below_half": 10,
+        "short_edge_below_224": 4,
+        "predictions": {
+          "acne": 37,
+          "folliculitis": 3,
+          "allergic_contact_dermatitis": 1,
+          "eczema": 1
+        },
+        "correct": 37,
+        "below_half_correct": 10
+      }
+    },
+    "eczema": {
+      "train": {
+        "images": 118,
+        "source_labels": {
+          "eczema": 118
+        },
+        "source_domains": {
+          "www.dermaamin.com": 118
+        },
+        "frame_retained_min": 0.3239669421487603,
+        "frame_retained_median": 0.5137623503868299,
+        "frame_below_half": 25,
+        "short_edge_below_224": 27
+      },
+      "val": {
+        "images": 16,
+        "source_labels": {
+          "eczema": 16
+        },
+        "source_domains": {
+          "www.dermaamin.com": 16
+        },
+        "frame_retained_min": 0.35379061371841153,
+        "frame_retained_median": 0.5714334285325717,
+        "frame_below_half": 3,
+        "short_edge_below_224": 4,
+        "predictions": {
+          "psoriasis": 4,
+          "eczema": 3,
+          "allergic_contact_dermatitis": 4,
+          "acne": 1,
+          "urticaria": 1,
+          "scabies": 2,
+          "folliculitis": 1
+        },
+        "correct": 3,
+        "below_half_correct": 1
+      }
+    },
+    "psoriasis": {
+      "train": {
+        "images": 356,
+        "source_labels": {
+          "psoriasis": 356
+        },
+        "source_domains": {
+          "www.dermaamin.com": 296,
+          "atlasdermatologico.com.br": 60
+        },
+        "frame_retained_min": 0.2804005722460658,
+        "frame_retained_median": 0.5747800586510264,
+        "frame_below_half": 47,
+        "short_edge_below_224": 31
+      },
+      "val": {
+        "images": 49,
+        "source_labels": {
+          "psoriasis": 49
+        },
+        "source_domains": {
+          "www.dermaamin.com": 39,
+          "atlasdermatologico.com.br": 10
+        },
+        "frame_retained_min": 0.4126315789473684,
+        "frame_retained_median": 0.5975609756097561,
+        "frame_below_half": 4,
+        "short_edge_below_224": 1,
+        "predictions": {
+          "psoriasis": 35,
+          "scabies": 5,
+          "eczema": 3,
+          "seborrheic_dermatitis": 2,
+          "folliculitis": 1,
+          "allergic_contact_dermatitis": 2,
+          "acne": 1
+        },
+        "correct": 35,
+        "below_half_correct": 1
+      }
+    },
+    "folliculitis": {
+      "train": {
+        "images": 98,
+        "source_labels": {
+          "folliculitis": 98
+        },
+        "source_domains": {
+          "atlasdermatologico.com.br": 34,
+          "www.dermaamin.com": 64
+        },
+        "frame_retained_min": 0.4404494382022472,
+        "frame_retained_median": 0.6153982649842271,
+        "frame_below_half": 6,
+        "short_edge_below_224": 16
+      },
+      "val": {
+        "images": 12,
+        "source_labels": {
+          "folliculitis": 12
+        },
+        "source_domains": {
+          "atlasdermatologico.com.br": 6,
+          "www.dermaamin.com": 6
+        },
+        "frame_retained_min": 0.48756218905472637,
+        "frame_retained_median": 0.5808032029782078,
+        "frame_below_half": 1,
+        "short_edge_below_224": 2,
+        "predictions": {
+          "scabies": 2,
+          "folliculitis": 6,
+          "acne": 3,
+          "psoriasis": 1
+        },
+        "correct": 6,
+        "below_half_correct": 0
+      }
+    },
+    "urticaria": {
+      "train": {
+        "images": 88,
+        "source_labels": {
+          "urticaria": 88
+        },
+        "source_domains": {
+          "www.dermaamin.com": 65,
+          "atlasdermatologico.com.br": 23
+        },
+        "frame_retained_min": 0.3820662768031189,
+        "frame_retained_median": 0.5747800586510264,
+        "frame_below_half": 10,
+        "short_edge_below_224": 2
+      },
+      "val": {
+        "images": 13,
+        "source_labels": {
+          "urticaria": 13
+        },
+        "source_domains": {
+          "www.dermaamin.com": 12,
+          "atlasdermatologico.com.br": 1
+        },
+        "frame_retained_min": 0.48756218905472637,
+        "frame_retained_median": 0.6086956521739131,
+        "frame_below_half": 1,
+        "short_edge_below_224": 0,
+        "predictions": {
+          "acne": 2,
+          "urticaria": 7,
+          "allergic_contact_dermatitis": 2,
+          "eczema": 1,
+          "psoriasis": 1
+        },
+        "correct": 7,
+        "below_half_correct": 1
+      }
+    },
+    "allergic_contact_dermatitis": {
+      "train": {
+        "images": 209,
+        "source_labels": {
+          "allergic contact dermatitis": 209
+        },
+        "source_domains": {
+          "www.dermaamin.com": 197,
+          "atlasdermatologico.com.br": 12
+        },
+        "frame_retained_min": 0.33676975945017185,
+        "frame_retained_median": 0.5490196078431373,
+        "frame_below_half": 34,
+        "short_edge_below_224": 17
+      },
+      "val": {
+        "images": 30,
+        "source_labels": {
+          "allergic contact dermatitis": 30
+        },
+        "source_domains": {
+          "www.dermaamin.com": 28,
+          "atlasdermatologico.com.br": 2
+        },
+        "frame_retained_min": 0.3596330275229358,
+        "frame_retained_median": 0.5051680616447456,
+        "frame_below_half": 11,
+        "short_edge_below_224": 4,
+        "predictions": {
+          "urticaria": 3,
+          "folliculitis": 5,
+          "eczema": 2,
+          "allergic_contact_dermatitis": 11,
+          "psoriasis": 5,
+          "acne": 2,
+          "scabies": 1,
+          "seborrheic_dermatitis": 1
+        },
+        "correct": 11,
+        "below_half_correct": 3
+      }
+    },
+    "seborrheic_dermatitis": {
+      "train": {
+        "images": 79,
+        "source_labels": {
+          "seborrheic dermatitis": 79
+        },
+        "source_domains": {
+          "www.dermaamin.com": 50,
+          "atlasdermatologico.com.br": 29
+        },
+        "frame_retained_min": 0.26558265582655827,
+        "frame_retained_median": 0.5730994152046783,
+        "frame_below_half": 12,
+        "short_edge_below_224": 0
+      },
+      "val": {
+        "images": 11,
+        "source_labels": {
+          "seborrheic dermatitis": 11
+        },
+        "source_domains": {
+          "www.dermaamin.com": 7,
+          "atlasdermatologico.com.br": 4
+        },
+        "frame_retained_min": 0.47002398081534774,
+        "frame_retained_median": 0.5730994152046783,
+        "frame_below_half": 1,
+        "short_edge_below_224": 0,
+        "predictions": {
+          "seborrheic_dermatitis": 5,
+          "psoriasis": 2,
+          "scabies": 1,
+          "folliculitis": 1,
+          "eczema": 1,
+          "allergic_contact_dermatitis": 1
+        },
+        "correct": 5,
+        "below_half_correct": 0
+      }
+    },
+    "scabies": {
+      "train": {
+        "images": 139,
+        "source_labels": {
+          "scabies": 139
+        },
+        "source_domains": {
+          "atlasdermatologico.com.br": 60,
+          "www.dermaamin.com": 79
+        },
+        "frame_retained_min": 0.4091858037578288,
+        "frame_retained_median": 0.5850746268656717,
+        "frame_below_half": 10,
+        "short_edge_below_224": 2
+      },
+      "val": {
+        "images": 20,
+        "source_labels": {
+          "scabies": 20
+        },
+        "source_domains": {
+          "www.dermaamin.com": 10,
+          "atlasdermatologico.com.br": 10
+        },
+        "frame_retained_min": 0.4803921568627451,
+        "frame_retained_median": 0.6232508290867913,
+        "frame_below_half": 1,
+        "short_edge_below_224": 0,
+        "predictions": {
+          "eczema": 2,
+          "scabies": 11,
+          "acne": 1,
+          "psoriasis": 3,
+          "urticaria": 1,
+          "allergic_contact_dermatitis": 1,
+          "folliculitis": 1
+        },
+        "correct": 11,
+        "below_half_correct": 1
+      }
+    }
+  },
+  "review_selection": [
+    {
+      "image_id": "100aecaaac433ac3b9d08869e29a5c73",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "1bec7e2e587c13adb6887df1bd705a43",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "26ac8d279302975f823cc24c60040aa5",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "2e8d80b36e871b1ff2b0b9ef8c8532f8",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "46be988f153fbfe0c97f59da9f7c6479",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "53d69b9f140ac6b48514141564dc6b2f",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "696922f3d6d65bfb880ba2636f96b1d2",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "851055fe0d7026e6d4aa965ca857d5e2",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "8b7a068398e205a60dfea6db2ad42f75",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "924acae61840d0e0e6ad71c137dbadbc",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "cb0bd0c2a0c3050db2384a371a5a83c9",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "d05a9fe83cf48fc727d48995f4ff06b5",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "de0b8a88c10b392c990a4109d7483e95",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "ecb358bd112ba5da490e99bb9c015fca",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "f15bc382e70cb3a1daec7092a79f4749",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "fb57531df8274f14fe60e71ac27095d2",
+      "partition": "val",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "0ff013316ad0b4773d6cf28fd453e817",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "06ba85a99cf630d83696a18fd35f8333",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "380ae9b2f4a17914a656eadc0a255223",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "d3d5cfff71416d2044cde529ceeb406b",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "672e3fb91134cce75e899d38c4e27c7b",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "bb50db007a517645b895d1dde3b3714f",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "7ab27dd82e5e58090d3243f1f8b4bc20",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "63a123ca7279d6100f6a813c89d30417",
+      "partition": "val",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "d875ed2994d5cc1d2a4dddc2f5ecd7e9",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "d02fe1ea29ed9ab2f2ded6c516dfff99",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "961d7614dcde8fe49ca6bd24e0d05ed1",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "86cd7e56103deaff8d7d02b319ea316a",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "d49f3bcd96238cf5657681a4f1f4efa6",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "78b51eea155d011fee2e1279a7d19081",
+      "partition": "train",
+      "source_class": "eczema"
+    },
+    {
+      "image_id": "2e03634f404f78e42f59c3926570eb88",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "fcd0e8f83bb2c2f01d124809fecc10cc",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "5208dea0fd94e4ca2cc2b7a2df4d8466",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "bcd558c86187bde3ed013eed7b7cfe5f",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "9d8b54942be0f5c46d9943fbd408cb52",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "0af9a73bbe0b7ca9217b0dc27d665377",
+      "partition": "train",
+      "source_class": "allergic_contact_dermatitis"
+    },
+    {
+      "image_id": "ea252217e0c06cecfae33140b8de1ea6",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    },
+    {
+      "image_id": "299fdd16db1a023d5501f70f80619dc3",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    },
+    {
+      "image_id": "22ab1ad4863a3f44365cc1a75b9248e6",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    },
+    {
+      "image_id": "af78740aed048db888af516a0f216393",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    },
+    {
+      "image_id": "496653353ce67e4d910bf28c822edf59",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    },
+    {
+      "image_id": "44c18634af81d8726adc51fb0230a179",
+      "partition": "train",
+      "source_class": "seborrheic_dermatitis"
+    }
+  ],
+  "selection_count": 42,
+  "frame_metric": "Geometric image area retained by resize256/centre224; not measured lesion area",
+  "visual_review_record": "ai/error_visual_review.json"
+}

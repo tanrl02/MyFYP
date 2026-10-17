@@ -46,3 +46,8 @@ Both commands run offline. Results go to `docs/ai/review/`; optional contact she
 ## Upper-block fine-tuning
 
 The next development experiment starts from the saved baseline and trains feature blocks 6–8 plus the classifier with lower learning rates and training-only horizontal flips. All BatchNorm state and earlier feature blocks stay frozen. Read [the procedure and results](../docs/ai/FINE_TUNING.md) and `finetune_config.json`; use `train_finetune.py --mode smoke|train|verify --run-id <new-id> --device cuda`. Verification replays validation predictions for both checkpoints and checks frozen/trainable state changes. No test images are fitted or evaluated, and the application remains simulated.
+
+
+## Validation error analysis
+
+Run `.venv-ai\Scripts\python.exe ai/analyze_errors.py --device cuda` to replay the saved fine-tuned validation predictions and generate source/count/framing aggregates plus local original/crop contact sheets. It never trains or reads test pixels. See [the error review and proposed preprocessing experiment](../docs/ai/ERROR_ANALYSIS.md). The separate `error_visual_review.json` records actual technical visual inspection; generating sheets alone does not constitute visual review.
