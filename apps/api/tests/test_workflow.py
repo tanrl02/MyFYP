@@ -62,6 +62,50 @@ class WorkflowTests(unittest.TestCase):
             outcomes=list(pool.map(edit,['Fictional specialty one','Fictional specialty two']))
         self.assertEqual(sorted(outcomes),[1,409])
 
+    def test_doctor_matching_manual_ranking_fallback_and_live_profiles(self):
+        store=Store(self.path)
+        store.save_doctor_profile('doctor-lim','Fictional dermatology',['acne'],0)
+        store.save_doctor_profile('doctor-anita','Fictional dermatology',['general'],0)
+        def matches(concern):
+            return self.client.get('/doctor-matches',headers=self.patient,params={'concern':concern}).json()
+        acne=matches('acne')
+        self.assertEqual(acne['source'],'manual')
+        self.assertEqual([(d['doctor_id'],d['match_level']) for d in acne['doctors']],
+                         [('doctor-lim','concern'),('doctor-anita','general')])
+        eczema=matches('eczema')
+        self.assertEqual([(d['doctor_id'],d['match_level']) for d in eczema['doctors']],
+                         [('doctor-anita','general'),('doctor-lim','none')])
+        store.save_doctor_profile('doctor-lim','Fictional dermatology',['eczema'],1)
+        self.assertEqual(matches('eczema')['doctors'][0]['doctor_id'],'doctor-lim')
+        self.assertEqual(len(matches('psoriasis')['doctors']),2)
+        for params in ({},{'concern':'unknown'},{'concern':'acne','assessment_id':'x'},{'assessment_id':''}):
+            self.assertEqual(self.client.get('/doctor-matches',headers=self.patient,params=params).status_code,422)
+        for who in (self.staff,{'X-Demo-Actor':'doctor-lim'}):
+            self.assertEqual(self.client.get('/doctor-matches',headers=who,params={'concern':'general'}).status_code,403)
+
+    def test_assessment_matching_is_owned_simulated_and_does_not_share(self):
+        store=Store(self.path)
+        assessment=store.save_assessment('patient-ava','match-photo-fixture','hash',b'fictional',1,1)
+        params={'assessment_id':assessment['id']}
+        result=self.client.get('/doctor-matches',headers=self.patient,params=params).json()
+        self.assertEqual(result['source'],'simulation')
+        self.assertEqual(result['concern'],'acne')
+        self.assertIn('SIMULATION',result['message'])
+        self.assertNotIn('photo_uri',str(result))
+        self.assertEqual(self.client.get('/doctor-matches',headers=self.other,params=params).status_code,404)
+        self.assertEqual(self.client.get('/doctor-matches',headers=self.patient,params={'assessment_id':'missing'}).status_code,404)
+        self.assertEqual(store.shares('patient-ava'),[])
+        self.book()
+        self.assertEqual(store.shares('patient-ava'),[])
+
+    def test_unknown_assessment_category_uses_general_matching(self):
+        from unittest.mock import patch
+        store=Store(self.path)
+        assessment=store.save_assessment('patient-ava','unknown-result-fixture','hash',b'fictional',1,1)
+        with patch.object(Store,'assessment_metadata',return_value={'origin':'simulation','example_category':'Uncertain'}):
+            result=store.doctor_matches('patient-ava',assessment_id=assessment['id'])
+        self.assertEqual(result['concern'],'general')
+
     def test_connected_persistence_and_scoping(self):
         booking = self.book().json()
         self.assertEqual(self.book().json()['id'], booking['id'])

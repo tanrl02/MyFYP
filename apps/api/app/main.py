@@ -2,7 +2,7 @@ from datetime import date
 import os
 from pathlib import Path
 from typing import Literal
-from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form
+from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Query
 import hashlib
 from .photos import MAX_BYTES, normalise_photo
 from fastapi.middleware.cors import CORSMiddleware
@@ -135,6 +135,11 @@ def create_app(path=None):
     @api.get('/doctors')
     def doctor_profiles(who=Depends(actor)):
         return store.doctor_profiles()
+
+    @api.get('/doctor-matches')
+    def doctor_matches(concern: Literal['general','acne','eczema','psoriasis'] | None=None,
+                       assessment_id: str | None=Query(default=None,min_length=1,max_length=100),who=Depends(patient)):
+        return run(lambda: store.doctor_matches(who,concern,assessment_id))
 
     @api.post('/staff/doctors/{doctor_id}')
     def save_doctor_profile(doctor_id: str,payload: DoctorProfileInput,who=Depends(staff)):

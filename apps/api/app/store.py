@@ -130,6 +130,41 @@ class Store:
         with self.connect() as db:
             return [self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
 
+    def doctor_matches(self, patient, concern=None, assessment_id=None):
+        if (concern is None) == (assessment_id is None):
+            raise RuleError('Choose a concern or a saved assessment, not both.',422)
+        if concern is not None and concern not in DOCTOR_CONCERNS:
+            raise RuleError('Choose a supported concern.',422)
+        source='manual'
+        message='Suggestions use staff-entered expertise, not verified qualifications or a diagnosis.'
+        with self.connect() as db:
+            db.execute('BEGIN')
+            if assessment_id is not None:
+                row=db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE id=? AND patient_id=?',
+                               (assessment_id,patient)).fetchone()
+                if row is None:
+                    raise RuleError('Assessment not found for this patient.',404)
+                metadata=self.assessment_metadata(row)
+                # Explicit categories only. Unknown/uncertain results use general support.
+                concern={'Acne (example only)':'acne','Eczema (example only)':'eczema',
+                         'Psoriasis (example only)':'psoriasis'}.get(metadata['example_category'],'general')
+                source=metadata['origin']
+                message='SIMULATION: suggestions use a fixed example category, not image analysis or a diagnosis. No assessment is shared by viewing suggestions or booking.'
+            profiles=[self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
+        for profile in profiles:
+            if concern in profile['expertise']:
+                level='concern'
+                reason='Profile lists general skin concerns.' if concern=='general' else f"Profile lists {concern} as an area of expertise."
+            elif 'general' in profile['expertise']:
+                level='general'
+                reason='General skin concerns are listed; the selected concern is not specifically listed.'
+            else:
+                level='none'
+                reason='No matching expertise is listed. You can still choose this doctor.'
+            profile.update(match_level=level,match_reason=reason)
+        profiles.sort(key=lambda p:({'concern':0,'general':1,'none':2}[p['match_level']],p['doctor_name']))
+        return {'concern':concern,'source':source,'assessment_id':assessment_id,'message':message,'doctors':profiles}
+
     def save_doctor_profile(self, doctor, specialty, expertise, version):
         specialty = specialty.strip()
         if not specialty or len(specialty)>80 or not set(expertise)<=DOCTOR_CONCERNS or len(expertise)!=len(set(expertise)):

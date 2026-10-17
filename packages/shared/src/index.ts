@@ -17,6 +17,8 @@ export type DemoDoctor = "doctor-lim" | "doctor-anita";
 export const concernLabels = {general:"General skin concerns / not sure",acne:"Acne",eczema:"Eczema",psoriasis:"Psoriasis"};
 export type DoctorConcern = keyof typeof concernLabels;
 export type DoctorProfile = {doctor_id:DemoDoctor;doctor_name:string;specialty:string;expertise:DoctorConcern[];version:number;updated_at:string|null};
+export type DoctorMatchSource = {concern:DoctorConcern;assessmentId?:string};
+export type DoctorMatches = {concern:DoctorConcern;source:"manual"|"simulation";assessment_id:string|null;message:string;doctors:(DoctorProfile & {match_level:"concern"|"general"|"none";match_reason:string})[]};
 export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim (demo)", "doctor-anita": "Dr. Anita (demo)" };
 export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDoctor; note: string; follow_up: string; created_at: string };
 export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
@@ -35,6 +37,7 @@ export const queueToken = (booking: Booking) => `${booking.doctor_id === "doctor
 export const visitTime = (iso: string) => new Date(iso).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 export class DemoApi {
+  doctorMatches(source:DoctorMatchSource) { return this.request<DoctorMatches>(source.assessmentId?`/doctor-matches?assessment_id=${encodeURIComponent(source.assessmentId)}`:`/doctor-matches?concern=${encodeURIComponent(source.concern)}`); }
   doctors() { return this.request<DoctorProfile[]>("/doctors"); }
   saveDoctor(id:DemoDoctor,body:Pick<DoctorProfile,"specialty"|"expertise"|"version">) { return this.request<DoctorProfile>(`/staff/doctors/${encodeURIComponent(id)}`,body); }
   constructor(private baseUrl: string, private actor: DemoActor) {}
