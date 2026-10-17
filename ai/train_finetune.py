@@ -11,10 +11,12 @@ try:
     from ai.train_baseline import (FrozenImages, build_model, evaluate, one_per_class,
                                    seed_everything, torch, nn, torchvision, np, Image)
     from ai.baseline_data import ROOT, load_baseline_data, training_class_weights
+    from ai.preprocessing import FullFrame224
 except ModuleNotFoundError:
     from train_baseline import (FrozenImages, build_model, evaluate, one_per_class,
                                seed_everything, torch, nn, torchvision, np, Image)
     from baseline_data import ROOT, load_baseline_data, training_class_weights
+    from preprocessing import FullFrame224
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.models import EfficientNet_B0_Weights
@@ -79,6 +81,21 @@ def macro_precision(metrics):
     return sum(row['precision'] for row in metrics['per_class']) / len(metrics['per_class'])
 
 
+def validation_transform_for(config):
+    kind = config.get('preprocessing', 'official_centre_crop')
+    if kind == 'official_centre_crop': return EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()
+    if kind == 'full_frame_pad224': return FullFrame224()
+    raise ValueError('Unknown preprocessing; refuse to guess checkpoint geometry')
+
+
+def check_controlled_config(config, incumbent_config):
+    permitted = {'experiment', 'preprocessing', 'augmentation'}
+    for key in set(config) | set(incumbent_config):
+        if key not in permitted and config.get(key) != incumbent_config.get(key):
+            raise ValueError(f'Preprocessing comparison changed another setting: {key}')
+    if config.get('preprocessing') != 'full_frame_pad224': raise ValueError('Expected full-frame comparison')
+
+
 def verify(folder, device):
     run = json.loads((folder / 'run.json').read_text(encoding='utf-8'))
     config = run['config']
@@ -101,14 +118,16 @@ def verify(folder, device):
     configure_trainable(model, config['feature_blocks'])
     checks = state_checks(model, source['model_state_dict'], config['feature_blocks'])
     model.to(device)
-    loader = DataLoader(FrozenImages(rows['val'], EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()), batch_size=config['batch_size'])
+    loader = DataLoader(FrozenImages(rows['val'], validation_transform_for(config)), batch_size=config['batch_size'])
     reproduced = evaluate(model, loader, device, len(mapping))
     assert_metrics(reproduced, checkpoint['validation'])
-    # Replay the source on the identical validation loader to verify the comparison too.
+    # Baseline always uses its own original geometry, never the candidate transform.
     model.load_state_dict(source['model_state_dict'])
-    baseline = evaluate(model, loader, device, len(mapping))
+    baseline_loader = DataLoader(FrozenImages(rows['val'], EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()), batch_size=config['batch_size'])
+    baseline = evaluate(model, baseline_loader, device, len(mapping))
     assert_metrics(baseline, source['validation'])
-    output = ROOT / 'docs/ai/finetune_results'
+    is_full_frame = config.get('preprocessing') == 'full_frame_pad224'
+    output = ROOT / ('docs/ai/full_frame_results' if is_full_frame else 'docs/ai/finetune_results')
     output.mkdir(parents=True, exist_ok=True)
     summary = {'run_id': folder.name, 'config': config, 'environment': run,
                'checkpoint_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -119,6 +138,23 @@ def verify(folder, device):
                'baseline_macro_precision': macro_precision(baseline),
                'finetuned_macro_precision': macro_precision(reproduced),
                'epoch_seconds_total': sum(r['seconds'] for r in history)}
+    if is_full_frame:
+        incumbent_evidence = json.loads((ROOT / 'docs/ai/finetune_results/summary.json').read_text(encoding='utf-8'))
+        incumbent_path = ROOT / 'ai/runs' / incumbent_evidence['run_id'] / 'best.pt'
+        if hashlib.sha256(incumbent_path.read_bytes()).hexdigest() != incumbent_evidence['checkpoint_sha256']:
+            raise ValueError('Incumbent checkpoint changed')
+        incumbent = torch.load(incumbent_path, map_location='cpu', weights_only=True)
+        check_controlled_config(config, incumbent['metadata']['config'])
+        if incumbent['metadata']['class_to_index'] != mapping: raise ValueError('Incumbent class mapping differs')
+        model.load_state_dict(incumbent['model_state_dict'])
+        incumbent_metrics = evaluate(model, baseline_loader, device, len(mapping))
+        assert_metrics(incumbent_metrics, incumbent['validation'])
+        assert_metrics(incumbent_metrics, incumbent_evidence['finetuned'])
+        wins = (reproduced['macro_f1'], -reproduced['loss']) > (incumbent_metrics['macro_f1'], -incumbent_metrics['loss'])
+        summary.update({'incumbent': incumbent_metrics, 'incumbent_macro_precision': macro_precision(incumbent_metrics),
+                        'incumbent_checkpoint_sha256': incumbent_evidence['checkpoint_sha256'],
+                        'incumbent_replay_verified': True,
+                        'selected_model': folder.name if wins else incumbent_evidence['run_id']})
     (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
     (output / 'epochs.json').write_text(json.dumps(history, indent=2) + '\n', encoding='utf-8')
     with (output / 'per_class.csv').open('w', encoding='utf-8', newline='') as handle:
@@ -129,6 +165,7 @@ def verify(folder, device):
     print(json.dumps({key: summary[key] for key in ('best_epoch', 'validation_replay_verified', 'baseline_replay_verified', 'state_checks', 'baseline_macro_precision', 'finetuned_macro_precision')}, indent=2))
     print(json.dumps({'baseline_accuracy': baseline['accuracy'], 'finetuned_accuracy': reproduced['accuracy'],
                       'baseline_macro_f1': baseline['macro_f1'], 'finetuned_macro_f1': reproduced['macro_f1']}))
+    if is_full_frame: print(json.dumps({'selected_model': summary['selected_model'], 'incumbent_replay_verified': True}))
 
 
 def main():
@@ -136,6 +173,8 @@ def main():
     parser.add_argument('--mode', choices=('smoke', 'train', 'verify'), required=True)
     parser.add_argument('--run-id', required=True)
     parser.add_argument('--device', choices=('cpu', 'cuda'), default='cuda')
+    parser.add_argument('--experiment', choices=('centre-crop', 'full-frame'), default='centre-crop',
+                        help='Training/smoke config; verify always uses saved checkpoint config')
     args = parser.parse_args()
     if not args.run_id or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-_' for c in args.run_id):
         raise ValueError('Invalid run ID')
@@ -144,7 +183,11 @@ def main():
     folder = ROOT / 'ai/runs' / args.run_id
     if args.mode == 'verify': return verify(folder, device)
     if folder.exists(): raise ValueError('Run exists; use a new run ID')
-    config = json.loads((ROOT / 'ai/finetune_config.json').read_text(encoding='utf-8'))
+    config_name = 'full_frame_config.json' if args.experiment == 'full-frame' else 'finetune_config.json'
+    config = json.loads((ROOT / 'ai' / config_name).read_text(encoding='utf-8'))
+    if args.experiment == 'full-frame':
+        incumbent_evidence = json.loads((ROOT / 'docs/ai/finetune_results/summary.json').read_text(encoding='utf-8'))
+        check_controlled_config(config, incumbent_evidence['config'])
     mapping, rows, dataset = load_baseline_data(config)
     source = load_source(config, mapping)
     seed_everything(config['seed'], config['cpu_threads'])
@@ -152,7 +195,7 @@ def main():
     model.load_state_dict(source['model_state_dict'])
     configure_trainable(model, config['feature_blocks'])
     model.to(device)
-    validation_transform = EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()
+    validation_transform = validation_transform_for(config)
     training_transform = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5), validation_transform])
     feature_parameters = [p for p in model.features.parameters() if p.requires_grad]
     classifier_parameters = [p for p in model.classifier.parameters() if p.requires_grad]

@@ -51,3 +51,7 @@ The next development experiment starts from the saved baseline and trains featur
 ## Validation error analysis
 
 Run `.venv-ai\Scripts\python.exe ai/analyze_errors.py --device cuda` to replay the saved fine-tuned validation predictions and generate source/count/framing aggregates plus local original/crop contact sheets. It never trains or reads test pixels. See [the error review and proposed preprocessing experiment](../docs/ai/ERROR_ANALYSIS.md). The separate `error_visual_review.json` records actual technical visual inspection; generating sheets alone does not constitute visual review.
+
+## Full-frame preprocessing comparison
+
+`train_finetune.py --experiment full-frame` selects `full_frame_config.json` for smoke/training. It fits the whole frame inside224 with mean-coloured padding and retains the earlier experiment's training settings. Verification uses each checkpoint's saved preprocessing, independently replays the baseline and incumbent, and writes to `docs/ai/full_frame_results`. See [the comparison procedure and results](../docs/ai/FULL_FRAME_COMPARISON.md). Old centre-crop checkpoints retain their original preprocessing.

@@ -1,0 +1,28 @@
+{
+  "experiment": "efficientnet-b0-full-frame-v1",
+  "dataset_version": "eight-class-v1",
+  "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+  "architecture": "efficientnet_b0",
+  "source_checkpoint": "ai/runs/efficientnet-b0-baseline-v1/best.pt",
+  "source_sha256": "c13595ca48d53e69ecf83feec287920494285c10c1d273b590ab7ba289e41d1c",
+  "seed": 3403,
+  "epochs": 10,
+  "batch_size": 16,
+  "feature_blocks": [
+    6,
+    7,
+    8
+  ],
+  "feature_learning_rate": 1e-05,
+  "classifier_learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "cpu_threads": 4,
+  "num_workers": 0,
+  "batchnorm": "all_running_statistics_and_affine_parameters_frozen",
+  "train_loss": "inverse_training_class_frequency_weighted_cross_entropy",
+  "validation_loss": "unweighted_cross_entropy",
+  "selection_metric": "validation_macro_f1_then_lower_validation_loss",
+  "augmentation": "training_only_horizontal_flip_probability_0.5_before_full_frame_preprocessing",
+  "test_evaluation": "disabled",
+  "preprocessing": "full_frame_pad224"
+}

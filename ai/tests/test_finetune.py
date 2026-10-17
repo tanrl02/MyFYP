@@ -6,7 +6,7 @@ HAS_TORCH = importlib.util.find_spec('torch') is not None
 if HAS_TORCH:
     import torch
     from ai.train_baseline import build_model, seed_everything
-    from ai.train_finetune import configure_trainable, training_mode, state_checks
+    from ai.train_finetune import configure_trainable, training_mode, state_checks, check_controlled_config, validation_transform_for
 
 
 @unittest.skipUnless(HAS_TORCH, 'Fine-tuning checks require .venv-ai')
@@ -36,6 +36,14 @@ class FineTuneTests(unittest.TestCase):
 
     def test_reject_wrong_block_boundary(self):
         with self.assertRaises(ValueError): configure_trainable(build_model(8, pretrained=False), [5, 6, 7, 8])
+
+    def test_comparison_rejects_changed_training_settings_or_unknown_geometry(self):
+        incumbent = {'epochs': 10, 'seed': 3403, 'feature_learning_rate': 1e-5}
+        candidate = {**incumbent, 'preprocessing': 'full_frame_pad224'}
+        check_controlled_config(candidate, incumbent)
+        for key, value in (('epochs', 20), ('seed', 42), ('feature_learning_rate', 0.001)):
+            with self.assertRaises(ValueError): check_controlled_config({**candidate, key: value}, incumbent)
+        with self.assertRaises(ValueError): validation_transform_for({'preprocessing': 'unknown'})
 
 
 if __name__ == '__main__': unittest.main()

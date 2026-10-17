@@ -64,3 +64,6 @@ Independent checkpoint reload reproduced the validation metrics for both models:
 Tracked [summary and provenance](finetune_results/summary.json), [ten-epoch aggregates](finetune_results/epochs.json) and [per-class CSV](finetune_results/per_class.csv) preserve the evidence. All **401 test images remain unevaluated**. No new model is integrated into the app; Word, app dependencies and clinic services are unchanged. The pre-existing user edit to `BASELINE_SETUP.md` remains untouched.
 
 Next manageable task: examine eczema/dermatitis errors and the available training examples, document annotation/preprocessing limitations, and choose one further targeted experiment. Avoid promising that more epochs or a larger model will reach 90%. Additional model selection continues to use development data; final test evaluation comes after that process is complete.
+
+
+Subsequent checkpoint: the planned error review and full-frame preprocessing comparison have now completed. See [the comparison report](FULL_FRAME_COMPARISON.md) for the marginal macro-F1 gain, accuracy trade-off and current offline model-selection decision. This page retains the original first-experiment results.

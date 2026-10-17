@@ -146,3 +146,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October eczema/dermatitis error review complete: all 193 validation predictions replayed exactly; 42 original/crop images visually inspected and recorded, with no test-image review, relabelling or training. Read docs/ai/ERROR_ANALYSIS.md. Context loss is visible but not a proven cause of errors; narrow source coverage and small/variable training examples remain concerns. Next manageable task: implement/check full-frame aspect-preserving resize with padding, then one comparison run from the same baseline checkpoint with otherwise identical v1 fine-tuning settings. All eight classes and 401 reserved test images remain unchanged.
+
+
+18 October full-frame comparison complete:33 AI tests, GPU smoke, all10epochs and independent three-checkpoint validation replay passed. Full-frame epoch8 wins macro-F1 narrowly (.5288 vs.5214), average precision53.28% vs53.07%, accuracy58.55% vs59.59%. Eczema recall6/16 vs3/16, but several other classes worsen; no90% claim. Read docs/ai/FULL_FRAME_COMPARISON.md. Selected offline model efficientnet-b0-full-frame-v1; app remains simulated,401test untouched. Next small task: audit permitted additional training-data options for weak eczema/dermatitis classes before acquisition/training. Keep8classes and version any future data change.

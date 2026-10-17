@@ -53,3 +53,6 @@ If this does not materially help, prioritise qualified review and permitted addi
 ```
 
 This regenerates analysis and local contact sheets only. It does not itself perform the separately recorded visual review, train a model, download images, change frozen data or modify the application. The app remains simulated, Word edits and real authentication stay deferred, and the existing user edit to `BASELINE_SETUP.md` is preserved.
+
+
+Subsequent checkpoint: the proposed full-frame experiment has now completed; see [its procedure, results and selection decision](FULL_FRAME_COMPARISON.md). The error observations here remain the evidence recorded before that experiment.

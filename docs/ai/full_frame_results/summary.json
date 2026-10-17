@@ -1,0 +1,621 @@
+{
+  "run_id": "efficientnet-b0-full-frame-v1",
+  "config": {
+    "experiment": "efficientnet-b0-full-frame-v1",
+    "dataset_version": "eight-class-v1",
+    "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+    "architecture": "efficientnet_b0",
+    "source_checkpoint": "ai/runs/efficientnet-b0-baseline-v1/best.pt",
+    "source_sha256": "c13595ca48d53e69ecf83feec287920494285c10c1d273b590ab7ba289e41d1c",
+    "seed": 3403,
+    "epochs": 10,
+    "batch_size": 16,
+    "feature_blocks": [
+      6,
+      7,
+      8
+    ],
+    "feature_learning_rate": 1e-05,
+    "classifier_learning_rate": 0.0001,
+    "weight_decay": 0.0001,
+    "cpu_threads": 4,
+    "num_workers": 0,
+    "batchnorm": "all_running_statistics_and_affine_parameters_frozen",
+    "train_loss": "inverse_training_class_frequency_weighted_cross_entropy",
+    "validation_loss": "unweighted_cross_entropy",
+    "selection_metric": "validation_macro_f1_then_lower_validation_loss",
+    "augmentation": "training_only_horizontal_flip_probability_0.5_before_full_frame_preprocessing",
+    "test_evaluation": "disabled",
+    "preprocessing": "full_frame_pad224"
+  },
+  "environment": {
+    "mode": "train",
+    "config": {
+      "experiment": "efficientnet-b0-full-frame-v1",
+      "dataset_version": "eight-class-v1",
+      "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+      "architecture": "efficientnet_b0",
+      "source_checkpoint": "ai/runs/efficientnet-b0-baseline-v1/best.pt",
+      "source_sha256": "c13595ca48d53e69ecf83feec287920494285c10c1d273b590ab7ba289e41d1c",
+      "seed": 3403,
+      "epochs": 10,
+      "batch_size": 16,
+      "feature_blocks": [
+        6,
+        7,
+        8
+      ],
+      "feature_learning_rate": 1e-05,
+      "classifier_learning_rate": 0.0001,
+      "weight_decay": 0.0001,
+      "cpu_threads": 4,
+      "num_workers": 0,
+      "batchnorm": "all_running_statistics_and_affine_parameters_frozen",
+      "train_loss": "inverse_training_class_frequency_weighted_cross_entropy",
+      "validation_loss": "unweighted_cross_entropy",
+      "selection_metric": "validation_macro_f1_then_lower_validation_loss",
+      "augmentation": "training_only_horizontal_flip_probability_0.5_before_full_frame_preprocessing",
+      "test_evaluation": "disabled",
+      "preprocessing": "full_frame_pad224"
+    },
+    "class_to_index": {
+      "acne": 0,
+      "eczema": 1,
+      "psoriasis": 2,
+      "folliculitis": 3,
+      "urticaria": 4,
+      "allergic_contact_dermatitis": 5,
+      "seborrheic_dermatitis": 6,
+      "scabies": 7
+    },
+    "dataset_lock": {
+      "all_images_visually_reviewed": false,
+      "clinical_use_validated": false,
+      "dataset_version": "eight-class-v1",
+      "excluded_images": 108,
+      "expanded_review_semantic_sha256": "85a9afc73f95537edc563fa99713c05d6b783a71d2cde008170843dc16383bca",
+      "frozen_on": "2026-10-18",
+      "included_images": 1968,
+      "initial_review_semantic_sha256": "a7e2266ecb814fe99bd4b387329a9e8523478d22ebcdacd6b78005354a417bd6",
+      "limitations": [
+        "Labels inherited from source, not clinically revalidated",
+        "Technical visual review is partial; every image has not been manually reviewed",
+        "No participant IDs; patient independence unproven",
+        "Difference hashing and sample review cannot rule out every near duplicate",
+        "No training, model performance or phone-domain validation",
+        "Noncommercial research data source; retain original attribution/licence notices"
+      ],
+      "manifest_sha256_normalised_lf": {
+        "class_to_index.json": "005304095b048f311afe51fffa1a68b7d53d61197d3d685693c95b38a1122e1c",
+        "excluded.csv": "6e470d99eb50650600a7da884e03ae08c79ffe47d11add0346c61e06afec9697",
+        "test.csv": "f2529d218e6dc173b9e18687309159e88e04137b71cc91706f38749628cd6793",
+        "train.csv": "328c793ffc87bdbde80a588e76a28ff473e17bb3e14d0fa755d76d924270440f",
+        "val.csv": "9d88c40853bd16b2e392e4c12b2eede30dddbeba2432ec751e81f6b6b868e9a1"
+      },
+      "per_class": {
+        "acne": {
+          "test": 81,
+          "train": 287,
+          "val": 42
+        },
+        "allergic_contact_dermatitis": {
+          "test": 58,
+          "train": 209,
+          "val": 30
+        },
+        "eczema": {
+          "test": 34,
+          "train": 118,
+          "val": 16
+        },
+        "folliculitis": {
+          "test": 35,
+          "train": 98,
+          "val": 12
+        },
+        "psoriasis": {
+          "test": 105,
+          "train": 356,
+          "val": 49
+        },
+        "scabies": {
+          "test": 39,
+          "train": 139,
+          "val": 20
+        },
+        "seborrheic_dermatitis": {
+          "test": 23,
+          "train": 79,
+          "val": 11
+        },
+        "urticaria": {
+          "test": 26,
+          "train": 88,
+          "val": 13
+        }
+      },
+      "preparation_rows_semantic_sha256": "b34feea32756680956d490cb9ddc72a224c2ab6977b67a47dbb107b5e0ce8ca8",
+      "research_baseline_manifests_frozen": true,
+      "rules_semantic_sha256": "81f5d9ada2bbfd5a6e68f18601a7f59d6e5d955635714730c20cd68e6440741a",
+      "source_image_entries": 2076,
+      "source_partitions_preserved": true,
+      "split_counts": {
+        "test": 401,
+        "train": 1374,
+        "val": 193
+      },
+      "visual_triage_flagged_images": 107,
+      "visual_triage_sample_images": 64
+    },
+    "source_epoch": 8,
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "torch": "2.13.0+cu126",
+    "torchvision": "0.28.0+cu126",
+    "numpy": "2.5.2",
+    "pillow": "12.3.0",
+    "cuda_runtime": "12.6",
+    "training_transform": "Compose(\n    RandomHorizontalFlip(p=0.5)\n    FullFrame224(bicubic fit-long-edge224, centred floating ImageNet-mean padding, ImageNet normalisation)\n)",
+    "validation_transform": "FullFrame224(bicubic fit-long-edge224, centred floating ImageNet-mean padding, ImageNet normalisation)",
+    "trainable_parameters": 3140132,
+    "test_images_evaluated": 0
+  },
+  "checkpoint_sha256": "9122d554fb736b49b3d5526f613df70e18318085c90541693655e71a590f1584",
+  "best_epoch": 8,
+  "validation_images": 193,
+  "test_images_evaluated": 0,
+  "validation_replay_verified": true,
+  "baseline_replay_verified": true,
+  "state_checks": {
+    "frozen_parameters_and_buffers_unchanged": true,
+    "changed_feature_blocks": {
+      "6": true,
+      "7": true,
+      "8": true
+    },
+    "classifier_updated": true
+  },
+  "baseline": {
+    "accuracy": 0.5647668393782384,
+    "macro_f1": 0.4854840065863493,
+    "confusion_matrix": [
+      [
+        37,
+        1,
+        0,
+        3,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        2,
+        1,
+        2,
+        4,
+        0,
+        2
+      ],
+      [
+        1,
+        3,
+        32,
+        2,
+        1,
+        2,
+        3,
+        5
+      ],
+      [
+        3,
+        0,
+        0,
+        6,
+        0,
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        1,
+        1,
+        0,
+        7,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        3,
+        4,
+        4,
+        5,
+        10,
+        2,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        6,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        3,
+        1,
+        0,
+        8
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.7551020408163265,
+        "recall": 0.8809523809523809,
+        "f1": 0.8131868131868131
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.21428571428571427,
+        "recall": 0.1875,
+        "f1": 0.19999999999999998
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.7619047619047619,
+        "recall": 0.6530612244897959,
+        "f1": 0.7032967032967032
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.3157894736842105,
+        "recall": 0.5,
+        "f1": 0.3870967741935484
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.3684210526315789,
+        "recall": 0.5384615384615384,
+        "f1": 0.4375
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.5,
+        "recall": 0.3333333333333333,
+        "f1": 0.4
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.5,
+        "recall": 0.5454545454545454,
+        "f1": 0.5217391304347826
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.4444444444444444,
+        "recall": 0.4,
+        "f1": 0.4210526315789474
+      }
+    ],
+    "loss": 1.283222456670178
+  },
+  "finetuned": {
+    "accuracy": 0.5854922279792746,
+    "macro_f1": 0.5288096755995216,
+    "confusion_matrix": [
+      [
+        36,
+        0,
+        1,
+        3,
+        0,
+        1,
+        1,
+        0
+      ],
+      [
+        0,
+        6,
+        4,
+        0,
+        1,
+        3,
+        0,
+        2
+      ],
+      [
+        2,
+        6,
+        29,
+        0,
+        0,
+        6,
+        3,
+        3
+      ],
+      [
+        3,
+        0,
+        0,
+        7,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        2,
+        0,
+        5,
+        3,
+        0,
+        0
+      ],
+      [
+        1,
+        6,
+        1,
+        2,
+        3,
+        13,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        0,
+        0,
+        2,
+        5,
+        1
+      ],
+      [
+        0,
+        2,
+        2,
+        3,
+        0,
+        1,
+        0,
+        12
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.8181818181818182,
+        "recall": 0.8571428571428571,
+        "f1": 0.8372093023255814
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.2608695652173913,
+        "recall": 0.375,
+        "f1": 0.30769230769230765
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.725,
+        "recall": 0.5918367346938775,
+        "f1": 0.6516853932584269
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.4666666666666667,
+        "recall": 0.5833333333333334,
+        "f1": 0.5185185185185186
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.5555555555555556,
+        "recall": 0.38461538461538464,
+        "f1": 0.4545454545454546
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.4482758620689655,
+        "recall": 0.43333333333333335,
+        "f1": 0.44067796610169496
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.4166666666666667,
+        "recall": 0.45454545454545453,
+        "f1": 0.43478260869565216
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.5714285714285714,
+        "recall": 0.6,
+        "f1": 0.5853658536585366
+      }
+    ],
+    "loss": 1.2390578225486637
+  },
+  "baseline_macro_precision": 0.48249343597087957,
+  "finetuned_macro_precision": 0.5328305882232044,
+  "epoch_seconds_total": 253.21800000000803,
+  "incumbent": {
+    "accuracy": 0.5958549222797928,
+    "macro_f1": 0.5214449327801965,
+    "confusion_matrix": [
+      [
+        37,
+        1,
+        0,
+        3,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        3,
+        4,
+        1,
+        1,
+        4,
+        0,
+        2
+      ],
+      [
+        1,
+        3,
+        35,
+        1,
+        0,
+        2,
+        2,
+        5
+      ],
+      [
+        3,
+        0,
+        1,
+        6,
+        0,
+        0,
+        0,
+        2
+      ],
+      [
+        2,
+        1,
+        1,
+        0,
+        7,
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        2,
+        5,
+        5,
+        3,
+        11,
+        1,
+        1
+      ],
+      [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        5,
+        1
+      ],
+      [
+        1,
+        2,
+        3,
+        1,
+        1,
+        1,
+        0,
+        11
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.7872340425531915,
+        "recall": 0.8809523809523809,
+        "f1": 0.8314606741573034
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.23076923076923078,
+        "recall": 0.1875,
+        "f1": 0.20689655172413793
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.6862745098039216,
+        "recall": 0.7142857142857143,
+        "f1": 0.7000000000000001
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.3333333333333333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.5833333333333334,
+        "recall": 0.5384615384615384,
+        "f1": 0.5599999999999999
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.5,
+        "recall": 0.36666666666666664,
+        "f1": 0.423076923076923
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.625,
+        "recall": 0.45454545454545453,
+        "f1": 0.5263157894736842
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.5,
+        "recall": 0.55,
+        "f1": 0.5238095238095238
+      }
+    ],
+    "loss": 1.2834398462364711
+  },
+  "incumbent_macro_precision": 0.5307430562241263,
+  "incumbent_checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+  "incumbent_replay_verified": true,
+  "selected_model": "efficientnet-b0-full-frame-v1"
+}
