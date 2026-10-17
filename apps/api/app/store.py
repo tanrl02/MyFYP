@@ -88,6 +88,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS assessment_reviews (
                   id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
                   doctor_id TEXT NOT NULL, note TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS assessment_review_drafts (
+                  share_id TEXT PRIMARY KEY REFERENCES assessment_shares(id), doctor_id TEXT NOT NULL,
+                  note TEXT NOT NULL, follow_up TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS consultation_notes (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   doctor_id TEXT NOT NULL, findings TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -700,7 +703,35 @@ class Store:
             return dict(share, assessment=self.assessment_metadata(photo) | {
                 'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')})
 
-    def publish_review(self, share_id, doctor, note, follow_up):
+    def review_draft_record(self, db, share_id, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        share=self.share_record(db,share_id,doctor)
+        if share['review']:
+            raise RuleError('This review is already published. Draft editing is closed.')
+        row=db.execute('SELECT * FROM assessment_review_drafts WHERE share_id=? AND doctor_id=?',(share_id,doctor)).fetchone()
+        return dict(row) if row else {'share_id':share_id,'doctor_id':doctor,'note':'','follow_up':'','version':0,'updated_at':None}
+
+    def review_draft(self, share_id, doctor):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return self.review_draft_record(db,share_id,doctor)
+
+    def save_review_draft(self, share_id, doctor, note, follow_up, version):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            current=self.review_draft_record(db,share_id,doctor)
+            if (current['note'],current['follow_up'])==(note,follow_up):
+                return current
+            if current['version']!=version:
+                raise RuleError('This draft changed in another tab. Reload the saved draft before editing again.')
+            db.execute('''INSERT INTO assessment_review_drafts VALUES(?,?,?,?,?,?)
+                ON CONFLICT(share_id) DO UPDATE SET note=excluded.note,follow_up=excluded.follow_up,
+                version=excluded.version,updated_at=excluded.updated_at''',
+                (share_id,doctor,note,follow_up,version+1,datetime.now(timezone.utc).isoformat()))
+            return self.review_draft_record(db,share_id,doctor)
+
+    def publish_review(self, share_id, doctor, note, follow_up, draft_version=None):
         with self.connect() as db:
             # Serializes publication and revocation: a revoked share cannot accept a new review.
             db.execute('BEGIN IMMEDIATE')
@@ -709,10 +740,15 @@ class Store:
                 if (share['review']['note'],share['review']['follow_up']) != (note,follow_up):
                     raise RuleError('Review already published. Published reviews cannot be replaced.')
                 return share
+            if draft_version is not None:
+                draft=self.review_draft_record(db,share_id,doctor)
+                if draft['version']!=draft_version:
+                    raise RuleError('This draft changed in another tab. Reload the saved draft before publishing.')
             db.execute('INSERT INTO assessment_reviews VALUES(?,?,?,?,?,?)',
                        (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
             self.notify(db,share['patient_id'],'review_published',share_id,share['assessment_id'],'Doctor review is ready',
                         f"{DOCTORS[doctor]} published a review. Open the assessment to read it.")
+            db.execute('DELETE FROM assessment_review_drafts WHERE share_id=?',(share_id,))
             return self.share_record(db, share_id, doctor)
 
     def background_record(self, db, patient):

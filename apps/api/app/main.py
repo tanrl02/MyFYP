@@ -54,6 +54,12 @@ class ShareInput(BaseModel):
 class ReviewInput(BaseModel):
     note: str = Field(min_length=1, max_length=2000, pattern=r'\S')
     follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
+    draft_version: int | None = Field(default=None,strict=True,ge=0)
+
+class ReviewDraftInput(BaseModel):
+    note: str = Field(max_length=2000)
+    follow_up: str = Field(max_length=1000)
+    version: int = Field(strict=True,ge=0)
 
 class AppointmentLinkInput(BaseModel):
     booking_id: str = Field(min_length=1, max_length=100)
@@ -268,7 +274,15 @@ def create_app(path=None):
 
     @api.post('/assessment-shares/{share_id}/review')
     def publish_review(share_id: str, payload: ReviewInput, who=Depends(doctor)):
-        return run(lambda: store.publish_review(share_id, who, payload.note.strip(), payload.follow_up.strip()))
+        return run(lambda: store.publish_review(share_id, who, payload.note.strip(), payload.follow_up.strip(),payload.draft_version))
+
+    @api.get('/assessment-shares/{share_id}/draft')
+    def review_draft(share_id: str,who=Depends(doctor)):
+        return run(lambda: store.review_draft(share_id,who))
+
+    @api.post('/assessment-shares/{share_id}/draft')
+    def save_review_draft(share_id: str,payload: ReviewDraftInput,who=Depends(doctor)):
+        return run(lambda: store.save_review_draft(share_id,who,payload.note.strip(),payload.follow_up.strip(),payload.version))
 
     @api.post('/visits/{booking_id}/prescription')
     def prescribe(booking_id: str, payload: PrescriptionInput, who=Depends(doctor)):
