@@ -1,5 +1,7 @@
 # AI metadata audit
 
+Current research data: [frozen eight-class dataset](../docs/ai/FROZEN_DATASET.md), version `eight-class-v1`. Use its fixed manifests for the upcoming baseline. Preparation/review summaries below are stage-specific evidence; they do not override the frozen version's 1,968 included/108 excluded decisions.
+
 This is a metadata audit, not a trained model. Read [the findings](../docs/ai/DATASET_AUDIT.md) before selecting training data.
 
 From the MyFYP root, using the existing Python environment:

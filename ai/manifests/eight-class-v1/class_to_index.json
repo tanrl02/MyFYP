@@ -1,0 +1,10 @@
+{
+  "acne": 0,
+  "eczema": 1,
+  "psoriasis": 2,
+  "folliculitis": 3,
+  "urticaria": 4,
+  "allergic_contact_dermatitis": 5,
+  "seborrheic_dermatitis": 6,
+  "scabies": 7
+}

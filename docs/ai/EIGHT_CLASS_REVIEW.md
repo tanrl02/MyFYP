@@ -1,5 +1,7 @@
 # Eight-class scope and visual review checkpoint
 
+Follow-up complete: the [frozen dataset checkpoint](FROZEN_DATASET.md) records review of the 29 new flags and 24 added-class samples, one additional manual exclusion and the current fixed research splits. The preparation counts below remain historical screening evidence.
+
 18 October 2026. The user selected the recommended eight-condition scope. This extends the first five-class batch; it does not change the application's simulated predictions or the Word report.
 
 ## Selected data

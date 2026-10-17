@@ -1,0 +1,94 @@
+{
+  "reviewed_on": "2026-10-18",
+  "source_checkpoint": "b9200d6",
+  "reviewer": "Codex technical visual triage; no clinician review",
+  "new_flagged_image_ids": [
+    "3c872d2410c57441eccd4368ece6f28a",
+    "1964b3d34061bfaab80abbfb633fc960",
+    "684462ae1bc4f8c1b5e84250f5032ca3",
+    "69f8ba0e44bb35cd510bae23cbd5ee72",
+    "bcb4246972afeeaad342b8e2ee335293",
+    "d933e55ee727fdce3029b7e063f55a7f",
+    "03efa4056a5cd1c067c2fb603f66ab89",
+    "07d55974943153af45594276e638ebbb",
+    "323977042db803ae6431a1fc47e31e2b",
+    "3f67ef764505627ea568656140bbdb31",
+    "4dfab46ab512feae578148ae0928430a",
+    "5b7015646628d7cea3e550bb8d3b43ee",
+    "b19ba4bd6156a03456a44fa842e366fa",
+    "e4880078008dde6f752136d3ec2b2315",
+    "ed962c92bfc2728740fbee29d011a849",
+    "f25d31b5b7f85429bd848bbc4db7ef78",
+    "f68ca52afa7fdcf1cc64a8fc8acac3f1",
+    "890cf5d791c7e738d156ec3ea95fae5d",
+    "2c88133e38ba53c6acfc22a5532a5176",
+    "593f7f67852c0b452dee547c86e16f59",
+    "b80f2eda030680a3574078e5ffa6d89d",
+    "c2e75eeebea5ca1151bd8d1adfb0ed82",
+    "c65f6daed50da7d8f0e38f87c13c96b5",
+    "692165241f3c213969652e1e0f6e90cd",
+    "39c6dcfb61b38c65cff7d43f6298e685",
+    "e7678e0242b95a7b579978f4481732d0",
+    "fd5220b2f67569b337764718d4a75bc8",
+    "2482fd359e1b2d615edfadfee2db4f2f",
+    "c27cb73a12dd832b8ad993beaf214f33"
+  ],
+  "additional_class_sample_ids": [
+    "63bbd2c3727dbc8a518d80b0e463808b",
+    "2bb7c70319380ca591b3f2a8bf97208e",
+    "5f468ccefc2d2a777dbfe1b4e8a43bf3",
+    "b59297ecacbef29e522509058543cfd5",
+    "672e3fb91134cce75e899d38c4e27c7b",
+    "41069e763fab263ac3cae05d26208ee0",
+    "51a8e47ae9579b9d0311c9e415d60bb1",
+    "52a632d8d04ee30e8e733e99322772fe",
+    "29b0117e5644d724409250d85af0b5c0",
+    "ea7bb459f4d760b76a832012ddd9356f",
+    "61356a7e2b5526a8267ee5523db3fd71",
+    "496653353ce67e4d910bf28c822edf59",
+    "639dc42d14eab53c95bb384a1f6765e1",
+    "a10a2cf331063d7221cc76d24b31c5e3",
+    "0b2540d71902014d1c831db66cd37135",
+    "69016270e9e3a99e99f0078541a6b940",
+    "ffe829319653c0107013d5395eb60161",
+    "646f61d09b290fc96f251f5abd0dd296",
+    "3c5ea4fff2494e9817c22d8e33cb2134",
+    "b1587a7eb25df917bbc2b02000d83fab",
+    "2cdd5280c2c5286b4bf4fc63c9dcbefb",
+    "548774165893f4fa827d6a789994940c",
+    "12ac338804ee17a60ddafa93a9f6f69a",
+    "563c07deb927f07e5fac7da4ce43a1f7"
+  ],
+  "sample_method": "Per added class, SHA256(review-2026-10-18:MD5) sort of mechanically unflagged entries; select train4,val2,test2.",
+  "disposition": "Exclude every mechanical flag; do not reinstate visually distinct hash matches in this conservative first version.",
+  "manual_exclusions": [
+    {
+      "md5hash": "563c07deb927f07e5fac7da4ce43a1f7",
+      "reason": "visual_scene_overlap_with_quarantined_image",
+      "related_md5hash": "692165241f3c213969652e1e0f6e90cd",
+      "observation": "Similar visible landmark and lesion arrangement with different framing; conservatively exclude both photographs without asserting patient identity or clinical correctness."
+    }
+  ],
+  "comparison_not_grouped": [
+    {
+      "first": "c65f6daed50da7d8f0e38f87c13c96b5",
+      "second": "646f61d09b290fc96f251f5abd0dd296",
+      "observation": "Different visible image structures; not sufficient evidence to group or relabel."
+    }
+  ],
+  "observations": [
+    "All 29 newly flagged thumbnails inspected; all 24 added-class sample thumbnails inspected.",
+    "Four photographs additionally compared at larger resolution.",
+    "Source watermarks, borders, privacy masks, wide crops and intimate anatomical views occur in the research data; no source photos added to app UI.",
+    "No label diagnosis or individual patient identification performed."
+  ],
+  "clinical_label_validation": false,
+  "all_images_visually_reviewed": false,
+  "research_freeze_policy": {
+    "exclude_all_mechanical_flags": true,
+    "manual_exclusions_apply": true,
+    "keep_original_partitions": true,
+    "augment_before_split": false,
+    "gate": "Whole-set mechanical checks plus visual triage of all flags and stratified samples; inherited labels, research baseline only."
+  }
+}

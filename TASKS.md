@@ -132,3 +132,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18October eight-class review checkpoint: user selected8(original5+allergic contact dermatitis/seborrheic dermatitis/scabies). Added630images;2076hash/decode/CRC verified,0failures. Technical visual triage78originalflags+40sampledimages recorded11matching groups/5cross-split and2false hash examples. Expandedscreen107quarantines(29new)/1969unflagged.16tests+byte-identical11offlineoutputs pass. See docs/ai/EIGHT_CLASS_REVIEW.md. Next:29new-flag visual triage+sample3newclasses, conservative exclusions/frozen research manifests; no baseline training yet. Word/auth deferred.
+
+
+18October research dataset freeze complete: visually triaged29newflags+24new-class samples;107mechanical+1manual related-scene exclusion. Frozen eight-class-v1 contains1968images(split1374/193/401) and108excluded, source assignments retained.21tests and complete2076-imageSHA verification/repeat passed. Read docs/ai/FROZEN_DATASET.md. Technical visual coverage171uniqueimages, clinical labels inherited/unvalidated; partial QA explicitly documented. Next one smalltask: pretrained baseline selection/configuration and reproducible training setup; no training/app integration started. Word/auth remain deferred.

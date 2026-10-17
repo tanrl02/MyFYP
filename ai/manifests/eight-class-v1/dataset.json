@@ -1,0 +1,79 @@
+{
+  "all_images_visually_reviewed": false,
+  "clinical_use_validated": false,
+  "dataset_version": "eight-class-v1",
+  "excluded_images": 108,
+  "expanded_review_semantic_sha256": "85a9afc73f95537edc563fa99713c05d6b783a71d2cde008170843dc16383bca",
+  "frozen_on": "2026-10-18",
+  "included_images": 1968,
+  "initial_review_semantic_sha256": "a7e2266ecb814fe99bd4b387329a9e8523478d22ebcdacd6b78005354a417bd6",
+  "limitations": [
+    "Labels inherited from source, not clinically revalidated",
+    "Technical visual review is partial; every image has not been manually reviewed",
+    "No participant IDs; patient independence unproven",
+    "Difference hashing and sample review cannot rule out every near duplicate",
+    "No training, model performance or phone-domain validation",
+    "Noncommercial research data source; retain original attribution/licence notices"
+  ],
+  "manifest_sha256_normalised_lf": {
+    "class_to_index.json": "005304095b048f311afe51fffa1a68b7d53d61197d3d685693c95b38a1122e1c",
+    "excluded.csv": "6e470d99eb50650600a7da884e03ae08c79ffe47d11add0346c61e06afec9697",
+    "test.csv": "f2529d218e6dc173b9e18687309159e88e04137b71cc91706f38749628cd6793",
+    "train.csv": "328c793ffc87bdbde80a588e76a28ff473e17bb3e14d0fa755d76d924270440f",
+    "val.csv": "9d88c40853bd16b2e392e4c12b2eede30dddbeba2432ec751e81f6b6b868e9a1"
+  },
+  "per_class": {
+    "acne": {
+      "test": 81,
+      "train": 287,
+      "val": 42
+    },
+    "allergic_contact_dermatitis": {
+      "test": 58,
+      "train": 209,
+      "val": 30
+    },
+    "eczema": {
+      "test": 34,
+      "train": 118,
+      "val": 16
+    },
+    "folliculitis": {
+      "test": 35,
+      "train": 98,
+      "val": 12
+    },
+    "psoriasis": {
+      "test": 105,
+      "train": 356,
+      "val": 49
+    },
+    "scabies": {
+      "test": 39,
+      "train": 139,
+      "val": 20
+    },
+    "seborrheic_dermatitis": {
+      "test": 23,
+      "train": 79,
+      "val": 11
+    },
+    "urticaria": {
+      "test": 26,
+      "train": 88,
+      "val": 13
+    }
+  },
+  "preparation_rows_semantic_sha256": "b34feea32756680956d490cb9ddc72a224c2ab6977b67a47dbb107b5e0ce8ca8",
+  "research_baseline_manifests_frozen": true,
+  "rules_semantic_sha256": "81f5d9ada2bbfd5a6e68f18601a7f59d6e5d955635714730c20cd68e6440741a",
+  "source_image_entries": 2076,
+  "source_partitions_preserved": true,
+  "split_counts": {
+    "test": 401,
+    "train": 1374,
+    "val": 193
+  },
+  "visual_triage_flagged_images": 107,
+  "visual_triage_sample_images": 64
+}
