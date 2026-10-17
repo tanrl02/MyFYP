@@ -42,3 +42,7 @@ Outputs in `docs/ai/preparation/` preserve the authors' partitions. Exact-pixel 
 ```
 
 Both commands run offline. Results go to `docs/ai/review/`; optional contact sheets go to ignored `ai/data/review/`. The script checks visual group IDs/partitions and hashes image bytes when rendering sheets. It exports only the recorded review set, without claiming that new classes or the entire dataset were visually reviewed. Current preparation results cover the expanded eight-class set; the first five-class checkpoint remains in Git history at `ff908dc`. See [the eight-class review](../docs/ai/EIGHT_CLASS_REVIEW.md).
+
+## Upper-block fine-tuning
+
+The next development experiment starts from the saved baseline and trains feature blocks 6–8 plus the classifier with lower learning rates and training-only horizontal flips. All BatchNorm state and earlier feature blocks stay frozen. Read [the procedure and results](../docs/ai/FINE_TUNING.md) and `finetune_config.json`; use `train_finetune.py --mode smoke|train|verify --run-id <new-id> --device cuda`. Verification replays validation predictions for both checkpoints and checks frozen/trainable state changes. No test images are fitted or evaluated, and the application remains simulated.
