@@ -126,3 +126,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October AI metadata audit: completed five CSV source locks, class counts, source/split comparison, licence/suitability review and conditional recommendation in docs/ai/DATASET_AUDIT.md. Six audit tests and deterministic offline regeneration passed. No image download/training/integration. Next: resolve underlying image rights/access and review five-class mapping, then separately prepare permitted images; baseline/fine-tuning/evaluation/integration remain future tasks. All nine final modules required; Word/auth deferred.
+
+
+18 October source/label/preparation checkpoint complete: licence scopes distinguished using actual Zenodo releases, five-class working mapping documented,1446images acquired/MD5+CRC+decode verified with0failures.78flagged for review;1368mechanically unflagged are not clinically approved. See docs/ai/PREPARATION_RESULTS.md.13tests and byte-identical offline regeneration pass. Next: duplicate/visual review and final class list; training/fine-tuning/evaluation/integration remain pending. Word/auth deferred.

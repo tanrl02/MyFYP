@@ -1,0 +1,52 @@
+{
+  "archive_bytes": 1422904980,
+  "counts": {
+    "acne": {
+      "mechanical_checks_passed": 411,
+      "quarantined": 9,
+      "test": 84,
+      "train": 294,
+      "val": 42
+    },
+    "eczema": {
+      "mechanical_checks_passed": 169,
+      "quarantined": 7,
+      "test": 35,
+      "train": 123,
+      "val": 18
+    },
+    "folliculitis": {
+      "mechanical_checks_passed": 145,
+      "quarantined": 37,
+      "test": 37,
+      "train": 127,
+      "val": 18
+    },
+    "psoriasis": {
+      "mechanical_checks_passed": 514,
+      "quarantined": 20,
+      "test": 107,
+      "train": 374,
+      "val": 53
+    },
+    "urticaria": {
+      "mechanical_checks_passed": 129,
+      "quarantined": 5,
+      "test": 27,
+      "train": 94,
+      "val": 13
+    }
+  },
+  "duplicate_candidate_pairs": 101,
+  "failures": [],
+  "image_metadata_md5_verified": true,
+  "pillow_version": "12.3.0",
+  "published_whole_archive_md5": "8f2640a6a45bbaf5c9b776d2d68fccc6",
+  "quarantined_images": 78,
+  "selected_entries": 1446,
+  "source_record": "https://zenodo.org/records/11101338",
+  "training_ready": false,
+  "verified_images": 1446,
+  "visual_clinical_review": "not performed; pending for every image",
+  "whole_archive_digest_verified": false
+}

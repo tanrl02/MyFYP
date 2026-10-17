@@ -1,5 +1,5 @@
 {
-  "status": "Audit proposal only; not an approved training taxonomy",
+  "status": "Working five-class preparation mapping; not a final clinical taxonomy or cap on future classes",
   "scin_screen": {"minimum_top_weight": 0.6, "minimum_margin": 0.2},
   "classes": {
     "acne": {"scin": ["Acne"], "fitzpatrick": ["acne", "acne vulgaris"]},
@@ -9,7 +9,7 @@
     "urticaria": {"scin": ["Urticaria"], "fitzpatrick": ["urticaria"]}
   },
   "notes": [
-    "The proposed acne class combines two source label names; confirm the grouping before preparing training labels.",
+    "For this preparation subset, acne combines the source labels acne and acne vulgaris. This is a documented project grouping, not clinical relabelling or independent label validation.",
     "Do not silently include dyshidrotic eczema, contact dermatitis, pustular psoriasis, acneiform eruption or urticaria pigmentosa.",
     "SCIN weights are differential-label ranking weights, not calibrated disease probabilities.",
     "The screen is a sensitivity analysis, not confirmation of diagnosis, image quality, image availability or independence."

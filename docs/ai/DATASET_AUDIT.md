@@ -1,5 +1,7 @@
 # Skin dataset metadata audit — 18 October 2026
 
+Follow-up: the [source and label decision](SOURCE_AND_LABEL_DECISION.md) resolves the apparent licence conflict by distinguishing newer metadata from the older noncommercial image release. It records the working five-class preparation route and supersedes the initial acquisition hold below. Image preparation evidence is recorded separately; historical metadata counts remain unchanged.
+
 ## Decision
 
 **Fitzpatrick17k-C is the strongest conditional training candidate for the current common-condition scope.** A provisional five-class subset contains 1,446 metadata entries. Resolve image-source permissions and availability, then review the label mapping before downloading a selective image subset. No dataset is training-ready from metadata alone.
