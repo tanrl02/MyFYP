@@ -1,5 +1,7 @@
 # AI metadata audit
 
+Training setup: [EfficientNet-B0 baseline guide](../docs/ai/BASELINE_SETUP.md). The isolated `.venv-ai` is for offline model work; app `.venv` stays separate. Use `ai/train_baseline.py --mode smoke` for a small pipeline check, or explicitly `--mode train` for the future full baseline run. Smoke checkpoints are never saved as trained models.
+
 Current research data: [frozen eight-class dataset](../docs/ai/FROZEN_DATASET.md), version `eight-class-v1`. Use its fixed manifests for the upcoming baseline. Preparation/review summaries below are stage-specific evidence; they do not override the frozen version's 1,968 included/108 excluded decisions.
 
 This is a metadata audit, not a trained model. Read [the findings](../docs/ai/DATASET_AUDIT.md) before selecting training data.

@@ -1,0 +1,58 @@
+{
+  "verified_on": "2026-10-18",
+  "run_id": "efficientnet-b0-setup-smoke-v1",
+  "scope": "Setup verification only; full baseline and final test evaluation not run",
+  "tests_passed": 27,
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver_version": "566.24",
+    "gpu_memory_mib": 8188,
+    "system_ram_gib": 15.7
+  },
+  "runtime": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "torch": "2.13.0+cu126",
+    "torchvision": "0.28.0+cu126",
+    "numpy": "2.5.2",
+    "pillow": "12.3.0",
+    "cuda_runtime": "12.6",
+    "device": "cuda"
+  },
+  "model": {
+    "parameters": 4017796,
+    "trainable_parameters": 10248,
+    "weight_url": "https://download.pytorch.org/models/efficientnet_b0_rwightman-7f5810bc.pth",
+    "weight_sha256": "7f5810bc96def8f7552d5b7e68d53c4786f81167d28291b21c0d90e1fca14934",
+    "preprocessing": "ImageClassification(\n    crop_size=[224]\n    resize_size=[256]\n    mean=[0.485, 0.456, 0.406]\n    std=[0.229, 0.224, 0.225]\n    interpolation=InterpolationMode.BICUBIC\n)"
+  },
+  "class_to_index": {
+    "acne": 0,
+    "eczema": 1,
+    "psoriasis": 2,
+    "folliculitis": 3,
+    "urticaria": 4,
+    "allergic_contact_dermatitis": 5,
+    "seborrheic_dermatitis": 6,
+    "scabies": 7
+  },
+  "dataset_version": "eight-class-v1",
+  "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+  "smoke": {
+    "purpose": "Pipeline smoke check, not measured model performance",
+    "training_images": 8,
+    "validation_images": 8,
+    "test_images": 0,
+    "logits_shape": [
+      8,
+      8
+    ],
+    "validation_logits_shape": [
+      8,
+      8
+    ],
+    "finite_loss": true,
+    "features_unchanged": true,
+    "head_updated": true,
+    "checkpoint_saved": false
+  }
+}

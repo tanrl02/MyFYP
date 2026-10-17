@@ -1,0 +1,21 @@
+{
+  "experiment": "efficientnet-b0-frozen-head-v1",
+  "dataset_version": "eight-class-v1",
+  "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+  "architecture": "efficientnet_b0",
+  "weights": "EfficientNet_B0_Weights.IMAGENET1K_V1",
+  "seed": 3403,
+  "epochs": 10,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0001,
+  "num_workers": 0,
+  "cpu_threads": 4,
+  "training_stage": "frozen_feature_extractor_train_classifier_only",
+  "train_loss": "inverse_training_class_frequency_weighted_cross_entropy",
+  "validation_loss": "unweighted_cross_entropy",
+  "selection_metric": "validation_macro_f1_then_lower_validation_loss",
+  "augmentation": "none_for_first_baseline",
+  "preprocessing": "weights.transforms: RGB/EXIF transpose, bicubic resize short edge256, centre crop224, ImageNet mean/std",
+  "test_evaluation": "disabled_in_baseline_runner"
+}

@@ -12,6 +12,9 @@ coverage/
 *.pem
 *.key
 .venv/
+.venv-ai/
+ai/runs/
+ai/weights/
 .pnpm-store/
 .pnpm-cache/
 __pycache__/

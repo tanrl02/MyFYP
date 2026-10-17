@@ -135,3 +135,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18October research dataset freeze complete: visually triaged29newflags+24new-class samples;107mechanical+1manual related-scene exclusion. Frozen eight-class-v1 contains1968images(split1374/193/401) and108excluded, source assignments retained.21tests and complete2076-imageSHA verification/repeat passed. Read docs/ai/FROZEN_DATASET.md. Technical visual coverage171uniqueimages, clinical labels inherited/unvalidated; partial QA explicitly documented. Next one smalltask: pretrained baseline selection/configuration and reproducible training setup; no training/app integration started. Word/auth remain deferred.
+
+
+18October pretrained baseline setup complete: EfficientNet-B0 ImageNet frozenfeatures+eight-classhead, separateCUDA .venv-ai installed/pinned, config/loader/trainingrunner and setupscript ready. ActualRTX4060GPU smoke passed8train+8val/0test, no trainedcheckpoint;27tests+pipcheck passed. See docs/ai/BASELINE_SETUP.md. Next smalltask: full10-epoch frozen-head baseline run andvalidationanalysis, thenseparatemeaningfulfine-tuning/finalheldouttest. App/simulatedpredictions/Word unchanged.
