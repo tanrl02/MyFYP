@@ -85,3 +85,6 @@ New doctor_profiles(doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, experti
 
 ## Doctor matching query
 No schema change. GET /doctor-matches patient-only; exactly one supported concern or owned assessment_id. Metadata lookup/profile read in one read transaction; category map has general fallback, output includes concern/source/assessment reference/message and all doctor profiles with match_level/reason sorted concern/general/none. No assessment/photo sharing, clinical content or recommendation state stored. Mobile joins current slots to doctors by doctor_id; normal booking endpoint remains authoritative for availability. Simulation origin retained and clearly disclosed.
+
+## Appointment reminders
+No schema change. patient_notifications.kind gains appointment_reminder with booking source_id/target_id and existing unique event key. Inbox reads use BEGIN IMMEDIATE to INSERT OR IGNORE reminders for own waiting visits in (now, now+24h], then list/count with the same current booking/time visibility predicate. SQL julianday handles offset timestamps, display is fixed Malaysia+08. Mark-read rechecks visibility. Obsolete reminder rows retain original Read history but are hidden, without affecting historical queue/review events. Generation is lazy on inbox request, not a background job or push delivery. New replacement booking has its own reminder/read state.

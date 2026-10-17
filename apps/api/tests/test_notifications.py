@@ -62,4 +62,4 @@ class NotificationTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):store.publish_review(grant['id'],'doctor-lim','Fictional note','Demo follow-up')
         self.assertEqual(self.client.get('/bookings',headers=self.patient).json()[0]['status'],'waiting')
         self.assertIsNone(self.client.get("/assessment-shares",headers=self.patient).json()[0]["review"])
-        self.assertEqual(self.inbox().json()['items'],[])
+        self.assertFalse(any(n['kind'] in ('queue_called','review_published') for n in self.inbox().json()['items']))

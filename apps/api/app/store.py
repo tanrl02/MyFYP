@@ -9,6 +9,11 @@ from uuid import uuid4
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
 DOCTORS = {'doctor-lim': 'Dr. Lim (demo)', 'doctor-anita': 'Dr. Anita (demo)'}
 DOCTOR_CONCERNS = {'general', 'acne', 'eczema', 'psoriasis'}
+# Reminder rows are retained, but only currently upcoming waiting visits are visible.
+NOTIFICATION_VISIBLE = """(n.kind!='appointment_reminder' OR EXISTS (
+    SELECT 1 FROM bookings b JOIN slots s ON s.id=b.slot_id
+    WHERE b.id=n.target_id AND b.patient_id=n.patient_id AND b.status='waiting'
+      AND julianday(s.starts_at)>julianday(?) AND julianday(s.starts_at)<=julianday(?)))"""
 
 class RuleError(Exception):
     def __init__(self, message, status=409):
@@ -277,9 +282,22 @@ class Store:
         if patient not in PATIENTS:
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
-            db.execute('BEGIN')
-            rows=db.execute('SELECT * FROM patient_notifications WHERE patient_id=? ORDER BY created_at DESC,id DESC LIMIT 100',(patient,)).fetchall()
-            unread=db.execute('SELECT COUNT(*) FROM patient_notifications WHERE patient_id=? AND read_at IS NULL',(patient,)).fetchone()[0]
+            db.execute('BEGIN IMMEDIATE')
+            now=datetime.now(timezone.utc)
+            window=(now.isoformat(),(now+timedelta(hours=24)).isoformat())
+            visits=db.execute('''SELECT b.id,b.queue_number,s.doctor_id,s.starts_at FROM bookings b
+                JOIN slots s ON s.id=b.slot_id WHERE b.patient_id=? AND b.status='waiting'
+                AND julianday(s.starts_at)>julianday(?) AND julianday(s.starts_at)<=julianday(?)''',
+                (patient,*window)).fetchall()
+            for visit in visits:
+                token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+                local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
+                self.notify(db,patient,'appointment_reminder',visit['id'],visit['id'],'Upcoming appointment',
+                            f"{token} with {DOCTORS[visit['doctor_id']]} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open the visit to check its latest details.")
+            rows=db.execute(f'''SELECT n.* FROM patient_notifications n WHERE n.patient_id=? AND {NOTIFICATION_VISIBLE}
+                ORDER BY n.created_at DESC,n.id DESC LIMIT 100''',(patient,*window)).fetchall()
+            unread=db.execute(f'''SELECT COUNT(*) FROM patient_notifications n
+                WHERE n.patient_id=? AND n.read_at IS NULL AND {NOTIFICATION_VISIBLE}''',(patient,*window)).fetchone()[0]
             return {'items':[dict(row) for row in rows],'unread_count':unread}
 
     def read_notification(self, notification_id, patient):
@@ -287,7 +305,9 @@ class Store:
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
-            row=db.execute('SELECT * FROM patient_notifications WHERE id=? AND patient_id=?',(notification_id,patient)).fetchone()
+            now=datetime.now(timezone.utc)
+            row=db.execute(f'''SELECT n.* FROM patient_notifications n WHERE n.id=? AND n.patient_id=? AND {NOTIFICATION_VISIBLE}''',
+                           (notification_id,patient,now.isoformat(),(now+timedelta(hours=24)).isoformat())).fetchone()
             if not row:
                 raise RuleError('Notification unavailable for this patient.',404)
             if not row['read_at']:
