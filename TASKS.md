@@ -138,3 +138,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18October pretrained baseline setup complete: EfficientNet-B0 ImageNet frozenfeatures+eight-classhead, separateCUDA .venv-ai installed/pinned, config/loader/trainingrunner and setupscript ready. ActualRTX4060GPU smoke passed8train+8val/0test, no trainedcheckpoint;27tests+pipcheck passed. See docs/ai/BASELINE_SETUP.md. Next smalltask: full10-epoch frozen-head baseline run andvalidationanalysis, thenseparatemeaningfulfine-tuning/finalheldouttest. App/simulatedpredictions/Word unchanged.
+
+
+18October full10-epoch EfficientNet-B0 frozen-head baseline complete. Bestepoch8 valaccuracy56.48%,macroF1.4855;193valimages,401testunevaluated. Checkpointselection/valreplay/frozenfeaturestateverified,headchanged. Reportdocs/ai/BASELINE_RESULTS.md andplots saved;trainedcheckpointignoredlocal. Nextmanageabletask: fine-tuneselectedupperblocksfrombaseline,comparevalidationwithouttestaccess. Apppredictionsstill simulated,Word/authdeferred. ExistinguserBASELINE_SETUP.mdedit preserved/unstaged.

@@ -1,0 +1,507 @@
+{
+  "verified_on": "2026-10-18",
+  "run_id": "efficientnet-b0-baseline-v1",
+  "dataset_version": "eight-class-v1",
+  "architecture": "efficientnet_b0",
+  "stage": "frozen_feature_extractor_train_classifier_only",
+  "completed_epochs": 10,
+  "best_epoch": 8,
+  "training_images": 1374,
+  "validation_images": 193,
+  "test_images_evaluated": 0,
+  "validation": {
+    "accuracy": 0.5647668393782384,
+    "macro_f1": 0.4854840065863493,
+    "confusion_matrix": [
+      [
+        37,
+        1,
+        0,
+        3,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        2,
+        3,
+        2,
+        1,
+        2,
+        4,
+        0,
+        2
+      ],
+      [
+        1,
+        3,
+        32,
+        2,
+        1,
+        2,
+        3,
+        5
+      ],
+      [
+        3,
+        0,
+        0,
+        6,
+        0,
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        1,
+        1,
+        0,
+        7,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        3,
+        4,
+        4,
+        5,
+        10,
+        2,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        6,
+        0
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        3,
+        1,
+        0,
+        8
+      ]
+    ],
+    "per_class": [
+      {
+        "class_name": "acne",
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.7551020408163265,
+        "recall": 0.8809523809523809,
+        "f1": 0.8131868131868131
+      },
+      {
+        "class_name": "eczema",
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.21428571428571427,
+        "recall": 0.1875,
+        "f1": 0.19999999999999998
+      },
+      {
+        "class_name": "psoriasis",
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.7619047619047619,
+        "recall": 0.6530612244897959,
+        "f1": 0.7032967032967032
+      },
+      {
+        "class_name": "folliculitis",
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.3157894736842105,
+        "recall": 0.5,
+        "f1": 0.3870967741935484
+      },
+      {
+        "class_name": "urticaria",
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.3684210526315789,
+        "recall": 0.5384615384615384,
+        "f1": 0.4375
+      },
+      {
+        "class_name": "allergic_contact_dermatitis",
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.5,
+        "recall": 0.3333333333333333,
+        "f1": 0.4
+      },
+      {
+        "class_name": "seborrheic_dermatitis",
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.5,
+        "recall": 0.5454545454545454,
+        "f1": 0.5217391304347826
+      },
+      {
+        "class_name": "scabies",
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.4444444444444444,
+        "recall": 0.4,
+        "f1": 0.4210526315789474
+      }
+    ],
+    "loss": 1.283222456670178
+  },
+  "first_epoch_validation": {
+    "accuracy": 0.43005181347150256,
+    "macro_f1": 0.3628941451117135,
+    "confusion_matrix": [
+      [
+        33,
+        0,
+        0,
+        5,
+        1,
+        0,
+        3,
+        0
+      ],
+      [
+        2,
+        5,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1
+      ],
+      [
+        3,
+        5,
+        20,
+        5,
+        4,
+        1,
+        9,
+        2
+      ],
+      [
+        2,
+        0,
+        0,
+        5,
+        0,
+        0,
+        2,
+        3
+      ],
+      [
+        4,
+        1,
+        1,
+        2,
+        5,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        2,
+        2,
+        5,
+        6,
+        4,
+        6,
+        1
+      ],
+      [
+        2,
+        0,
+        1,
+        1,
+        0,
+        0,
+        6,
+        1
+      ],
+      [
+        1,
+        4,
+        2,
+        5,
+        3,
+        0,
+        0,
+        5
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.6470588235294118,
+        "recall": 0.7857142857142857,
+        "f1": 0.7096774193548386
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.29411764705882354,
+        "recall": 0.3125,
+        "f1": 0.30303030303030304
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.7142857142857143,
+        "recall": 0.40816326530612246,
+        "f1": 0.5194805194805194
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.1724137931034483,
+        "recall": 0.4166666666666667,
+        "f1": 0.2439024390243903
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.23809523809523808,
+        "recall": 0.38461538461538464,
+        "f1": 0.2941176470588235
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.6666666666666666,
+        "recall": 0.13333333333333333,
+        "f1": 0.2222222222222222
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.21428571428571427,
+        "recall": 0.5454545454545454,
+        "f1": 0.30769230769230765
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.38461538461538464,
+        "recall": 0.25,
+        "f1": 0.30303030303030304
+      }
+    ],
+    "loss": 1.5743383620069435
+  },
+  "last_epoch_validation": {
+    "accuracy": 0.5595854922279793,
+    "macro_f1": 0.4851587656484742,
+    "confusion_matrix": [
+      [
+        38,
+        0,
+        0,
+        3,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        2,
+        3,
+        2,
+        1,
+        2,
+        4,
+        0,
+        2
+      ],
+      [
+        3,
+        3,
+        29,
+        2,
+        0,
+        2,
+        5,
+        5
+      ],
+      [
+        3,
+        0,
+        0,
+        6,
+        0,
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        1,
+        1,
+        0,
+        7,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        4,
+        5,
+        4,
+        3,
+        8,
+        4,
+        1
+      ],
+      [
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        6,
+        1
+      ],
+      [
+        2,
+        2,
+        1,
+        3,
+        0,
+        1,
+        0,
+        11
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.7307692307692307,
+        "recall": 0.9047619047619048,
+        "f1": 0.8085106382978723
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.21428571428571427,
+        "recall": 0.1875,
+        "f1": 0.19999999999999998
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.7435897435897436,
+        "recall": 0.5918367346938775,
+        "f1": 0.6590909090909091
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.3,
+        "recall": 0.5,
+        "f1": 0.37499999999999994
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.5384615384615384,
+        "recall": 0.5384615384615384,
+        "f1": 0.5384615384615384
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.5,
+        "recall": 0.26666666666666666,
+        "f1": 0.3478260869565218
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.35294117647058826,
+        "recall": 0.5454545454545454,
+        "f1": 0.42857142857142855
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.5,
+        "recall": 0.55,
+        "f1": 0.5238095238095238
+      }
+    ],
+    "loss": 1.2737865052692632
+  },
+  "recorded_epoch_seconds": 205.14000000001397,
+  "class_to_index": {
+    "acne": 0,
+    "eczema": 1,
+    "psoriasis": 2,
+    "folliculitis": 3,
+    "urticaria": 4,
+    "allergic_contact_dermatitis": 5,
+    "seborrheic_dermatitis": 6,
+    "scabies": 7
+  },
+  "config": {
+    "experiment": "efficientnet-b0-frozen-head-v1",
+    "dataset_version": "eight-class-v1",
+    "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+    "architecture": "efficientnet_b0",
+    "weights": "EfficientNet_B0_Weights.IMAGENET1K_V1",
+    "seed": 3403,
+    "epochs": 10,
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "num_workers": 0,
+    "cpu_threads": 4,
+    "training_stage": "frozen_feature_extractor_train_classifier_only",
+    "train_loss": "inverse_training_class_frequency_weighted_cross_entropy",
+    "validation_loss": "unweighted_cross_entropy",
+    "selection_metric": "validation_macro_f1_then_lower_validation_loss",
+    "augmentation": "none_for_first_baseline",
+    "preprocessing": "weights.transforms: RGB/EXIF transpose, bicubic resize short edge256, centre crop224, ImageNet mean/std",
+    "test_evaluation": "disabled_in_baseline_runner"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "runtime": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "torch": "2.13.0+cu126",
+    "torchvision": "0.28.0+cu126",
+    "numpy": "2.5.2",
+    "pillow": "12.3.0",
+    "cuda_runtime": "12.6"
+  },
+  "checkpoint": "ai/runs/efficientnet-b0-baseline-v1/best.pt",
+  "checkpoint_sha256": "c13595ca48d53e69ecf83feec287920494285c10c1d273b590ab7ba289e41d1c",
+  "pretrained_weight_sha256": "7f5810bc96def8f7552d5b7e68d53c4786f81167d28291b21c0d90e1fca14934",
+  "feature_state_sha256": "472a71f44830515296f51ac595a8baa944b82411895830376287e506dc298191",
+  "checkpoint_selection_verified": true,
+  "validation_replay_verified": true,
+  "frozen_features_including_batchnorm_unchanged": true,
+  "classifier_updated": true,
+  "clinical_validity_established": false,
+  "fine_tuning_completed": false
+}

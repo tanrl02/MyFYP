@@ -1,5 +1,7 @@
 # AI metadata audit
 
+Completed experiment: [10-epoch EfficientNet-B0 baseline results](../docs/ai/BASELINE_RESULTS.md). Selected epoch 8 validation macro-F1 is 0.4855 and accuracy 56.48%; the 401 test images remain unevaluated. The saved checkpoint is local under ignored `ai/runs/efficientnet-b0-baseline-v1/`. This is the frozen-feature comparator for the next fine-tuning task; app predictions remain simulated.
+
 Training setup: [EfficientNet-B0 baseline guide](../docs/ai/BASELINE_SETUP.md). The isolated `.venv-ai` is for offline model work; app `.venv` stays separate. Use `ai/train_baseline.py --mode smoke` for a small pipeline check, or explicitly `--mode train` for the future full baseline run. Smoke checkpoints are never saved as trained models.
 
 Current research data: [frozen eight-class dataset](../docs/ai/FROZEN_DATASET.md), version `eight-class-v1`. Use its fixed manifests for the upcoming baseline. Preparation/review summaries below are stage-specific evidence; they do not override the frozen version's 1,968 included/108 excluded decisions.
