@@ -1,0 +1,6 @@
+candidate_class,scin_labels,fitz_labels,scin_any_weight_cases,scin_unique_top_cases,scin_screened_cases,scin_screened_image_references,fitz_original_images,fitz_c_images,fitz_c_train,fitz_c_val,fitz_c_test
+acne,Acne,acne | acne vulgaris,98,45,33,63,518,420,294,42,84
+eczema,Eczema,eczema,1056,368,231,509,204,176,123,18,35
+psoriasis,Psoriasis,psoriasis,308,65,32,65,653,534,374,53,107
+folliculitis,Folliculitis,folliculitis,268,92,68,145,342,182,127,18,37
+urticaria,Urticaria,urticaria,332,175,131,271,151,134,94,13,27

@@ -1,0 +1,344 @@
+{
+  "acanthosis nigricans": {
+    "images": 92
+  },
+  "acne": {
+    "images": 183
+  },
+  "acne vulgaris": {
+    "images": 335
+  },
+  "acquired autoimmune bullous diseaseherpes gestationis": {
+    "images": 67
+  },
+  "acrodermatitis enteropathica": {
+    "images": 92
+  },
+  "actinic keratosis": {
+    "images": 175
+  },
+  "allergic contact dermatitis": {
+    "images": 430
+  },
+  "aplasia cutis": {
+    "images": 72
+  },
+  "basal cell carcinoma": {
+    "images": 468
+  },
+  "basal cell carcinoma morpheiform": {
+    "images": 62
+  },
+  "becker nevus": {
+    "images": 63
+  },
+  "behcets disease": {
+    "images": 63
+  },
+  "calcinosis cutis": {
+    "images": 80
+  },
+  "cheilitis": {
+    "images": 106
+  },
+  "congenital nevus": {
+    "images": 68
+  },
+  "dariers disease": {
+    "images": 153
+  },
+  "dermatofibroma": {
+    "images": 79
+  },
+  "dermatomyositis": {
+    "images": 151
+  },
+  "disseminated actinic porokeratosis": {
+    "images": 60
+  },
+  "drug eruption": {
+    "images": 200
+  },
+  "drug induced pigmentary changes": {
+    "images": 71
+  },
+  "dyshidrotic eczema": {
+    "images": 83
+  },
+  "eczema": {
+    "images": 204
+  },
+  "ehlers danlos syndrome": {
+    "images": 127
+  },
+  "epidermal nevus": {
+    "images": 91
+  },
+  "epidermolysis bullosa": {
+    "images": 70
+  },
+  "erythema annulare centrifigum": {
+    "images": 88
+  },
+  "erythema elevatum diutinum": {
+    "images": 55
+  },
+  "erythema multiforme": {
+    "images": 236
+  },
+  "erythema nodosum": {
+    "images": 81
+  },
+  "factitial dermatitis": {
+    "images": 66
+  },
+  "fixed eruptions": {
+    "images": 125
+  },
+  "folliculitis": {
+    "images": 342
+  },
+  "fordyce spots": {
+    "images": 100
+  },
+  "granuloma annulare": {
+    "images": 211
+  },
+  "granuloma pyogenic": {
+    "images": 75
+  },
+  "hailey hailey disease": {
+    "images": 174
+  },
+  "halo nevus": {
+    "images": 82
+  },
+  "hidradenitis": {
+    "images": 90
+  },
+  "ichthyosis vulgaris": {
+    "images": 65
+  },
+  "incontinentia pigmenti": {
+    "images": 102
+  },
+  "juvenile xanthogranuloma": {
+    "images": 149
+  },
+  "kaposi sarcoma": {
+    "images": 156
+  },
+  "keloid": {
+    "images": 156
+  },
+  "keratosis pilaris": {
+    "images": 78
+  },
+  "langerhans cell histiocytosis": {
+    "images": 60
+  },
+  "lentigo maligna": {
+    "images": 83
+  },
+  "lichen amyloidosis": {
+    "images": 77
+  },
+  "lichen planus": {
+    "images": 491
+  },
+  "lichen simplex": {
+    "images": 97
+  },
+  "livedo reticularis": {
+    "images": 60
+  },
+  "lupus erythematosus": {
+    "images": 410
+  },
+  "lupus subacute": {
+    "images": 111
+  },
+  "lyme disease": {
+    "images": 129
+  },
+  "lymphangioma": {
+    "images": 100
+  },
+  "malignant melanoma": {
+    "images": 111
+  },
+  "melanoma": {
+    "images": 261
+  },
+  "milia": {
+    "images": 112
+  },
+  "mucinosis": {
+    "images": 92
+  },
+  "mucous cyst": {
+    "images": 79
+  },
+  "mycosis fungoides": {
+    "images": 182
+  },
+  "myiasis": {
+    "images": 67
+  },
+  "naevus comedonicus": {
+    "images": 73
+  },
+  "necrobiosis lipoidica": {
+    "images": 123
+  },
+  "nematode infection": {
+    "images": 260
+  },
+  "neurodermatitis": {
+    "images": 69
+  },
+  "neurofibromatosis": {
+    "images": 189
+  },
+  "neurotic excoriations": {
+    "images": 73
+  },
+  "neutrophilic dermatoses": {
+    "images": 361
+  },
+  "nevocytic nevus": {
+    "images": 86
+  },
+  "nevus sebaceous of jadassohn": {
+    "images": 95
+  },
+  "papilomatosis confluentes and reticulate": {
+    "images": 150
+  },
+  "paronychia": {
+    "images": 59
+  },
+  "pediculosis lids": {
+    "images": 151
+  },
+  "perioral dermatitis": {
+    "images": 61
+  },
+  "photodermatoses": {
+    "images": 348
+  },
+  "pilar cyst": {
+    "images": 93
+  },
+  "pilomatricoma": {
+    "images": 53
+  },
+  "pityriasis lichenoides chronica": {
+    "images": 73
+  },
+  "pityriasis rosea": {
+    "images": 193
+  },
+  "pityriasis rubra pilaris": {
+    "images": 278
+  },
+  "porokeratosis actinic": {
+    "images": 183
+  },
+  "porokeratosis of mibelli": {
+    "images": 78
+  },
+  "porphyria": {
+    "images": 127
+  },
+  "port wine stain": {
+    "images": 59
+  },
+  "prurigo nodularis": {
+    "images": 170
+  },
+  "psoriasis": {
+    "images": 653
+  },
+  "pustular psoriasis": {
+    "images": 53
+  },
+  "pyogenic granuloma": {
+    "images": 113
+  },
+  "rhinophyma": {
+    "images": 91
+  },
+  "rosacea": {
+    "images": 102
+  },
+  "sarcoidosis": {
+    "images": 349
+  },
+  "scabies": {
+    "images": 339
+  },
+  "scleroderma": {
+    "images": 309
+  },
+  "scleromyxedema": {
+    "images": 108
+  },
+  "seborrheic dermatitis": {
+    "images": 126
+  },
+  "seborrheic keratosis": {
+    "images": 69
+  },
+  "solid cystic basal cell carcinoma": {
+    "images": 66
+  },
+  "squamous cell carcinoma": {
+    "images": 581
+  },
+  "stasis edema": {
+    "images": 69
+  },
+  "stevens johnson syndrome": {
+    "images": 113
+  },
+  "striae": {
+    "images": 67
+  },
+  "sun damaged skin": {
+    "images": 66
+  },
+  "superficial spreading melanoma ssm": {
+    "images": 118
+  },
+  "syringoma": {
+    "images": 127
+  },
+  "telangiectases": {
+    "images": 126
+  },
+  "tick bite": {
+    "images": 73
+  },
+  "tuberous sclerosis": {
+    "images": 141
+  },
+  "tungiasis": {
+    "images": 152
+  },
+  "urticaria": {
+    "images": 151
+  },
+  "urticaria pigmentosa": {
+    "images": 112
+  },
+  "vitiligo": {
+    "images": 166
+  },
+  "xanthomas": {
+    "images": 53
+  },
+  "xeroderma pigmentosum": {
+    "images": 81
+  }
+}

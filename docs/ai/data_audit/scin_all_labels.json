@@ -1,0 +1,1732 @@
+{
+  "AKV - Acrokeratosis verruciformis": {
+    "any_weight_cases": 3,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 3
+  },
+  "Abrasion and/or friction burn of lower limb without infection": {
+    "any_weight_cases": 1
+  },
+  "Abrasion and/or friction burn of thigh without infection": {
+    "any_weight_cases": 1
+  },
+  "Abrasion of wrist": {
+    "any_weight_cases": 2
+  },
+  "Abrasion, scrape, or scab": {
+    "any_weight_cases": 48,
+    "screened_cases": 3,
+    "screened_image_references": 6,
+    "unique_top_cases": 10,
+    "unique_top_image_references": 20
+  },
+  "Abscess": {
+    "any_weight_cases": 41,
+    "screened_cases": 5,
+    "screened_image_references": 7,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 14
+  },
+  "Acanthosis nigricans": {
+    "any_weight_cases": 5,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "Acne": {
+    "any_weight_cases": 98,
+    "screened_cases": 33,
+    "screened_image_references": 63,
+    "unique_top_cases": 45,
+    "unique_top_image_references": 91
+  },
+  "Acne keloidalis": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Acne urticata": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Acneiform eruption": {
+    "any_weight_cases": 1
+  },
+  "Acquired digital fibrokeratoma": {
+    "any_weight_cases": 1
+  },
+  "Acquired poikiloderma": {
+    "any_weight_cases": 1
+  },
+  "Acral erythema": {
+    "any_weight_cases": 1
+  },
+  "Acral persistent papular mucinosis": {
+    "any_weight_cases": 1
+  },
+  "Actinic Keratosis": {
+    "any_weight_cases": 22,
+    "screened_cases": 7,
+    "screened_image_references": 11,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 14
+  },
+  "Actinic granuloma": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Acute and chronic dermatitis": {
+    "any_weight_cases": 47,
+    "screened_cases": 10,
+    "screened_image_references": 19,
+    "unique_top_cases": 12,
+    "unique_top_image_references": 25
+  },
+  "Acute constitutional eczema": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Acute dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Acute dermatitis, NOS": {
+    "any_weight_cases": 124,
+    "screened_cases": 27,
+    "screened_image_references": 54,
+    "unique_top_cases": 28,
+    "unique_top_image_references": 57
+  },
+  "Acute generalised exanthematous pustulosis": {
+    "any_weight_cases": 3
+  },
+  "Acute ulcer of skin": {
+    "any_weight_cases": 1
+  },
+  "Acute vesicular dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Acute-on-chronic dyshidrotic eczema of hands": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Adnexal neoplasm": {
+    "any_weight_cases": 4,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Agminate folliculitis": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Allergic Contact Dermatitis": {
+    "any_weight_cases": 873,
+    "screened_cases": 111,
+    "screened_image_references": 219,
+    "unique_top_cases": 224,
+    "unique_top_image_references": 491
+  },
+  "Allergic contact dermatitis caused by allergenic hapten derived from plant": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Amyloidosis of skin": {
+    "any_weight_cases": 9,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Anetoderma": {
+    "any_weight_cases": 1
+  },
+  "Angiokeratoma of skin": {
+    "any_weight_cases": 3
+  },
+  "Angiosarcoma of skin": {
+    "any_weight_cases": 1
+  },
+  "Animal bite - wound": {
+    "any_weight_cases": 7,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 6
+  },
+  "Annular erythema": {
+    "any_weight_cases": 7,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 2
+  },
+  "Arsenical keratosis": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Atrophic glossitis": {
+    "any_weight_cases": 1
+  },
+  "Atypical Nevus": {
+    "any_weight_cases": 5
+  },
+  "Autoimmune diseases affecting skin": {
+    "any_weight_cases": 2
+  },
+  "B-Cell Cutaneous Lymphoma": {
+    "any_weight_cases": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Bacterial pyoderma": {
+    "any_weight_cases": 1
+  },
+  "Basal Cell Carcinoma": {
+    "any_weight_cases": 21,
+    "screened_cases": 3,
+    "screened_image_references": 7,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 10
+  },
+  "Benign cutaneous vascular tumor": {
+    "any_weight_cases": 2
+  },
+  "Benign tumor of dermis": {
+    "any_weight_cases": 1
+  },
+  "Berloque dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Blister": {
+    "any_weight_cases": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Blood blister": {
+    "any_weight_cases": 1
+  },
+  "Bullosis diabeticorum": {
+    "any_weight_cases": 1
+  },
+  "Bullous Pemphigoid": {
+    "any_weight_cases": 9,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 6
+  },
+  "Bullous dermatitis": {
+    "any_weight_cases": 3
+  },
+  "Bullous dermatitis, NOS": {
+    "any_weight_cases": 2
+  },
+  "Bullous dermatosis": {
+    "any_weight_cases": 2
+  },
+  "Burn erythema of abdominal wall": {
+    "any_weight_cases": 1
+  },
+  "Burn erythema of back of hand": {
+    "any_weight_cases": 3
+  },
+  "Burn erythema of lower leg": {
+    "any_weight_cases": 2
+  },
+  "Burn erythema of neck": {
+    "any_weight_cases": 1
+  },
+  "Burn of forearm": {
+    "any_weight_cases": 1
+  },
+  "Burn of skin": {
+    "any_weight_cases": 16,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 3
+  },
+  "CD - Contact dermatitis": {
+    "any_weight_cases": 70,
+    "screened_cases": 10,
+    "screened_image_references": 23,
+    "unique_top_cases": 21,
+    "unique_top_image_references": 54
+  },
+  "Calcinosis cutis": {
+    "any_weight_cases": 4
+  },
+  "Calciphylaxis cutis": {
+    "any_weight_cases": 1
+  },
+  "Candida": {
+    "any_weight_cases": 4
+  },
+  "Candida infection of flexural skin": {
+    "any_weight_cases": 1
+  },
+  "Candida intertrigo": {
+    "any_weight_cases": 13,
+    "screened_cases": 2,
+    "screened_image_references": 2,
+    "unique_top_cases": 4,
+    "unique_top_image_references": 8
+  },
+  "Candidal intertrigo": {
+    "any_weight_cases": 6
+  },
+  "Cat scratch disease": {
+    "any_weight_cases": 1
+  },
+  "Cat scratch injury": {
+    "any_weight_cases": 1
+  },
+  "Cellulitis": {
+    "any_weight_cases": 39,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 19
+  },
+  "Cellulitis of hand excluding finger": {
+    "any_weight_cases": 1
+  },
+  "Cheilitis": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Chemical leukoderma": {
+    "any_weight_cases": 2
+  },
+  "Chicken pox exanthem": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Chilblain": {
+    "any_weight_cases": 6,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Chronic dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Chronic dermatitis, NOS": {
+    "any_weight_cases": 27,
+    "screened_cases": 13,
+    "screened_image_references": 20,
+    "unique_top_cases": 13,
+    "unique_top_image_references": 20
+  },
+  "Chronic ulcer of skin": {
+    "any_weight_cases": 1
+  },
+  "Clavus": {
+    "any_weight_cases": 4,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Clinical neurofibromatosis": {
+    "any_weight_cases": 1
+  },
+  "Collagenoma": {
+    "any_weight_cases": 1
+  },
+  "Comedone": {
+    "any_weight_cases": 2
+  },
+  "Condyloma acuminatum": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Confluent and reticulate papillomatosis": {
+    "any_weight_cases": 8,
+    "screened_cases": 4,
+    "screened_image_references": 5,
+    "unique_top_cases": 6,
+    "unique_top_image_references": 9
+  },
+  "Contact burn of skin": {
+    "any_weight_cases": 1
+  },
+  "Contact dermatitis caused by Rhus diversiloba": {
+    "any_weight_cases": 3,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Contact dermatitis, NOS": {
+    "any_weight_cases": 10,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Contact purpura": {
+    "any_weight_cases": 3
+  },
+  "Crohn disease of skin": {
+    "any_weight_cases": 1
+  },
+  "Crusted eczematous dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Cutaneous T Cell Lymphoma": {
+    "any_weight_cases": 16,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 3
+  },
+  "Cutaneous larva migrans": {
+    "any_weight_cases": 9,
+    "screened_cases": 2,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 3
+  },
+  "Cutaneous leishmaniasis": {
+    "any_weight_cases": 3
+  },
+  "Cutaneous lupus": {
+    "any_weight_cases": 31,
+    "screened_cases": 6,
+    "screened_image_references": 10,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 15
+  },
+  "Cutaneous lyme disease": {
+    "any_weight_cases": 3
+  },
+  "Cutaneous metastasis": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Cutaneous polyarteritis nodosa": {
+    "any_weight_cases": 1
+  },
+  "Cutaneous sarcoidosis": {
+    "any_weight_cases": 24,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "Cyst": {
+    "any_weight_cases": 20,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 7
+  },
+  "Darier's disease": {
+    "any_weight_cases": 2
+  },
+  "Deep fungal infection": {
+    "any_weight_cases": 16,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Dehiscence": {
+    "any_weight_cases": 1
+  },
+  "Dermatitis herpetiformis": {
+    "any_weight_cases": 14
+  },
+  "Dermatofibroma": {
+    "any_weight_cases": 8,
+    "screened_cases": 2,
+    "screened_image_references": 6,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 7
+  },
+  "Dermatofibrosarcoma protuberans": {
+    "any_weight_cases": 1
+  },
+  "Dermatomyositis": {
+    "any_weight_cases": 3
+  },
+  "Dermatosis caused by lice": {
+    "any_weight_cases": 1
+  },
+  "Dermatosis due to flea": {
+    "any_weight_cases": 2
+  },
+  "Diffuse xanthoma": {
+    "any_weight_cases": 1
+  },
+  "Discrete papular lichen myxedematosus": {
+    "any_weight_cases": 1
+  },
+  "Drug Rash": {
+    "any_weight_cases": 148,
+    "screened_cases": 9,
+    "screened_image_references": 18,
+    "unique_top_cases": 17,
+    "unique_top_image_references": 39
+  },
+  "Drug induced abnormal pigmentation of skin": {
+    "any_weight_cases": 2
+  },
+  "Drug-induced pellagra": {
+    "any_weight_cases": 1
+  },
+  "Drug-induced photosensitivity": {
+    "any_weight_cases": 1
+  },
+  "Ecthyma": {
+    "any_weight_cases": 11,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 13
+  },
+  "Ecthyma gangrenosum": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Eczema": {
+    "any_weight_cases": 1056,
+    "screened_cases": 231,
+    "screened_image_references": 509,
+    "unique_top_cases": 368,
+    "unique_top_image_references": 828
+  },
+  "Elephantiasis nostras": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Epidermal nevus": {
+    "any_weight_cases": 5,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Erosion of skin": {
+    "any_weight_cases": 1
+  },
+  "Eruptive odontogenic cyst": {
+    "any_weight_cases": 2
+  },
+  "Eruptive xanthoma": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Erysipelas": {
+    "any_weight_cases": 1
+  },
+  "Erythema ab igne": {
+    "any_weight_cases": 16,
+    "screened_cases": 5,
+    "screened_image_references": 12,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 12
+  },
+  "Erythema annulare centrifugum": {
+    "any_weight_cases": 13
+  },
+  "Erythema dyschromicum perstans": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Erythema elevatum diutinum": {
+    "any_weight_cases": 1
+  },
+  "Erythema gyratum repens": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Erythema marginatum": {
+    "any_weight_cases": 1
+  },
+  "Erythema marginatum in acute rheumatic fever": {
+    "any_weight_cases": 1
+  },
+  "Erythema migrans": {
+    "any_weight_cases": 11,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Erythema multiforme": {
+    "any_weight_cases": 33,
+    "screened_cases": 5,
+    "screened_image_references": 11,
+    "unique_top_cases": 7,
+    "unique_top_image_references": 16
+  },
+  "Erythema nodosum": {
+    "any_weight_cases": 8,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "Flagellate erythema": {
+    "any_weight_cases": 4
+  },
+  "Flushing": {
+    "any_weight_cases": 2
+  },
+  "Folliculitis": {
+    "any_weight_cases": 268,
+    "screened_cases": 68,
+    "screened_image_references": 145,
+    "unique_top_cases": 92,
+    "unique_top_image_references": 204
+  },
+  "Folliculitis decalvans": {
+    "any_weight_cases": 1
+  },
+  "Foot ulcer": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Foreign body": {
+    "any_weight_cases": 2
+  },
+  "Foreign body reaction of the skin": {
+    "any_weight_cases": 3,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Fox-Fordyce disease": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Frontal fibrosing alopecia": {
+    "any_weight_cases": 1
+  },
+  "Fungal dermatitis": {
+    "any_weight_cases": 2
+  },
+  "Fungal dermatosis": {
+    "any_weight_cases": 3
+  },
+  "Furuncle": {
+    "any_weight_cases": 1
+  },
+  "Geographic tongue": {
+    "any_weight_cases": 8,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 4,
+    "unique_top_image_references": 8
+  },
+  "Granuloma annulare": {
+    "any_weight_cases": 59,
+    "screened_cases": 11,
+    "screened_image_references": 17,
+    "unique_top_cases": 19,
+    "unique_top_image_references": 35
+  },
+  "Granuloma faciale": {
+    "any_weight_cases": 5
+  },
+  "Granulomatous disorder of the skin and subcutaneous tissue": {
+    "any_weight_cases": 4
+  },
+  "Grover's disease": {
+    "any_weight_cases": 10,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 5
+  },
+  "HK - Hyperkeratosis": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Hailey Hailey disease": {
+    "any_weight_cases": 3
+  },
+  "Hand foot and mouth disease": {
+    "any_weight_cases": 4,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 2
+  },
+  "Hemangioma": {
+    "any_weight_cases": 15,
+    "screened_cases": 3,
+    "screened_image_references": 6,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 10
+  },
+  "Hematoma of skin": {
+    "any_weight_cases": 2
+  },
+  "Hemosiderin pigmentation of lower limb due to varicose veins of lower limb": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Hemosiderin pigmentation of skin": {
+    "any_weight_cases": 1
+  },
+  "Hemosiderin pigmentation of skin due to venous insufficiency": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Herpes Simplex": {
+    "any_weight_cases": 141,
+    "screened_cases": 30,
+    "screened_image_references": 59,
+    "unique_top_cases": 54,
+    "unique_top_image_references": 108
+  },
+  "Herpes Zoster": {
+    "any_weight_cases": 142,
+    "screened_cases": 35,
+    "screened_image_references": 62,
+    "unique_top_cases": 45,
+    "unique_top_image_references": 87
+  },
+  "Hidradenitis": {
+    "any_weight_cases": 14,
+    "screened_cases": 4,
+    "screened_image_references": 8,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 9
+  },
+  "Histiocytosis of skin": {
+    "any_weight_cases": 1
+  },
+  "Hyperkeratosis of skin": {
+    "any_weight_cases": 1
+  },
+  "Hyperpigmentation": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Hyperpigmentation disorder": {
+    "any_weight_cases": 1
+  },
+  "Hypersensitivity": {
+    "any_weight_cases": 113,
+    "screened_cases": 10,
+    "screened_image_references": 21,
+    "unique_top_cases": 15,
+    "unique_top_image_references": 33
+  },
+  "Ichthyosiform dermatosis": {
+    "any_weight_cases": 1
+  },
+  "Ichthyosis": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Idiopathic guttate hypomelanosis": {
+    "any_weight_cases": 2,
+    "screened_cases": 2,
+    "screened_image_references": 2,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 2
+  },
+  "Impetigo": {
+    "any_weight_cases": 121,
+    "screened_cases": 16,
+    "screened_image_references": 31,
+    "unique_top_cases": 26,
+    "unique_top_image_references": 51
+  },
+  "Infected eczema": {
+    "any_weight_cases": 23,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 6,
+    "unique_top_image_references": 8
+  },
+  "Infection of skin": {
+    "any_weight_cases": 2
+  },
+  "Infection of tick bite": {
+    "any_weight_cases": 1
+  },
+  "Infection of toe web": {
+    "any_weight_cases": 1
+  },
+  "Infestation caused by Sarcoptes scabiei var bovis": {
+    "any_weight_cases": 1
+  },
+  "Inflammatory dermatosis": {
+    "any_weight_cases": 3
+  },
+  "Inflicted skin lesions": {
+    "any_weight_cases": 29,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 7,
+    "unique_top_image_references": 14
+  },
+  "Ingrown hair": {
+    "any_weight_cases": 2
+  },
+  "Injection site disorder": {
+    "any_weight_cases": 1
+  },
+  "Insect Bite": {
+    "any_weight_cases": 403,
+    "screened_cases": 56,
+    "screened_image_references": 115,
+    "unique_top_cases": 134,
+    "unique_top_image_references": 300
+  },
+  "Intertrigo": {
+    "any_weight_cases": 31,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 9,
+    "unique_top_image_references": 15
+  },
+  "Inverse psoriasis": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Irritant Contact Dermatitis": {
+    "any_weight_cases": 249,
+    "screened_cases": 29,
+    "screened_image_references": 51,
+    "unique_top_cases": 34,
+    "unique_top_image_references": 62
+  },
+  "Itchy skin eruption": {
+    "any_weight_cases": 1
+  },
+  "Jessner lymphocytic infiltrate": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Kaposi's sarcoma of skin": {
+    "any_weight_cases": 13,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Keratoderma": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Keratolysis exfoliativa": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Keratosis": {
+    "any_weight_cases": 6
+  },
+  "Keratosis pilaris": {
+    "any_weight_cases": 61,
+    "screened_cases": 15,
+    "screened_image_references": 37,
+    "unique_top_cases": 24,
+    "unique_top_image_references": 58
+  },
+  "Knuckle pads": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Koebner phenomenon": {
+    "any_weight_cases": 4,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 6
+  },
+  "Lentigo": {
+    "any_weight_cases": 3
+  },
+  "Leprosy": {
+    "any_weight_cases": 1
+  },
+  "Leukemia cutis": {
+    "any_weight_cases": 2
+  },
+  "Leukocytoclastic Vasculitis": {
+    "any_weight_cases": 99,
+    "screened_cases": 18,
+    "screened_image_references": 38,
+    "unique_top_cases": 23,
+    "unique_top_image_references": 51
+  },
+  "Leukonychia": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Lichen Simplex Chronicus": {
+    "any_weight_cases": 78,
+    "screened_cases": 10,
+    "screened_image_references": 18,
+    "unique_top_cases": 24,
+    "unique_top_image_references": 52
+  },
+  "Lichen nitidus": {
+    "any_weight_cases": 27,
+    "screened_cases": 2,
+    "screened_image_references": 5,
+    "unique_top_cases": 7,
+    "unique_top_image_references": 17
+  },
+  "Lichen planus/lichenoid eruption": {
+    "any_weight_cases": 89,
+    "screened_cases": 5,
+    "screened_image_references": 11,
+    "unique_top_cases": 16,
+    "unique_top_image_references": 37
+  },
+  "Lichen sclerosus": {
+    "any_weight_cases": 3
+  },
+  "Lichen spinulosus": {
+    "any_weight_cases": 11,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 7
+  },
+  "Lichen striatus": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 6
+  },
+  "Lichenified eczema": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Lichenified eczematous dermatitis": {
+    "any_weight_cases": 6,
+    "screened_cases": 3,
+    "screened_image_references": 7,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 7
+  },
+  "Lichenoid myxedema": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Linear IgA disease": {
+    "any_weight_cases": 3
+  },
+  "Lipoma": {
+    "any_weight_cases": 1
+  },
+  "Livedo reticularis": {
+    "any_weight_cases": 10,
+    "screened_cases": 4,
+    "screened_image_references": 8,
+    "unique_top_cases": 4,
+    "unique_top_image_references": 8
+  },
+  "Livedoid vasculopathy": {
+    "any_weight_cases": 4
+  },
+  "Local infection of wound": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Localised cutaneous vasculitis": {
+    "any_weight_cases": 1
+  },
+  "Localised skin eruption due to drugs and medicaments": {
+    "any_weight_cases": 1
+  },
+  "Localised skin infection": {
+    "any_weight_cases": 2
+  },
+  "Localized cutaneous vasculitis": {
+    "any_weight_cases": 3
+  },
+  "Localized skin infection": {
+    "any_weight_cases": 11,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Lymphangioma": {
+    "any_weight_cases": 5,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Lymphocutaneous sporotrichosis": {
+    "any_weight_cases": 1
+  },
+  "Lymphomatoid papulosis": {
+    "any_weight_cases": 3
+  },
+  "Majocchi granuloma": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Majocchi's granuloma": {
+    "any_weight_cases": 1
+  },
+  "Mastocytoma": {
+    "any_weight_cases": 1
+  },
+  "Melanin pigmentation due to exogenous substance": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Melanocytic Nevus": {
+    "any_weight_cases": 12,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 7
+  },
+  "Melanoma": {
+    "any_weight_cases": 7,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Melasma": {
+    "any_weight_cases": 5,
+    "screened_cases": 2,
+    "screened_image_references": 5,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 5
+  },
+  "Milia": {
+    "any_weight_cases": 11,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Miliaria": {
+    "any_weight_cases": 36,
+    "screened_cases": 3,
+    "screened_image_references": 6,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 15
+  },
+  "Mixed diabetic ulcer - foot": {
+    "any_weight_cases": 1
+  },
+  "Molluscum Contagiosum": {
+    "any_weight_cases": 63,
+    "screened_cases": 9,
+    "screened_image_references": 14,
+    "unique_top_cases": 18,
+    "unique_top_image_references": 33
+  },
+  "Morbilliform eruption": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Morphea/Scleroderma": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 5
+  },
+  "Muehrcke lines": {
+    "any_weight_cases": 1
+  },
+  "Mycetoma": {
+    "any_weight_cases": 2
+  },
+  "Nail dystrophy": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Nail dystrophy due to trauma": {
+    "any_weight_cases": 3
+  },
+  "Nail pitting": {
+    "any_weight_cases": 1
+  },
+  "Necrobiosis lipoidica": {
+    "any_weight_cases": 5,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Neoplasm of uncertain behavior of skin of arm": {
+    "any_weight_cases": 1
+  },
+  "Nevus anemicus": {
+    "any_weight_cases": 1
+  },
+  "Nodular vasculitis": {
+    "any_weight_cases": 1
+  },
+  "Non-melanin pigmentation due to exogenous substance (disorder)": {
+    "any_weight_cases": 1
+  },
+  "Non-specific panniculitis": {
+    "any_weight_cases": 1
+  },
+  "O/E - ecchymoses present": {
+    "any_weight_cases": 50,
+    "screened_cases": 23,
+    "screened_image_references": 44,
+    "unique_top_cases": 28,
+    "unique_top_image_references": 53
+  },
+  "O/E - petechiae on skin": {
+    "any_weight_cases": 7,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 4,
+    "unique_top_image_references": 7
+  },
+  "O/E - petechiae present": {
+    "any_weight_cases": 3,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "O/E - purulent pustules": {
+    "any_weight_cases": 1
+  },
+  "O/E - pustules": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "O/E - skin cyst present": {
+    "any_weight_cases": 1
+  },
+  "O/E - skin fissure": {
+    "any_weight_cases": 1
+  },
+  "O/E - vesicles present": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "OK - Odontogenic keratocyst": {
+    "any_weight_cases": 1
+  },
+  "Ochronosis": {
+    "any_weight_cases": 1
+  },
+  "On examination - follicular pustules": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "On examination - hemorrhagic bullae": {
+    "any_weight_cases": 1
+  },
+  "Onychodystrophy": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Onychomycosis": {
+    "any_weight_cases": 7,
+    "screened_cases": 3,
+    "screened_image_references": 7,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 12
+  },
+  "PXE (pseudoxanthoma elasticum) like syndrome": {
+    "any_weight_cases": 1
+  },
+  "Pachyonychia congenita": {
+    "any_weight_cases": 1
+  },
+  "Paget disease": {
+    "any_weight_cases": 2
+  },
+  "Panniculitis": {
+    "any_weight_cases": 2
+  },
+  "Panniculitis, NOS": {
+    "any_weight_cases": 1
+  },
+  "Papular acrodermatitis of childhood": {
+    "any_weight_cases": 1
+  },
+  "Parapsoriasis": {
+    "any_weight_cases": 8
+  },
+  "Paronychia": {
+    "any_weight_cases": 5,
+    "screened_cases": 3,
+    "screened_image_references": 6,
+    "unique_top_cases": 4,
+    "unique_top_image_references": 9
+  },
+  "Pemphigoid gestationis": {
+    "any_weight_cases": 2
+  },
+  "Pemphigus": {
+    "any_weight_cases": 1
+  },
+  "Pemphigus foliaceus": {
+    "any_weight_cases": 2
+  },
+  "Pemphigus vulgaris": {
+    "any_weight_cases": 3
+  },
+  "Perforating dermatosis": {
+    "any_weight_cases": 7,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Perifollicular haemorrhage": {
+    "any_weight_cases": 1
+  },
+  "Perifolliculitis": {
+    "any_weight_cases": 1
+  },
+  "Perioral Dermatitis": {
+    "any_weight_cases": 26,
+    "screened_cases": 8,
+    "screened_image_references": 19,
+    "unique_top_cases": 13,
+    "unique_top_image_references": 31
+  },
+  "Perleche": {
+    "any_weight_cases": 1
+  },
+  "Petechiae": {
+    "any_weight_cases": 2
+  },
+  "Photocontact dermatitis [berloque dermatitis]": {
+    "any_weight_cases": 1
+  },
+  "Photodermatitis": {
+    "any_weight_cases": 43,
+    "screened_cases": 5,
+    "screened_image_references": 7,
+    "unique_top_cases": 10,
+    "unique_top_image_references": 19
+  },
+  "Phytophotodermatitis": {
+    "any_weight_cases": 4
+  },
+  "Pigmented purpuric eruption": {
+    "any_weight_cases": 98,
+    "screened_cases": 19,
+    "screened_image_references": 41,
+    "unique_top_cases": 33,
+    "unique_top_image_references": 66
+  },
+  "Pincer nail deformity": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "Pityriasis alba": {
+    "any_weight_cases": 4
+  },
+  "Pityriasis lichenoides": {
+    "any_weight_cases": 28,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Pityriasis rosea": {
+    "any_weight_cases": 80,
+    "screened_cases": 12,
+    "screened_image_references": 27,
+    "unique_top_cases": 35,
+    "unique_top_image_references": 75
+  },
+  "Pityriasis rubra pilaris": {
+    "any_weight_cases": 8
+  },
+  "Poikiloderma": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Poisoning by nematocyst": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Porokeratosis": {
+    "any_weight_cases": 13,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Post-Inflammatory hyperpigmentation": {
+    "any_weight_cases": 28,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 12
+  },
+  "Post-Inflammatory hypopigmentation": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Pressure ulcer": {
+    "any_weight_cases": 1
+  },
+  "Pressure ulcer stage 2": {
+    "any_weight_cases": 1
+  },
+  "Pretibial myxedema": {
+    "any_weight_cases": 4
+  },
+  "Primary cutaneous lymphoma": {
+    "any_weight_cases": 4
+  },
+  "Prurigo": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Prurigo nodularis": {
+    "any_weight_cases": 27,
+    "screened_cases": 9,
+    "screened_image_references": 22,
+    "unique_top_cases": 14,
+    "unique_top_image_references": 36
+  },
+  "Pruritic dermatitis": {
+    "any_weight_cases": 1
+  },
+  "Pruritic urticarial papules and plaques of pregnancy": {
+    "any_weight_cases": 6
+  },
+  "Pseudolymphoma": {
+    "any_weight_cases": 5
+  },
+  "Psoriasiform dermatitis": {
+    "any_weight_cases": 4
+  },
+  "Psoriasis": {
+    "any_weight_cases": 308,
+    "screened_cases": 32,
+    "screened_image_references": 65,
+    "unique_top_cases": 65,
+    "unique_top_image_references": 135
+  },
+  "Purpura": {
+    "any_weight_cases": 36,
+    "screened_cases": 12,
+    "screened_image_references": 14,
+    "unique_top_cases": 14,
+    "unique_top_image_references": 20
+  },
+  "Pyoderma": {
+    "any_weight_cases": 1
+  },
+  "Pyoderma Gangrenosum": {
+    "any_weight_cases": 3
+  },
+  "Pyogenic granuloma": {
+    "any_weight_cases": 4,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 6
+  },
+  "RMSF - Rocky Mountain spotted fever": {
+    "any_weight_cases": 3
+  },
+  "Remove from labeling tool": {
+    "any_weight_cases": 12,
+    "screened_cases": 2,
+    "screened_image_references": 2,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 3
+  },
+  "Rheumatoid nodule": {
+    "any_weight_cases": 2,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Rosacea": {
+    "any_weight_cases": 52,
+    "screened_cases": 17,
+    "screened_image_references": 34,
+    "unique_top_cases": 23,
+    "unique_top_image_references": 44
+  },
+  "Rosai Dorfman disease - I know rare, but I've seen a case like this unilateral.  Rosacea supported bilateral further images": {
+    "any_weight_cases": 1
+  },
+  "SCC/SCCIS": {
+    "any_weight_cases": 37,
+    "screened_cases": 5,
+    "screened_image_references": 11,
+    "unique_top_cases": 8,
+    "unique_top_image_references": 16
+  },
+  "SK/ISK": {
+    "any_weight_cases": 17,
+    "screened_cases": 3,
+    "screened_image_references": 6,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 10
+  },
+  "SLE - Systemic lupus erythematosus-related syndrome": {
+    "any_weight_cases": 3
+  },
+  "Scabies": {
+    "any_weight_cases": 63,
+    "screened_cases": 1,
+    "screened_image_references": 2,
+    "unique_top_cases": 5,
+    "unique_top_image_references": 13
+  },
+  "Scar Condition": {
+    "any_weight_cases": 23,
+    "screened_cases": 10,
+    "screened_image_references": 21,
+    "unique_top_cases": 12,
+    "unique_top_image_references": 27
+  },
+  "Seborrheic Dermatitis": {
+    "any_weight_cases": 46,
+    "screened_cases": 10,
+    "screened_image_references": 22,
+    "unique_top_cases": 14,
+    "unique_top_image_references": 31
+  },
+  "Secondary impetiginization": {
+    "any_weight_cases": 2
+  },
+  "Skin and soft tissue atypical mycobacterial infection": {
+    "any_weight_cases": 25
+  },
+  "Skin atrophy": {
+    "any_weight_cases": 1
+  },
+  "Skin cancer": {
+    "any_weight_cases": 7
+  },
+  "Skin hypopigmented": {
+    "any_weight_cases": 1
+  },
+  "Skin infection": {
+    "any_weight_cases": 15,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Skin lesion in drug addict": {
+    "any_weight_cases": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Skin striae": {
+    "any_weight_cases": 1
+  },
+  "Skin ulcer": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Small plaque parapsoriasis": {
+    "any_weight_cases": 2
+  },
+  "Snake bite - wound": {
+    "any_weight_cases": 1
+  },
+  "Sneddon-Wilkinson disease": {
+    "any_weight_cases": 1
+  },
+  "Stasis Dermatitis": {
+    "any_weight_cases": 70,
+    "screened_cases": 9,
+    "screened_image_references": 27,
+    "unique_top_cases": 12,
+    "unique_top_image_references": 35
+  },
+  "Sunburn": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Superficial frostbite": {
+    "any_weight_cases": 1
+  },
+  "Superficial wound of body region": {
+    "any_weight_cases": 10,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 6,
+    "unique_top_image_references": 16
+  },
+  "Sweet syndrome": {
+    "any_weight_cases": 5
+  },
+  "Syphilis": {
+    "any_weight_cases": 32,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 2
+  },
+  "TMEP - telangiectasia macularis eruptiva perstans": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Tinea": {
+    "any_weight_cases": 206,
+    "screened_cases": 19,
+    "screened_image_references": 43,
+    "unique_top_cases": 60,
+    "unique_top_image_references": 136
+  },
+  "Tinea Versicolor": {
+    "any_weight_cases": 53,
+    "screened_cases": 20,
+    "screened_image_references": 38,
+    "unique_top_cases": 32,
+    "unique_top_image_references": 61
+  },
+  "Traction alopecia": {
+    "any_weight_cases": 1
+  },
+  "Traumatic blister": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Traumatic petechiae": {
+    "any_weight_cases": 7,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "Traumatic ulcer": {
+    "any_weight_cases": 2,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Tuberculosis of skin and subcutaneous tissue": {
+    "any_weight_cases": 2
+  },
+  "Tufted angioma of skin": {
+    "any_weight_cases": 1
+  },
+  "Urticaria": {
+    "any_weight_cases": 332,
+    "screened_cases": 131,
+    "screened_image_references": 271,
+    "unique_top_cases": 175,
+    "unique_top_image_references": 359
+  },
+  "Urticarial vasculitis": {
+    "any_weight_cases": 1
+  },
+  "Varicose veins of lower extremity": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Vascular nevus of skin": {
+    "any_weight_cases": 1
+  },
+  "Vasculitis of the skin": {
+    "any_weight_cases": 10,
+    "screened_cases": 1,
+    "screened_image_references": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "Vasculitis of the skin, NOS": {
+    "any_weight_cases": 1
+  },
+  "Venous Stasis Ulcer": {
+    "any_weight_cases": 2,
+    "screened_cases": 2,
+    "screened_image_references": 4,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "Verruca vulgaris": {
+    "any_weight_cases": 40,
+    "screened_cases": 8,
+    "screened_image_references": 20,
+    "unique_top_cases": 13,
+    "unique_top_image_references": 33
+  },
+  "Viral Exanthem": {
+    "any_weight_cases": 82,
+    "screened_cases": 4,
+    "screened_image_references": 9,
+    "unique_top_cases": 12,
+    "unique_top_image_references": 26
+  },
+  "Viral dermatological disorders": {
+    "any_weight_cases": 1
+  },
+  "Viral infection of skin": {
+    "any_weight_cases": 1
+  },
+  "Vitiligo": {
+    "any_weight_cases": 6,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 2,
+    "unique_top_image_references": 4
+  },
+  "Xanthoma": {
+    "any_weight_cases": 1
+  },
+  "Xerosis": {
+    "any_weight_cases": 24,
+    "screened_cases": 2,
+    "screened_image_references": 2,
+    "unique_top_cases": 3,
+    "unique_top_image_references": 5
+  },
+  "deep fungal infection": {
+    "any_weight_cases": 1
+  },
+  "deep vein thrombosis": {
+    "any_weight_cases": 1
+  },
+  "digital myxoid cyst": {
+    "any_weight_cases": 1
+  },
+  "gouty tophi": {
+    "any_weight_cases": 1
+  },
+  "granular parakeratosis": {
+    "any_weight_cases": 1
+  },
+  "hyperlinear palm": {
+    "any_weight_cases": 1
+  },
+  "panniculitis of skin": {
+    "any_weight_cases": 1
+  },
+  "pathergy": {
+    "any_weight_cases": 1
+  },
+  "post-sunburn peeling/superficial desquamation": {
+    "any_weight_cases": 1
+  },
+  "relapsing polychondritis": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "resolving dermatitis": {
+    "any_weight_cases": 1
+  },
+  "scurvy": {
+    "any_weight_cases": 1
+  },
+  "superficial hemorrhage": {
+    "any_weight_cases": 1
+  },
+  "unilateral laterothoracic exanthem": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 1
+  },
+  "varicose vein": {
+    "any_weight_cases": 1,
+    "screened_cases": 1,
+    "screened_image_references": 3,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  },
+  "wound/abrasion": {
+    "any_weight_cases": 1,
+    "unique_top_cases": 1,
+    "unique_top_image_references": 3
+  }
+}

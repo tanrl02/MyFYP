@@ -1,0 +1,686 @@
+{
+  "acanthosis nigricans": {
+    "images": 66,
+    "test": 13,
+    "train": 46,
+    "val": 7
+  },
+  "acne": {
+    "images": 121,
+    "test": 24,
+    "train": 85,
+    "val": 12
+  },
+  "acne vulgaris": {
+    "images": 299,
+    "test": 60,
+    "train": 209,
+    "val": 30
+  },
+  "acquired autoimmune bullous diseaseherpes gestationis": {
+    "images": 59,
+    "test": 12,
+    "train": 41,
+    "val": 6
+  },
+  "acrodermatitis enteropathica": {
+    "images": 53,
+    "test": 11,
+    "train": 37,
+    "val": 5
+  },
+  "actinic keratosis": {
+    "images": 142,
+    "test": 29,
+    "train": 99,
+    "val": 14
+  },
+  "allergic contact dermatitis": {
+    "images": 314,
+    "test": 63,
+    "train": 220,
+    "val": 31
+  },
+  "aplasia cutis": {
+    "images": 50,
+    "test": 10,
+    "train": 35,
+    "val": 5
+  },
+  "basal cell carcinoma": {
+    "images": 412,
+    "test": 83,
+    "train": 288,
+    "val": 41
+  },
+  "basal cell carcinoma morpheiform": {
+    "images": 46,
+    "test": 9,
+    "train": 32,
+    "val": 5
+  },
+  "becker nevus": {
+    "images": 56,
+    "test": 11,
+    "train": 39,
+    "val": 6
+  },
+  "behcets disease": {
+    "images": 49,
+    "test": 10,
+    "train": 34,
+    "val": 5
+  },
+  "calcinosis cutis": {
+    "images": 47,
+    "test": 9,
+    "train": 33,
+    "val": 5
+  },
+  "cheilitis": {
+    "images": 71,
+    "test": 14,
+    "train": 50,
+    "val": 7
+  },
+  "congenital nevus": {
+    "images": 38,
+    "test": 7,
+    "train": 27,
+    "val": 4
+  },
+  "dariers disease": {
+    "images": 130,
+    "test": 26,
+    "train": 91,
+    "val": 13
+  },
+  "dermatofibroma": {
+    "images": 57,
+    "test": 11,
+    "train": 40,
+    "val": 6
+  },
+  "dermatomyositis": {
+    "images": 135,
+    "test": 27,
+    "train": 94,
+    "val": 14
+  },
+  "disseminated actinic porokeratosis": {
+    "images": 20,
+    "test": 4,
+    "train": 14,
+    "val": 2
+  },
+  "drug eruption": {
+    "images": 157,
+    "test": 31,
+    "train": 110,
+    "val": 16
+  },
+  "drug induced pigmentary changes": {
+    "images": 49,
+    "test": 10,
+    "train": 34,
+    "val": 5
+  },
+  "dyshidrotic eczema": {
+    "images": 66,
+    "test": 13,
+    "train": 46,
+    "val": 7
+  },
+  "eczema": {
+    "images": 176,
+    "test": 35,
+    "train": 123,
+    "val": 18
+  },
+  "ehlers danlos syndrome": {
+    "images": 66,
+    "test": 13,
+    "train": 46,
+    "val": 7
+  },
+  "epidermal nevus": {
+    "images": 78,
+    "test": 15,
+    "train": 55,
+    "val": 8
+  },
+  "epidermolysis bullosa": {
+    "images": 61,
+    "test": 12,
+    "train": 43,
+    "val": 6
+  },
+  "erythema annulare centrifigum": {
+    "images": 51,
+    "test": 10,
+    "train": 36,
+    "val": 5
+  },
+  "erythema elevatum diutinum": {
+    "images": 24,
+    "test": 4,
+    "train": 17,
+    "val": 3
+  },
+  "erythema multiforme": {
+    "images": 154,
+    "test": 31,
+    "train": 108,
+    "val": 15
+  },
+  "erythema nodosum": {
+    "images": 53,
+    "test": 11,
+    "train": 37,
+    "val": 5
+  },
+  "factitial dermatitis": {
+    "images": 38,
+    "test": 7,
+    "train": 27,
+    "val": 4
+  },
+  "fixed eruptions": {
+    "images": 85,
+    "test": 17,
+    "train": 59,
+    "val": 9
+  },
+  "folliculitis": {
+    "images": 182,
+    "test": 37,
+    "train": 127,
+    "val": 18
+  },
+  "fordyce spots": {
+    "images": 44,
+    "test": 9,
+    "train": 31,
+    "val": 4
+  },
+  "granuloma annulare": {
+    "images": 130,
+    "test": 26,
+    "train": 91,
+    "val": 13
+  },
+  "granuloma pyogenic": {
+    "images": 34,
+    "test": 7,
+    "train": 24,
+    "val": 3
+  },
+  "hailey hailey disease": {
+    "images": 61,
+    "test": 12,
+    "train": 43,
+    "val": 6
+  },
+  "halo nevus": {
+    "images": 69,
+    "test": 14,
+    "train": 48,
+    "val": 7
+  },
+  "hidradenitis": {
+    "images": 57,
+    "test": 11,
+    "train": 40,
+    "val": 6
+  },
+  "ichthyosis vulgaris": {
+    "images": 53,
+    "test": 11,
+    "train": 37,
+    "val": 5
+  },
+  "incontinentia pigmenti": {
+    "images": 64,
+    "test": 13,
+    "train": 45,
+    "val": 6
+  },
+  "juvenile xanthogranuloma": {
+    "images": 104,
+    "test": 21,
+    "train": 73,
+    "val": 10
+  },
+  "kaposi sarcoma": {
+    "images": 98,
+    "test": 19,
+    "train": 69,
+    "val": 10
+  },
+  "keloid": {
+    "images": 83,
+    "test": 17,
+    "train": 58,
+    "val": 8
+  },
+  "keratosis pilaris": {
+    "images": 64,
+    "test": 13,
+    "train": 45,
+    "val": 6
+  },
+  "langerhans cell histiocytosis": {
+    "images": 33,
+    "test": 7,
+    "train": 23,
+    "val": 3
+  },
+  "lentigo maligna": {
+    "images": 59,
+    "test": 12,
+    "train": 41,
+    "val": 6
+  },
+  "lichen amyloidosis": {
+    "images": 33,
+    "test": 7,
+    "train": 23,
+    "val": 3
+  },
+  "lichen planus": {
+    "images": 377,
+    "test": 75,
+    "train": 264,
+    "val": 38
+  },
+  "lichen simplex": {
+    "images": 65,
+    "test": 13,
+    "train": 45,
+    "val": 7
+  },
+  "livedo reticularis": {
+    "images": 45,
+    "test": 9,
+    "train": 32,
+    "val": 4
+  },
+  "lupus erythematosus": {
+    "images": 257,
+    "test": 51,
+    "train": 180,
+    "val": 26
+  },
+  "lupus subacute": {
+    "images": 73,
+    "test": 15,
+    "train": 51,
+    "val": 7
+  },
+  "lyme disease": {
+    "images": 83,
+    "test": 17,
+    "train": 58,
+    "val": 8
+  },
+  "lymphangioma": {
+    "images": 79,
+    "test": 16,
+    "train": 55,
+    "val": 8
+  },
+  "malignant melanoma": {
+    "images": 90,
+    "test": 18,
+    "train": 63,
+    "val": 9
+  },
+  "melanoma": {
+    "images": 176,
+    "test": 35,
+    "train": 123,
+    "val": 18
+  },
+  "milia": {
+    "images": 88,
+    "test": 17,
+    "train": 62,
+    "val": 9
+  },
+  "mucinosis": {
+    "images": 55,
+    "test": 11,
+    "train": 38,
+    "val": 6
+  },
+  "mucous cyst": {
+    "images": 58,
+    "test": 11,
+    "train": 41,
+    "val": 6
+  },
+  "mycosis fungoides": {
+    "images": 143,
+    "test": 29,
+    "train": 100,
+    "val": 14
+  },
+  "myiasis": {
+    "images": 38,
+    "test": 7,
+    "train": 27,
+    "val": 4
+  },
+  "naevus comedonicus": {
+    "images": 44,
+    "test": 9,
+    "train": 31,
+    "val": 4
+  },
+  "necrobiosis lipoidica": {
+    "images": 82,
+    "test": 17,
+    "train": 57,
+    "val": 8
+  },
+  "nematode infection": {
+    "images": 113,
+    "test": 23,
+    "train": 79,
+    "val": 11
+  },
+  "neurodermatitis": {
+    "images": 54,
+    "test": 11,
+    "train": 38,
+    "val": 5
+  },
+  "neurofibromatosis": {
+    "images": 109,
+    "test": 22,
+    "train": 76,
+    "val": 11
+  },
+  "neurotic excoriations": {
+    "images": 47,
+    "test": 9,
+    "train": 33,
+    "val": 5
+  },
+  "neutrophilic dermatoses": {
+    "images": 244,
+    "test": 49,
+    "train": 171,
+    "val": 24
+  },
+  "nevocytic nevus": {
+    "images": 50,
+    "test": 10,
+    "train": 35,
+    "val": 5
+  },
+  "nevus sebaceous of jadassohn": {
+    "images": 88,
+    "test": 17,
+    "train": 62,
+    "val": 9
+  },
+  "papilomatosis confluentes and reticulate": {
+    "images": 55,
+    "test": 11,
+    "train": 39,
+    "val": 5
+  },
+  "paronychia": {
+    "images": 57,
+    "test": 11,
+    "train": 40,
+    "val": 6
+  },
+  "pediculosis lids": {
+    "images": 32,
+    "test": 7,
+    "train": 22,
+    "val": 3
+  },
+  "perioral dermatitis": {
+    "images": 53,
+    "test": 11,
+    "train": 37,
+    "val": 5
+  },
+  "photodermatoses": {
+    "images": 242,
+    "test": 49,
+    "train": 169,
+    "val": 24
+  },
+  "pilar cyst": {
+    "images": 80,
+    "test": 16,
+    "train": 56,
+    "val": 8
+  },
+  "pilomatricoma": {
+    "images": 39,
+    "test": 8,
+    "train": 27,
+    "val": 4
+  },
+  "pityriasis lichenoides chronica": {
+    "images": 43,
+    "test": 9,
+    "train": 30,
+    "val": 4
+  },
+  "pityriasis rosea": {
+    "images": 123,
+    "test": 25,
+    "train": 86,
+    "val": 12
+  },
+  "pityriasis rubra pilaris": {
+    "images": 176,
+    "test": 35,
+    "train": 123,
+    "val": 18
+  },
+  "porokeratosis actinic": {
+    "images": 93,
+    "test": 19,
+    "train": 65,
+    "val": 9
+  },
+  "porokeratosis of mibelli": {
+    "images": 45,
+    "test": 9,
+    "train": 32,
+    "val": 4
+  },
+  "porphyria": {
+    "images": 87,
+    "test": 17,
+    "train": 61,
+    "val": 9
+  },
+  "port wine stain": {
+    "images": 52,
+    "test": 11,
+    "train": 36,
+    "val": 5
+  },
+  "prurigo nodularis": {
+    "images": 81,
+    "test": 16,
+    "train": 57,
+    "val": 8
+  },
+  "psoriasis": {
+    "images": 534,
+    "test": 107,
+    "train": 374,
+    "val": 53
+  },
+  "pustular psoriasis": {
+    "images": 47,
+    "test": 9,
+    "train": 33,
+    "val": 5
+  },
+  "pyogenic granuloma": {
+    "images": 95,
+    "test": 19,
+    "train": 66,
+    "val": 10
+  },
+  "rhinophyma": {
+    "images": 48,
+    "test": 9,
+    "train": 34,
+    "val": 5
+  },
+  "rosacea": {
+    "images": 79,
+    "test": 16,
+    "train": 55,
+    "val": 8
+  },
+  "sarcoidosis": {
+    "images": 257,
+    "test": 51,
+    "train": 180,
+    "val": 26
+  },
+  "scabies": {
+    "images": 203,
+    "test": 41,
+    "train": 142,
+    "val": 20
+  },
+  "scleroderma": {
+    "images": 246,
+    "test": 49,
+    "train": 172,
+    "val": 25
+  },
+  "scleromyxedema": {
+    "images": 76,
+    "test": 15,
+    "train": 53,
+    "val": 8
+  },
+  "seborrheic dermatitis": {
+    "images": 113,
+    "test": 23,
+    "train": 79,
+    "val": 11
+  },
+  "seborrheic keratosis": {
+    "images": 53,
+    "test": 11,
+    "train": 37,
+    "val": 5
+  },
+  "solid cystic basal cell carcinoma": {
+    "images": 41,
+    "test": 8,
+    "train": 29,
+    "val": 4
+  },
+  "squamous cell carcinoma": {
+    "images": 372,
+    "test": 75,
+    "train": 260,
+    "val": 37
+  },
+  "stasis edema": {
+    "images": 55,
+    "test": 11,
+    "train": 39,
+    "val": 5
+  },
+  "stevens johnson syndrome": {
+    "images": 89,
+    "test": 18,
+    "train": 62,
+    "val": 9
+  },
+  "striae": {
+    "images": 48,
+    "test": 9,
+    "train": 34,
+    "val": 5
+  },
+  "sun damaged skin": {
+    "images": 55,
+    "test": 11,
+    "train": 39,
+    "val": 5
+  },
+  "superficial spreading melanoma ssm": {
+    "images": 104,
+    "test": 21,
+    "train": 73,
+    "val": 10
+  },
+  "syringoma": {
+    "images": 66,
+    "test": 13,
+    "train": 46,
+    "val": 7
+  },
+  "telangiectases": {
+    "images": 100,
+    "test": 20,
+    "train": 70,
+    "val": 10
+  },
+  "tick bite": {
+    "images": 48,
+    "test": 9,
+    "train": 34,
+    "val": 5
+  },
+  "tuberous sclerosis": {
+    "images": 65,
+    "test": 13,
+    "train": 45,
+    "val": 7
+  },
+  "tungiasis": {
+    "images": 65,
+    "test": 13,
+    "train": 45,
+    "val": 7
+  },
+  "urticaria": {
+    "images": 134,
+    "test": 27,
+    "train": 94,
+    "val": 13
+  },
+  "urticaria pigmentosa": {
+    "images": 90,
+    "test": 18,
+    "train": 63,
+    "val": 9
+  },
+  "vitiligo": {
+    "images": 113,
+    "test": 23,
+    "train": 79,
+    "val": 11
+  },
+  "xanthomas": {
+    "images": 44,
+    "test": 9,
+    "train": 31,
+    "val": 4
+  },
+  "xeroderma pigmentosum": {
+    "images": 47,
+    "test": 9,
+    "train": 33,
+    "val": 5
+  }
+}

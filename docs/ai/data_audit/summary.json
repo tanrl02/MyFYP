@@ -1,0 +1,171 @@
+{
+  "audited_on": "2026-10-18",
+  "candidate_classes": [
+    {
+      "candidate_class": "acne",
+      "fitz_c_images": 420,
+      "fitz_c_test": 84,
+      "fitz_c_train": 294,
+      "fitz_c_val": 42,
+      "fitz_labels": "acne | acne vulgaris",
+      "fitz_original_images": 518,
+      "scin_any_weight_cases": 98,
+      "scin_labels": "Acne",
+      "scin_screened_cases": 33,
+      "scin_screened_image_references": 63,
+      "scin_unique_top_cases": 45
+    },
+    {
+      "candidate_class": "eczema",
+      "fitz_c_images": 176,
+      "fitz_c_test": 35,
+      "fitz_c_train": 123,
+      "fitz_c_val": 18,
+      "fitz_labels": "eczema",
+      "fitz_original_images": 204,
+      "scin_any_weight_cases": 1056,
+      "scin_labels": "Eczema",
+      "scin_screened_cases": 231,
+      "scin_screened_image_references": 509,
+      "scin_unique_top_cases": 368
+    },
+    {
+      "candidate_class": "psoriasis",
+      "fitz_c_images": 534,
+      "fitz_c_test": 107,
+      "fitz_c_train": 374,
+      "fitz_c_val": 53,
+      "fitz_labels": "psoriasis",
+      "fitz_original_images": 653,
+      "scin_any_weight_cases": 308,
+      "scin_labels": "Psoriasis",
+      "scin_screened_cases": 32,
+      "scin_screened_image_references": 65,
+      "scin_unique_top_cases": 65
+    },
+    {
+      "candidate_class": "folliculitis",
+      "fitz_c_images": 182,
+      "fitz_c_test": 37,
+      "fitz_c_train": 127,
+      "fitz_c_val": 18,
+      "fitz_labels": "folliculitis",
+      "fitz_original_images": 342,
+      "scin_any_weight_cases": 268,
+      "scin_labels": "Folliculitis",
+      "scin_screened_cases": 68,
+      "scin_screened_image_references": 145,
+      "scin_unique_top_cases": 92
+    },
+    {
+      "candidate_class": "urticaria",
+      "fitz_c_images": 134,
+      "fitz_c_test": 27,
+      "fitz_c_train": 94,
+      "fitz_c_val": 13,
+      "fitz_labels": "urticaria",
+      "fitz_original_images": 151,
+      "scin_any_weight_cases": 332,
+      "scin_labels": "Urticaria",
+      "scin_screened_cases": 131,
+      "scin_screened_image_references": 271,
+      "scin_unique_top_cases": 175
+    }
+  ],
+  "corrected_source_comparison": {
+    "github_rows": 11394,
+    "github_summary": {
+      "cross_split_repeated_literal_urls": 0,
+      "cross_split_repeated_md5": 0,
+      "image_bytes_or_existence_checked": false,
+      "partitions": {
+        "test": 2280,
+        "train": 7975,
+        "val": 1139
+      },
+      "patient_id_available": false,
+      "repeated_md5_rows": 0,
+      "rows": 11394,
+      "skin_type_counts": {
+        "0": 296,
+        "1": 2353,
+        "2": 3649,
+        "3": 2160,
+        "4": 1684,
+        "5": 879,
+        "6": 373
+      },
+      "unique_md5_identifiers": 11394
+    },
+    "membership_label_split_sets_equal": true,
+    "zenodo_rows": 11394
+  },
+  "fitzpatrick_corrected": {
+    "cross_split_repeated_literal_urls": 0,
+    "cross_split_repeated_md5": 0,
+    "image_bytes_or_existence_checked": false,
+    "partitions": {
+      "test": 2280,
+      "train": 7975,
+      "val": 1139
+    },
+    "patient_id_available": false,
+    "repeated_md5_rows": 0,
+    "rows": 11394,
+    "skin_type_counts": {
+      "0": 296,
+      "1": 2353,
+      "2": 3649,
+      "3": 2160,
+      "4": 1684,
+      "5": 879,
+      "6": 373
+    },
+    "unique_md5_identifiers": 11394
+  },
+  "fitzpatrick_original": {
+    "cross_split_repeated_literal_urls": 0,
+    "cross_split_repeated_md5": 0,
+    "image_bytes_or_existence_checked": false,
+    "partitions": {},
+    "patient_id_available": false,
+    "repeated_md5_rows": 0,
+    "rows": 16577,
+    "skin_type_counts": {
+      "-1": 565,
+      "1": 2947,
+      "2": 4808,
+      "3": 3308,
+      "4": 2781,
+      "5": 1533,
+      "6": 635
+    },
+    "unique_md5_identifiers": 16577
+  },
+  "scin": {
+    "case_count": 5033,
+    "distinct_image_paths": 10380,
+    "gradability_values": {
+      "": 8634,
+      "DEFAULT_YES_IMAGE_QUALITY_SUFFICIENT": 3974,
+      "NO_IMAGE_QUALITY_INSUFFICIENT": 2413,
+      "YES_IMAGE_QUALITY_SUFFICIENT_NO_DISCERNIBLE_PATHOLOGY": 78
+    },
+    "image_bytes_or_existence_checked": false,
+    "image_references": 10407,
+    "label_row_count": 5033,
+    "missing_image_cases": 0,
+    "paths_shared_between_cases": 15,
+    "patient_id_available": false,
+    "releases": {
+      "1.0.0": 5033
+    },
+    "repeated_path_references": 27,
+    "screen_rule": "unique top; weight >=0.60; margin >=0.20; at least one default-gradable rating; at least one image reference",
+    "screened_cases": 1268,
+    "tied_top_cases": 925,
+    "unique_top_cases": 2136,
+    "without_weighted_label": 1972
+  },
+  "scope": "metadata only; counts are not verified usable image counts"
+}

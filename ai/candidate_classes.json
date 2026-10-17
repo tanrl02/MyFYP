@@ -1,0 +1,17 @@
+{
+  "status": "Audit proposal only; not an approved training taxonomy",
+  "scin_screen": {"minimum_top_weight": 0.6, "minimum_margin": 0.2},
+  "classes": {
+    "acne": {"scin": ["Acne"], "fitzpatrick": ["acne", "acne vulgaris"]},
+    "eczema": {"scin": ["Eczema"], "fitzpatrick": ["eczema"]},
+    "psoriasis": {"scin": ["Psoriasis"], "fitzpatrick": ["psoriasis"]},
+    "folliculitis": {"scin": ["Folliculitis"], "fitzpatrick": ["folliculitis"]},
+    "urticaria": {"scin": ["Urticaria"], "fitzpatrick": ["urticaria"]}
+  },
+  "notes": [
+    "The proposed acne class combines two source label names; confirm the grouping before preparing training labels.",
+    "Do not silently include dyshidrotic eczema, contact dermatitis, pustular psoriasis, acneiform eruption or urticaria pigmentosa.",
+    "SCIN weights are differential-label ranking weights, not calibrated disease probabilities.",
+    "The screen is a sensitivity analysis, not confirmation of diagnosis, image quality, image availability or independence."
+  ]
+}

@@ -19,3 +19,5 @@ __pycache__/
 *.tsbuildinfo
 apps/api/data/
 apps/api/.test-data/
+# Public research metadata/images stay local; commit only aggregate audit outputs.
+ai/data/

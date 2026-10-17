@@ -1,0 +1,54 @@
+{
+  "audited_on": "2026-10-18",
+  "scope": "Only five metadata CSVs; no images",
+  "sources": [
+    {
+      "name": "scin_cases",
+      "local_path": "ai/data/scin/raw/scin_cases.csv",
+      "file": "scin_cases.csv",
+      "url": "https://storage.googleapis.com/dx-scin-public-data/dataset/scin_cases.csv",
+      "bytes": 1293926,
+      "sha256": "7923ee9ba9775af413ca115c4587dc1bd32259d7936aa97fa80d88dd616ca3c3",
+      "etag": "\"2260e1766404218b697fb098728dbb24\"",
+      "last_modified": "Tue, 05 Mar 2024 05:32:33 GMT"
+    },
+    {
+      "name": "scin_labels",
+      "local_path": "ai/data/scin/raw/scin_labels.csv",
+      "file": "scin_labels.csv",
+      "url": "https://storage.googleapis.com/dx-scin-public-data/dataset/scin_labels.csv",
+      "bytes": 895734,
+      "sha256": "616ad03c24c304f5f7ef01b4116e4d3274f1c71c9b19a0e3d5620698b081a9fe",
+      "etag": "\"589aa59d3d4ad906eec704b5f76c5d16\"",
+      "last_modified": "Tue, 05 Mar 2024 04:45:40 GMT"
+    },
+    {
+      "name": "fitz_original",
+      "local_path": "ai/data/fitzpatrick17k/raw/fitzpatrick17k.csv",
+      "file": "fitzpatrick17k.csv",
+      "url": "https://raw.githubusercontent.com/mattgroh/fitzpatrick17k/main/fitzpatrick17k.csv",
+      "bytes": 4104341,
+      "sha256": "851dfaabf1791c2a8b1c2957619f3e0673cf0002f4ce924a5c02d185c7d4a1cd"
+    },
+    {
+      "name": "fitz_corrected_github",
+      "local_path": "ai/data/fitzpatrick17k/raw/SimThresh_T_A2_T_0.99_0.70_FC_T_KeepOne_Out_T_OutThresh_None_0FST_F.csv",
+      "file": "SimThresh_T_A2_T_0.99_0.70_FC_T_KeepOne_Out_T_OutThresh_None_0FST_F.csv",
+      "url": "https://raw.githubusercontent.com/kakumarabhishek/Corrected-Skin-Image-Datasets/ac655ac5a5b93264c57d69d6d520778d915bfc89/Fitzpatrick17k/Fitzpatrick17k_Analysis/DatasetSplits/SimThresh_T_A2_T_0.99_0.70_FC_T_KeepOne_Out_T_OutThresh_None_0FST_F.csv",
+      "bytes": 4304252,
+      "sha256": "bfc28411147693a910b2b409bf449f4f6e61002f29926626eab3589c442fd219"
+    },
+    {
+      "name": "fitz_corrected_zenodo",
+      "local_path": "ai/data/fitzpatrick17k/raw/Fitzpatrick17k-C.csv",
+      "file": "Fitzpatrick17k-C.csv",
+      "url": "https://zenodo.org/api/records/12739457/files/Fitzpatrick17k-C.csv/content",
+      "bytes": 4304252,
+      "sha256": "bfc28411147693a910b2b409bf449f4f6e61002f29926626eab3589c442fd219",
+      "zenodo_record_id": 12739457,
+      "zenodo_declared_license": {
+        "id": "cc-by-4.0"
+      }
+    }
+  ]
+}
