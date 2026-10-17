@@ -257,3 +257,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October Dermnet metadata verification: fetched only public description/file-list JSON (98pages), checked dataset version/size stability, page/view SHA and exact sum1850517236bytes for19559 entries.23categories,15557train/4002test. Two focused audit tests pass; offline summary/lock reproduce byte-for-byte. Checked eight mapping records against saved summary hash and40 provisional training-folder references with zero image downloads.270 same-name/same-category/same-size cross-split pairs are metadata suspects only. No content/diagnosis/patient independence/actual leakage certification. No application, GPU training or phone checks needed; source models/frozen dataset untouched.
+
+
+18 October SCIN expansion audit: original metadata SHA locks and5033 case/annotation keys verified. New three tests plus six existing metadata tests pass. Offline rerun aggregate/eligible/first-batch JSON hashes match byte-for-byte;45 distinct case IDs and45 preferred paths checked, all preferred images belong to their case references. Screening excludes15 globally shared paths and retains case grouping. No image bytes, GPU training or frozen test use. Counts are metadata candidates, not verified diagnoses or available images.

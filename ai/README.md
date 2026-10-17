@@ -65,3 +65,8 @@ Run `.venv-ai\Scripts\python.exe ai/analyze_errors.py --device cuda` to replay t
 ## Kaggle Dermnet audit
 
 Read [the permissions and class-mapping findings](../docs/ai/DERMNET_AUDIT.md). `audit_dermnet.py` inspects public file-list JSON only; it never fetches images. Run it offline against cached metadata, or use `--fetch` for a bounded fresh public metadata audit. `dermnet_mapping_review.json` records review candidates and mixed/missing categories; it is not an approved training mapping. Current model/data remain unchanged.
+
+
+## SCIN expansion screening
+
+Run `.venv\Scripts\python.exe ai/audit_scin_expansion.py` offline against the existing SHA-locked metadata. See [the screening rules, limitations and proposed45-case batch](../docs/ai/SCIN_EXPANSION_AUDIT.md). Candidate lists stay local; the script never fetches images, assigns splits or approves training. Differential weights and case gradability must not be presented as confirmed diagnoses.

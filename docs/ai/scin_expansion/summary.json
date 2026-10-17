@@ -1,0 +1,140 @@
+{
+  "audited_on": "2026-10-18",
+  "scope": "Existing SHA-locked SCIN metadata only",
+  "case_count": 5033,
+  "releases": {
+    "1.0.0": 5033
+  },
+  "sources": [
+    {
+      "name": "scin_cases",
+      "url": "https://storage.googleapis.com/dx-scin-public-data/dataset/scin_cases.csv",
+      "sha256": "7923ee9ba9775af413ca115c4587dc1bd32259d7936aa97fa80d88dd616ca3c3"
+    },
+    {
+      "name": "scin_labels",
+      "url": "https://storage.googleapis.com/dx-scin-public-data/dataset/scin_labels.csv",
+      "sha256": "616ad03c24c304f5f7ef01b4116e4d3274f1c71c9b19a0e3d5620698b081a9fe"
+    }
+  ],
+  "shared_image_paths_between_cases": 15,
+  "class_statistics": {
+    "acne": {
+      "any_weight_cases": 98,
+      "unique_top_cases": 45,
+      "top_cases_with_gradability_disagreement": 5,
+      "initial_screen_cases": 33,
+      "initial_screen_image_references": 63,
+      "strict_screen_cases": 14,
+      "strict_screen_image_references": 26,
+      "strict_positive_graders_1": 13,
+      "multiple_graders_strict_cases": 1,
+      "multiple_graders_strict_image_references": 3,
+      "strict_positive_graders_3": 1
+    },
+    "eczema": {
+      "any_weight_cases": 1056,
+      "unique_top_cases": 368,
+      "top_cases_with_gradability_disagreement": 47,
+      "initial_screen_cases": 231,
+      "initial_screen_image_references": 509,
+      "strict_screen_cases": 121,
+      "strict_screen_image_references": 264,
+      "strict_positive_graders_1": 115,
+      "multiple_graders_strict_cases": 6,
+      "multiple_graders_strict_image_references": 16,
+      "strict_positive_graders_3": 6
+    },
+    "psoriasis": {
+      "any_weight_cases": 308,
+      "unique_top_cases": 65,
+      "top_cases_with_gradability_disagreement": 5,
+      "initial_screen_cases": 32,
+      "initial_screen_image_references": 65,
+      "strict_screen_cases": 17,
+      "strict_screen_image_references": 33,
+      "strict_positive_graders_1": 17
+    },
+    "folliculitis": {
+      "any_weight_cases": 268,
+      "unique_top_cases": 92,
+      "top_cases_with_gradability_disagreement": 10,
+      "initial_screen_cases": 68,
+      "initial_screen_image_references": 145,
+      "strict_screen_cases": 36,
+      "strict_screen_image_references": 69,
+      "strict_positive_graders_1": 35,
+      "multiple_graders_strict_cases": 1,
+      "multiple_graders_strict_image_references": 3,
+      "strict_positive_graders_3": 1
+    },
+    "urticaria": {
+      "any_weight_cases": 332,
+      "unique_top_cases": 175,
+      "top_cases_with_gradability_disagreement": 12,
+      "initial_screen_cases": 131,
+      "initial_screen_image_references": 271,
+      "strict_screen_cases": 86,
+      "strict_screen_image_references": 163,
+      "strict_positive_graders_1": 80,
+      "multiple_graders_strict_cases": 6,
+      "multiple_graders_strict_image_references": 16,
+      "strict_positive_graders_3": 6
+    },
+    "allergic_contact_dermatitis": {
+      "any_weight_cases": 873,
+      "unique_top_cases": 224,
+      "top_cases_with_gradability_disagreement": 18,
+      "initial_screen_cases": 111,
+      "initial_screen_image_references": 219,
+      "strict_screen_cases": 38,
+      "strict_screen_image_references": 72,
+      "strict_positive_graders_1": 38
+    },
+    "seborrheic_dermatitis": {
+      "any_weight_cases": 46,
+      "unique_top_cases": 14,
+      "top_cases_with_gradability_disagreement": 1,
+      "initial_screen_cases": 10,
+      "initial_screen_image_references": 22,
+      "strict_screen_cases": 5,
+      "strict_screen_image_references": 11,
+      "strict_positive_graders_1": 5
+    },
+    "scabies": {
+      "any_weight_cases": 63,
+      "unique_top_cases": 5,
+      "top_cases_with_gradability_disagreement": 1,
+      "initial_screen_cases": 1,
+      "initial_screen_image_references": 2
+    }
+  },
+  "screen_rules": {
+    "initial": "Unique top, weight>=0.60, margin>=0.20, at least one default-positive case-grade and image reference (historical rule)",
+    "strict": "Unique top, weight>=0.80, margin>=0.40, ALL available case-graders default-positive, valid distinct paths and no literal path shared with another case",
+    "multiple_graders_strict": "Strict rule plus at least two available default-positive case-graders; not proof of diagnostic consensus"
+  },
+  "first_batch": {
+    "cases_by_class": {
+      "eczema": 20,
+      "allergic_contact_dermatitis": 20,
+      "seborrheic_dermatitis": 5
+    },
+    "total_cases": 45,
+    "first_review_image_references": 45,
+    "all_case_image_references": 100,
+    "preferred_close_ups": 45
+  },
+  "image_bytes_downloaded": 0,
+  "image_availability_or_quality_verified": false,
+  "training_approved": false,
+  "test_images_used": 0,
+  "limitations": [
+    "Weights rank differential diagnoses; they are not calibrated disease probabilities",
+    "Case IDs are not participant IDs; participant independence is not established",
+    "Gradability fields describe case raters, not matching image numbers",
+    "No file bytes or perceptual duplicates checked; no clinical label verification",
+    "Original confidence values are retained for review but are not used by this ranking-weight screen",
+    "Exact mapped labels still need cross-source taxonomy review; no source labels silently merged"
+  ]
+}
