@@ -316,6 +316,10 @@ def create_app(path=None):
     def consultation(booking_id: str, who=Depends(actor)):
         return run(lambda: store.consultation(booking_id, who))
 
+    @api.get('/visits/{booking_id}/history')
+    def consultation_history(booking_id: str,who=Depends(doctor)):
+        return run(lambda: store.consultation_history(booking_id,who))
+
     @api.post('/visits/{booking_id}/consultation')
     def publish_consultation(booking_id: str, payload: ConsultationInput, who=Depends(doctor)):
         return run(lambda: store.publish_consultation(booking_id,who,payload.findings.strip(),payload.follow_up.strip()))

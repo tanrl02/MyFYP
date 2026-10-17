@@ -25,6 +25,8 @@ export type ReviewDraft = {share_id:string;doctor_id:DemoDoctor;note:string;foll
 export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
 export type Prescription = { id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & Pick<Medicine,"name"|"strength"|"form"|"price_cents">)[] };
+export type ClinicalPrescription = Omit<Prescription,"items"> & {items:(PrescriptionItem & Pick<Medicine,"name"|"strength"|"form">)[]};
+export type ConsultationHistory = {current_visit_id:string;limit:number;items:{visit:Booking;note:ConsultationNote|null;prescription:ClinicalPrescription|null}[]};
 export type Invoice = { id: string; booking_id: string; total_cents: number; status: "unpaid" | "paid"; paid_at: string | null; payment_mode: "simulation" | null; lines: { description: string; quantity: number; unit_price_cents: number }[] };
 export type Care = { visit: Booking; prescription: Prescription | null; invoice: Invoice | null };
 export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: ConsultationNote | null; feedback: Omit<VisitFeedback,"visit"> | null; replacement: Booking | null };
@@ -82,6 +84,7 @@ export class DemoApi {
   feedback() { return this.request<VisitFeedback[]>("/feedback"); }
   submitFeedback(id: string,rating: number,comment: string) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback`,{rating,comment}); }
   consultation(id: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`); }
+  consultationHistory(id:string) { return this.request<ConsultationHistory>(`/visits/${encodeURIComponent(id)}/history`); }
   publishConsultation(id: string, findings: string, followUp: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp }); }
   assessments() { return this.request<Assessment[]>("/assessments"); }
   assessment(id: string) { return this.request<Assessment>(`/assessments/${encodeURIComponent(id)}`); }

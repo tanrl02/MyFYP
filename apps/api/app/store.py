@@ -821,6 +821,28 @@ class Store:
             db.execute('BEGIN')
             return self.consultation_record(db,booking_id,actor,include_photo=True)
 
+    def consultation_history(self, booking_id, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            current=self.consultation_record(db,booking_id,doctor)['visit']
+            rows=db.execute('''SELECT b.id FROM bookings b JOIN slots s ON s.id=b.slot_id
+                WHERE b.patient_id=? AND s.doctor_id=? AND b.status='completed' AND b.id!=?
+                  AND julianday(s.starts_at)<julianday(?)
+                ORDER BY julianday(s.starts_at) DESC,b.id DESC LIMIT 50''',
+                (current['patient_id'],doctor,booking_id,current['starts_at'])).fetchall()
+            items=[]
+            for row in rows:
+                note=db.execute('SELECT * FROM consultation_notes WHERE booking_id=?',(row['id'],)).fetchone()
+                prescription=self.prescription(db,row['id'])
+                if prescription:
+                    # Clinical history does not need catalogue prices or billing data.
+                    prescription={key:prescription[key] for key in ('id','booking_id','doctor_id','status','created_at','dispensed_at')} | {
+                        'items':[{key:item[key] for key in ('medicine_id','name','strength','form','quantity','directions')} for item in prescription['items']]}
+                items.append({'visit':self.record(db,row['id']),'note':dict(note) if note else None,'prescription':prescription})
+            return {'current_visit_id':booking_id,'items':items,'limit':50}
+
     def publish_consultation(self, booking_id, doctor, findings, follow_up):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
