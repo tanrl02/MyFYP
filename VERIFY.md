@@ -260,3 +260,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October SCIN expansion audit: original metadata SHA locks and5033 case/annotation keys verified. New three tests plus six existing metadata tests pass. Offline rerun aggregate/eligible/first-batch JSON hashes match byte-for-byte;45 distinct case IDs and45 preferred paths checked, all preferred images belong to their case references. Screening excludes15 globally shared paths and retains case grouping. No image bytes, GPU training or frozen test use. Counts are metadata candidates, not verified diagnoses or available images.
+
+
+18 October SCIN acquisition checks:45/45 downloads and decodes succeeded; source CRC32C verified for all45, local SHA/MD5/pixel/dHash recorded,0small-edge flags. Four tests passed including standard CRC32C check value0xe3069283 for123456789, response checksum/length/size failures, restricted paths and exact-versus-heuristic matching. Old fingerprint metadata semantic lock passed;93420 cross-source and990 within-batch comparisons yield no candidates. No prior test pixels opened. Repeated offline final summary/image-manifest hashes match exactly;45 review records,3 actually viewed sheet hashes,37 retained/8 quarantine totals verified. Training approval false; no data split/app/model changes.

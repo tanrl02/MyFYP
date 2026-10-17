@@ -1,0 +1,13 @@
+{
+  "batch_sha256": "2ff671a34f65cff8e8ff977a60164a0a9ec419f5e1d2842659ac37ad46c50a21",
+  "expected_cases": 45,
+  "expected_classes": {
+    "eczema": 20,
+    "allergic_contact_dermatitis": 20,
+    "seborrheic_dermatitis": 5
+  },
+  "max_image_bytes": 10485760,
+  "max_run_bytes": 201326592,
+  "source_bucket": "https://storage.googleapis.com/dx-scin-public-data/",
+  "purpose": "Local noncommercial technical review only; no training approval or split assignment"
+}

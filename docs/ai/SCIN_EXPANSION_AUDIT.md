@@ -57,3 +57,6 @@ Dermnet remains a parallel option after source/use clarification and narrower la
 ```
 
 Current offline model remains the user-selected centre-crop fine-tuned checkpoint. App predictions are still simulated. Word, real authentication, services, dependencies and model weights are unchanged; the user's existing `BASELINE_SETUP.md` edit remains untouched.
+
+
+Subsequent checkpoint: [the45-photo acquisition and technical review](SCIN_PHOTO_REVIEW.md) is complete.37 candidates remain after8 quarantines; no training or new split has been performed. This page preserves the original screening evidence.

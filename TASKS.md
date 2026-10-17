@@ -158,3 +158,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October SCIN screening complete: stricter metadata rule yields121eczema/38ACD/5SD cases; most have one case grader, no confirmed-diagnosis claim. Read docs/ai/SCIN_EXPANSION_AUDIT.md. Prepared45-case review list(20+20+5), one preferred close-up each, zero images downloaded. Nine targeted tests and byte-identical offline reproduction passed. Next small task: bounded acquisition and technical QA of45 preferred images, preserving provenance/licence and case grouping; no training or current dataset changes yet. Keep8classes/401test reserved/current centre-crop model.
+
+
+18 October first SCIN batch complete:45 images acquired and source CRC32C/decode/local hashes verified; all45 contact-sheet views inspected.37 candidates retained (18eczema/17ACD/2SD),8 quarantined (4 low original confidence,4 mask overlays), originals untouched. No exact/dHash<=4 matches among93420 old comparisons+990 within batch; not exhaustive duplicate proof. Four tests and repeatable offline verification passed. Read docs/ai/SCIN_PHOTO_REVIEW.md. Next task: separate versioned expansion manifest and case-group split/SCIN development holdout before training. Old401test/current centre-crop model unchanged.

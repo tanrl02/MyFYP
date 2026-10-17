@@ -70,3 +70,8 @@ Read [the permissions and class-mapping findings](../docs/ai/DERMNET_AUDIT.md). 
 ## SCIN expansion screening
 
 Run `.venv\Scripts\python.exe ai/audit_scin_expansion.py` offline against the existing SHA-locked metadata. See [the screening rules, limitations and proposed45-case batch](../docs/ai/SCIN_EXPANSION_AUDIT.md). Candidate lists stay local; the script never fetches images, assigns splits or approves training. Differential weights and case gradability must not be presented as confirmed diagnoses.
+
+
+## First SCIN photo review batch
+
+`prepare_scin_review.py --download --sheets` acquires only the locked45-image plan, retaining notices, checking source CRC32C/local fingerprints and comparing with precomputed old hashes. Run without `--download` to verify the cache offline. Read [the photo-review outcome](../docs/ai/SCIN_PHOTO_REVIEW.md) and `scin_photo_review.json` before any dataset expansion.37 retained cases remain research-preparation candidates, not an approved training manifest.

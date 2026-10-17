@@ -1,0 +1,460 @@
+{
+  "reviewed_on": "2026-10-18",
+  "reviewer": "Codex technical visual triage; no clinical diagnosis or independent label verification",
+  "batch_sha256": "2ff671a34f65cff8e8ff977a60164a0a9ec419f5e1d2842659ac37ad46c50a21",
+  "image_manifest_sha256": "df60930bef92ed03169f1816eb82af717821bc2258c12f9405eb129c82d0ba79",
+  "sheets": {
+    "photos-1.jpg": "33216fe8d6fb1571ae48e8cf312c07e38f9fc48f56c72bbb2b6ba2a5189f69fa",
+    "photos-2.jpg": "0dbc0a2fcbb05f39c43a340429c5d7aba87be3d8a852383289de4bb298bbea43",
+    "photos-3.jpg": "5baea554da4f4e94a9c2115125ebec4362653d625aacf38b6b037dbaa6f900cd"
+  },
+  "reviewed_images": 45,
+  "image_bytes_acquired": 64720899,
+  "decisions": [
+    {
+      "position": 1,
+      "case_id": "-7776857652459777696",
+      "target_candidate": "eczema",
+      "image_sha256": "c9353dd03387fb9ec47d922d828180e60b061dbb5bfc36d3d8ab7d5ed283e610",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 2,
+      "case_id": "3083550471820565612",
+      "target_candidate": "eczema",
+      "image_sha256": "7bada9b46feeef61e243ca16c255ec967aafb6983e9e019c3622a974b13659ee",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 3,
+      "case_id": "3377584127732041409",
+      "target_candidate": "eczema",
+      "image_sha256": "3595aac6aa9d82b2b292c1f0393f964035c5705dd8889491d9ceb1c367039e59",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 4,
+      "case_id": "335846587626430311",
+      "target_candidate": "eczema",
+      "image_sha256": "2791181234464aeb96999b52986f363efc1debf8ba399135d6982b6e444c6a86",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 5,
+      "case_id": "-919660371744832007",
+      "target_candidate": "eczema",
+      "image_sha256": "d3a64340c31fc18aa0228421cc94781b28ca77b3c6ec259f4229aff438c162d6",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 6,
+      "case_id": "7530181678510252673",
+      "target_candidate": "eczema",
+      "image_sha256": "ae5e0ac95506664d35324a98fa891a205864d8798f59b3c24a451ac714d04bb4",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 7,
+      "case_id": "5275181661240813075",
+      "target_candidate": "eczema",
+      "image_sha256": "4727670ca93f040bf66e6d1187f787dd92c097bc0d008445a1c292bc949ae1a9",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 8,
+      "case_id": "-7743291557587090042",
+      "target_candidate": "eczema",
+      "image_sha256": "387f0c6b5be1d33007b91fb68269de9561a52fa8dc2e2e2f64263a36e39fbeac",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 9,
+      "case_id": "-8299809889773574040",
+      "target_candidate": "eczema",
+      "image_sha256": "f5f1ef263c68c48e3f1504098999ab98db7f193f5b149a29e565f104b120dfa0",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 10,
+      "case_id": "3846988567346853286",
+      "target_candidate": "eczema",
+      "image_sha256": "9690450e6f0cd895d55ad67bf298d52bf643a2b645e892dc19d63c6c5f2edf0a",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 11,
+      "case_id": "-8111125152560753978",
+      "target_candidate": "eczema",
+      "image_sha256": "e67339324b82e2de79716c819f8b29348d8caa70ab72f1b80f95fa97518c2401",
+      "source_max_original_confidence": 3,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 12,
+      "case_id": "8534614443021283236",
+      "target_candidate": "eczema",
+      "image_sha256": "f73134dc0be9626be244aeb00ccaa9b9cc78aeb7e077e1f4ede0c5f509160e5c",
+      "source_max_original_confidence": 1,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "low_absolute_source_confidence_below3"
+      ]
+    },
+    {
+      "position": 13,
+      "case_id": "3950839687124807995",
+      "target_candidate": "eczema",
+      "image_sha256": "235ac0c376e867cf0b0ef17b812a9a18b113c07898bbeb533b26083cfc40334d",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 14,
+      "case_id": "5604714673774290686",
+      "target_candidate": "eczema",
+      "image_sha256": "b34c00773e335cbb10745db093c87f7dd23adf3f9cb72fde23072595731f847f",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 15,
+      "case_id": "-130215202506383973",
+      "target_candidate": "eczema",
+      "image_sha256": "24d5630891b7f8f9873ed2b138bfc330776a89396a479750064abbd44da492b0",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 16,
+      "case_id": "1850198155303184343",
+      "target_candidate": "eczema",
+      "image_sha256": "472ef18d1fe2f41d1fbbc3f18e84285e0b0c2629603d318e58f1b79057445cfe",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 17,
+      "case_id": "5475014386524307360",
+      "target_candidate": "eczema",
+      "image_sha256": "dc9098773b66a8858018fb9110961416ff4508ea128dec9f9c4d129963381c1b",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 18,
+      "case_id": "5632157492123174629",
+      "target_candidate": "eczema",
+      "image_sha256": "9d75e390d84f35f49cef0ce8a8e8e25ee39d5cad5acbf6e305df3536f458728e",
+      "source_max_original_confidence": 5,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "visible_source_privacy_mask_overlay"
+      ]
+    },
+    {
+      "position": 19,
+      "case_id": "-4662194556963063742",
+      "target_candidate": "eczema",
+      "image_sha256": "eb92f07b6d6104d4d59aaa29edc520eb268c6d7279e4d0a1297e31e2ce05d848",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 20,
+      "case_id": "2562611754724897853",
+      "target_candidate": "eczema",
+      "image_sha256": "8fc1a15a5ffb07f151dec73fc5d952f8ff69c22d2e225c41f2f6162e4e510eba",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 21,
+      "case_id": "-2483075134447987416",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "c36904431cdcc32c1424159987402046039a45507d400463ed05a81967bc5740",
+      "source_max_original_confidence": 1,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "low_absolute_source_confidence_below3"
+      ]
+    },
+    {
+      "position": 22,
+      "case_id": "255207051194135479",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "6b81170fdb313829bdf71af0312fe6d39e59092cc4a25062a776b686351a6729",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 23,
+      "case_id": "-2986702064294375651",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "0aa95a0c655eb78a3feeaa8661e9baa00626b3daf92183e03dcfb889cdcfc554",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 24,
+      "case_id": "4412120753157054552",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "2de9fd1b591d186b1386b7c8848d9d9a6352c45d0d0a9c6dc7adc00abeb060fd",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 25,
+      "case_id": "3231607339220548802",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "dfa58b14acb65203e08324af5d77348903b8d8b7f97a8f3ee98931b413da4427",
+      "source_max_original_confidence": 2,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "low_absolute_source_confidence_below3"
+      ]
+    },
+    {
+      "position": 26,
+      "case_id": "4039144254966056317",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "16b4b679e3d870945835dcaba9e31836cb66926c0e93a86717ca9acb0b431efd",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 27,
+      "case_id": "-3406507834674402591",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "549ac716776007caf2b138beb7475226200543847dea69ddbd260c9af69227d5",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 28,
+      "case_id": "7327821802957291496",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "a72ee6d1d2e86f8f24b21929456553ad5658a771e34fef5c74b6744816d798aa",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 29,
+      "case_id": "-7125505155253781707",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "dd3ec884deebd96f6bc1f88b8f1f1830fd0db7555c86d0089ba0a473b539b472",
+      "source_max_original_confidence": 1,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "low_absolute_source_confidence_below3"
+      ]
+    },
+    {
+      "position": 30,
+      "case_id": "-5781127683500413767",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "cf9c0e2f673d985885c3d66324a000e330f000883b7095c2d174a898c9c6cea7",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 31,
+      "case_id": "-3055300247709269077",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "cc4353cc0b436a03470021dd41e2a5dbe691b60c03f3eb5e8ad527ed913bea18",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 32,
+      "case_id": "-2518265086444700975",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "7aeda81d4b8f08e059a189d0a638cc5f5de95df994e7c331bd384a2fd4fd0e67",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 33,
+      "case_id": "5080913691893238848",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "c78ac4d9e526c84cdbb30e7382f61ba8fef597810f6294156bb5dab0aa2e6a67",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 34,
+      "case_id": "-6776518044035331491",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "8f79bf43855eed8c00f1afb2062a94c4cb758454958e5978bf9c80df8fa0a421",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 35,
+      "case_id": "-525038500404864710",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "1403199225ffed87daf04b00ed9916b81138b2d6efb2f0611d32dd0abf9a3da5",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 36,
+      "case_id": "6691291750986670327",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "68ab01939dcf0f85a13adb6a2a99082fa20687429e0120c58612d808ae548cf7",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 37,
+      "case_id": "4716235809681478742",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "b8972e9eb29dacdb0124b7dbed8df22b5c494f67d1520cb89517c14954036cd6",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 38,
+      "case_id": "-1694584375310842794",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "9f5f1e600f7d5a5ea2a8318cd349a903e7ca3339f8d95e449161e8ab5414399f",
+      "source_max_original_confidence": 3,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 39,
+      "case_id": "-2420670963295906064",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "e3f7ef7691f7905c51bd1100d18b96e9a48a5beb9c09809f1fa49c2257767a8e",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 40,
+      "case_id": "2600794538114860588",
+      "target_candidate": "allergic_contact_dermatitis",
+      "image_sha256": "0f274d2f1a9ddbb2c6a1c3ab4e94e7fc133620ae9f31e9b0d4441f23890ec8fc",
+      "source_max_original_confidence": 4,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 41,
+      "case_id": "-7963004189436208876",
+      "target_candidate": "seborrheic_dermatitis",
+      "image_sha256": "9332d6cd89a785d2dfe318ede472ebc846dbd30e82d184666162b9d34386cafa",
+      "source_max_original_confidence": 5,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "visible_source_privacy_mask_overlay"
+      ]
+    },
+    {
+      "position": 42,
+      "case_id": "-5641194784721271250",
+      "target_candidate": "seborrheic_dermatitis",
+      "image_sha256": "35ed0e7ecd2056ef19f39c3b4de3290ea3da2285e8f0f2a711c5cfcc1b0a748f",
+      "source_max_original_confidence": 4,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "visible_source_privacy_mask_overlay"
+      ]
+    },
+    {
+      "position": 43,
+      "case_id": "-8368978379079502283",
+      "target_candidate": "seborrheic_dermatitis",
+      "image_sha256": "f4126175f4d24463e5631243442e8d723b1875f556b8b954110af831e4b6f2eb",
+      "source_max_original_confidence": 5,
+      "decision": "quarantine_from_first_research_expansion",
+      "reasons": [
+        "visible_source_privacy_mask_overlay"
+      ]
+    },
+    {
+      "position": 44,
+      "case_id": "1872413092507744029",
+      "target_candidate": "seborrheic_dermatitis",
+      "image_sha256": "07eb1804e58f938cc99daca286ba3bc719353e2ac275a07e1d04b9e6e6c6b19d",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    },
+    {
+      "position": 45,
+      "case_id": "-5642777666164872473",
+      "target_candidate": "seborrheic_dermatitis",
+      "image_sha256": "3f2f67a7ee0709e0e0cb03b260c03e3c49dd53e82e0b10ba49b7dce8113956fd",
+      "source_max_original_confidence": 5,
+      "decision": "candidate_for_research_preparation_only",
+      "reasons": []
+    }
+  ],
+  "candidate_counts": {
+    "eczema": 18,
+    "allergic_contact_dermatitis": 17,
+    "seborrheic_dermatitis": 2
+  },
+  "quarantine_counts": {
+    "eczema": 2,
+    "allergic_contact_dermatitis": 3,
+    "seborrheic_dermatitis": 3
+  },
+  "observations": [
+    "All three contact sheets inspected, covering all45 selected photos",
+    "Four source-provided privacy-mask overlays observed at positions18,41,42,43; originals and masks retained unchanged",
+    "Four cases have all original differential confidence scores below3 despite high ranking weight; ranking is not certainty",
+    "Remaining images show skin regions with varied lighting, backgrounds and scale; no universal photographic-quality or diagnostic guarantee",
+    "No additional obvious non-skin/error image or text-based identifying detail was detected at contact-sheet scale",
+    "Faces/beard regions and jewellery may remain visible; no identification attempted and source images stay local"
+  ],
+  "policy": "Conservative first-expansion candidate selection; mask overlays and low absolute source-confidence quarantined. Not a clinical threshold or diagnosis.",
+  "training_approved": false,
+  "split_assigned": false,
+  "source_labels_changed": false,
+  "images_deleted": 0,
+  "test_pixels_read": 0
+}
