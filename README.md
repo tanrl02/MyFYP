@@ -18,3 +18,6 @@ Added care workflow: dashboard /care for assigned doctors and staff; patient Car
 12 October 2026: care browser checks and specified Android shared-record/persistence/patient-separation checks passed. See VERIFY.md for limits. Services currently running on ports8000/3000/8081. Skin assessment not yet implemented; original Word unchanged.
 
 Added Skin check: camera/gallery/photo confirmation, local-backend saved photo/history and explicit simulated result. AI model training/inference remains future work. Word unchanged. See VERIFY.md for tested versus pending behavior.
+
+
+Offline AI comparison (18 October): three matched pretrained models completed. Best EfficientNet-B0 validation accuracy 65.28%; 85% target not met. App predictions remain simulated; final test reserved. See [protocol, results and limitations](docs/ai/MODEL_COMPARISON.md).

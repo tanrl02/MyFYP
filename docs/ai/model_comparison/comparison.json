@@ -1,0 +1,524 @@
+{
+  "protocol": {
+    "experiment": "three-model-comparison-v1",
+    "architectures": [
+      "efficientnet_b0",
+      "resnet50",
+      "densenet121"
+    ],
+    "dataset_version": "eight-class-v1",
+    "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+    "seed": 3403,
+    "batch_size": 16,
+    "warmup_epochs": 3,
+    "finetune_epochs": 15,
+    "minimum_finetune_epochs": 6,
+    "early_stopping_patience": 5,
+    "warmup_head_lr": 0.001,
+    "feature_lr": 0.0001,
+    "head_lr": 0.0005,
+    "weight_decay": 0.0001,
+    "cpu_threads": 4,
+    "num_workers": 0,
+    "batchnorm": "all_affine_parameters_and_running_statistics_frozen",
+    "loss": "inverse_training_class_frequency_cross_entropy",
+    "checkpoint_selection": "finetune_validation_accuracy_then_macro_f1_then_lower_unweighted_loss",
+    "preprocessing": "common_bicubic_resize256_centrecrop224_ImageNet_normalisation",
+    "augmentation": "train_only_RandomResizedCrop224_scale0.85to1_ratio0.9to1.1_horizontal_flip0.5",
+    "scheduler": "cosine_during_full_finetuning_eta_min_1e-6",
+    "test_evaluation": "disabled",
+    "accuracy_target": 0.85,
+    "scin_images_included": false
+  },
+  "validation_images": 193,
+  "training_images": 1374,
+  "test_images_evaluated": 0,
+  "class_to_index": {
+    "acne": 0,
+    "eczema": 1,
+    "psoriasis": 2,
+    "folliculitis": 3,
+    "urticaria": 4,
+    "allergic_contact_dermatitis": 5,
+    "seborrheic_dermatitis": 6,
+    "scabies": 7
+  },
+  "matched_runs": [
+    {
+      "architecture": "efficientnet_b0",
+      "run_id": "comparison-v1-efficientnet_b0",
+      "best_epoch": 15,
+      "epochs_completed": 18,
+      "accuracy": 0.6528497409326425,
+      "macro_f1": 0.6002515712985222,
+      "macro_precision": 0.6441585183227625,
+      "loss": 1.6292184844535866,
+      "per_class": [
+        {
+          "class_index": 0,
+          "support": 42,
+          "precision": 0.8604651162790697,
+          "recall": 0.8809523809523809,
+          "f1": 0.8705882352941177
+        },
+        {
+          "class_index": 1,
+          "support": 16,
+          "precision": 0.5,
+          "recall": 0.4375,
+          "f1": 0.4666666666666667
+        },
+        {
+          "class_index": 2,
+          "support": 49,
+          "precision": 0.6166666666666667,
+          "recall": 0.7551020408163265,
+          "f1": 0.6788990825688074
+        },
+        {
+          "class_index": 3,
+          "support": 12,
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1": 0.5
+        },
+        {
+          "class_index": 4,
+          "support": 13,
+          "precision": 1.0,
+          "recall": 0.5384615384615384,
+          "f1": 0.7000000000000001
+        },
+        {
+          "class_index": 5,
+          "support": 30,
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1": 0.5
+        },
+        {
+          "class_index": 6,
+          "support": 11,
+          "precision": 0.36363636363636365,
+          "recall": 0.36363636363636365,
+          "f1": 0.36363636363636365
+        },
+        {
+          "class_index": 7,
+          "support": 20,
+          "precision": 0.8125,
+          "recall": 0.65,
+          "f1": 0.7222222222222223
+        }
+      ],
+      "confusion_matrix": [
+        [
+          37,
+          1,
+          1,
+          2,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          7,
+          4,
+          1,
+          0,
+          2,
+          1,
+          1
+        ],
+        [
+          0,
+          3,
+          37,
+          0,
+          0,
+          5,
+          2,
+          2
+        ],
+        [
+          0,
+          0,
+          4,
+          6,
+          0,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          3,
+          0,
+          7,
+          1,
+          0,
+          0
+        ],
+        [
+          3,
+          2,
+          6,
+          2,
+          0,
+          15,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          3,
+          0,
+          0,
+          3,
+          4,
+          0
+        ],
+        [
+          1,
+          0,
+          2,
+          1,
+          0,
+          2,
+          1,
+          13
+        ]
+      ],
+      "parameters": 4017796,
+      "epoch_seconds": 312.21599999997125,
+      "checkpoint_sha256": "ea91f5ca8a6dc278c0faf5570c7a1db6e4bdcef67a55e17f88846368ec6879c9"
+    },
+    {
+      "architecture": "densenet121",
+      "run_id": "comparison-v1-densenet121",
+      "best_epoch": 14,
+      "epochs_completed": 18,
+      "accuracy": 0.5854922279792746,
+      "macro_f1": 0.5232977060003603,
+      "macro_precision": 0.5972819131889403,
+      "loss": 2.088449660978169,
+      "per_class": [
+        {
+          "class_index": 0,
+          "support": 42,
+          "precision": 0.7608695652173914,
+          "recall": 0.8333333333333334,
+          "f1": 0.7954545454545455
+        },
+        {
+          "class_index": 1,
+          "support": 16,
+          "precision": 0.3333333333333333,
+          "recall": 0.25,
+          "f1": 0.28571428571428575
+        },
+        {
+          "class_index": 2,
+          "support": 49,
+          "precision": 0.6037735849056604,
+          "recall": 0.6530612244897959,
+          "f1": 0.6274509803921567
+        },
+        {
+          "class_index": 3,
+          "support": 12,
+          "precision": 0.42105263157894735,
+          "recall": 0.6666666666666666,
+          "f1": 0.5161290322580646
+        },
+        {
+          "class_index": 4,
+          "support": 13,
+          "precision": 1.0,
+          "recall": 0.3076923076923077,
+          "f1": 0.47058823529411764
+        },
+        {
+          "class_index": 5,
+          "support": 30,
+          "precision": 0.46875,
+          "recall": 0.5,
+          "f1": 0.4838709677419355
+        },
+        {
+          "class_index": 6,
+          "support": 11,
+          "precision": 0.6666666666666666,
+          "recall": 0.36363636363636365,
+          "f1": 0.4705882352941177
+        },
+        {
+          "class_index": 7,
+          "support": 20,
+          "precision": 0.5238095238095238,
+          "recall": 0.55,
+          "f1": 0.5365853658536585
+        }
+      ],
+      "confusion_matrix": [
+        [
+          35,
+          0,
+          1,
+          3,
+          0,
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          4,
+          6,
+          1,
+          0,
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          5,
+          32,
+          1,
+          0,
+          6,
+          2,
+          3
+        ],
+        [
+          3,
+          0,
+          1,
+          8,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          2,
+          0,
+          4,
+          3,
+          0,
+          2
+        ],
+        [
+          6,
+          0,
+          5,
+          3,
+          0,
+          15,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          2,
+          2,
+          0,
+          2,
+          4,
+          1
+        ],
+        [
+          0,
+          2,
+          4,
+          1,
+          0,
+          2,
+          0,
+          11
+        ]
+      ],
+      "parameters": 6962056,
+      "epoch_seconds": 365.3429999999935,
+      "checkpoint_sha256": "235401b7f403c1b494e3be25d83a87f2572b2c8d34fa94c77bc824b5854b58c6"
+    },
+    {
+      "architecture": "resnet50",
+      "run_id": "comparison-v1-resnet50",
+      "best_epoch": 15,
+      "epochs_completed": 18,
+      "accuracy": 0.5803108808290155,
+      "macro_f1": 0.5299083609054355,
+      "macro_precision": 0.5834852009420974,
+      "loss": 2.1988600893959482,
+      "per_class": [
+        {
+          "class_index": 0,
+          "support": 42,
+          "precision": 0.75,
+          "recall": 0.8571428571428571,
+          "f1": 0.7999999999999999
+        },
+        {
+          "class_index": 1,
+          "support": 16,
+          "precision": 0.18181818181818182,
+          "recall": 0.25,
+          "f1": 0.2105263157894737
+        },
+        {
+          "class_index": 2,
+          "support": 49,
+          "precision": 0.6296296296296297,
+          "recall": 0.6938775510204082,
+          "f1": 0.6601941747572815
+        },
+        {
+          "class_index": 3,
+          "support": 12,
+          "precision": 0.45454545454545453,
+          "recall": 0.4166666666666667,
+          "f1": 0.43478260869565216
+        },
+        {
+          "class_index": 4,
+          "support": 13,
+          "precision": 0.8571428571428571,
+          "recall": 0.46153846153846156,
+          "f1": 0.6
+        },
+        {
+          "class_index": 5,
+          "support": 30,
+          "precision": 0.41379310344827586,
+          "recall": 0.4,
+          "f1": 0.4067796610169491
+        },
+        {
+          "class_index": 6,
+          "support": 11,
+          "precision": 0.7142857142857143,
+          "recall": 0.45454545454545453,
+          "f1": 0.5555555555555556
+        },
+        {
+          "class_index": 7,
+          "support": 20,
+          "precision": 0.6666666666666666,
+          "recall": 0.5,
+          "f1": 0.5714285714285715
+        }
+      ],
+      "confusion_matrix": [
+        [
+          36,
+          1,
+          1,
+          2,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          1,
+          4,
+          4,
+          1,
+          0,
+          3,
+          1,
+          2
+        ],
+        [
+          2,
+          4,
+          34,
+          0,
+          0,
+          8,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          2,
+          5,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          1,
+          2,
+          1,
+          0,
+          6,
+          2,
+          0,
+          1
+        ],
+        [
+          4,
+          5,
+          6,
+          2,
+          1,
+          12,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          2,
+          0,
+          0,
+          1,
+          5,
+          0
+        ],
+        [
+          1,
+          3,
+          4,
+          1,
+          0,
+          1,
+          0,
+          10
+        ]
+      ],
+      "parameters": 23524424,
+      "epoch_seconds": 346.68800000002375,
+      "checkpoint_sha256": "b8a393a7051522d877a616cda1de39caf5e3eb31cf2d4b7a3bd1eff5f10509d4"
+    }
+  ],
+  "winner": "comparison-v1-efficientnet_b0",
+  "accuracy_target_reached": false,
+  "target_minimum_correct": 165,
+  "prior_user_selected_model": {
+    "run_id": "efficientnet-b0-finetune-v1",
+    "accuracy": 0.5958549222797928,
+    "macro_f1": 0.5214449327801965,
+    "macro_precision": 0.5307430562241263,
+    "note": "Historical comparison only; training protocol differs"
+  },
+  "scin_images_included": 0,
+  "limitations": [
+    "Single seed and one repeatedly used development split",
+    "No independent clinical diagnoses, patient-independence or real-phone performance established",
+    "Pretrained weights and inherent model regularisation differ; not architecture-only causation",
+    "The 85% target is evaluated on all193 images without selective rejection or excluded failed classes"
+  ]
+}

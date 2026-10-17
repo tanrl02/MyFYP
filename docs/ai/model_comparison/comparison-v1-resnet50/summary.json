@@ -1,0 +1,297 @@
+{
+  "run_id": "comparison-v1-resnet50",
+  "architecture": "resnet50",
+  "run": {
+    "architecture": "resnet50",
+    "config": {
+      "experiment": "three-model-comparison-v1",
+      "architectures": [
+        "efficientnet_b0",
+        "resnet50",
+        "densenet121"
+      ],
+      "dataset_version": "eight-class-v1",
+      "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+      "seed": 3403,
+      "batch_size": 16,
+      "warmup_epochs": 3,
+      "finetune_epochs": 15,
+      "minimum_finetune_epochs": 6,
+      "early_stopping_patience": 5,
+      "warmup_head_lr": 0.001,
+      "feature_lr": 0.0001,
+      "head_lr": 0.0005,
+      "weight_decay": 0.0001,
+      "cpu_threads": 4,
+      "num_workers": 0,
+      "batchnorm": "all_affine_parameters_and_running_statistics_frozen",
+      "loss": "inverse_training_class_frequency_cross_entropy",
+      "checkpoint_selection": "finetune_validation_accuracy_then_macro_f1_then_lower_unweighted_loss",
+      "preprocessing": "common_bicubic_resize256_centrecrop224_ImageNet_normalisation",
+      "augmentation": "train_only_RandomResizedCrop224_scale0.85to1_ratio0.9to1.1_horizontal_flip0.5",
+      "scheduler": "cosine_during_full_finetuning_eta_min_1e-6",
+      "test_evaluation": "disabled",
+      "accuracy_target": 0.85,
+      "scin_images_included": false
+    },
+    "class_to_index": {
+      "acne": 0,
+      "eczema": 1,
+      "psoriasis": 2,
+      "folliculitis": 3,
+      "urticaria": 4,
+      "allergic_contact_dermatitis": 5,
+      "seborrheic_dermatitis": 6,
+      "scabies": 7
+    },
+    "dataset_lock": {
+      "all_images_visually_reviewed": false,
+      "clinical_use_validated": false,
+      "dataset_version": "eight-class-v1",
+      "excluded_images": 108,
+      "expanded_review_semantic_sha256": "85a9afc73f95537edc563fa99713c05d6b783a71d2cde008170843dc16383bca",
+      "frozen_on": "2026-10-18",
+      "included_images": 1968,
+      "initial_review_semantic_sha256": "a7e2266ecb814fe99bd4b387329a9e8523478d22ebcdacd6b78005354a417bd6",
+      "limitations": [
+        "Labels inherited from source, not clinically revalidated",
+        "Technical visual review is partial; every image has not been manually reviewed",
+        "No participant IDs; patient independence unproven",
+        "Difference hashing and sample review cannot rule out every near duplicate",
+        "No training, model performance or phone-domain validation",
+        "Noncommercial research data source; retain original attribution/licence notices"
+      ],
+      "manifest_sha256_normalised_lf": {
+        "class_to_index.json": "005304095b048f311afe51fffa1a68b7d53d61197d3d685693c95b38a1122e1c",
+        "excluded.csv": "6e470d99eb50650600a7da884e03ae08c79ffe47d11add0346c61e06afec9697",
+        "test.csv": "f2529d218e6dc173b9e18687309159e88e04137b71cc91706f38749628cd6793",
+        "train.csv": "328c793ffc87bdbde80a588e76a28ff473e17bb3e14d0fa755d76d924270440f",
+        "val.csv": "9d88c40853bd16b2e392e4c12b2eede30dddbeba2432ec751e81f6b6b868e9a1"
+      },
+      "per_class": {
+        "acne": {
+          "test": 81,
+          "train": 287,
+          "val": 42
+        },
+        "allergic_contact_dermatitis": {
+          "test": 58,
+          "train": 209,
+          "val": 30
+        },
+        "eczema": {
+          "test": 34,
+          "train": 118,
+          "val": 16
+        },
+        "folliculitis": {
+          "test": 35,
+          "train": 98,
+          "val": 12
+        },
+        "psoriasis": {
+          "test": 105,
+          "train": 356,
+          "val": 49
+        },
+        "scabies": {
+          "test": 39,
+          "train": 139,
+          "val": 20
+        },
+        "seborrheic_dermatitis": {
+          "test": 23,
+          "train": 79,
+          "val": 11
+        },
+        "urticaria": {
+          "test": 26,
+          "train": 88,
+          "val": 13
+        }
+      },
+      "preparation_rows_semantic_sha256": "b34feea32756680956d490cb9ddc72a224c2ab6977b67a47dbb107b5e0ce8ca8",
+      "research_baseline_manifests_frozen": true,
+      "rules_semantic_sha256": "81f5d9ada2bbfd5a6e68f18601a7f59d6e5d955635714730c20cd68e6440741a",
+      "source_image_entries": 2076,
+      "source_partitions_preserved": true,
+      "split_counts": {
+        "test": 401,
+        "train": 1374,
+        "val": 193
+      },
+      "visual_triage_flagged_images": 107,
+      "visual_triage_sample_images": 64
+    },
+    "mode": "train",
+    "pretrained_url": "https://download.pytorch.org/models/resnet50-11ad3fa6.pth",
+    "pretrained_sha256": "11ad3fa62ca79e40addfd354a8ec4b7c75143b3038b8d2a807fbc68deab379ca",
+    "full_frozen_digest": "55600dad1198bc84a01c510925b5cdab760717523dda15be333dc261aa49094b",
+    "train_transform": "Compose(\n    RandomResizedCrop(size=(224, 224), scale=(0.85, 1), ratio=(0.9, 1.1), interpolation=bicubic, antialias=True)\n    RandomHorizontalFlip(p=0.5)\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)",
+    "validation_transform": "Compose(\n    Resize(size=256, interpolation=bicubic, max_size=None, antialias=True)\n    CenterCrop(size=(224, 224))\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)",
+    "parameters": 23524424,
+    "torch": "2.13.0+cu126",
+    "torchvision": "0.28.0+cu126",
+    "numpy": "2.5.2",
+    "pillow": "12.3.0",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "test_images_evaluated": 0
+  },
+  "checkpoint_sha256": "b8a393a7051522d877a616cda1de39caf5e3eb31cf2d4b7a3bd1eff5f10509d4",
+  "best_epoch": 15,
+  "epochs_completed": 18,
+  "validation": {
+    "accuracy": 0.5803108808290155,
+    "macro_f1": 0.5299083609054355,
+    "confusion_matrix": [
+      [
+        36,
+        1,
+        1,
+        2,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        4,
+        4,
+        1,
+        0,
+        3,
+        1,
+        2
+      ],
+      [
+        2,
+        4,
+        34,
+        0,
+        0,
+        8,
+        0,
+        1
+      ],
+      [
+        3,
+        0,
+        2,
+        5,
+        0,
+        2,
+        0,
+        0
+      ],
+      [
+        1,
+        2,
+        1,
+        0,
+        6,
+        2,
+        0,
+        1
+      ],
+      [
+        4,
+        5,
+        6,
+        2,
+        1,
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        3,
+        2,
+        0,
+        0,
+        1,
+        5,
+        0
+      ],
+      [
+        1,
+        3,
+        4,
+        1,
+        0,
+        1,
+        0,
+        10
+      ]
+    ],
+    "per_class": [
+      {
+        "class_index": 0,
+        "support": 42,
+        "precision": 0.75,
+        "recall": 0.8571428571428571,
+        "f1": 0.7999999999999999
+      },
+      {
+        "class_index": 1,
+        "support": 16,
+        "precision": 0.18181818181818182,
+        "recall": 0.25,
+        "f1": 0.2105263157894737
+      },
+      {
+        "class_index": 2,
+        "support": 49,
+        "precision": 0.6296296296296297,
+        "recall": 0.6938775510204082,
+        "f1": 0.6601941747572815
+      },
+      {
+        "class_index": 3,
+        "support": 12,
+        "precision": 0.45454545454545453,
+        "recall": 0.4166666666666667,
+        "f1": 0.43478260869565216
+      },
+      {
+        "class_index": 4,
+        "support": 13,
+        "precision": 0.8571428571428571,
+        "recall": 0.46153846153846156,
+        "f1": 0.6
+      },
+      {
+        "class_index": 5,
+        "support": 30,
+        "precision": 0.41379310344827586,
+        "recall": 0.4,
+        "f1": 0.4067796610169491
+      },
+      {
+        "class_index": 6,
+        "support": 11,
+        "precision": 0.7142857142857143,
+        "recall": 0.45454545454545453,
+        "f1": 0.5555555555555556
+      },
+      {
+        "class_index": 7,
+        "support": 20,
+        "precision": 0.6666666666666666,
+        "recall": 0.5,
+        "f1": 0.5714285714285715
+      }
+    ],
+    "loss": 2.1988600893959482
+  },
+  "macro_precision": 0.5834852009420974,
+  "validation_replay_verified": true,
+  "frozen_batchnorm_verified": true,
+  "features_updated": true,
+  "epoch_seconds": 346.68800000002375,
+  "accuracy_target_reached": false,
+  "test_images_evaluated": 0
+}
