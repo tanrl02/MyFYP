@@ -1,6 +1,6 @@
 """Local synthetic demo storage. Keep SQL and transactions out of screens/routes."""
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 import sqlite3
 import json
@@ -44,6 +44,12 @@ class Store:
                   queue_number INTEGER NOT NULL, status TEXT NOT NULL CHECK(status IN ('waiting','called','completed','cancelled')),
                   created_at TEXT NOT NULL, request_id TEXT NOT NULL,
                   UNIQUE(patient_id, request_id));
+                CREATE TABLE IF NOT EXISTS follow_up_recommendations (
+                  source_booking_id TEXT PRIMARY KEY REFERENCES bookings(id), doctor_id TEXT NOT NULL,
+                  recommended_date TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS follow_up_bookings (
+                  booking_id TEXT PRIMARY KEY REFERENCES bookings(id),
+                  source_booking_id TEXT NOT NULL REFERENCES follow_up_recommendations(source_booking_id));
                 CREATE INDEX IF NOT EXISTS booking_slot ON bookings(slot_id, status);
                 CREATE TABLE IF NOT EXISTS events (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL REFERENCES bookings(id),
@@ -323,25 +329,45 @@ class Store:
         if r is None:
             raise RuleError('Booking not found.', 404)
         replacement = db.execute('SELECT new_booking_id FROM reschedules WHERE old_booking_id=?',(booking_id,)).fetchone()
+        follow_up=db.execute('''SELECT f.source_booking_id,r.recommended_date FROM follow_up_bookings f
+            JOIN follow_up_recommendations r ON r.source_booking_id=f.source_booking_id WHERE f.booking_id=?''',(booking_id,)).fetchone()
         return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
-                    rescheduled_to_id=replacement['new_booking_id'] if replacement else None)
+                    rescheduled_to_id=replacement['new_booking_id'] if replacement else None,
+                    follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
+                    follow_up_date=follow_up['recommended_date'] if follow_up else None)
 
-    def book(self, patient, slot_id, request_id, created_by=None):
+    def book(self, patient, slot_id, request_id, created_by=None, follow_up_source=None):
         if patient not in PATIENTS:
             raise RuleError('Choose a recognised demo patient.', 422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
+            recommendation=None
+            if follow_up_source:
+                source=self.record(db,follow_up_source)
+                if source['patient_id']!=patient:
+                    raise RuleError('Follow-up unavailable for this patient.',404)
+                recommendation=self.follow_up_record(db,follow_up_source)
+                if not recommendation or source['status'] not in ('called','completed'):
+                    raise RuleError('No available follow-up recommendation for this visit.',404)
             existing = db.execute('SELECT id, slot_id FROM bookings WHERE patient_id=? AND request_id=?',
                                   (patient, request_id)).fetchone()
             if existing:
                 if existing['slot_id'] != slot_id:
                     raise RuleError('This request was already used for a different slot.')
+                if follow_up_source:
+                    link=db.execute('SELECT source_booking_id FROM follow_up_bookings WHERE booking_id=?',(existing['id'],)).fetchone()
+                    if not link or link['source_booking_id']!=follow_up_source:
+                        raise RuleError('This request belongs to another booking. Use a new request.')
                 return self.record(db, existing['id'])
+            if recommendation and recommendation['booked_visit'] and recommendation['booked_visit']['status']!='cancelled':
+                raise RuleError('A follow-up is already booked. Open that visit to reschedule or cancel it.')
             slot = db.execute('SELECT * FROM slots WHERE id=?', (slot_id,)).fetchone()
             if slot is None:
                 raise RuleError('Slot not found.', 404)
             if slot['closed']:
                 raise RuleError('This slot is closed. Choose another time.')
+            if recommendation:
+                self.validate_follow_up_slot(recommendation,slot)
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
                 raise RuleError('This slot has already started. Choose another time.')
             if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",
@@ -356,6 +382,9 @@ class Store:
             db.execute('INSERT INTO bookings VALUES(?,?,?,?,?,?,?)',
                        (booking_id, patient, slot_id, number, 'waiting', datetime.now(timezone.utc).isoformat(), request_id))
             self.event(db, booking_id, created_by or patient, 'counter-booked' if created_by else 'booked')
+            if follow_up_source:
+                db.execute('INSERT INTO follow_up_bookings VALUES(?,?)',(booking_id,follow_up_source))
+                self.event(db,booking_id,patient,'follow-up-booked')
             return self.record(db, booking_id)
 
     def mine(self, patient):
@@ -377,9 +406,12 @@ class Store:
                 linked.append(dict(share,assessment=self.assessment_metadata(assessment)))
             feedback=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
             replacement=self.record(db,visit['rescheduled_to_id']) if visit['rescheduled_to_id'] else None
+            origin=db.execute('SELECT source_booking_id FROM follow_up_bookings WHERE booking_id=?',(booking_id,)).fetchone()
             return {'visit':visit,'linked_shares':linked,'note':dict(note) if note else None,
                     'prescription':self.prescription(db,booking_id),'invoice':self.invoice(db,booking_id),
-                    'feedback':dict(feedback) if feedback else None,'replacement':replacement}
+                    'feedback':dict(feedback) if feedback else None,'replacement':replacement,
+                    'follow_up':self.follow_up_record(db,booking_id),
+                    'follow_up_of':self.record(db,origin['source_booking_id']) if origin else None}
 
     def feedback(self, actor):
         if actor not in {*PATIENTS,'staff-demo'}:
@@ -427,6 +459,9 @@ class Store:
             slot = db.execute('SELECT * FROM slots WHERE id=?',(slot_id,)).fetchone()
             if slot is None:
                 raise RuleError('Slot not found.',404)
+            follow_up=db.execute('SELECT source_booking_id FROM follow_up_bookings WHERE booking_id=?',(booking_id,)).fetchone()
+            if follow_up:
+                self.validate_follow_up_slot(self.follow_up_record(db,follow_up['source_booking_id']),slot)
             if slot['closed']:
                 raise RuleError('This slot is closed. Choose another time.')
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
@@ -441,6 +476,8 @@ class Store:
             new_id, now = str(uuid4()), datetime.now(timezone.utc).isoformat()
             db.execute("UPDATE bookings SET status='cancelled' WHERE id=?",(booking_id,))
             db.execute('INSERT INTO bookings VALUES(?,?,?,?,?,?,?)',(new_id,old['patient_id'],slot_id,number,'waiting',now,'reschedule-'+new_id))
+            if follow_up:
+                db.execute('INSERT INTO follow_up_bookings VALUES(?,?)',(new_id,follow_up['source_booking_id']))
             if slot['doctor_id'] == old['doctor_id']:
                 db.execute('UPDATE assessment_shares SET booking_id=? WHERE booking_id=? AND revoked_at IS NULL',(new_id,booking_id))
             else:
@@ -802,6 +839,7 @@ class Store:
         result = {'visit':visit, 'note':dict(note) if note else None, 'linked_share':linked}
         if include_photo:
             result['background'] = self.background_record(db,visit['patient_id'])
+            result['follow_up'] = self.follow_up_record(db,booking_id)
         return result
 
     def consultations(self, actor):
@@ -820,6 +858,37 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             return self.consultation_record(db,booking_id,actor,include_photo=True)
+
+    def follow_up_record(self, db, booking_id):
+        row=db.execute('SELECT * FROM follow_up_recommendations WHERE source_booking_id=?',(booking_id,)).fetchone()
+        if not row:
+            return None
+        latest=db.execute('''SELECT b.id FROM follow_up_bookings f JOIN bookings b ON b.id=f.booking_id
+            WHERE f.source_booking_id=? ORDER BY b.created_at DESC,b.rowid DESC LIMIT 1''',(booking_id,)).fetchone()
+        return dict(row,booked_visit=self.record(db,latest['id']) if latest else None)
+
+    @staticmethod
+    def validate_follow_up_slot(recommendation, slot):
+        if slot['doctor_id']!=recommendation['doctor_id'] or slot['clinic_date']<recommendation['recommended_date']:
+            raise RuleError('Choose the recommending doctor on or after the recommended follow-up date.')
+
+    def recommend_follow_up(self, booking_id, doctor, recommended_date, reason):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            source=self.consultation_record(db,booking_id,doctor)['visit']
+            existing=self.follow_up_record(db,booking_id)
+            if existing:
+                if (existing['recommended_date'],existing['reason'])!=(recommended_date,reason):
+                    raise RuleError('A follow-up recommendation is already saved for this visit.')
+                return existing
+            today=datetime.now(timezone(timedelta(hours=8))).date()
+            if date.fromisoformat(recommended_date)<=max(today,date.fromisoformat(source['clinic_date'])):
+                raise RuleError('Choose a follow-up date after today and after this appointment date.',422)
+            db.execute('INSERT INTO follow_up_recommendations VALUES(?,?,?,?,?)',
+                       (booking_id,doctor,recommended_date,reason,datetime.now(timezone.utc).isoformat()))
+            return self.follow_up_record(db,booking_id)
 
     def consultation_history(self, booking_id, doctor):
         if doctor not in DOCTORS:

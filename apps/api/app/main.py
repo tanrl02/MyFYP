@@ -70,6 +70,10 @@ class ConsultationInput(BaseModel):
     findings: str = Field(min_length=1, max_length=2000, pattern=r'\S')
     follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
 
+class FollowUpInput(BaseModel):
+    recommended_date: date
+    reason: str = Field(min_length=1,max_length=1000,pattern=r'\S')
+
 class FeedbackInput(BaseModel):
     rating: int = Field(strict=True,ge=1,le=5)
     comment: str = Field(max_length=1000)
@@ -319,6 +323,14 @@ def create_app(path=None):
     @api.get('/visits/{booking_id}/history')
     def consultation_history(booking_id: str,who=Depends(doctor)):
         return run(lambda: store.consultation_history(booking_id,who))
+
+    @api.post('/visits/{booking_id}/follow-up')
+    def recommend_follow_up(booking_id: str,payload: FollowUpInput,who=Depends(doctor)):
+        return run(lambda: store.recommend_follow_up(booking_id,who,payload.recommended_date.isoformat(),payload.reason.strip()))
+
+    @api.post('/visits/{booking_id}/follow-up/book',status_code=201)
+    def book_follow_up(booking_id: str,payload: BookingInput,who=Depends(patient)):
+        return run(lambda: store.book(who,payload.slot_id,payload.request_id,follow_up_source=booking_id))
 
     @api.post('/visits/{booking_id}/consultation')
     def publish_consultation(booking_id: str, payload: ConsultationInput, who=Depends(doctor)):
