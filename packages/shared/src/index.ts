@@ -32,13 +32,19 @@ export type Invoice = { id: string; booking_id: string; total_cents: number; sta
 export type Care = { visit: Booking; prescription: Prescription | null; invoice: Invoice | null };
 export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: ConsultationNote | null; feedback: Omit<VisitFeedback,"visit"> | null; replacement: Booking | null;follow_up:FollowUp|null;follow_up_of:Booking|null };
 export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
-export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; capacity: number; available: number };
+export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string;ends_at:string;duration_minutes:number; clinic_date: string; capacity: number; available: number };
 export type ManagedSlot = Slot & {closed:number;booking_count:number};
-export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
+export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
 export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled" };
 export const queueToken = (booking: Booking) => `${booking.doctor_id === "doctor-lim" ? "L" : "A"}${String(booking.queue_number).padStart(3, "0")}`;
 export const visitTime = (iso: string) => new Date(iso).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
+  if(!slot.ends_at)return visitTime(slot.starts_at);
+  const day=(iso:string)=>new Date(Date.parse(iso)+8*3600000).toISOString().slice(0,10);
+  const end=day(slot.starts_at)===day(slot.ends_at)?new Date(slot.ends_at).toLocaleTimeString("en-MY",{timeZone:"Asia/Kuala_Lumpur",hour:"numeric",minute:"2-digit"}):visitTime(slot.ends_at);
+  return `${visitTime(slot.starts_at)} – ${end}`;
+};
 
 export class DemoApi {
   doctorMatches(source:DoctorMatchSource) { return this.request<DoctorMatches>(source.assessmentId?`/doctor-matches?assessment_id=${encodeURIComponent(source.assessmentId)}`:`/doctor-matches?concern=${encodeURIComponent(source.concern)}`); }
@@ -65,7 +71,7 @@ export class DemoApi {
   }
   slots() { return this.request<Slot[]>("/slots"); }
   managedSlots() { return this.request<ManagedSlot[]>("/staff/slots"); }
-  addSlot(body:{doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;request_id:string}) { return this.request<ManagedSlot>("/staff/slots",body); }
+  addSlot(body:{doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;request_id:string;duration_minutes?:number}) { return this.request<ManagedSlot>("/staff/slots",body); }
   closeSlot(id:string) { return this.request<ManagedSlot>(`/staff/slots/${encodeURIComponent(id)}/close`,{}); }
   bookings() { return this.request<Booking[]>("/bookings"); }
   notifications() { return this.request<NotificationInbox>("/notifications"); }

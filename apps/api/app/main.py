@@ -25,6 +25,7 @@ class SlotInput(BaseModel):
     clinic_date: date
     time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
     capacity: int = Field(strict=True,ge=1,le=20)
+    duration_minutes: int = Field(default=30,strict=True,ge=15,le=120,multiple_of=15)
     request_id: str = Field(min_length=8,max_length=100)
 
 class BookingInput(BaseModel):
@@ -161,7 +162,7 @@ def create_app(path=None):
 
     @api.post('/staff/slots',status_code=201)
     def add_slot(payload: SlotInput,who=Depends(staff)):
-        return run(lambda: store.add_slot(payload.doctor_id,payload.clinic_date.isoformat(),payload.time,payload.capacity,payload.request_id))
+        return run(lambda: store.add_slot(payload.doctor_id,payload.clinic_date.isoformat(),payload.time,payload.capacity,payload.request_id,payload.duration_minutes))
 
     @api.post('/staff/slots/{slot_id}/close')
     def close_slot(slot_id: str,who=Depends(staff)):

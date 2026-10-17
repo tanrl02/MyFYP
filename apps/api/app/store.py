@@ -105,7 +105,8 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
-            for column, definition in [('closed', 'INTEGER NOT NULL DEFAULT 0'),('request_id','TEXT')]:
+            for column, definition in [('closed', 'INTEGER NOT NULL DEFAULT 0'),('request_id','TEXT'),
+                                       ('duration_minutes','INTEGER NOT NULL DEFAULT 30 CHECK(duration_minutes BETWEEN 15 AND 120 AND duration_minutes%15=0)')]:
                 if column not in {row['name'] for row in db.execute('PRAGMA table_info(slots)')}:
                     db.execute(f'ALTER TABLE slots ADD COLUMN {column} {definition}')
             db.execute('CREATE UNIQUE INDEX IF NOT EXISTS slot_request ON slots(request_id) WHERE request_id IS NOT NULL')
@@ -217,21 +218,38 @@ class Store:
         # UTC+8, fixed offset (Malaysia); ensure future slots after reopening days later.
         local = datetime.now(timezone(timedelta(hours=8)))
         with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
             for day in (1, 2):
                 for doctor in DOCTORS:
                     for hour in (9, 10, 11):
                         start = (local + timedelta(days=day)).replace(hour=hour, minute=0, second=0, microsecond=0)
                         key = f'{doctor}-{start:%Y%m%d}-{hour}'
+                        if db.execute('SELECT 1 FROM slots WHERE id=? OR (doctor_id=? AND julianday(starts_at)=julianday(?))',
+                                      (key,doctor,start.isoformat())).fetchone() or self.slot_overlap(db,doctor,start,30):
+                            continue
                         db.execute('INSERT OR IGNORE INTO slots(id,doctor_id,starts_at,clinic_date,capacity) VALUES(?,?,?,?,?)',
                                    (key, doctor, start.isoformat(), start.date().isoformat(), 2))
 
     def slots(self):
         with self.connect() as db:
-            rows = db.execute('''SELECT s.id,s.doctor_id,s.starts_at,s.clinic_date,s.capacity, s.capacity - COUNT(b.id) AS available
+            rows = db.execute('''SELECT s.id,s.doctor_id,s.starts_at,s.clinic_date,s.capacity,s.duration_minutes, s.capacity - COUNT(b.id) AS available
                 FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id AND b.status!='cancelled'
                 WHERE s.starts_at > ? AND s.closed=0 GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
                 (datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
-        return [dict(r, doctor_name=DOCTORS[r['doctor_id']]) for r in rows]
+        return [self.slot_metadata(r) for r in rows]
+
+    @staticmethod
+    def slot_metadata(row):
+        end=datetime.fromisoformat(row['starts_at'])+timedelta(minutes=row['duration_minutes'])
+        return dict(row,doctor_name=DOCTORS[row['doctor_id']],ends_at=end.isoformat())
+
+    @staticmethod
+    def slot_overlap(db, doctor, start, duration):
+        end=start+timedelta(minutes=duration)
+        return db.execute('''SELECT id FROM slots WHERE doctor_id=? AND closed=0
+            AND julianday(starts_at)<julianday(?)
+            AND julianday(starts_at,'+'||duration_minutes||' minutes')>julianday(?) LIMIT 1''',
+            (doctor,end.isoformat(),start.isoformat())).fetchone()
 
     def managed_slot(self, db, slot_id):
         row = db.execute('''SELECT s.*,COUNT(b.id) AS booking_count,
@@ -239,7 +257,7 @@ class Store:
                             FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id WHERE s.id=? GROUP BY s.id''',(slot_id,)).fetchone()
         if not row:
             raise RuleError('Slot not found.',404)
-        return {key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available')} | {'doctor_name':DOCTORS[row['doctor_id']]}
+        return self.slot_metadata({key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available','duration_minutes')})
 
     def managed_slots(self):
         with self.connect() as db:
@@ -247,23 +265,27 @@ class Store:
             rows=db.execute('SELECT id FROM slots WHERE starts_at>? ORDER BY starts_at,doctor_id',(datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
             return [self.managed_slot(db,row['id']) for row in rows]
 
-    def add_slot(self, doctor, clinic_date, time, capacity, request_id):
+    def add_slot(self, doctor, clinic_date, time, capacity, request_id, duration_minutes=30):
+        if type(duration_minutes) is not int or not 15<=duration_minutes<=120 or duration_minutes%15:
+            raise RuleError('Slot duration must be 15–120 minutes in 15-minute steps.',422)
         start=datetime.fromisoformat(f'{clinic_date}T{time}:00+08:00')
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             old=db.execute('SELECT id FROM slots WHERE request_id=?',(request_id,)).fetchone()
             if old:
                 slot=self.managed_slot(db,old['id'])
-                if (slot['doctor_id'],slot['starts_at'],slot['capacity'])!=(doctor,start.isoformat(),capacity):
+                if (slot['doctor_id'],slot['starts_at'],slot['capacity'],slot['duration_minutes'])!=(doctor,start.isoformat(),capacity,duration_minutes):
                     raise RuleError('This request already saved different slot details.')
                 return slot
             if start<=datetime.now(timezone.utc):
                 raise RuleError('Choose a future date and time.')
-            if db.execute('SELECT 1 FROM slots WHERE doctor_id=? AND starts_at=?',(doctor,start.isoformat())).fetchone():
+            if db.execute('SELECT 1 FROM slots WHERE doctor_id=? AND julianday(starts_at)=julianday(?)',(doctor,start.isoformat())).fetchone():
                 raise RuleError('This doctor already has a slot at that time, including closed slots.')
+            if self.slot_overlap(db,doctor,start,duration_minutes):
+                raise RuleError('This doctor already has an overlapping open slot. Choose another start time or duration.')
             slot_id=str(uuid4())
-            db.execute('INSERT INTO slots(id,doctor_id,starts_at,clinic_date,capacity,request_id) VALUES(?,?,?,?,?,?)',
-                       (slot_id,doctor,start.isoformat(),clinic_date,capacity,request_id))
+            db.execute('INSERT INTO slots(id,doctor_id,starts_at,clinic_date,capacity,request_id,duration_minutes) VALUES(?,?,?,?,?,?,?)',
+                       (slot_id,doctor,start.isoformat(),clinic_date,capacity,request_id,duration_minutes))
             return self.managed_slot(db,slot_id)
 
     def close_slot(self, slot_id):
@@ -324,7 +346,7 @@ class Store:
             return dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
 
     def record(self, db, booking_id):
-        r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date FROM bookings b
+        r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date,s.duration_minutes FROM bookings b
                           JOIN slots s ON s.id=b.slot_id WHERE b.id=?''', (booking_id,)).fetchone()
         if r is None:
             raise RuleError('Booking not found.', 404)
@@ -332,6 +354,7 @@ class Store:
         follow_up=db.execute('''SELECT f.source_booking_id,r.recommended_date FROM follow_up_bookings f
             JOIN follow_up_recommendations r ON r.source_booking_id=f.source_booking_id WHERE f.booking_id=?''',(booking_id,)).fetchone()
         return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
+                    ends_at=(datetime.fromisoformat(r['starts_at'])+timedelta(minutes=r['duration_minutes'])).isoformat(),
                     rescheduled_to_id=replacement['new_booking_id'] if replacement else None,
                     follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
                     follow_up_date=follow_up['recommended_date'] if follow_up else None)
