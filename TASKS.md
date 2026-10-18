@@ -204,6 +204,6 @@ Next suggested small task: review weak disease classes and data quality;85% targ
 - [x] Persist immutable versioned top3 predictions; migrate old rows as simulations; preserve retry/concurrency/access boundaries.
 - [x] Update patient/doctor result views, appointment details and doctor matching with experimental labels and model-score limitations.
 - [x]95 API tests, TS/Android/dashboard builds;3 real API/reference replays, persistence/isolation/failure checks; live browser result rendering.
-- [ ] Android new prediction/reopening/patient separation confirmation (card pending).
+- [x] Android new prediction/reopening/patient separation confirmed by user18 October2026.
 - [ ] Independent disease-test/phone-domain evaluation;85% target remains unmet. No retraining in this increment.
 Word/auth remain deferred. Payment processing remains simulated.
