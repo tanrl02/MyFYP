@@ -20,7 +20,7 @@ Verification:152 API tests, including8 new cases, passed; final8 focused cases p
 
 Browser checked staff review/Keep editing/save/reload, booked-period refusal, exact cancellation review/Keep absence, doctor range/reason and blocked versus adjacent slot, patient adjacent selection/Back, Ava existing visit and Noah isolation. Snapshots confirm no original slot-field/booking/pattern mutation. Only new synthetic absence84fc1154-52ab-4d0f-84b4-16b97838724e and adjacent empty12:30 slotcc6b3f4c-de07-4175-8a28-e847d485b49d were created. Original synthetic11November noon slot3d4a3d04-d804-4f92-9fea-89b105d57c8e remains stored and now hidden. Screenshot tmp/partial-day-verified.png was visually inspected; fixture/before snapshots are under tmp/. No new patient booking.
 
-Android check pending: after reopening, Lim11November noon hidden,12:30 selectable then Back; Ava L0012November14:00 unchanged and hidden from Noah. Do not claim physical verification until the user replies.
+Android confirmed by the user on19October2026: "Yes, partial-day blocking and existing booking work". After reopening, Lim11November noon is hidden,12:30 is selectable and Back works; Ava L0012November14:00 remains unchanged and hidden from Noah. This resolves the pending physical check.
 
 Auth, Word report, experimental AI/model/training, dependencies and user baseline edit unchanged. No push/deploy/merge.
 

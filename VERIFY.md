@@ -359,3 +359,6 @@ Browser: review/Keep editing preserved the range; confirmed Lim11Nov12:00–12:3
 API refreshed to load this feature; dashboard78988/3000 and Expo99028/8081 retained. Phone API http://192.168.0.2:8000. See docs/PARTIAL_DAY_ABSENCES.md. AI/model/training, real auth, Word, dependencies and user's docs/ai/BASELINE_SETUP.md edit preserved. Local branch feat/partial-day-absence; no push/deploy/merge. Discuss the next small task before implementation.
 
 Final runtime: API session98750 PID119452/8000, dashboard PID78988/3000, Expo PID99028/8081. Dashboard TypeScript also passed after restoring the build-generated next-env.d.ts path change.
+
+
+19 October 2026 Android partial-day absence confirmation: user replied "Yes, partial-day blocking and existing booking work". After reopening, Dr Lim's11November noon slot is hidden,12:30pm is selectable and Back works. Ava's L0012November14:00 booking remains unchanged and hidden from Noah. This resolves the pending Android card for this increment. Implementation ba5bbc2 on feat/partial-day-absence;152 API tests, dashboard production build/TypeScript, mobile TypeScript with Expo types, browser flow and specified physical checks passed. No broader physical claim for concurrency/migration/boundaries. Discuss the next small task before implementation.
