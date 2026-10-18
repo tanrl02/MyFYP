@@ -1,0 +1,265 @@
+{
+  "scope": "Metadata-only readiness and exploratory replacement census",
+  "source_sha256": {
+    "scin_cases": "7923ee9ba9775af413ca115c4587dc1bd32259d7936aa97fa80d88dd616ca3c3",
+    "scin_labels": "616ad03c24c304f5f7ef01b4116e4d3274f1c71c9b19a0e3d5620698b081a9fe",
+    "fitz_original": "851dfaabf1791c2a8b1c2957619f3e0673cf0002f4ce924a5c02d185c7d4a1cd",
+    "fitz_corrected_github": "bfc28411147693a910b2b409bf449f4f6e61002f29926626eab3589c442fd219",
+    "fitz_corrected_zenodo": "bfc28411147693a910b2b409bf449f4f6e61002f29926626eab3589c442fd219"
+  },
+  "frozen_dataset_version": "eight-class-v1",
+  "current_conditions": [
+    {
+      "condition": "acne",
+      "frozen_images": {
+        "test": 81,
+        "train": 287,
+        "val": 42
+      },
+      "full_control_f1": 0.8705882352941177,
+      "partial_freezing_f1": 0.8505747126436781,
+      "scin_strict_metadata_cases": 14,
+      "scin_reviewed_preparation_candidates": 0,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "eczema",
+      "frozen_images": {
+        "test": 34,
+        "train": 118,
+        "val": 16
+      },
+      "full_control_f1": 0.4666666666666667,
+      "partial_freezing_f1": 0.2962962962962963,
+      "scin_strict_metadata_cases": 121,
+      "scin_reviewed_preparation_candidates": 18,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "psoriasis",
+      "frozen_images": {
+        "test": 105,
+        "train": 356,
+        "val": 49
+      },
+      "full_control_f1": 0.6788990825688074,
+      "partial_freezing_f1": 0.7850467289719627,
+      "scin_strict_metadata_cases": 17,
+      "scin_reviewed_preparation_candidates": 0,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "folliculitis",
+      "frozen_images": {
+        "test": 35,
+        "train": 98,
+        "val": 12
+      },
+      "full_control_f1": 0.5,
+      "partial_freezing_f1": 0.5,
+      "scin_strict_metadata_cases": 36,
+      "scin_reviewed_preparation_candidates": 0,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "urticaria",
+      "frozen_images": {
+        "test": 26,
+        "train": 88,
+        "val": 13
+      },
+      "full_control_f1": 0.7000000000000001,
+      "partial_freezing_f1": 0.64,
+      "scin_strict_metadata_cases": 86,
+      "scin_reviewed_preparation_candidates": 0,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "allergic_contact_dermatitis",
+      "frozen_images": {
+        "test": 58,
+        "train": 209,
+        "val": 30
+      },
+      "full_control_f1": 0.5,
+      "partial_freezing_f1": 0.456140350877193,
+      "scin_strict_metadata_cases": 38,
+      "scin_reviewed_preparation_candidates": 17,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "seborrheic_dermatitis",
+      "frozen_images": {
+        "test": 23,
+        "train": 79,
+        "val": 11
+      },
+      "full_control_f1": 0.36363636363636365,
+      "partial_freezing_f1": 0.4705882352941177,
+      "scin_strict_metadata_cases": 5,
+      "scin_reviewed_preparation_candidates": 2,
+      "additional_training_approved": 0
+    },
+    {
+      "condition": "scabies",
+      "frozen_images": {
+        "test": 39,
+        "train": 139,
+        "val": 20
+      },
+      "full_control_f1": 0.7222222222222223,
+      "partial_freezing_f1": 0.6842105263157895,
+      "scin_strict_metadata_cases": 0,
+      "scin_reviewed_preparation_candidates": 0,
+      "additional_training_approved": 0
+    }
+  ],
+  "strict_scin_all_labels": {
+    "Abscess": 3,
+    "Acanthosis nigricans": 1,
+    "Acne": 14,
+    "Actinic Keratosis": 4,
+    "Acute and chronic dermatitis": 9,
+    "Acute dermatitis, NOS": 27,
+    "Acute-on-chronic dyshidrotic eczema of hands": 1,
+    "Agminate folliculitis": 1,
+    "Allergic Contact Dermatitis": 38,
+    "Annular erythema": 1,
+    "Arsenical keratosis": 1,
+    "Bullous Pemphigoid": 1,
+    "CD - Contact dermatitis": 3,
+    "Candida intertrigo": 1,
+    "Cheilitis": 1,
+    "Chicken pox exanthem": 1,
+    "Chronic dermatitis, NOS": 12,
+    "Confluent and reticulate papillomatosis": 4,
+    "Contact dermatitis caused by Rhus diversiloba": 1,
+    "Cutaneous larva migrans": 2,
+    "Cutaneous lupus": 1,
+    "Deep fungal infection": 1,
+    "Drug Rash": 2,
+    "Eczema": 121,
+    "Elephantiasis nostras": 1,
+    "Epidermal nevus": 1,
+    "Erythema ab igne": 3,
+    "Erythema multiforme": 4,
+    "Folliculitis": 36,
+    "Foreign body reaction of the skin": 1,
+    "Granuloma annulare": 9,
+    "Hemangioma": 2,
+    "Hemosiderin pigmentation of skin due to venous insufficiency": 1,
+    "Herpes Simplex": 16,
+    "Herpes Zoster": 18,
+    "Hidradenitis": 3,
+    "Hypersensitivity": 1,
+    "Ichthyosis": 1,
+    "Idiopathic guttate hypomelanosis": 2,
+    "Impetigo": 7,
+    "Inflicted skin lesions": 1,
+    "Insect Bite": 26,
+    "Irritant Contact Dermatitis": 11,
+    "Keratosis pilaris": 3,
+    "Knuckle pads": 1,
+    "Leukocytoclastic Vasculitis": 11,
+    "Lichen Simplex Chronicus": 3,
+    "Lichen planus/lichenoid eruption": 2,
+    "Lichen striatus": 1,
+    "Lichenified eczema": 1,
+    "Lichenified eczematous dermatitis": 1,
+    "Melanin pigmentation due to exogenous substance": 1,
+    "Melasma": 1,
+    "Milia": 1,
+    "Miliaria": 2,
+    "Molluscum Contagiosum": 7,
+    "O/E - ecchymoses present": 20,
+    "O/E - petechiae on skin": 1,
+    "O/E - petechiae present": 1,
+    "O/E - pustules": 1,
+    "O/E - vesicles present": 1,
+    "Paronychia": 2,
+    "Perioral Dermatitis": 5,
+    "Photodermatitis": 2,
+    "Pigmented purpuric eruption": 10,
+    "Pincer nail deformity": 1,
+    "Pityriasis rosea": 3,
+    "Prurigo": 1,
+    "Prurigo nodularis": 3,
+    "Psoriasis": 17,
+    "Purpura": 9,
+    "Rosacea": 5,
+    "SCC/SCCIS": 2,
+    "SK/ISK": 1,
+    "Scar Condition": 4,
+    "Seborrheic Dermatitis": 5,
+    "Skin ulcer": 1,
+    "Stasis Dermatitis": 5,
+    "Tinea": 12,
+    "Tinea Versicolor": 12,
+    "Traumatic blister": 1,
+    "Traumatic ulcer": 1,
+    "Urticaria": 86,
+    "Varicose veins of lower extremity": 1,
+    "Vasculitis of the skin": 1,
+    "Venous Stasis Ulcer": 2,
+    "Verruca vulgaris": 5,
+    "Viral Exanthem": 1,
+    "Xerosis": 2,
+    "varicose vein": 1
+  },
+  "exploratory_replacements": [
+    {
+      "source_label": "lichen planus",
+      "metadata_partition_counts": {
+        "test": 75,
+        "train": 264,
+        "val": 38
+      },
+      "metadata_total": 377,
+      "replacement_approved": false,
+      "images_acquired_for_this_candidate": 0
+    },
+    {
+      "source_label": "pityriasis rosea",
+      "metadata_partition_counts": {
+        "test": 25,
+        "train": 86,
+        "val": 12
+      },
+      "metadata_total": 123,
+      "replacement_approved": false,
+      "images_acquired_for_this_candidate": 0
+    },
+    {
+      "source_label": "vitiligo",
+      "metadata_partition_counts": {
+        "test": 23,
+        "train": 79,
+        "val": 11
+      },
+      "metadata_total": 113,
+      "replacement_approved": false,
+      "images_acquired_for_this_candidate": 0
+    },
+    {
+      "source_label": "rosacea",
+      "metadata_partition_counts": {
+        "test": 16,
+        "train": 55,
+        "val": 8
+      },
+      "metadata_total": 79,
+      "replacement_approved": false,
+      "images_acquired_for_this_candidate": 0
+    }
+  ],
+  "test_pixels_read": 0,
+  "new_training_runs": 0,
+  "class_mapping_changed": false,
+  "limitations": [
+    "Metadata counts are not verified diagnoses, unique patients or approved training images",
+    "SCIN strict weights are ranking weights; most current focus cases have one grader",
+    "No replacement photos acquired or clinically reviewed; no replacement performance measured",
+    "Frozen dataset visual review remains partial; patient independence unproven",
+    "Current upload sanitation is not a validated model photo-quality or out-of-scope detector"
+  ]
+}
