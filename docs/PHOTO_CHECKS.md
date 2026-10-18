@@ -22,6 +22,8 @@ The one-time download is approximately 354 MB and verifies the complete SHA-256.
 
 The expanded [270-check development challenge](ai/PHOTO_VALIDATION_FINDINGS.md) found 35/37 synthetic browser pages containing skin were incorrectly accepted, along with one checkerboard graphic. CLIP uses a centre crop and can miss peripheral context. A cropped screenshot of skin cannot reliably be distinguished from the original photograph. Prompts mentioning screenshots do not guarantee screenshot detection. Retake messages describe likely content, not proof. Thresholds (`positive >= 0.22`, skin/non-skin margin `>= 0.015`) are prototype engineering choices; the similarity values are not calibrated probabilities. More independent real-phone, skin-tone and negative examples are required before claiming reliability. The challenge did not change production thresholds.
 
+The subsequent [whole-frame comparison](ai/PHOTO_CONTEXT_FINDINGS.md) tested two fixed candidates offline. Both failed the skin-preservation guard on the reused-skin validation challenge; neither was promoted. Screenshot/pattern exclusion remains an acknowledged limitation of the current prototype.
+
 Source and licence: [official CLIP repository](https://github.com/openai/CLIP), [model card](https://github.com/openai/CLIP/blob/main/model-card.md). Keep the upstream MIT licence with redistributed weights/code. The local six negative fixtures retain their upstream scikit-image notices and hashes; raw photographs and weights are not committed.
 
 ## Manual Android check

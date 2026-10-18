@@ -189,3 +189,12 @@ Enhancement training stopped at user request; no verified enhancement winner. Wo
 - [x] Record35/37 skin-screenshot false acceptances and one checkerboard false acceptance.
 - [ ] Independent phone matrix and additional independent negatives; no reliability/clinical claim yet.
 - [ ] Discuss targeted whole-frame context experiment before changing production gate.
+
+## Whole-frame context experiment, 18 October 2026
+- [x] Predeclare two candidates, grouped development/validation challenge and selection guards.
+- [x] Acquire four public licensed negatives with upstream hashes/notices; prepare128 offline fixtures.
+- [x] Test candidates; freeze development selection before validation; retain all failures.
+- [x] Three tests,128hash/accounting checks,11representative decision replays and fixture visual review.
+- [x] Reject both candidates for skin-original acceptance loss; keep live gate unchanged.
+- [ ] Independent phone/skin/negative dataset before further admission reliability claims.
+Next suggested small task: review weak disease classes and data quality;85% target remains unmet.

@@ -1,0 +1,4387 @@
+{
+  "contract_sha256": "97e715e8f8319ee16a8db533af5ea21c7794722e4fee3786ea7bfd14f367c572",
+  "selected_on_development": "whole_frame",
+  "validation_guards": {
+    "whole_frame": {
+      "passes": false,
+      "skin_accepted": 18,
+      "object_accepted": 0,
+      "screen_pattern_accepted": 26,
+      "baseline_screen_pattern_accepted": 36
+    },
+    "whole_frame_context": {
+      "passes": false,
+      "skin_accepted": 12,
+      "object_accepted": 0,
+      "screen_pattern_accepted": 0,
+      "baseline_screen_pattern_accepted": 36
+    }
+  },
+  "passes_both_guards": false,
+  "production_promoted": false,
+  "disease_test_images_read": 0,
+  "groups": {
+    "development": {
+      "baseline": {
+        "skin": {
+          "count": 18,
+          "accepted": 18
+        },
+        "prior_screen": {
+          "count": 18,
+          "accepted": 17
+        },
+        "novel_screen": {
+          "count": 18,
+          "accepted": 18
+        },
+        "object": {
+          "count": 8,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 4,
+          "accepted": 1
+        }
+      },
+      "whole_frame": {
+        "skin": {
+          "count": 18,
+          "accepted": 18
+        },
+        "prior_screen": {
+          "count": 18,
+          "accepted": 12
+        },
+        "novel_screen": {
+          "count": 18,
+          "accepted": 7
+        },
+        "object": {
+          "count": 8,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 4,
+          "accepted": 1
+        }
+      },
+      "whole_frame_context": {
+        "skin": {
+          "count": 18,
+          "accepted": 13
+        },
+        "prior_screen": {
+          "count": 18,
+          "accepted": 0
+        },
+        "novel_screen": {
+          "count": 18,
+          "accepted": 0
+        },
+        "object": {
+          "count": 8,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 4,
+          "accepted": 0
+        }
+      }
+    },
+    "validation": {
+      "baseline": {
+        "skin": {
+          "count": 19,
+          "accepted": 19
+        },
+        "prior_screen": {
+          "count": 19,
+          "accepted": 18
+        },
+        "novel_screen": {
+          "count": 19,
+          "accepted": 18
+        },
+        "object": {
+          "count": 2,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 3,
+          "accepted": 0
+        }
+      },
+      "whole_frame": {
+        "skin": {
+          "count": 19,
+          "accepted": 18
+        },
+        "prior_screen": {
+          "count": 19,
+          "accepted": 12
+        },
+        "novel_screen": {
+          "count": 19,
+          "accepted": 14
+        },
+        "object": {
+          "count": 2,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 3,
+          "accepted": 0
+        }
+      },
+      "whole_frame_context": {
+        "skin": {
+          "count": 19,
+          "accepted": 12
+        },
+        "prior_screen": {
+          "count": 19,
+          "accepted": 0
+        },
+        "novel_screen": {
+          "count": 19,
+          "accepted": 0
+        },
+        "object": {
+          "count": 2,
+          "accepted": 0
+        },
+        "pattern": {
+          "count": 3,
+          "accepted": 0
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "5275181661240813075",
+      "sha256": "4727670ca93f040bf66e6d1187f787dd92c097bc0d008445a1c292bc949ae1a9",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3115643262863159,
+          "negative": 0.23908960819244385,
+          "margin": 0.07247471809387207,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28514328598976135,
+          "negative": 0.24012026190757751,
+          "margin": 0.04502302408218384,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28514328598976135,
+          "negative": 0.26431193947792053,
+          "margin": 0.02083134651184082,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "5275181661240813075",
+      "sha256": "1837991b7969de33b65e59d111541ee8487a8b1bcab32b4e0b3ad446b6f940f2",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2695913314819336,
+          "negative": 0.24285395443439484,
+          "margin": 0.026737377047538757,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27018842101097107,
+          "negative": 0.2610432505607605,
+          "margin": 0.009145170450210571,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27018842101097107,
+          "negative": 0.32851195335388184,
+          "margin": -0.05832353234291077,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "5275181661240813075",
+      "sha256": "069ca0d2b26f6cf4c5b0f626a52c1665b13dbf9041de50ec7f5b25496936ec90",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2717749774456024,
+          "negative": 0.24318885803222656,
+          "margin": 0.028586119413375854,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2636914551258087,
+          "negative": 0.2587686777114868,
+          "margin": 0.004922777414321899,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2636914551258087,
+          "negative": 0.326244056224823,
+          "margin": -0.06255260109901428,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "6691291750986670327",
+      "sha256": "68ab01939dcf0f85a13adb6a2a99082fa20687429e0120c58612d808ae548cf7",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.302654504776001,
+          "negative": 0.21386989951133728,
+          "margin": 0.0887846052646637,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3218097686767578,
+          "negative": 0.23366761207580566,
+          "margin": 0.08814215660095215,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3218097686767578,
+          "negative": 0.27706772089004517,
+          "margin": 0.044742047786712646,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "6691291750986670327",
+      "sha256": "21717a0176091ad2d03cfda78bcc93a8a1508a51006afe79879a4945d352d0ca",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3123043477535248,
+          "negative": 0.23821687698364258,
+          "margin": 0.0740874707698822,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.31085285544395447,
+          "negative": 0.2437683343887329,
+          "margin": 0.06708452105522156,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.31085285544395447,
+          "negative": 0.3462815284729004,
+          "margin": -0.03542867302894592,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "6691291750986670327",
+      "sha256": "1548dc9632c30ed68e79aac88d1029fd25d3b76fd9ed6633783408e7bff4ce41",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.31028276681900024,
+          "negative": 0.23147279024124146,
+          "margin": 0.07880997657775879,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2956281900405884,
+          "negative": 0.24955575168132782,
+          "margin": 0.04607243835926056,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2956281900405884,
+          "negative": 0.34497928619384766,
+          "margin": -0.04935109615325928,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-8111125152560753978",
+      "sha256": "e67339324b82e2de79716c819f8b29348d8caa70ab72f1b80f95fa97518c2401",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2956646978855133,
+          "negative": 0.20735934376716614,
+          "margin": 0.08830535411834717,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29765546321868896,
+          "negative": 0.23274566233158112,
+          "margin": 0.06490980088710785,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29765546321868896,
+          "negative": 0.2768913209438324,
+          "margin": 0.020764142274856567,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-8111125152560753978",
+      "sha256": "36018a09f3eb657a7f5b5174790c73696b26a673562812fe3cf67c04a02ec2bd",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28919968008995056,
+          "negative": 0.22911173105239868,
+          "margin": 0.06008794903755188,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30169180035591125,
+          "negative": 0.2572742700576782,
+          "margin": 0.04441753029823303,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30169180035591125,
+          "negative": 0.33645620942115784,
+          "margin": -0.03476440906524658,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-8111125152560753978",
+      "sha256": "62d63885a4deb219e3eb18c92c228a836707b4a6b4945a4176e3c6db479379b7",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2848033905029297,
+          "negative": 0.22688283026218414,
+          "margin": 0.057920560240745544,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29245105385780334,
+          "negative": 0.2511139214038849,
+          "margin": 0.04133713245391846,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29245105385780334,
+          "negative": 0.3397979736328125,
+          "margin": -0.047346919775009155,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-8299809889773574040",
+      "sha256": "f5f1ef263c68c48e3f1504098999ab98db7f193f5b149a29e565f104b120dfa0",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2991633415222168,
+          "negative": 0.2365160882472992,
+          "margin": 0.0626472532749176,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28371793031692505,
+          "negative": 0.2381138652563095,
+          "margin": 0.04560406506061554,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28371793031692505,
+          "negative": 0.2661546468734741,
+          "margin": 0.017563283443450928,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-8299809889773574040",
+      "sha256": "16c18502c89ab999a1f98c0df541a04f7b3c2cc2792eb8ec37c0e6e624a7c8af",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.27688097953796387,
+          "negative": 0.2405679076910019,
+          "margin": 0.036313071846961975,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29340440034866333,
+          "negative": 0.26057106256484985,
+          "margin": 0.03283333778381348,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29340440034866333,
+          "negative": 0.3367864489555359,
+          "margin": -0.04338204860687256,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-8299809889773574040",
+      "sha256": "40e3c218da39e234bf31243ebb1bfe556caa5b301d028eb9d9e58e415aa01583",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28508734703063965,
+          "negative": 0.24035289883613586,
+          "margin": 0.044734448194503784,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.280741810798645,
+          "negative": 0.2553800940513611,
+          "margin": 0.025361716747283936,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.280741810798645,
+          "negative": 0.33587682247161865,
+          "margin": -0.05513501167297363,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "335846587626430311",
+      "sha256": "2791181234464aeb96999b52986f363efc1debf8ba399135d6982b6e444c6a86",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2578827738761902,
+          "negative": 0.2192375361919403,
+          "margin": 0.03864523768424988,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27645954489707947,
+          "negative": 0.244594544172287,
+          "margin": 0.03186500072479248,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27645954489707947,
+          "negative": 0.2656170725822449,
+          "margin": 0.010842472314834595,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "335846587626430311",
+      "sha256": "36cefc6412baa279e1840d74bcc6f8fee51759535851a9bbd14ec59a1b755e23",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.24544337391853333,
+          "negative": 0.23477023839950562,
+          "margin": 0.01067313551902771,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.24062307178974152,
+          "negative": 0.26564401388168335,
+          "margin": -0.025020942091941833,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.24062307178974152,
+          "negative": 0.31390082836151123,
+          "margin": -0.07327775657176971,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "335846587626430311",
+      "sha256": "9a865b2940e0180e66553ca3465486cf57b763d9f9fb8d6d5deea7405d4c6b87",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2492556869983673,
+          "negative": 0.2318401336669922,
+          "margin": 0.017415553331375122,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2323935329914093,
+          "negative": 0.2524239420890808,
+          "margin": -0.02003040909767151,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2323935329914093,
+          "negative": 0.3019777834415436,
+          "margin": -0.06958425045013428,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-2518265086444700975",
+      "sha256": "7aeda81d4b8f08e059a189d0a638cc5f5de95df994e7c331bd384a2fd4fd0e67",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3203853368759155,
+          "negative": 0.24666033685207367,
+          "margin": 0.07372500002384186,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2885228991508484,
+          "negative": 0.23399940133094788,
+          "margin": 0.05452349781990051,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2885228991508484,
+          "negative": 0.26635128259658813,
+          "margin": 0.022171616554260254,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-2518265086444700975",
+      "sha256": "6aa49d4369a43c9505ee284baeed89b9f6083d0a96e6f53b752f129e5b8b4e30",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29500722885131836,
+          "negative": 0.26583197712898254,
+          "margin": 0.029175251722335815,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2930069863796234,
+          "negative": 0.2724030613899231,
+          "margin": 0.020603924989700317,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2930069863796234,
+          "negative": 0.33547621965408325,
+          "margin": -0.04246923327445984,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-2518265086444700975",
+      "sha256": "d0fc0977df9991db6758b6c0329172fe3c933bf2217dfd5b8ed3e06524089df6",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2985319495201111,
+          "negative": 0.25254860520362854,
+          "margin": 0.045983344316482544,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2564196288585663,
+          "negative": 0.2536680996417999,
+          "margin": 0.0027515292167663574,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2564196288585663,
+          "negative": 0.2998587489128113,
+          "margin": -0.043439120054244995,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "3950839687124807995",
+      "sha256": "235ac0c376e867cf0b0ef17b812a9a18b113c07898bbeb533b26083cfc40334d",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3129689693450928,
+          "negative": 0.23140478134155273,
+          "margin": 0.08156418800354004,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3081566393375397,
+          "negative": 0.23055963218212128,
+          "margin": 0.0775970071554184,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3081566393375397,
+          "negative": 0.2635503113269806,
+          "margin": 0.04460632801055908,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "3950839687124807995",
+      "sha256": "1e408f84b7c6630b7dbc1181f0de36f1baa44a52fcdf5134fabe54fceadb124a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2968769371509552,
+          "negative": 0.25621944665908813,
+          "margin": 0.040657490491867065,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3008235991001129,
+          "negative": 0.26648688316345215,
+          "margin": 0.03433671593666077,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3008235991001129,
+          "negative": 0.34409090876579285,
+          "margin": -0.04326730966567993,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "3950839687124807995",
+      "sha256": "3144fe71e3705d86f2ddaff13a8b34f99fbc3dd0a15bd7eca0321ab8356b1e76",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30527496337890625,
+          "negative": 0.24083973467350006,
+          "margin": 0.06443522870540619,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28612977266311646,
+          "negative": 0.2754107117652893,
+          "margin": 0.010719060897827148,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.28612977266311646,
+          "negative": 0.3422600328922272,
+          "margin": -0.05613026022911072,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "2600794538114860588",
+      "sha256": "0f274d2f1a9ddbb2c6a1c3ab4e94e7fc133620ae9f31e9b0d4441f23890ec8fc",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28264933824539185,
+          "negative": 0.23578611016273499,
+          "margin": 0.04686322808265686,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.26853495836257935,
+          "negative": 0.2408742606639862,
+          "margin": 0.02766069769859314,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.26853495836257935,
+          "negative": 0.2408742606639862,
+          "margin": 0.02766069769859314,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "2600794538114860588",
+      "sha256": "0838b0ab556c47adbc40b7214a80fbb944c81fc494f72da602fcbe01757ad241",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3002072274684906,
+          "negative": 0.2649082839488983,
+          "margin": 0.035298943519592285,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28980332612991333,
+          "negative": 0.2828221321105957,
+          "margin": 0.006981194019317627,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.28980332612991333,
+          "negative": 0.3328370153903961,
+          "margin": -0.04303368926048279,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "2600794538114860588",
+      "sha256": "ca663af5feb8e71ea0573ed9bffe629b3c49b5da949e110f994edd96294230cc",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28875088691711426,
+          "negative": 0.24542328715324402,
+          "margin": 0.04332759976387024,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29438698291778564,
+          "negative": 0.2691563367843628,
+          "margin": 0.02523064613342285,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29438698291778564,
+          "negative": 0.32660919427871704,
+          "margin": -0.032222211360931396,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-2420670963295906064",
+      "sha256": "e3f7ef7691f7905c51bd1100d18b96e9a48a5beb9c09809f1fa49c2257767a8e",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2887739837169647,
+          "negative": 0.22298653423786163,
+          "margin": 0.06578744947910309,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2891925573348999,
+          "negative": 0.22866180539131165,
+          "margin": 0.06053075194358826,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2891925573348999,
+          "negative": 0.26069802045822144,
+          "margin": 0.028494536876678467,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-2420670963295906064",
+      "sha256": "d3597511ce03fbcd4b818d46de9f00c1be8ce759a7c7c3ec79416a8569e823bf",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28189170360565186,
+          "negative": 0.22333219647407532,
+          "margin": 0.05855950713157654,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2915200889110565,
+          "negative": 0.23835842311382294,
+          "margin": 0.05316166579723358,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2915200889110565,
+          "negative": 0.3329162895679474,
+          "margin": -0.04139620065689087,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-2420670963295906064",
+      "sha256": "c383aca3ade42d25d59aba17399f70009df234e58765ade26317a44d7cf39d89",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28801992535591125,
+          "negative": 0.22209174931049347,
+          "margin": 0.06592817604541779,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.25204142928123474,
+          "negative": 0.2392219603061676,
+          "margin": 0.012819468975067139,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.25204142928123474,
+          "negative": 0.3181067705154419,
+          "margin": -0.06606534123420715,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "4412120753157054552",
+      "sha256": "2de9fd1b591d186b1386b7c8848d9d9a6352c45d0d0a9c6dc7adc00abeb060fd",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2862274646759033,
+          "negative": 0.2335882931947708,
+          "margin": 0.05263917148113251,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2736881375312805,
+          "negative": 0.23526433110237122,
+          "margin": 0.0384238064289093,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2736881375312805,
+          "negative": 0.26022088527679443,
+          "margin": 0.013467252254486084,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "4412120753157054552",
+      "sha256": "d7b8c3476b075fb2366ef67fc5eb45f1381b76d4bf436f01ddd99e9f4060540a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.27602100372314453,
+          "negative": 0.2378629446029663,
+          "margin": 0.03815805912017822,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27498477697372437,
+          "negative": 0.2666725516319275,
+          "margin": 0.008312225341796875,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27498477697372437,
+          "negative": 0.32598811388015747,
+          "margin": -0.051003336906433105,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "4412120753157054552",
+      "sha256": "6836b885e0dc515c5134c51b0e3d96d37b36ae006b938e5b9ab0ba1da7724573",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.285068154335022,
+          "negative": 0.24288149178028107,
+          "margin": 0.042186662554740906,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2673962116241455,
+          "negative": 0.27107900381088257,
+          "margin": -0.0036827921867370605,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2673962116241455,
+          "negative": 0.32876965403556824,
+          "margin": -0.06137344241142273,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "2562611754724897853",
+      "sha256": "8fc1a15a5ffb07f151dec73fc5d952f8ff69c22d2e225c41f2f6162e4e510eba",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3118135929107666,
+          "negative": 0.2314968705177307,
+          "margin": 0.08031672239303589,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3129432499408722,
+          "negative": 0.2547306418418884,
+          "margin": 0.058212608098983765,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3129432499408722,
+          "negative": 0.28698521852493286,
+          "margin": 0.02595803141593933,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "2562611754724897853",
+      "sha256": "03efac27bc4554717d052913da8b5a6c85a7201a6127652fcd65901ed0d4a8ce",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29909467697143555,
+          "negative": 0.2548842430114746,
+          "margin": 0.04421043395996094,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27629929780960083,
+          "negative": 0.27205541729927063,
+          "margin": 0.0042438805103302,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27629929780960083,
+          "negative": 0.3292278051376343,
+          "margin": -0.05292850732803345,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "2562611754724897853",
+      "sha256": "c273c6b337acb1ce9e1d1328e187c73c810af3d802021bb392a0a7ff9036aa15",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28258007764816284,
+          "negative": 0.24385717511177063,
+          "margin": 0.03872290253639221,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.24915862083435059,
+          "negative": 0.2545422911643982,
+          "margin": -0.005383670330047607,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.24915862083435059,
+          "negative": 0.31149911880493164,
+          "margin": -0.062340497970581055,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "255207051194135479",
+      "sha256": "6b81170fdb313829bdf71af0312fe6d39e59092cc4a25062a776b686351a6729",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.32054561376571655,
+          "negative": 0.24380266666412354,
+          "margin": 0.07674294710159302,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2935692369937897,
+          "negative": 0.23525883257389069,
+          "margin": 0.05831040441989899,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2935692369937897,
+          "negative": 0.275143563747406,
+          "margin": 0.018425673246383667,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "255207051194135479",
+      "sha256": "b91db487f332fc6abee9dbb571454c1864030493d2b7c85f6062a14de83fc33a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28924959897994995,
+          "negative": 0.2456647753715515,
+          "margin": 0.04358482360839844,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2970482110977173,
+          "negative": 0.26862379908561707,
+          "margin": 0.02842441201210022,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2970482110977173,
+          "negative": 0.354595810174942,
+          "margin": -0.05754759907722473,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "255207051194135479",
+      "sha256": "7d90b4cf0c504e6ed26f4f09644ac01cd40f95fe0b169eff21813cce868f1993",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29216280579566956,
+          "negative": 0.2412230372428894,
+          "margin": 0.05093976855278015,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2753854990005493,
+          "negative": 0.2540165185928345,
+          "margin": 0.021368980407714844,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2753854990005493,
+          "negative": 0.3375760316848755,
+          "margin": -0.06219053268432617,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-5642777666164872473",
+      "sha256": "3f2f67a7ee0709e0e0cb03b260c03e3c49dd53e82e0b10ba49b7dce8113956fd",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28588318824768066,
+          "negative": 0.22367312014102936,
+          "margin": 0.062210068106651306,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27871841192245483,
+          "negative": 0.23129531741142273,
+          "margin": 0.047423094511032104,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27871841192245483,
+          "negative": 0.2745139002799988,
+          "margin": 0.004204511642456055,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-5642777666164872473",
+      "sha256": "011068f8f85565cb107b13a42b1c5ebb31f583c02a182267e92797e0bb34eb9b",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.25254374742507935,
+          "negative": 0.23103758692741394,
+          "margin": 0.021506160497665405,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2604846954345703,
+          "negative": 0.24666230380535126,
+          "margin": 0.013822391629219055,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2604846954345703,
+          "negative": 0.31141307950019836,
+          "margin": -0.05092838406562805,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-5642777666164872473",
+      "sha256": "2e255adc3b855daaee062392314e96f70fdc78eb483d3fb3264f182548f9a58f",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2553119957447052,
+          "negative": 0.22264397144317627,
+          "margin": 0.03266802430152893,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2377946376800537,
+          "negative": 0.24147330224514008,
+          "margin": -0.0036786645650863647,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2377946376800537,
+          "negative": 0.29190942645072937,
+          "margin": -0.05411478877067566,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "1872413092507744029",
+      "sha256": "07eb1804e58f938cc99daca286ba3bc719353e2ac275a07e1d04b9e6e6c6b19d",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3020268678665161,
+          "negative": 0.25223129987716675,
+          "margin": 0.049795567989349365,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27769652009010315,
+          "negative": 0.25120043754577637,
+          "margin": 0.026496082544326782,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27769652009010315,
+          "negative": 0.26769429445266724,
+          "margin": 0.010002225637435913,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "1872413092507744029",
+      "sha256": "9c253391e244d418695d4e50b725432551214dfe399b8af300c0a4da2ca8ce92",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2682177722454071,
+          "negative": 0.23753555119037628,
+          "margin": 0.030682221055030823,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.26651108264923096,
+          "negative": 0.2445669025182724,
+          "margin": 0.021944180130958557,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.26651108264923096,
+          "negative": 0.31127482652664185,
+          "margin": -0.04476374387741089,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "1872413092507744029",
+      "sha256": "8cf9039b6dbf59d64c43ad104dde94c85e0214377babcceeba94719a0d323671",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.26086124777793884,
+          "negative": 0.22387242317199707,
+          "margin": 0.03698882460594177,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2529894709587097,
+          "negative": 0.24882635474205017,
+          "margin": 0.004163116216659546,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2529894709587097,
+          "negative": 0.31480249762535095,
+          "margin": -0.061813026666641235,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-130215202506383973",
+      "sha256": "24d5630891b7f8f9873ed2b138bfc330776a89396a479750064abbd44da492b0",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2952127754688263,
+          "negative": 0.2255987823009491,
+          "margin": 0.0696139931678772,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29870447516441345,
+          "negative": 0.237306609749794,
+          "margin": 0.061397865414619446,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29870447516441345,
+          "negative": 0.28723862767219543,
+          "margin": 0.011465847492218018,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-130215202506383973",
+      "sha256": "e55a75e205c2e3bb29e0d076dde7ed54e36679232fbb389d8b401d3ba0a55852",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29000332951545715,
+          "negative": 0.24491900205612183,
+          "margin": 0.04508432745933533,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3014151453971863,
+          "negative": 0.2677900195121765,
+          "margin": 0.033625125885009766,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3014151453971863,
+          "negative": 0.35468214750289917,
+          "margin": -0.05326700210571289,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-130215202506383973",
+      "sha256": "e58f19c3df9544b8cc500bca1227fe9b8bc16c3e680faefd9311aec784b0c16e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2792109251022339,
+          "negative": 0.2344626933336258,
+          "margin": 0.04474823176860809,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2674049735069275,
+          "negative": 0.25499165058135986,
+          "margin": 0.012413322925567627,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2674049735069275,
+          "negative": 0.32046809792518616,
+          "margin": -0.05306312441825867,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "4039144254966056317",
+      "sha256": "16b4b679e3d870945835dcaba9e31836cb66926c0e93a86717ca9acb0b431efd",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.33279430866241455,
+          "negative": 0.23323974013328552,
+          "margin": 0.09955456852912903,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30132657289505005,
+          "negative": 0.23476770520210266,
+          "margin": 0.06655886769294739,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30132657289505005,
+          "negative": 0.2615388035774231,
+          "margin": 0.03978776931762695,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "4039144254966056317",
+      "sha256": "ad1e9fcdc048dd2ac2b4adc3dbd677dc4f67ee4a977e92c71ea783654b844a90",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.26588594913482666,
+          "negative": 0.2187487930059433,
+          "margin": 0.04713715612888336,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27941828966140747,
+          "negative": 0.23672062158584595,
+          "margin": 0.04269766807556152,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27941828966140747,
+          "negative": 0.3217400908470154,
+          "margin": -0.04232180118560791,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "4039144254966056317",
+      "sha256": "51a0f35e8e254c75f98c362a65790fa38b95c574f2957a674babb0e993a960f1",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2856193780899048,
+          "negative": 0.22613844275474548,
+          "margin": 0.0594809353351593,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27305006980895996,
+          "negative": 0.24582774937152863,
+          "margin": 0.027222320437431335,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27305006980895996,
+          "negative": 0.32161444425582886,
+          "margin": -0.048564374446868896,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "-7776857652459777696",
+      "sha256": "c9353dd03387fb9ec47d922d828180e60b061dbb5bfc36d3d8ab7d5ed283e610",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3012668788433075,
+          "negative": 0.21874858438968658,
+          "margin": 0.08251829445362091,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.280056893825531,
+          "negative": 0.21956630051136017,
+          "margin": 0.06049059331417084,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.280056893825531,
+          "negative": 0.24998614192008972,
+          "margin": 0.030070751905441284,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "-7776857652459777696",
+      "sha256": "2b20723443eb9585da5288bf48abb93369fcb95f10488800d1e9ceca7f6d2fb8",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2822415232658386,
+          "negative": 0.23838084936141968,
+          "margin": 0.043860673904418945,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2872345745563507,
+          "negative": 0.27122995257377625,
+          "margin": 0.016004621982574463,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2872345745563507,
+          "negative": 0.33509039878845215,
+          "margin": -0.04785582423210144,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "-7776857652459777696",
+      "sha256": "507ecfb9566f2b2ce087650b8b55627284872785975bf07c319ccc66b52f0d6b",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2899933457374573,
+          "negative": 0.22907310724258423,
+          "margin": 0.06092023849487305,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2700551450252533,
+          "negative": 0.26143112778663635,
+          "margin": 0.008624017238616943,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2700551450252533,
+          "negative": 0.3258012533187866,
+          "margin": -0.055746108293533325,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "3083550471820565612",
+      "sha256": "7bada9b46feeef61e243ca16c255ec967aafb6983e9e019c3622a974b13659ee",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29889893531799316,
+          "negative": 0.23184114694595337,
+          "margin": 0.0670577883720398,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2962523400783539,
+          "negative": 0.2383042424917221,
+          "margin": 0.057948097586631775,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2962523400783539,
+          "negative": 0.2740412652492523,
+          "margin": 0.022211074829101562,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "3083550471820565612",
+      "sha256": "8b882047fbefbc9b36925e99847557b535ee0485c939d928dab14c20e4dee8b7",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28965693712234497,
+          "negative": 0.2577563524246216,
+          "margin": 0.03190058469772339,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2887319028377533,
+          "negative": 0.26755040884017944,
+          "margin": 0.021181493997573853,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2887319028377533,
+          "negative": 0.33873528242111206,
+          "margin": -0.050003379583358765,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "3083550471820565612",
+      "sha256": "87e810f0b829cba02fe00ae802d7fc04271b8d4349d3bae3a778ad185150141f",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30592232942581177,
+          "negative": 0.24711132049560547,
+          "margin": 0.0588110089302063,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27419915795326233,
+          "negative": 0.25377923250198364,
+          "margin": 0.020419925451278687,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27419915795326233,
+          "negative": 0.32950061559677124,
+          "margin": -0.05530145764350891,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "chelsea.png",
+      "sha256": "596aa1e7cb875eb79f437e310381d26b338a81c2da23439704a73c4651e8c4bb",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.21621930599212646,
+          "negative": 0.2706477642059326,
+          "margin": -0.05442845821380615,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.20747306942939758,
+          "negative": 0.2650977075099945,
+          "margin": -0.057624638080596924,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.20747306942939758,
+          "negative": 0.2650977075099945,
+          "margin": -0.057624638080596924,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "coffee.png",
+      "sha256": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.1987002193927765,
+          "negative": 0.3132334351539612,
+          "margin": -0.11453321576118469,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.1937195509672165,
+          "negative": 0.30938521027565,
+          "margin": -0.11566565930843353,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.1937195509672165,
+          "negative": 0.30938521027565,
+          "margin": -0.11566565930843353,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "brick.png",
+      "sha256": "7966caf324f6ba843118d98f7a07746d22f6a343430add0233eca5f6eaaa8fcf",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.24493664503097534,
+          "negative": 0.25679561495780945,
+          "margin": -0.011858969926834106,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.24493664503097534,
+          "negative": 0.25679561495780945,
+          "margin": -0.011858969926834106,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.24493664503097534,
+          "negative": 0.284999281167984,
+          "margin": -0.04006263613700867,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "grass.png",
+      "sha256": "b6b6022426b38936c43a4ac09635cd78af074e90f42ffa8227ac8b7452d39f89",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2685980200767517,
+          "negative": 0.2744557857513428,
+          "margin": -0.0058577656745910645,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.2685980200767517,
+          "negative": 0.2744557857513428,
+          "margin": -0.0058577656745910645,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2685980200767517,
+          "negative": 0.2744557857513428,
+          "margin": -0.0058577656745910645,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "gravel.png",
+      "sha256": "c48615b451bf1e606fbd72c0aa9f8cc0f068ab7111ef7d93bb9b0f2586440c12",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2619886100292206,
+          "negative": 0.270241916179657,
+          "margin": -0.008253306150436401,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.2619886100292206,
+          "negative": 0.270241916179657,
+          "margin": -0.008253306150436401,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2619886100292206,
+          "negative": 0.270241916179657,
+          "margin": -0.008253306150436401,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "rocket.jpg",
+      "sha256": "c2dd0de7c538df8d111e479619b129464d0269d0ae5fd18ca91d33a7fdfea95c",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.17306886613368988,
+          "negative": 0.20492351055145264,
+          "margin": -0.031854644417762756,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.16686171293258667,
+          "negative": 0.18843770027160645,
+          "margin": -0.021575987339019775,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.16686171293258667,
+          "negative": 0.18843770027160645,
+          "margin": -0.021575987339019775,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "pattern",
+      "source_id": "prior-pattern",
+      "sha256": "2a533a1f0dc51d9c457f000ad205f4595d087104a32df5d47fd96c4e4cb13dae",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.26798415184020996,
+          "negative": 0.2508719563484192,
+          "margin": 0.01711219549179077,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.26798415184020996,
+          "negative": 0.2508719563484192,
+          "margin": 0.01711219549179077,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.26798415184020996,
+          "negative": 0.2981933653354645,
+          "margin": -0.030209213495254517,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "camera.png",
+      "sha256": "b0793d2adda0fa6ae899c03989482bff9a42d3d5690fc7e3648f2795d730c23a",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2025740146636963,
+          "negative": 0.26216286420822144,
+          "margin": -0.059588849544525146,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.2025740146636963,
+          "negative": 0.26216286420822144,
+          "margin": -0.059588849544525146,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2025740146636963,
+          "negative": 0.26216286420822144,
+          "margin": -0.059588849544525146,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "eagle.png",
+      "sha256": "928f1bbe7403b533265f56db3a6b07c835dfa8e2513f5c5075ca2f1960f6179e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.17641973495483398,
+          "negative": 0.23741550743579865,
+          "margin": -0.06099577248096466,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.18655584752559662,
+          "negative": 0.24409544467926025,
+          "margin": -0.057539597153663635,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.18655584752559662,
+          "negative": 0.24409544467926025,
+          "margin": -0.057539597153663635,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "pattern",
+      "source_id": "development-pattern-0",
+      "sha256": "4a117fc02f2810b65476b792d7bccda699ed544684f825d694cb96b799f1116f",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.23236164450645447,
+          "negative": 0.2695483863353729,
+          "margin": -0.03718674182891846,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.23236164450645447,
+          "negative": 0.2695483863353729,
+          "margin": -0.03718674182891846,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.23236164450645447,
+          "negative": 0.2819485664367676,
+          "margin": -0.04958692193031311,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "pattern",
+      "source_id": "development-pattern-1",
+      "sha256": "5a6339187a11cd9cea0f3bf836cce889c5aa6cf7f333f63db2c6abb181b106bf",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.23965874314308167,
+          "negative": 0.2493981420993805,
+          "margin": -0.009739398956298828,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.23965874314308167,
+          "negative": 0.2493981420993805,
+          "margin": -0.009739398956298828,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.23965874314308167,
+          "negative": 0.320578008890152,
+          "margin": -0.08091926574707031,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "development",
+      "group": "pattern",
+      "source_id": "development-pattern-2",
+      "sha256": "c32ab04ce79474a44980f5e047169dad23409a689624649e66034fd9cf3a478f",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2569398880004883,
+          "negative": 0.2697058320045471,
+          "margin": -0.012765944004058838,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.2569398880004883,
+          "negative": 0.2697058320045471,
+          "margin": -0.012765944004058838,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2569398880004883,
+          "negative": 0.3406015634536743,
+          "margin": -0.08366167545318604,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-4662194556963063742",
+      "sha256": "eb92f07b6d6104d4d59aaa29edc520eb268c6d7279e4d0a1297e31e2ce05d848",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30480557680130005,
+          "negative": 0.21383187174797058,
+          "margin": 0.09097370505332947,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30103540420532227,
+          "negative": 0.21917569637298584,
+          "margin": 0.08185970783233643,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30103540420532227,
+          "negative": 0.2716098129749298,
+          "margin": 0.029425591230392456,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-4662194556963063742",
+      "sha256": "fe1b0c3a7ddeab3c63adda5e8b736c8fffe79679bea10f23a24938626dde8ed9",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29533490538597107,
+          "negative": 0.23358342051506042,
+          "margin": 0.061751484870910645,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3099043667316437,
+          "negative": 0.262685090303421,
+          "margin": 0.047219276428222656,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3099043667316437,
+          "negative": 0.34573084115982056,
+          "margin": -0.03582647442817688,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-4662194556963063742",
+      "sha256": "f0b5dd970b24a4a8ffe7cdedab70cdde8e136233893ceedf2c92d9dce0ab9e1e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3047626316547394,
+          "negative": 0.23308438062667847,
+          "margin": 0.07167825102806091,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3010760247707367,
+          "negative": 0.2523272633552551,
+          "margin": 0.04874876141548157,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3010760247707367,
+          "negative": 0.329789936542511,
+          "margin": -0.028713911771774292,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-7743291557587090042",
+      "sha256": "387f0c6b5be1d33007b91fb68269de9561a52fa8dc2e2e2f64263a36e39fbeac",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.31277337670326233,
+          "negative": 0.24674874544143677,
+          "margin": 0.06602463126182556,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30197805166244507,
+          "negative": 0.2511863112449646,
+          "margin": 0.05079174041748047,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30197805166244507,
+          "negative": 0.29178524017333984,
+          "margin": 0.010192811489105225,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-7743291557587090042",
+      "sha256": "65d54791dba1235936bdbe997d2f2447408d575c0a5ef7cb2c6cb72fc6a46efa",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.302283376455307,
+          "negative": 0.23961836099624634,
+          "margin": 0.06266501545906067,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29032498598098755,
+          "negative": 0.2563638687133789,
+          "margin": 0.03396111726760864,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29032498598098755,
+          "negative": 0.3437105417251587,
+          "margin": -0.05338555574417114,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-7743291557587090042",
+      "sha256": "9a4a3bc48ca28311435e99f4c3781a3e4c5d5059cc35e5fd1c5d1fa533f6ecb9",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.301239937543869,
+          "negative": 0.25340762734413147,
+          "margin": 0.04783231019973755,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3136243224143982,
+          "negative": 0.27376073598861694,
+          "margin": 0.03986358642578125,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3136243224143982,
+          "negative": 0.34180396795272827,
+          "margin": -0.028179645538330078,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "5080913691893238848",
+      "sha256": "c78ac4d9e526c84cdbb30e7382f61ba8fef597810f6294156bb5dab0aa2e6a67",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.31053248047828674,
+          "negative": 0.21447908878326416,
+          "margin": 0.09605339169502258,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28882551193237305,
+          "negative": 0.21177873015403748,
+          "margin": 0.07704678177833557,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28882551193237305,
+          "negative": 0.25928062200546265,
+          "margin": 0.0295448899269104,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "5080913691893238848",
+      "sha256": "94f7644234ee055d06e80dac44d3f8c593e717ba25a363af8b8eb9ba8105ad41",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28295445442199707,
+          "negative": 0.23783506453037262,
+          "margin": 0.04511938989162445,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2849029302597046,
+          "negative": 0.24218691885471344,
+          "margin": 0.04271601140499115,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2849029302597046,
+          "negative": 0.3281629681587219,
+          "margin": -0.043260037899017334,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "5080913691893238848",
+      "sha256": "767995e49e49bb1e3422d1fd25617a6e875c53b9d206cc38e9d6453688ed6cc2",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2890075743198395,
+          "negative": 0.21724063158035278,
+          "margin": 0.0717669427394867,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.288512647151947,
+          "negative": 0.24345290660858154,
+          "margin": 0.04505974054336548,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.288512647151947,
+          "negative": 0.29802367091178894,
+          "margin": -0.009511023759841919,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "3377584127732041409",
+      "sha256": "3595aac6aa9d82b2b292c1f0393f964035c5705dd8889491d9ceb1c367039e59",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.32174742221832275,
+          "negative": 0.23354756832122803,
+          "margin": 0.08819985389709473,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.31484317779541016,
+          "negative": 0.2321014553308487,
+          "margin": 0.08274172246456146,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.31484317779541016,
+          "negative": 0.2658926248550415,
+          "margin": 0.04895055294036865,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "3377584127732041409",
+      "sha256": "cc73267d819ccf293409ac000bcd4959a187fca217e752c3d2697ea21a75eb6a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30384790897369385,
+          "negative": 0.24760010838508606,
+          "margin": 0.05624780058860779,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30563539266586304,
+          "negative": 0.2571433484554291,
+          "margin": 0.04849204421043396,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30563539266586304,
+          "negative": 0.3319540023803711,
+          "margin": -0.026318609714508057,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "3377584127732041409",
+      "sha256": "02388152f9d34423d809f0dfd3ce07570e4adeb0b9d335b3c4f68af2332b7310",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3116084337234497,
+          "negative": 0.24327990412712097,
+          "margin": 0.06832852959632874,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3094741106033325,
+          "negative": 0.2631050646305084,
+          "margin": 0.0463690459728241,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3094741106033325,
+          "negative": 0.3166503310203552,
+          "margin": -0.007176220417022705,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-3055300247709269077",
+      "sha256": "cc4353cc0b436a03470021dd41e2a5dbe691b60c03f3eb5e8ad527ed913bea18",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2823016047477722,
+          "negative": 0.2658296823501587,
+          "margin": 0.016471922397613525,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2556820809841156,
+          "negative": 0.28968602418899536,
+          "margin": -0.03400394320487976,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2556820809841156,
+          "negative": 0.28968602418899536,
+          "margin": -0.03400394320487976,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-3055300247709269077",
+      "sha256": "e21a03e5cb1e917dd4d9ed2326705836f804b213d1e95cc345f89aa86882a331",
+      "known_baseline": false,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.24112696945667267,
+          "negative": 0.276370644569397,
+          "margin": -0.035243675112724304,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.23878400027751923,
+          "negative": 0.27623608708381653,
+          "margin": -0.0374520868062973,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.23878400027751923,
+          "negative": 0.2997220754623413,
+          "margin": -0.06093807518482208,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-3055300247709269077",
+      "sha256": "fb9681e163fcd8e7467b0b9be6358f71db4e9eb815752b11b71af5d09fa16760",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2665414810180664,
+          "negative": 0.2625289261341095,
+          "margin": 0.004012554883956909,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.23975536227226257,
+          "negative": 0.2885734438896179,
+          "margin": -0.04881808161735535,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.23975536227226257,
+          "negative": 0.29626062512397766,
+          "margin": -0.05650526285171509,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-6776518044035331491",
+      "sha256": "8f79bf43855eed8c00f1afb2062a94c4cb758454958e5978bf9c80df8fa0a421",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28152188658714294,
+          "negative": 0.22517172992229462,
+          "margin": 0.05635015666484833,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29298946261405945,
+          "negative": 0.24746669828891754,
+          "margin": 0.04552276432514191,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29298946261405945,
+          "negative": 0.29614102840423584,
+          "margin": -0.0031515657901763916,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-6776518044035331491",
+      "sha256": "3c9342a0319be9f855c05b50b40e17bcc9525db15a4f1e4bf526969033eb8d71",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2697340250015259,
+          "negative": 0.24463634192943573,
+          "margin": 0.02509768307209015,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27261120080947876,
+          "negative": 0.2660869359970093,
+          "margin": 0.006524264812469482,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27261120080947876,
+          "negative": 0.34478485584259033,
+          "margin": -0.07217365503311157,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-6776518044035331491",
+      "sha256": "c1bf1b4cb9ea5b26dbee8c4d5a2c55a5fb0aedbe61567d47fd15de66b0ddbc7d",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2934649586677551,
+          "negative": 0.24738290905952454,
+          "margin": 0.04608204960823059,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2816475033760071,
+          "negative": 0.2803131341934204,
+          "margin": 0.00133436918258667,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2816475033760071,
+          "negative": 0.3294587731361389,
+          "margin": -0.047811269760131836,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "5604714673774290686",
+      "sha256": "b34c00773e335cbb10745db093c87f7dd23adf3f9cb72fde23072595731f847f",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30112797021865845,
+          "negative": 0.2257365584373474,
+          "margin": 0.07539141178131104,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2921944260597229,
+          "negative": 0.24207714200019836,
+          "margin": 0.050117284059524536,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2921944260597229,
+          "negative": 0.2775728106498718,
+          "margin": 0.014621615409851074,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "5604714673774290686",
+      "sha256": "5983d71eb4404847118c14f4f0a925e8756010116fa7acefe21f75dba63661c2",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28507453203201294,
+          "negative": 0.234889417886734,
+          "margin": 0.05018511414527893,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29870766401290894,
+          "negative": 0.25052040815353394,
+          "margin": 0.048187255859375,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29870766401290894,
+          "negative": 0.33367252349853516,
+          "margin": -0.03496485948562622,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "5604714673774290686",
+      "sha256": "b7e5637caf5bc756cd2b2a52aba0b2bd80d82b71c543d8cd9b9d4244445e110e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.31025564670562744,
+          "negative": 0.2424418032169342,
+          "margin": 0.06781384348869324,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30452144145965576,
+          "negative": 0.25633421540260315,
+          "margin": 0.04818722605705261,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30452144145965576,
+          "negative": 0.331548810005188,
+          "margin": -0.027027368545532227,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-1694584375310842794",
+      "sha256": "9f5f1e600f7d5a5ea2a8318cd349a903e7ca3339f8d95e449161e8ab5414399f",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29263436794281006,
+          "negative": 0.22445447742938995,
+          "margin": 0.0681798905134201,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29145389795303345,
+          "negative": 0.24590212106704712,
+          "margin": 0.04555177688598633,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29145389795303345,
+          "negative": 0.2813698351383209,
+          "margin": 0.010084062814712524,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-1694584375310842794",
+      "sha256": "15adc65d51d84c4f1d1f0209bd316d28f9f3312aee28127f90ae15bfebb1f40e",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.27762317657470703,
+          "negative": 0.24897733330726624,
+          "margin": 0.028645843267440796,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2772279381752014,
+          "negative": 0.25722795724868774,
+          "margin": 0.019999980926513672,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2772279381752014,
+          "negative": 0.3355683982372284,
+          "margin": -0.05834046006202698,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-1694584375310842794",
+      "sha256": "3e2e5563774a89b4fe4e2c31eaf24d0e11fffbe88f9d491b1845df7d97826f9a",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2893948554992676,
+          "negative": 0.23940670490264893,
+          "margin": 0.04998815059661865,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2959032356739044,
+          "negative": 0.27888044714927673,
+          "margin": 0.017022788524627686,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2959032356739044,
+          "negative": 0.31751036643981934,
+          "margin": -0.021607130765914917,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-5781127683500413767",
+      "sha256": "cf9c0e2f673d985885c3d66324a000e330f000883b7095c2d174a898c9c6cea7",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28428858518600464,
+          "negative": 0.21421679854393005,
+          "margin": 0.07007178664207458,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2921168804168701,
+          "negative": 0.2203034907579422,
+          "margin": 0.07181338965892792,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2921168804168701,
+          "negative": 0.268398642539978,
+          "margin": 0.02371823787689209,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-5781127683500413767",
+      "sha256": "b0e57e34d45ce3f9c77449af943656163bc554174546a7d61ccfd857e6aee5d3",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2795298993587494,
+          "negative": 0.2366999238729477,
+          "margin": 0.0428299754858017,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28374260663986206,
+          "negative": 0.2519093155860901,
+          "margin": 0.03183329105377197,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28374260663986206,
+          "negative": 0.32740575075149536,
+          "margin": -0.0436631441116333,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-5781127683500413767",
+      "sha256": "35087d895474e58f6dc1fc0dfeb9861ada026d5e35c41cea55bbde4dc923bf8e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2856837809085846,
+          "negative": 0.21514125168323517,
+          "margin": 0.07054252922534943,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2832624316215515,
+          "negative": 0.23926027119159698,
+          "margin": 0.04400216042995453,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2832624316215515,
+          "negative": 0.30734783411026,
+          "margin": -0.024085402488708496,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "7327821802957291496",
+      "sha256": "a72ee6d1d2e86f8f24b21929456553ad5658a771e34fef5c74b6744816d798aa",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3068601191043854,
+          "negative": 0.22527265548706055,
+          "margin": 0.08158746361732483,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2902809679508209,
+          "negative": 0.22437486052513123,
+          "margin": 0.0659061074256897,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2902809679508209,
+          "negative": 0.2565779685974121,
+          "margin": 0.033702999353408813,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "7327821802957291496",
+      "sha256": "22f8283b4eacb68bd63a669ddf6bb79f4a7e8abef39e976f6b82f0bbc92d4a1d",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2685467600822449,
+          "negative": 0.23626327514648438,
+          "margin": 0.0322834849357605,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27893751859664917,
+          "negative": 0.26279306411743164,
+          "margin": 0.01614445447921753,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.27893751859664917,
+          "negative": 0.3333648443222046,
+          "margin": -0.05442732572555542,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "7327821802957291496",
+      "sha256": "cdb5a6ee90130e81398251c8b7241318868c9c671ce5db143203e31e1d7ab828",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2938488721847534,
+          "negative": 0.23368096351623535,
+          "margin": 0.060167908668518066,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2774229645729065,
+          "negative": 0.2650867700576782,
+          "margin": 0.012336194515228271,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2774229645729065,
+          "negative": 0.3151702284812927,
+          "margin": -0.03774726390838623,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-3406507834674402591",
+      "sha256": "549ac716776007caf2b138beb7475226200543847dea69ddbd260c9af69227d5",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28950366377830505,
+          "negative": 0.21677419543266296,
+          "margin": 0.07272946834564209,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28104156255722046,
+          "negative": 0.23697420954704285,
+          "margin": 0.04406735301017761,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28104156255722046,
+          "negative": 0.2705318331718445,
+          "margin": 0.010509729385375977,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-3406507834674402591",
+      "sha256": "b8142e265e06a45f3729e942afe3b0dad73e300e2ddd819d33c96bfc9a8ac607",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2975980341434479,
+          "negative": 0.24790751934051514,
+          "margin": 0.04969051480293274,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27922487258911133,
+          "negative": 0.2664370536804199,
+          "margin": 0.012787818908691406,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27922487258911133,
+          "negative": 0.3339160084724426,
+          "margin": -0.0546911358833313,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-3406507834674402591",
+      "sha256": "f76a416bac18661698bf7bca5a3cc9c3bd68f3522f2daa3ea5948d7812b609f1",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2763404846191406,
+          "negative": 0.22900380194187164,
+          "margin": 0.04733668267726898,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2909298539161682,
+          "negative": 0.2820051908493042,
+          "margin": 0.008924663066864014,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2909298539161682,
+          "negative": 0.3208102285861969,
+          "margin": -0.029880374670028687,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "1850198155303184343",
+      "sha256": "472ef18d1fe2f41d1fbbc3f18e84285e0b0c2629603d318e58f1b79057445cfe",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2892484664916992,
+          "negative": 0.2422293871641159,
+          "margin": 0.04701907932758331,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2891259491443634,
+          "negative": 0.2446526288986206,
+          "margin": 0.0444733202457428,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2891259491443634,
+          "negative": 0.28631138801574707,
+          "margin": 0.002814561128616333,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "1850198155303184343",
+      "sha256": "fbc7939efd8bc8c137279c449d97e8bd097cee2427833633b0bd8fea60561c78",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.27602896094322205,
+          "negative": 0.23382443189620972,
+          "margin": 0.04220452904701233,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.27492356300354004,
+          "negative": 0.2622720003128052,
+          "margin": 0.012651562690734863,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.27492356300354004,
+          "negative": 0.3420345187187195,
+          "margin": -0.06711095571517944,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "1850198155303184343",
+      "sha256": "8dee88aca97915df476a62b0d85e95d19dc7a8cfcf3d61d6fb7a42a2bf3d3c03",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2865179181098938,
+          "negative": 0.24520212411880493,
+          "margin": 0.04131579399108887,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29287537932395935,
+          "negative": 0.2886146903038025,
+          "margin": 0.00426068902015686,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.29287537932395935,
+          "negative": 0.34719139337539673,
+          "margin": -0.05431601405143738,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "3846988567346853286",
+      "sha256": "9690450e6f0cd895d55ad67bf298d52bf643a2b645e892dc19d63c6c5f2edf0a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.32271817326545715,
+          "negative": 0.22108346223831177,
+          "margin": 0.10163471102714539,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29368120431900024,
+          "negative": 0.22320425510406494,
+          "margin": 0.0704769492149353,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29368120431900024,
+          "negative": 0.25475072860717773,
+          "margin": 0.03893047571182251,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "3846988567346853286",
+      "sha256": "8db6aa77cc71421a64fffe514909da452f2a6e6dc0741ebbc0640deba55b3eec",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28329911828041077,
+          "negative": 0.2400924265384674,
+          "margin": 0.04320669174194336,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.26363253593444824,
+          "negative": 0.25382256507873535,
+          "margin": 0.00980997085571289,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.26363253593444824,
+          "negative": 0.31126683950424194,
+          "margin": -0.0476343035697937,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "3846988567346853286",
+      "sha256": "e7e8bc95413e80f2bd07335dd0f1f706391e11b7ead31db631ba8f38db301ab9",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29393067955970764,
+          "negative": 0.2351555973291397,
+          "margin": 0.05877508223056793,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28641992807388306,
+          "negative": 0.2631443738937378,
+          "margin": 0.023275554180145264,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28641992807388306,
+          "negative": 0.30755895376205444,
+          "margin": -0.021139025688171387,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-525038500404864710",
+      "sha256": "1403199225ffed87daf04b00ed9916b81138b2d6efb2f0611d32dd0abf9a3da5",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.32602837681770325,
+          "negative": 0.24391356110572815,
+          "margin": 0.0821148157119751,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3173593580722809,
+          "negative": 0.24212166666984558,
+          "margin": 0.0752376914024353,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3173593580722809,
+          "negative": 0.2767084836959839,
+          "margin": 0.040650874376297,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-525038500404864710",
+      "sha256": "54c5a9866f17a87586d48402574bfbb1340eb3be01480392bf9b9c6ed63d1a06",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3191322684288025,
+          "negative": 0.2658635079860687,
+          "margin": 0.053268760442733765,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.26845213770866394,
+          "negative": 0.266646146774292,
+          "margin": 0.0018059909343719482,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.26845213770866394,
+          "negative": 0.3176758885383606,
+          "margin": -0.049223750829696655,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-525038500404864710",
+      "sha256": "2c5785be39f54b8373453d1b280302f7a065f34b1d61d4308af0339ef9badb2e",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.32158708572387695,
+          "negative": 0.24969962239265442,
+          "margin": 0.07188746333122253,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.32244718074798584,
+          "negative": 0.2850275933742523,
+          "margin": 0.03741958737373352,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.32244718074798584,
+          "negative": 0.31843432784080505,
+          "margin": 0.004012852907180786,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "5475014386524307360",
+      "sha256": "dc9098773b66a8858018fb9110961416ff4508ea128dec9f9c4d129963381c1b",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29761195182800293,
+          "negative": 0.20586304366588593,
+          "margin": 0.091748908162117,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.28291523456573486,
+          "negative": 0.21244683861732483,
+          "margin": 0.07046839594841003,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.28291523456573486,
+          "negative": 0.25620490312576294,
+          "margin": 0.026710331439971924,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "5475014386524307360",
+      "sha256": "bbd84a0c5622962af4881f404a50c378644f30f39df8d1849d69a9b1aca41d9a",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.27666670083999634,
+          "negative": 0.23208773136138916,
+          "margin": 0.04457896947860718,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2925792336463928,
+          "negative": 0.2660730481147766,
+          "margin": 0.02650618553161621,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2925792336463928,
+          "negative": 0.33701443672180176,
+          "margin": -0.044435203075408936,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "5475014386524307360",
+      "sha256": "28ee603574f8a34af563666331c27695f1965da97bb699c71f2ec09e4c75fe59",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2980363070964813,
+          "negative": 0.2198481261730194,
+          "margin": 0.07818818092346191,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2737886309623718,
+          "negative": 0.2496630847454071,
+          "margin": 0.02412554621696472,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2737886309623718,
+          "negative": 0.3021817207336426,
+          "margin": -0.028393089771270752,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-919660371744832007",
+      "sha256": "d3a64340c31fc18aa0228421cc94781b28ca77b3c6ec259f4229aff438c162d6",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2890401780605316,
+          "negative": 0.2102489024400711,
+          "margin": 0.07879127562046051,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2889133095741272,
+          "negative": 0.21293553709983826,
+          "margin": 0.07597777247428894,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2889133095741272,
+          "negative": 0.24928730726242065,
+          "margin": 0.03962600231170654,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-919660371744832007",
+      "sha256": "8c4dd3a2bbb791a42bb40f871c684cf112a98efa9839b2fa01d1563478284ec7",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2991848587989807,
+          "negative": 0.23000526428222656,
+          "margin": 0.06917959451675415,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30291444063186646,
+          "negative": 0.2521105110645294,
+          "margin": 0.050803929567337036,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30291444063186646,
+          "negative": 0.3347085416316986,
+          "margin": -0.03179410099983215,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-919660371744832007",
+      "sha256": "d222510c2ed21f1a14409f84a2ff2ab6bf4538838a0d7998571502e6b86e4718",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2925587594509125,
+          "negative": 0.2222408652305603,
+          "margin": 0.07031789422035217,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30365055799484253,
+          "negative": 0.26411497592926025,
+          "margin": 0.039535582065582275,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30365055799484253,
+          "negative": 0.3251698613166809,
+          "margin": -0.02151930332183838,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-2986702064294375651",
+      "sha256": "0aa95a0c655eb78a3feeaa8661e9baa00626b3daf92183e03dcfb889cdcfc554",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.28851771354675293,
+          "negative": 0.20851263403892517,
+          "margin": 0.08000507950782776,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29855096340179443,
+          "negative": 0.22779318690299988,
+          "margin": 0.07075777649879456,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29855096340179443,
+          "negative": 0.2560777962207794,
+          "margin": 0.042473167181015015,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-2986702064294375651",
+      "sha256": "47da40a6105762e303b6c8cb87724b15617346f794d4e859ceb83164acbb6e33",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30578383803367615,
+          "negative": 0.23117268085479736,
+          "margin": 0.07461115717887878,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.30301153659820557,
+          "negative": 0.24854597449302673,
+          "margin": 0.05446556210517883,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.30301153659820557,
+          "negative": 0.3366960287094116,
+          "margin": -0.033684492111206055,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-2986702064294375651",
+      "sha256": "f41f15bf771581ef92e42db1cb65256a4af8ba65c9bd454ab9e3f3015f77fbf6",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2911534905433655,
+          "negative": 0.22795544564723969,
+          "margin": 0.0631980448961258,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3024321496486664,
+          "negative": 0.2611609697341919,
+          "margin": 0.04127117991447449,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3024321496486664,
+          "negative": 0.32187509536743164,
+          "margin": -0.01944294571876526,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "4716235809681478742",
+      "sha256": "b8972e9eb29dacdb0124b7dbed8df22b5c494f67d1520cb89517c14954036cd6",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.3017216622829437,
+          "negative": 0.22877785563468933,
+          "margin": 0.0729438066482544,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2936193346977234,
+          "negative": 0.23601093888282776,
+          "margin": 0.05760839581489563,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.2936193346977234,
+          "negative": 0.2721788287162781,
+          "margin": 0.021440505981445312,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "4716235809681478742",
+      "sha256": "2b5545f06e8c7bf4b85e69a92184e01383b70f32d24b591dd5ce9fa8ac9c9121",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2846726179122925,
+          "negative": 0.24891498684883118,
+          "margin": 0.035757631063461304,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.2853243350982666,
+          "negative": 0.27218198776245117,
+          "margin": 0.01314234733581543,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2853243350982666,
+          "negative": 0.33933019638061523,
+          "margin": -0.05400586128234863,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "4716235809681478742",
+      "sha256": "8efddf0426f35b22da0e04ad14d66e44e7ef8485c8183b6d9e31860e60389137",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2974494695663452,
+          "negative": 0.24801382422447205,
+          "margin": 0.04943564534187317,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29729920625686646,
+          "negative": 0.27613121271133423,
+          "margin": 0.021167993545532227,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29729920625686646,
+          "negative": 0.3147972822189331,
+          "margin": -0.01749807596206665,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "7530181678510252673",
+      "sha256": "ae5e0ac95506664d35324a98fa891a205864d8798f59b3c24a451ac714d04bb4",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": true
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.30940699577331543,
+          "negative": 0.22124293446540833,
+          "margin": 0.0881640613079071,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.29853618144989014,
+          "negative": 0.23004865646362305,
+          "margin": 0.06848752498626709,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.29853618144989014,
+          "negative": 0.26196038722991943,
+          "margin": 0.0365757942199707,
+          "passes": true
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "7530181678510252673",
+      "sha256": "ff34010fa041f921d194eb6ee5e2630434aaac2c08699ca5fb26c5d4864ee98f",
+      "known_baseline": true,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.29427915811538696,
+          "negative": 0.23014532029628754,
+          "margin": 0.06413383781909943,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.288503497838974,
+          "negative": 0.24929240345954895,
+          "margin": 0.03921109437942505,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.288503497838974,
+          "negative": 0.32018035650253296,
+          "margin": -0.03167685866355896,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "7530181678510252673",
+      "sha256": "363a1014c75db0142919732fdea5426f09144085b686d13983fa2b27e5b0e0b7",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": true,
+        "whole_frame": true,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2917387783527374,
+          "negative": 0.23043674230575562,
+          "margin": 0.06130203604698181,
+          "passes": true
+        },
+        "whole": {
+          "positive": 0.3066900670528412,
+          "negative": 0.26105499267578125,
+          "margin": 0.045635074377059937,
+          "passes": true
+        },
+        "whole_context": {
+          "positive": 0.3066900670528412,
+          "negative": 0.3306777775287628,
+          "margin": -0.02398771047592163,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "object",
+      "source_id": "clock_motion.png",
+      "sha256": "f029226b28b642e80113d86622e9b215ee067a0966feaf5e60604a1e05733955",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.24682752788066864,
+          "negative": 0.2803446054458618,
+          "margin": -0.033517077565193176,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.22585633397102356,
+          "negative": 0.2578316628932953,
+          "margin": -0.03197532892227173,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.22585633397102356,
+          "negative": 0.2578316628932953,
+          "margin": -0.03197532892227173,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "object",
+      "source_id": "horse.png",
+      "sha256": "c7fb60789fe394c485f842291ea3b21e50d140f39d6dcb5fb9917cc178225455",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.19546224176883698,
+          "negative": 0.26376503705978394,
+          "margin": -0.06830279529094696,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.17557692527770996,
+          "negative": 0.24763371050357819,
+          "margin": -0.07205678522586823,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.17557692527770996,
+          "negative": 0.24763371050357819,
+          "margin": -0.07205678522586823,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "pattern",
+      "source_id": "validation-pattern-0",
+      "sha256": "03b3899645fc1c9da54549f11118da605f989ce2be10ff1aec8bb2d98dc1fa09",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.2812986373901367,
+          "negative": 0.285041868686676,
+          "margin": -0.0037432312965393066,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.2812986373901367,
+          "negative": 0.285041868686676,
+          "margin": -0.0037432312965393066,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.2812986373901367,
+          "negative": 0.30359041690826416,
+          "margin": -0.02229177951812744,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "pattern",
+      "source_id": "validation-pattern-1",
+      "sha256": "4c058406da3e855b7908cfce9f15c408d99830c640d35611e312966dd3abb04c",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.24241182208061218,
+          "negative": 0.258562833070755,
+          "margin": -0.016151010990142822,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.24241182208061218,
+          "negative": 0.258562833070755,
+          "margin": -0.016151010990142822,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.24241182208061218,
+          "negative": 0.3327392637729645,
+          "margin": -0.0903274416923523,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    },
+    {
+      "split": "validation",
+      "group": "pattern",
+      "source_id": "validation-pattern-2",
+      "sha256": "64cb200de6f462b807faf5263694cb894cfbd5d0ad6fb8bb2540209072591aa5",
+      "known_baseline": null,
+      "decisions": {
+        "baseline": false,
+        "whole_frame": false,
+        "whole_frame_context": false
+      },
+      "metrics": {
+        "crop": {
+          "positive": 0.22736263275146484,
+          "negative": 0.26534512639045715,
+          "margin": -0.03798249363899231,
+          "passes": false
+        },
+        "whole": {
+          "positive": 0.22736263275146484,
+          "negative": 0.26534512639045715,
+          "margin": -0.03798249363899231,
+          "passes": false
+        },
+        "whole_context": {
+          "positive": 0.22736263275146484,
+          "negative": 0.3445356488227844,
+          "margin": -0.11717301607131958,
+          "passes": false
+        }
+      },
+      "quality_reasons": []
+    }
+  ]
+}

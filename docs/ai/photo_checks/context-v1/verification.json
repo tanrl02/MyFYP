@@ -1,0 +1,76 @@
+{
+  "all_128_fixtures_and_dependencies_verified": true,
+  "all_known_baselines_reproduced": true,
+  "selection_and_group_accounting_verified": true,
+  "representative_replays": [
+    {
+      "split": "development",
+      "group": "skin",
+      "source_id": "5275181661240813075",
+      "matches": true
+    },
+    {
+      "split": "development",
+      "group": "prior_screen",
+      "source_id": "5275181661240813075",
+      "matches": true
+    },
+    {
+      "split": "development",
+      "group": "novel_screen",
+      "source_id": "5275181661240813075",
+      "matches": true
+    },
+    {
+      "split": "development",
+      "group": "object",
+      "source_id": "chelsea.png",
+      "matches": true
+    },
+    {
+      "split": "development",
+      "group": "pattern",
+      "source_id": "prior-pattern",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-4662194556963063742",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "prior_screen",
+      "source_id": "-4662194556963063742",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "novel_screen",
+      "source_id": "-4662194556963063742",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "skin",
+      "source_id": "-3055300247709269077",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "object",
+      "source_id": "clock_motion.png",
+      "matches": true
+    },
+    {
+      "split": "validation",
+      "group": "pattern",
+      "source_id": "validation-pattern-0",
+      "matches": true
+    }
+  ],
+  "results_sha256": "98ef3fe1eb17dfb0e65dc745287a76212923d5746bc776d2c4f0d3f6de146fc7",
+  "production_promoted": false,
+  "disease_test_images_read": 0
+}

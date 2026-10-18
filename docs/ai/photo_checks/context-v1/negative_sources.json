@@ -1,0 +1,30 @@
+[
+  {
+    "name": "camera.png",
+    "split": "development",
+    "licence_note": "CC0; Lav Varshney; distant person/camera, not a skin close-up",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/camera.png",
+    "sha256": "b0793d2adda0fa6ae899c03989482bff9a42d3d5690fc7e3648f2795d730c23a"
+  },
+  {
+    "name": "eagle.png",
+    "split": "development",
+    "licence_note": "CC0; Dayane Machado",
+    "url": "https://gitlab.com/scikit-image/data/-/raw/1e4f62ac31ba4553d176d4473a5967ad1b076d62/eagle.png",
+    "sha256": "928f1bbe7403b533265f56db3a6b07c835dfa8e2513f5c5075ca2f1960f6179e"
+  },
+  {
+    "name": "clock_motion.png",
+    "split": "validation",
+    "licence_note": "Public domain; Stefan van der Walt",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/clock_motion.png",
+    "sha256": "f029226b28b642e80113d86622e9b215ee067a0966feaf5e60604a1e05733955"
+  },
+  {
+    "name": "horse.png",
+    "split": "validation",
+    "licence_note": "CC0; Andreas Preuss (marauder)",
+    "url": "https://raw.githubusercontent.com/scikit-image/scikit-image/v0.25.2/skimage/data/horse.png",
+    "sha256": "c7fb60789fe394c485f842291ea3b21e50d140f39d6dcb5fb9917cc178225455"
+  }
+]

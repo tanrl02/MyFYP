@@ -1,0 +1,21 @@
+{
+  "selected": "whole_frame",
+  "development_guards": {
+    "whole_frame": {
+      "passes": true,
+      "skin_accepted": 18,
+      "object_accepted": 0,
+      "screen_pattern_accepted": 20,
+      "baseline_screen_pattern_accepted": 36
+    },
+    "whole_frame_context": {
+      "passes": false,
+      "skin_accepted": 13,
+      "object_accepted": 0,
+      "screen_pattern_accepted": 0,
+      "baseline_screen_pattern_accepted": 36
+    }
+  },
+  "development_rows_sha256": "9583a88fac2cded765524674c8956e7e03b817690b4e88b1780e799207c18012",
+  "frozen_before_validation": true
+}
