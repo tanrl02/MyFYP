@@ -1,0 +1,17 @@
+# Patient booking date filter
+
+Implemented19October2026. In Book a visit, Show all dates is the default. Choose a date opens a calendar with month navigation. Choose today or a future date in Malaysia time to show only that clinic date's times. Past dates and navigating before the current Malaysia month are disabled. Date buttons have complete accessible labels; the current date filter and calendar expansion/selection are announced. Close calendar makes no filter change. Show all dates clears the filter and restores the full date list.
+
+The filter works with concern/saved-assessment doctor suggestions and Show all doctors. It filters the existing live slot list using clinic_date, preserving doctor order, capacity/full-slot and already-booked guards. Doctors without available times on that day have a date-specific message; if no shown doctor has available times, a global empty message offers another date or Show all dates. Choosing a date does not create a booking, share an assessment or change a schedule. Existing confirmation/server availability guards remain authoritative.
+
+App-level state retains the chosen date after time selection and Back and across tabs/live polling. Switching demo patients clears it. It is a temporary screen preference and resets to All dates on a fresh app start, not a persisted patient setting. Only initial Book a visit is changed; follow-up booking/rescheduling keep their existing flows. Staff and doctor flows remain unchanged.
+
+Implementation: new BookingDateFilter.tsx uses built-in React Native controls and UTC calendar arithmetic with Malaysia today. No new dependency, API, schema, model or clinical-record change. App.tsx owns the date and DoctorMatchingView.tsx applies it to slots. No storage or external transmission added.
+
+Verification: final mobile TypeScript passed with existing Expo globals explicitly loaded (--types expo/types). Final Android Hermes export passed (620modules), saved under tmp/booking-date-android-export. Browser checked default/all dates, calendar month boundaries/past disables,21November2026 showing only Anita10:00/10:30, confirmation selection then Back retaining the date, concern/Show all doctors combinations,22November empty messages, Show all dates restoring30 slot buttons, existing Ava2November slot remaining disabled, patient switch resetting all dates and Ava L0012November14:00 visibility/Noah separation. No Confirm booking action or record mutation. Existing166 API tests are the unchanged backend baseline, not rerun; dashboard unchanged/no new production build. No added tests for this reversible display-only change.
+
+Evidence: tmp/booking-date-calendar.png and tmp/booking-date-filter-verified.png visually inspected. tmp/booking-date-empty.png was captured before the final empty-state wording was shortened. No temporary viewport override was applied.
+
+Android pending: reopen Book a visit, choose21November and see only Anita10:00/10:30; select then Back retains date.22November shows no times; Show all dates restores the broader list. Ava L0012November14:00 stays unchanged and hidden from Noah. Do not claim physical verification until user reply.
+
+Runtime retained: API PID117592/8000, dashboardPID78988/3000, ExpoPID99028/8081; phone API http://192.168.0.2:8000. AI/model/training, auth, Word report, dependencies and user baseline edit unchanged. No push/deploy/merge.
