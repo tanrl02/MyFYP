@@ -39,8 +39,8 @@ export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: Cons
 export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string;ends_at:string;duration_minutes:number; clinic_date: string; capacity: number; available: number };
 export type ManagedSlot = Slot & {closed:number;booking_count:number;unavailable?:boolean};
-export type SchedulePattern = {doctor_id:DemoDoctor;doctor_name:string;weekdays:number[];start_time:string;end_time:string;duration_minutes:number;capacity:number;version:number;updated_at:string|null};
-export type SchedulePatternInput=Pick<SchedulePattern,"weekdays"|"start_time"|"end_time"|"duration_minutes"|"capacity"|"version">;
+export type SchedulePattern = {doctor_id:DemoDoctor;doctor_name:string;weekdays:number[];start_time:string;end_time:string;second_start_time:string|null;second_end_time:string|null;duration_minutes:number;capacity:number;version:number;updated_at:string|null};
+export type SchedulePatternInput=Pick<SchedulePattern,"weekdays"|"start_time"|"end_time"|"second_start_time"|"second_end_time"|"duration_minutes"|"capacity"|"version">;
 export type SchedulePreview={doctor_id:DemoDoctor;doctor_name:string;week_start:string;pattern_version:number;new_count:number;existing_count:number;conflict_count:number;unavailable_count:number;preview_token:string;slots:{starts_at:string;ends_at:string;clinic_date:string;duration_minutes:number;capacity:number;status:"new"|"existing"|"conflict"|"unavailable";reason:string;slot_id?:string}[]};
 export type ScheduleGeneration={id:string;doctor_id:DemoDoctor;week_start:string;pattern_version:number;created_count:number;existing_count:number;unavailable_count?:number;slot_ids:string[];created_at:string};
 export type DoctorUnavailability={id:string;doctor_id:DemoDoctor;clinic_date:string;reason:string;created_at:string;cancelled_at:string|null;start_time:string|null;end_time:string|null};

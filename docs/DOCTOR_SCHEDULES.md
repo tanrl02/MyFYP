@@ -28,3 +28,6 @@ Browser: staff saved DrLim Monday/Wednesday14:00–15:00,30-minute slots, capaci
 Android: user replied "Yes, generated times, reopening and separation work", confirming generated2/4November times, Ava L0012November14:00 after reopening and Noah isolation. No physical leave/holiday/closure checks are claimed.
 
 Runtime: API session14517 PID16004 port8000 using `.venv-ai`; existing dashboard17348/3000 and Expo28048/8081 retained. AI/model/training, real auth, Word, dependencies and user's `docs/ai/BASELINE_SETUP.md` edit preserved. No push/deploy/main merge. Discuss the next manageable improvement before implementation.
+
+
+19 October2026: optional second daily session now supported. See [Morning and afternoon sessions](SPLIT_DOCTOR_SESSIONS.md) for current flow, compatibility and verification.

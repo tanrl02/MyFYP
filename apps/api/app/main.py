@@ -39,6 +39,8 @@ class SlotInput(BaseModel):
     request_id: str = Field(min_length=8,max_length=100)
 
 class SchedulePatternInput(BaseModel):
+    second_start_time: str | None = Field(default=None,pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
+    second_end_time: str | None = Field(default=None,pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
     weekdays: list[Annotated[int,Field(strict=True,ge=0,le=6)]] = Field(min_length=1,max_length=7)
     start_time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
     end_time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
@@ -233,7 +235,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/staff/schedules/{doctor_id}')
     def save_schedule_pattern(doctor_id: str,payload: SchedulePatternInput,who=Depends(staff)):
-        return run(lambda: store.save_schedule_pattern(doctor_id,payload.weekdays,payload.start_time,payload.end_time,payload.duration_minutes,payload.capacity,payload.version))
+        return run(lambda: store.save_schedule_pattern(doctor_id,payload.weekdays,payload.start_time,payload.end_time,payload.duration_minutes,payload.capacity,payload.version,payload.second_start_time,payload.second_end_time))
 
     @api.post('/staff/schedules/{doctor_id}/preview')
     def preview_schedule(doctor_id: str,payload: SchedulePreviewInput,who=Depends(staff)):

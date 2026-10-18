@@ -366,7 +366,7 @@ class Store:
         if doctor not in DOCTORS:
             raise RuleError('Doctor not found.',404)
         row=db.execute('SELECT * FROM doctor_schedule_patterns WHERE doctor_id=?',(doctor,)).fetchone()
-        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],
+        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],'second_start_time':None,'second_end_time':None,
                 **(json.loads(row['pattern_json']) if row else {'weekdays':[],'start_time':'09:00','end_time':'12:00','duration_minutes':30,'capacity':2}),
                 'version':row['version'] if row else 0,'updated_at':row['updated_at'] if row else None}
 
@@ -440,8 +440,8 @@ class Store:
         with self.connect() as db:
             return [self.schedule_pattern(db,doctor) for doctor in DOCTORS]
 
-    def save_schedule_pattern(self, doctor, weekdays, start_time, end_time, duration_minutes, capacity, version):
-        try:values=pattern_values(weekdays,start_time,end_time,duration_minutes,capacity)
+    def save_schedule_pattern(self, doctor, weekdays, start_time, end_time, duration_minutes, capacity, version, second_start_time=None, second_end_time=None):
+        try:values=pattern_values(weekdays,start_time,end_time,duration_minutes,capacity,second_start_time,second_end_time)
         except ValueError as error:raise RuleError(str(error),422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
