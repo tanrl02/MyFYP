@@ -19,7 +19,7 @@ Reload Expo Go or the browser to obtain the updated panel. The live browser reta
 
 ## Data and access
 
-Nullable/empty-history compatibility is implemented with `doctor_assessment TEXT NOT NULL DEFAULT ''` added to published reviews and private drafts. Existing notes, follow-up, IDs and timestamps are preserved. Historical reviews with an empty assessment show “No separate assessment was recorded”; no diagnosis is inferred from their notes or AI. New API publication requires a nonblank assessment (maximum500), plus the existing nonblank notes and follow-up. Drafts may remain incomplete. Doctor access, patient ownership, revocation, publication transactions and private-draft boundaries are unchanged.
+History compatibility is implemented with `doctor_assessment TEXT NOT NULL DEFAULT ''` added to published reviews and private drafts. Existing notes, follow-up, IDs and timestamps are preserved. Historical reviews with an empty assessment show “No separate assessment was recorded”; no diagnosis is inferred from their notes or AI. New API publication requires a nonblank assessment (maximum500), plus the existing nonblank notes and follow-up. Drafts may remain incomplete. Doctor access, patient ownership, revocation, publication transactions and private-draft boundaries are unchanged.
 
 No new disease training, model selection, class mapping, score threshold, doctor-matching policy, medication, payment, login or Word-report change was made. The user's earlier request to revert the unconfirmed-result presentation remains respected; the experimental AI display is unchanged.
 
@@ -27,4 +27,4 @@ No new disease training, model selection, class mapping, score threshold, doctor
 
 98 API tests passed, including three new assessment tests covering private draft/version updates, publication/retry/immutable AI snapshot, access/revocation, validation and legacy migration. Both TypeScript checks, Android export and dashboard production build passed. Browser flow passed: share public dataset record, independently enter fictional assessment, save private draft (not visible to patient), confirm publication, reload patient bundle, view separate panel and switch to Noah to verify Ava's review is hidden. No actual clinical assessment was performed.
 
-Android new-panel/reopening/patient-separation confirmation is pending the user's test-card reply.
+The user confirmed Android separate-assessment display, reopening persistence and patient separation on18 October2026.

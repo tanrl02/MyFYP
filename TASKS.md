@@ -212,5 +212,5 @@ Word/auth remain deferred. Payment processing remains simulated.
 - [x] Separate blank-by-default doctor assessment field with private draft/version support and confirmed immutable publication.
 - [x] Patient assessment/visit panels show doctor assessment, notes and follow-up separately from unchanged AI snapshot; historical reviews remain intact.
 - [x]98API tests, TS/Android/dashboard builds; browser draft privacy/publication/reload/patient separation checks.
-- [ ] Android new panel, reopening and patient separation confirmation (test card pending).
+- [x] Android new panel, reopening and patient separation confirmed by user18 October2026.
 No AI-display reversal, training, Word or auth work in this increment.
