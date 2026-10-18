@@ -32,6 +32,10 @@ class Store:
                 CREATE TABLE IF NOT EXISTS doctor_schedule_patterns (
                   doctor_id TEXT PRIMARY KEY, pattern_json TEXT NOT NULL, version INTEGER NOT NULL,
                   updated_at TEXT NOT NULL, actor_id TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS doctor_unavailability (
+                  id TEXT PRIMARY KEY, doctor_id TEXT NOT NULL, clinic_date TEXT NOT NULL,
+                  reason TEXT NOT NULL, created_at TEXT NOT NULL, request_id TEXT NOT NULL UNIQUE,
+                  UNIQUE(doctor_id,clinic_date));
                 CREATE TABLE IF NOT EXISTS schedule_generations (
                   request_id TEXT PRIMARY KEY, doctor_id TEXT NOT NULL, week_start TEXT NOT NULL,
                   pattern_version INTEGER NOT NULL, preview_token TEXT NOT NULL, result_json TEXT NOT NULL);
@@ -250,6 +254,8 @@ class Store:
                         continue
                     for hour in (9, 10, 11):
                         start = (local + timedelta(days=day)).replace(hour=hour, minute=0, second=0, microsecond=0)
+                        if self.unavailable_overlap(db,doctor,start,30):
+                            continue
                         key = f'{doctor}-{start:%Y%m%d}-{hour}'
                         if db.execute('SELECT 1 FROM slots WHERE id=? OR (doctor_id=? AND julianday(starts_at)=julianday(?))',
                                       (key,doctor,start.isoformat())).fetchone() or self.slot_overlap(db,doctor,start,30):
@@ -261,7 +267,11 @@ class Store:
         with self.connect() as db:
             rows = db.execute('''SELECT s.id,s.doctor_id,s.starts_at,s.clinic_date,s.capacity,s.duration_minutes, s.capacity - COUNT(b.id) AS available
                 FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id AND b.status!='cancelled'
-                WHERE s.starts_at > ? AND s.closed=0 GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
+                WHERE s.starts_at > ? AND s.closed=0 AND NOT EXISTS (
+                    SELECT 1 FROM doctor_unavailability u WHERE u.doctor_id=s.doctor_id
+                    AND julianday(u.clinic_date||'T00:00:00+08:00')<julianday(s.starts_at,'+'||s.duration_minutes||' minutes')
+                    AND julianday(u.clinic_date||'T00:00:00+08:00','+1 day')>julianday(s.starts_at))
+                GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
                 (datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
         return [self.slot_metadata(r) for r in rows]
 
@@ -284,7 +294,9 @@ class Store:
                             FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id WHERE s.id=? GROUP BY s.id''',(slot_id,)).fetchone()
         if not row:
             raise RuleError('Slot not found.',404)
-        return self.slot_metadata({key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available','duration_minutes')})
+        values={key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available','duration_minutes')}
+        values['unavailable']=bool(self.unavailable_overlap(db,row['doctor_id'],datetime.fromisoformat(row['starts_at']),row['duration_minutes']))
+        return self.slot_metadata(values)
 
     def managed_slots(self):
         with self.connect() as db:
@@ -306,6 +318,8 @@ class Store:
                 return slot
             if start<=datetime.now(timezone.utc):
                 raise RuleError('Choose a future date and time.')
+            if self.unavailable_overlap(db,doctor,start,duration_minutes):
+                raise RuleError('This doctor is unavailable during that slot. Choose another date.')
             if db.execute('SELECT 1 FROM slots WHERE doctor_id=? AND julianday(starts_at)=julianday(?)',(doctor,start.isoformat())).fetchone():
                 raise RuleError('This doctor already has a slot at that time, including closed slots.')
             if self.slot_overlap(db,doctor,start,duration_minutes):
@@ -336,6 +350,50 @@ class Store:
                 **(json.loads(row['pattern_json']) if row else {'weekdays':[],'start_time':'09:00','end_time':'12:00','duration_minutes':30,'capacity':2}),
                 'version':row['version'] if row else 0,'updated_at':row['updated_at'] if row else None}
 
+    @staticmethod
+    def unavailable_overlap(db, doctor, start, duration):
+        return db.execute('''SELECT id FROM doctor_unavailability WHERE doctor_id=?
+            AND julianday(clinic_date||'T00:00:00+08:00')<julianday(?)
+            AND julianday(clinic_date||'T00:00:00+08:00','+1 day')>julianday(?) LIMIT 1''',
+            (doctor,(start+timedelta(minutes=duration)).isoformat(),start.isoformat())).fetchone()
+
+    def unavailability(self, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor not found.',404)
+        with self.connect() as db:
+            return [dict(row) for row in db.execute('SELECT id,doctor_id,clinic_date,reason,created_at FROM doctor_unavailability WHERE doctor_id=? AND clinic_date>=? ORDER BY clinic_date',
+                        (doctor,datetime.now(MALAYSIA).date().isoformat())).fetchall()]
+
+    def add_unavailability(self, doctor, clinic_date, reason, request_id):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor not found.',404)
+        if not reason.strip() or len(reason)>300:
+            raise RuleError('Enter a reason up to 300 characters.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            old=db.execute('SELECT * FROM doctor_unavailability WHERE request_id=?',(request_id,)).fetchone()
+            if old:
+                if (old['doctor_id'],old['clinic_date'],old['reason'])!=(doctor,clinic_date,reason):
+                    raise RuleError('This request already saved different unavailability details.')
+                return {key:old[key] for key in ('id','doctor_id','clinic_date','reason','created_at')}
+            day=date.fromisoformat(clinic_date)
+            if day<=datetime.now(MALAYSIA).date():
+                raise RuleError('Choose a date after today in Malaysia.',422)
+            try:next_day=day+timedelta(days=1)
+            except OverflowError:raise RuleError('Choose an earlier date.',422)
+            start=f'{day.isoformat()}T00:00:00+08:00';end=f'{next_day.isoformat()}T00:00:00+08:00'
+            if db.execute('SELECT 1 FROM doctor_unavailability WHERE doctor_id=? AND clinic_date=?',(doctor,clinic_date)).fetchone():
+                raise RuleError('This doctor is already unavailable on that date.')
+            booked=db.execute('''SELECT 1 FROM bookings b JOIN slots s ON s.id=b.slot_id
+                WHERE s.doctor_id=? AND b.status!='cancelled'
+                AND julianday(s.starts_at)<julianday(?)
+                AND julianday(s.starts_at,'+'||s.duration_minutes||' minutes')>julianday(?) LIMIT 1''',(doctor,end,start)).fetchone()
+            if booked:
+                raise RuleError('This date overlaps booked visits. Resolve those appointments first; no visits were changed.')
+            result={'id':str(uuid4()),'doctor_id':doctor,'clinic_date':clinic_date,'reason':reason,'created_at':datetime.now(timezone.utc).isoformat()}
+            db.execute('INSERT INTO doctor_unavailability VALUES(?,?,?,?,?,?)',(*result.values(),request_id))
+            return result
+
     def schedule_patterns(self):
         with self.connect() as db:
             return [self.schedule_pattern(db,doctor) for doctor in DOCTORS]
@@ -363,6 +421,9 @@ class Store:
         try:planned=week_slots(pattern,week_start,datetime.now(MALAYSIA).date())
         except ValueError as error:raise RuleError(str(error),422)
         for slot in planned:
+            if self.unavailable_overlap(db,doctor,datetime.fromisoformat(slot['starts_at']),slot['duration_minutes']):
+                slot.update(status='unavailable',reason='Doctor unavailable. No slot will be created or reopened.')
+                continue
             exact=db.execute('SELECT * FROM slots WHERE doctor_id=? AND julianday(starts_at)=julianday(?)',
                              (doctor,slot['starts_at'])).fetchone()
             if exact:
@@ -379,6 +440,7 @@ class Store:
                 'new_count':sum(slot['status']=='new' for slot in planned),
                 'existing_count':sum(slot['status']=='existing' for slot in planned),
                 'conflict_count':sum(slot['status']=='conflict' for slot in planned),
+                'unavailable_count':sum(slot['status']=='unavailable' for slot in planned),
                 'preview_token':preview_hash(doctor,version,week_start,planned)}
 
     def preview_schedule(self, doctor, week_start, version):
@@ -401,6 +463,8 @@ class Store:
                 raise RuleError('This week has slot conflicts. Resolve them before generating any slots.')
             ids=[]
             for slot in preview['slots']:
+                if slot['status']=='unavailable':
+                    continue
                 if slot['status']=='existing':
                     ids.append(slot['slot_id'])
                     continue
@@ -409,6 +473,7 @@ class Store:
                            (slot_id,doctor,slot['starts_at'],slot['clinic_date'],slot['capacity'],slot['duration_minutes']))
             result={'id':str(uuid4()),'doctor_id':doctor,'week_start':week_start,'pattern_version':version,
                     'created_count':preview['new_count'],'existing_count':preview['existing_count'],
+                    'unavailable_count':preview['unavailable_count'],
                     'slot_ids':ids,'created_at':datetime.now(timezone.utc).isoformat()}
             db.execute('INSERT INTO schedule_generations VALUES(?,?,?,?,?,?)',(request_id,doctor,week_start,version,token,json.dumps(result)))
             return result
@@ -430,7 +495,9 @@ class Store:
                 # Operational schedule only: no background, notes, photo, reason, prescription or bill.
                 slot['visits']=[{'id':visit['id'],'queue_number':visit['queue_number'],'status':visit['status'],'patient_name':PATIENTS[visit['patient_id']]} for visit in visits]
                 slots.append(slot)
-            return {'pattern':self.schedule_pattern(db,doctor),'week_start':week_start,'slots':slots}
+            absences=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at FROM doctor_unavailability WHERE doctor_id=? AND clinic_date>=? AND clinic_date<? ORDER BY clinic_date',
+                                (doctor,week_start,(monday+timedelta(days=7)).isoformat())).fetchall()
+            return {'pattern':self.schedule_pattern(db,doctor),'week_start':week_start,'slots':slots,'unavailability':[dict(row) for row in absences]}
 
     def event(self, db, booking_id, actor, action):
         db.execute('INSERT INTO events VALUES(?,?,?,?,?)',
@@ -520,6 +587,8 @@ class Store:
                 raise RuleError('Slot not found.', 404)
             if slot['closed']:
                 raise RuleError('This slot is closed. Choose another time.')
+            if self.unavailable_overlap(db,slot['doctor_id'],datetime.fromisoformat(slot['starts_at']),slot['duration_minutes']):
+                raise RuleError('This doctor is unavailable during that slot. Choose another date.')
             if recommendation:
                 self.validate_follow_up_slot(recommendation,slot)
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
@@ -651,6 +720,8 @@ class Store:
                 self.validate_follow_up_slot(self.follow_up_record(db,follow_up['source_booking_id']),slot)
             if slot['closed']:
                 raise RuleError('This slot is closed. Choose another time.')
+            if self.unavailable_overlap(db,slot['doctor_id'],datetime.fromisoformat(slot['starts_at']),slot['duration_minutes']):
+                raise RuleError('This doctor is unavailable during that slot. Choose another date.')
             if datetime.fromisoformat(slot['starts_at']) <= datetime.now(timezone.utc):
                 raise RuleError('This slot has already started. Choose another time.')
             if db.execute("SELECT 1 FROM bookings WHERE patient_id=? AND slot_id=? AND status!='cancelled'",(old['patient_id'],slot_id)).fetchone():

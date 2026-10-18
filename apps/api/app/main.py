@@ -54,6 +54,11 @@ class ScheduleGenerateInput(SchedulePreviewInput):
     preview_token: str = Field(pattern=r'^[0-9a-f]{64}$')
     request_id: str = Field(min_length=8,max_length=100)
 
+class UnavailabilityInput(BaseModel):
+    clinic_date: date
+    reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+    request_id: str = Field(min_length=8,max_length=100)
+
 class BookingInput(BaseModel):
     slot_id: str = Field(min_length=1, max_length=100)
     request_id: str = Field(min_length=8, max_length=100)
@@ -210,6 +215,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.get('/staff/schedules')
     def schedule_patterns(who=Depends(staff)):
         return store.schedule_patterns()
+
+    @api.get('/staff/schedules/{doctor_id}/unavailability')
+    def unavailability(doctor_id: str,who=Depends(staff)):
+        return run(lambda: store.unavailability(doctor_id))
+
+    @api.post('/staff/schedules/{doctor_id}/unavailability',status_code=201)
+    def add_unavailability(doctor_id: str,payload: UnavailabilityInput,who=Depends(staff)):
+        return run(lambda: store.add_unavailability(doctor_id,payload.clinic_date.isoformat(),payload.reason.strip(),payload.request_id))
 
     @api.post('/staff/schedules/{doctor_id}')
     def save_schedule_pattern(doctor_id: str,payload: SchedulePatternInput,who=Depends(staff)):
