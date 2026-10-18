@@ -39,6 +39,11 @@ export type VisitDetails = Care & { linked_shares: AssessmentShare[]; note: Cons
 export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string;ends_at:string;duration_minutes:number; clinic_date: string; capacity: number; available: number };
 export type ManagedSlot = Slot & {closed:number;booking_count:number};
+export type SchedulePattern = {doctor_id:DemoDoctor;doctor_name:string;weekdays:number[];start_time:string;end_time:string;duration_minutes:number;capacity:number;version:number;updated_at:string|null};
+export type SchedulePatternInput=Pick<SchedulePattern,"weekdays"|"start_time"|"end_time"|"duration_minutes"|"capacity"|"version">;
+export type SchedulePreview={doctor_id:DemoDoctor;doctor_name:string;week_start:string;pattern_version:number;new_count:number;existing_count:number;conflict_count:number;preview_token:string;slots:{starts_at:string;ends_at:string;clinic_date:string;duration_minutes:number;capacity:number;status:"new"|"existing"|"conflict";reason:string;slot_id?:string}[]};
+export type ScheduleGeneration={id:string;doctor_id:DemoDoctor;week_start:string;pattern_version:number;created_count:number;existing_count:number;slot_ids:string[];created_at:string};
+export type DoctorSchedule={pattern:SchedulePattern;week_start:string;slots:(ManagedSlot & {visits:{id:string;queue_number:number;status:Status;patient_name:string}[]})[]};
 export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
 export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled" };
@@ -77,6 +82,11 @@ export class DemoApi {
   }
   slots() { return this.request<Slot[]>("/slots"); }
   managedSlots() { return this.request<ManagedSlot[]>("/staff/slots"); }
+  schedulePatterns() { return this.request<SchedulePattern[]>("/staff/schedules"); }
+  saveSchedulePattern(doctor:DemoDoctor,body:SchedulePatternInput) { return this.request<SchedulePattern>(`/staff/schedules/${doctor}`,body); }
+  previewSchedule(doctor:DemoDoctor,weekStart:string,version:number) { return this.request<SchedulePreview>(`/staff/schedules/${doctor}/preview`,{week_start:weekStart,version}); }
+  generateSchedule(doctor:DemoDoctor,weekStart:string,version:number,previewToken:string,requestId:string) { return this.request<ScheduleGeneration>(`/staff/schedules/${doctor}/generate`,{week_start:weekStart,version,preview_token:previewToken,request_id:requestId}); }
+  doctorSchedule(weekStart:string) { return this.request<DoctorSchedule>(`/doctor/schedule?week_start=${encodeURIComponent(weekStart)}`); }
   addSlot(body:{doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;request_id:string;duration_minutes?:number}) { return this.request<ManagedSlot>("/staff/slots",body); }
   closeSlot(id:string) { return this.request<ManagedSlot>(`/staff/slots/${encodeURIComponent(id)}/close`,{}); }
   bookings() { return this.request<Booking[]>("/bookings"); }

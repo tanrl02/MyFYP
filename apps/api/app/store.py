@@ -5,6 +5,7 @@ from pathlib import Path
 import sqlite3
 import json
 from uuid import uuid4
+from .scheduling import MALAYSIA, pattern_values, week_slots, preview_hash
 
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
 DOCTORS = {'doctor-lim': 'Dr. Lim (demo)', 'doctor-anita': 'Dr. Anita (demo)'}
@@ -28,6 +29,12 @@ class Store:
                 CREATE TABLE IF NOT EXISTS doctor_profiles (
                   doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT);
+                CREATE TABLE IF NOT EXISTS doctor_schedule_patterns (
+                  doctor_id TEXT PRIMARY KEY, pattern_json TEXT NOT NULL, version INTEGER NOT NULL,
+                  updated_at TEXT NOT NULL, actor_id TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS schedule_generations (
+                  request_id TEXT PRIMARY KEY, doctor_id TEXT NOT NULL, week_start TEXT NOT NULL,
+                  pattern_version INTEGER NOT NULL, preview_token TEXT NOT NULL, result_json TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS patient_notifications (
                   id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, kind TEXT NOT NULL,
                   source_id TEXT NOT NULL, target_id TEXT NOT NULL, title TEXT NOT NULL,
@@ -239,6 +246,8 @@ class Store:
             db.execute('BEGIN IMMEDIATE')
             for day in (1, 2):
                 for doctor in DOCTORS:
+                    if db.execute('SELECT 1 FROM doctor_schedule_patterns WHERE doctor_id=?',(doctor,)).fetchone():
+                        continue
                     for hour in (9, 10, 11):
                         start = (local + timedelta(days=day)).replace(hour=hour, minute=0, second=0, microsecond=0)
                         key = f'{doctor}-{start:%Y%m%d}-{hour}'
@@ -318,6 +327,110 @@ class Store:
                 raise RuleError('This slot has already started.')
             db.execute('UPDATE slots SET closed=1 WHERE id=?',(slot_id,))
             return self.managed_slot(db,slot_id)
+
+    def schedule_pattern(self, db, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor not found.',404)
+        row=db.execute('SELECT * FROM doctor_schedule_patterns WHERE doctor_id=?',(doctor,)).fetchone()
+        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],
+                **(json.loads(row['pattern_json']) if row else {'weekdays':[],'start_time':'09:00','end_time':'12:00','duration_minutes':30,'capacity':2}),
+                'version':row['version'] if row else 0,'updated_at':row['updated_at'] if row else None}
+
+    def schedule_patterns(self):
+        with self.connect() as db:
+            return [self.schedule_pattern(db,doctor) for doctor in DOCTORS]
+
+    def save_schedule_pattern(self, doctor, weekdays, start_time, end_time, duration_minutes, capacity, version):
+        try:values=pattern_values(weekdays,start_time,end_time,duration_minutes,capacity)
+        except ValueError as error:raise RuleError(str(error),422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            current=self.schedule_pattern(db,doctor)
+            if current['version'] and all(current[key]==value for key,value in values.items()):
+                return current
+            if current['version']!=version:
+                raise RuleError('This weekly pattern changed. Reload it before editing again.')
+            db.execute('''INSERT INTO doctor_schedule_patterns VALUES(?,?,?,?,?)
+                ON CONFLICT(doctor_id) DO UPDATE SET pattern_json=excluded.pattern_json,version=excluded.version,
+                updated_at=excluded.updated_at,actor_id=excluded.actor_id''',
+                (doctor,json.dumps(values,sort_keys=True),version+1,datetime.now(timezone.utc).isoformat(),'staff-demo'))
+            return self.schedule_pattern(db,doctor)
+
+    def schedule_preview_record(self, db, doctor, week_start, version):
+        pattern=self.schedule_pattern(db,doctor)
+        if not pattern['version'] or pattern['version']!=version:
+            raise RuleError('Save or reload the current weekly pattern before previewing.')
+        try:planned=week_slots(pattern,week_start,datetime.now(MALAYSIA).date())
+        except ValueError as error:raise RuleError(str(error),422)
+        for slot in planned:
+            exact=db.execute('SELECT * FROM slots WHERE doctor_id=? AND julianday(starts_at)=julianday(?)',
+                             (doctor,slot['starts_at'])).fetchone()
+            if exact:
+                slot['slot_id']=exact['id']
+                if not exact['closed'] and (exact['duration_minutes'],exact['capacity'])==(slot['duration_minutes'],slot['capacity']):
+                    slot.update(status='existing',reason='Matching open slot retained, including its bookings.')
+                else:
+                    slot.update(status='conflict',reason='An existing or closed slot has different details. No slot will be changed.')
+            elif self.slot_overlap(db,doctor,datetime.fromisoformat(slot['starts_at']),slot['duration_minutes']):
+                slot.update(status='conflict',reason='Overlaps an existing open slot for this doctor.')
+            else:
+                slot.update(status='new',reason='New appointment slot.')
+        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],'week_start':week_start,'pattern_version':version,'slots':planned,
+                'new_count':sum(slot['status']=='new' for slot in planned),
+                'existing_count':sum(slot['status']=='existing' for slot in planned),
+                'conflict_count':sum(slot['status']=='conflict' for slot in planned),
+                'preview_token':preview_hash(doctor,version,week_start,planned)}
+
+    def preview_schedule(self, doctor, week_start, version):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return self.schedule_preview_record(db,doctor,week_start,version)
+
+    def generate_schedule(self, doctor, week_start, version, token, request_id):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            previous=db.execute('SELECT * FROM schedule_generations WHERE request_id=?',(request_id,)).fetchone()
+            if previous:
+                if (previous['doctor_id'],previous['week_start'],previous['pattern_version'],previous['preview_token'])!=(doctor,week_start,version,token):
+                    raise RuleError('This request already generated a different schedule.')
+                return json.loads(previous['result_json'])
+            preview=self.schedule_preview_record(db,doctor,week_start,version)
+            if preview['preview_token']!=token:
+                raise RuleError('Slot availability changed since preview. Preview the week again before confirming.')
+            if preview['conflict_count']:
+                raise RuleError('This week has slot conflicts. Resolve them before generating any slots.')
+            ids=[]
+            for slot in preview['slots']:
+                if slot['status']=='existing':
+                    ids.append(slot['slot_id'])
+                    continue
+                slot_id=str(uuid4());ids.append(slot_id)
+                db.execute('INSERT INTO slots(id,doctor_id,starts_at,clinic_date,capacity,duration_minutes) VALUES(?,?,?,?,?,?)',
+                           (slot_id,doctor,slot['starts_at'],slot['clinic_date'],slot['capacity'],slot['duration_minutes']))
+            result={'id':str(uuid4()),'doctor_id':doctor,'week_start':week_start,'pattern_version':version,
+                    'created_count':preview['new_count'],'existing_count':preview['existing_count'],
+                    'slot_ids':ids,'created_at':datetime.now(timezone.utc).isoformat()}
+            db.execute('INSERT INTO schedule_generations VALUES(?,?,?,?,?,?)',(request_id,doctor,week_start,version,token,json.dumps(result)))
+            return result
+
+    def doctor_schedule(self, doctor, week_start):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        monday=date.fromisoformat(week_start)
+        if monday.weekday()!=0:
+            raise RuleError('Choose the Monday starting the week.',422)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            rows=db.execute('SELECT id FROM slots WHERE doctor_id=? AND julianday(starts_at)>=julianday(?) AND julianday(starts_at)<julianday(?) ORDER BY julianday(starts_at),id',
+                            (doctor,f'{monday.isoformat()}T00:00:00+08:00',f'{(monday+timedelta(days=7)).isoformat()}T00:00:00+08:00')).fetchall()
+            slots=[]
+            for row in rows:
+                slot=self.managed_slot(db,row['id'])
+                visits=db.execute('SELECT id,queue_number,status,patient_id FROM bookings WHERE slot_id=? ORDER BY queue_number',(row['id'],)).fetchall()
+                # Operational schedule only: no background, notes, photo, reason, prescription or bill.
+                slot['visits']=[{'id':visit['id'],'queue_number':visit['queue_number'],'status':visit['status'],'patient_name':PATIENTS[visit['patient_id']]} for visit in visits]
+                slots.append(slot)
+            return {'pattern':self.schedule_pattern(db,doctor),'week_start':week_start,'slots':slots}
 
     def event(self, db, booking_id, actor, action):
         db.execute('INSERT INTO events VALUES(?,?,?,?,?)',

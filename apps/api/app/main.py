@@ -1,7 +1,7 @@
 from datetime import date
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Query
 import hashlib
 from .photos import MAX_BYTES, normalise_photo
@@ -36,6 +36,22 @@ class SlotInput(BaseModel):
     time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
     capacity: int = Field(strict=True,ge=1,le=20)
     duration_minutes: int = Field(default=30,strict=True,ge=15,le=120,multiple_of=15)
+    request_id: str = Field(min_length=8,max_length=100)
+
+class SchedulePatternInput(BaseModel):
+    weekdays: list[Annotated[int,Field(strict=True,ge=0,le=6)]] = Field(min_length=1,max_length=7)
+    start_time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
+    end_time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
+    duration_minutes: int = Field(strict=True,ge=15,le=120,multiple_of=15)
+    capacity: int = Field(strict=True,ge=1,le=20)
+    version: int = Field(strict=True,ge=0)
+
+class SchedulePreviewInput(BaseModel):
+    week_start: date
+    version: int = Field(strict=True,ge=1)
+
+class ScheduleGenerateInput(SchedulePreviewInput):
+    preview_token: str = Field(pattern=r'^[0-9a-f]{64}$')
     request_id: str = Field(min_length=8,max_length=100)
 
 class BookingInput(BaseModel):
@@ -190,6 +206,26 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/staff/slots/{slot_id}/close')
     def close_slot(slot_id: str,who=Depends(staff)):
         return run(lambda: store.close_slot(slot_id))
+
+    @api.get('/staff/schedules')
+    def schedule_patterns(who=Depends(staff)):
+        return store.schedule_patterns()
+
+    @api.post('/staff/schedules/{doctor_id}')
+    def save_schedule_pattern(doctor_id: str,payload: SchedulePatternInput,who=Depends(staff)):
+        return run(lambda: store.save_schedule_pattern(doctor_id,payload.weekdays,payload.start_time,payload.end_time,payload.duration_minutes,payload.capacity,payload.version))
+
+    @api.post('/staff/schedules/{doctor_id}/preview')
+    def preview_schedule(doctor_id: str,payload: SchedulePreviewInput,who=Depends(staff)):
+        return run(lambda: store.preview_schedule(doctor_id,payload.week_start.isoformat(),payload.version))
+
+    @api.post('/staff/schedules/{doctor_id}/generate',status_code=201)
+    def generate_schedule(doctor_id: str,payload: ScheduleGenerateInput,who=Depends(staff)):
+        return run(lambda: store.generate_schedule(doctor_id,payload.week_start.isoformat(),payload.version,payload.preview_token,payload.request_id))
+
+    @api.get('/doctor/schedule')
+    def doctor_schedule(week_start: date,who=Depends(doctor)):
+        return run(lambda: store.doctor_schedule(who,week_start.isoformat()))
 
     @api.get('/bookings')
     def bookings(who=Depends(patient)):
