@@ -65,13 +65,33 @@ def frozen_digest(model):
     return digest.hexdigest()
 
 
-def transforms_for():
+def transforms_for(config=None):
     normalise = transforms.Normalize((.485,.456,.406),(.229,.224,.225))
     validation = transforms.Compose([transforms.Resize(256, interpolation=transforms.InterpolationMode.BICUBIC),
         transforms.CenterCrop(224), transforms.ToTensor(), normalise])
     training = transforms.Compose([transforms.RandomResizedCrop(224, scale=(.85,1), ratio=(.9,1.1),
         interpolation=transforms.InterpolationMode.BICUBIC), transforms.RandomHorizontalFlip(.5), transforms.ToTensor(), normalise])
+    if config and config.get('experiment')=='enhancement-v1':
+        variant=config['enhancement_variant']
+        if variant=='train_jitter':training=transforms.Compose([
+            transforms.ColorJitter(brightness=.1,contrast=.1),*training.transforms])
+        elif variant=='contrast_blend':
+            try:from ai.enhancement_pipeline import ContrastBlend
+            except ModuleNotFoundError:from enhancement_pipeline import ContrastBlend
+            training=transforms.Compose([ContrastBlend(),*training.transforms])
+            validation=transforms.Compose([ContrastBlend(),*validation.transforms])
+        elif variant!='baseline':raise ValueError('Unknown enhancement variant')
     return training, validation
+
+
+def experiment_data(config):
+    mapping,rows,dataset=load_baseline_data(config)
+    if config.get('experiment')=='enhancement-v1':
+        try:from ai.enhancement_pipeline import validate_config,prepared_rows
+        except ModuleNotFoundError:from enhancement_pipeline import validate_config,prepared_rows
+        validate_config(config,json.loads((ROOT/'ai/model_comparison_config.json').read_text()))
+        rows=prepared_rows(config,rows)
+    return mapping,rows,dataset
 
 
 def score(metrics): return metrics['accuracy'], metrics['macro_f1'], -metrics['loss']
@@ -103,7 +123,7 @@ def verify(folder, device):
     path=folder/'best.pt'; saved=torch.load(path,map_location='cpu',weights_only=True)
     if saved['metadata'] != run or saved['epoch'] != best['epoch'] or saved['validation'] != best['validation']:
         raise ValueError('Checkpoint differs from logged selection')
-    mapping,rows,_=load_baseline_data(config)
+    mapping,rows,_=experiment_data(config)
     if mapping != run['class_to_index']: raise ValueError('Class mapping changed')
     seed_everything(config['seed'],config['cpu_threads'])
     blocks=config.get('feature_blocks')
@@ -119,10 +139,18 @@ def verify(folder, device):
         for name in feature_names if name.startswith(f'features.{i}.')) for i in blocks or []}
     if blocks and not all(changed_blocks.values()): raise ValueError('A selected feature block was not updated')
     model.to(device)
-    loader=DataLoader(FrozenImages(rows['val'],transforms_for()[1]),batch_size=config['batch_size'])
+    loader=DataLoader(FrozenImages(rows['val'],transforms_for(config)[1]),batch_size=config['batch_size'])
     metrics=evaluate(model,loader,device,len(mapping)); assert_metrics(metrics,saved['validation'])
+    probes={}
+    if config.get('experiment')=='enhancement-v1':
+        try:from ai.enhancement_evaluation import BrightnessProbe
+        except ModuleNotFoundError:from enhancement_evaluation import BrightnessProbe
+        for factor in (.8,1.2):
+            transform=transforms.Compose([BrightnessProbe(factor),*transforms_for(config)[1].transforms])
+            probes[str(factor)]=evaluate(model,DataLoader(FrozenImages(rows['val'],transform),
+                batch_size=config['batch_size']),device,len(mapping))
     report_folder=config.get('report_folder','model_comparison')
-    if report_folder not in ('model_comparison','efficientnet_tuning'): raise ValueError('Unknown report destination')
+    if report_folder not in ('model_comparison','efficientnet_tuning','enhancement'): raise ValueError('Unknown report destination')
     output=ROOT/'docs/ai'/report_folder/folder.name; output.mkdir(parents=True,exist_ok=True)
     result={'run_id':folder.name,'architecture':arch,'run':run,'checkpoint_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
         'best_epoch':saved['epoch'],'epochs_completed':len(history),'validation':metrics,'macro_precision':macro_precision(metrics),
@@ -130,6 +158,9 @@ def verify(folder, device):
         'epoch_seconds':sum(r['seconds'] for r in history),'accuracy_target_reached':metrics['accuracy']>=config['accuracy_target'],
         'test_images_evaluated':0}
     if blocks: result['changed_feature_blocks']=changed_blocks
+    if probes:
+        result['lighting_probes']=probes
+        result['lighting_probe_mean_accuracy']=sum(m['accuracy'] for m in probes.values())/len(probes)
     (output/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
     (output/'epochs.json').write_text(json.dumps(history,indent=2)+'\n')
     print(json.dumps({k:result[k] for k in ('architecture','best_epoch','epochs_completed','macro_precision','accuracy_target_reached','validation_replay_verified')}),flush=True)
@@ -165,10 +196,10 @@ def main():
         validate_tuning_config(config,json.loads((ROOT/'ai/model_comparison_config.json').read_text()))
     if arch not in config['architectures']: raise ValueError('Architecture outside configured experiment')
     blocks=config.get('feature_blocks')
-    mapping,rows,dataset=load_baseline_data(config)
+    mapping,rows,dataset=experiment_data(config)
     seed_everything(config['seed'],config['cpu_threads'])
     model=build(arch,len(mapping)).to(device)
-    train_transform,val_transform=transforms_for()
+    train_transform,val_transform=transforms_for(config)
     configure(model,arch,True,blocks); full_frozen=frozen_digest(model)
     configure(model,arch,False); warm_frozen=frozen_digest(model)
     run={'architecture':arch,'config':config,'class_to_index':mapping,'dataset_lock':dataset,'mode':args.mode,
