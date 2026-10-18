@@ -224,6 +224,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def add_unavailability(doctor_id: str,payload: UnavailabilityInput,who=Depends(staff)):
         return run(lambda: store.add_unavailability(doctor_id,payload.clinic_date.isoformat(),payload.reason.strip(),payload.request_id))
 
+    @api.post('/staff/schedules/{doctor_id}/unavailability/{absence_id}/cancel')
+    def cancel_unavailability(doctor_id: str,absence_id: str,who=Depends(staff)):
+        return run(lambda: store.cancel_unavailability(doctor_id,absence_id))
+
     @api.post('/staff/schedules/{doctor_id}')
     def save_schedule_pattern(doctor_id: str,payload: SchedulePatternInput,who=Depends(staff)):
         return run(lambda: store.save_schedule_pattern(doctor_id,payload.weekdays,payload.start_time,payload.end_time,payload.duration_minutes,payload.capacity,payload.version))

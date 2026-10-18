@@ -20,3 +20,6 @@ Browser verified refusing2November because of Ava's saved booking, then saving a
 Fixture: absence `96c9a23a-a8e0-4f9f-91b9-55e178fb345f`, hidden test slot `3d4a3d04-d804-4f92-9fea-89b105d57c8e`. Evidence `tmp/unavailability-fixture.json`, `tmp/doctor-unavailability-verified.png`. User confirmed Android after reopening: "Yes, blocked date and existing booking are correct" (11November noon absent,2/4November retained, Ava's2November booking unchanged and hidden from Noah).
 
 Runtime: API session13970 PID66672 port8000 using `.venv-ai`; existing dashboard17348/3000 and Expo28048/8081 retained. AI/model/training, Word, real auth, dependencies and user's `docs/ai/BASELINE_SETUP.md` edit are unchanged. No push/deploy/main merge. Discuss the next small task before implementation.
+
+
+19 October update: future absences can now be cancelled by staff while retaining history. See docs/ABSENCE_CANCELLATION.md; the original creation/booking protection rules above remain applicable to active absences.
