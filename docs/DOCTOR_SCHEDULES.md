@@ -31,3 +31,6 @@ Runtime: API session14517 PID16004 port8000 using `.venv-ai`; existing dashboard
 
 
 19 October2026: optional second daily session now supported. See [Morning and afternoon sessions](SPLIT_DOCTOR_SESSIONS.md) for current flow, compatibility and verification.
+
+
+19 October2026: selected weekdays can now have custom first/second session hours while other days inherit shared sessions. See [Different weekday hours](WEEKDAY_DOCTOR_HOURS.md) for current flow and verification.

@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta, timezone
 MALAYSIA=timezone(timedelta(hours=8))
 
 
-def pattern_values(weekdays, start, end, duration, capacity, second_start=None, second_end=None):
+def pattern_values(weekdays, start, end, duration, capacity, second_start=None, second_end=None, day_sessions=None):
     if not weekdays or len(weekdays)>7 or any(type(day) is not int or not 0<=day<=6 for day in weekdays) or len(set(weekdays))!=len(weekdays):
         raise ValueError('Choose distinct working days, Monday through Sunday.')
     if type(duration) is not int or not 15<=duration<=120 or duration%15 or type(capacity) is not int or not 1<=capacity<=20:
@@ -26,22 +26,42 @@ def pattern_values(weekdays, start, end, duration, capacity, second_start=None, 
         total+=length//duration
     if second_start is not None and second_start<end:
         raise ValueError('The second session must start at or after the first session ends.')
-    if total*len(weekdays)>200:
-        raise ValueError('Limit each generated week to 200 slots across both sessions.')
+    overrides=[]
+    seen=set()
+    for item in day_sessions or []:
+        day=item.get('weekday')
+        if type(day) is not int or day not in weekdays or day in seen:
+            raise ValueError('Custom hours must belong to distinct selected working days.')
+        seen.add(day)
+        values=pattern_values([day],item.get('start_time'),item.get('end_time'),duration,capacity,
+                              item.get('second_start_time'),item.get('second_end_time'))
+        overrides.append({key:values[key] for key in ('start_time','end_time','second_start_time','second_end_time')}|{'weekday':day})
+    weekly_total=0
+    for day in weekdays:
+        item=next((value for value in overrides if value['weekday']==day),None)
+        if item is None:
+            weekly_total+=total
+        else:
+            weekly_total+=(minutes(item['end_time'])-minutes(item['start_time']))//duration
+            if item['second_start_time'] is not None:
+                weekly_total+=(minutes(item['second_end_time'])-minutes(item['second_start_time']))//duration
+    if weekly_total>200:
+        raise ValueError('Limit each generated week to 200 slots across all working days.')
     return {'weekdays':sorted(weekdays),'start_time':start,'end_time':end,'duration_minutes':duration,'capacity':capacity,
-            'second_start_time':second_start,'second_end_time':second_end}
+            'second_start_time':second_start,'second_end_time':second_end,'day_sessions':sorted(overrides,key=lambda item:item['weekday'])}
 
 
 def week_slots(pattern, week_start, today):
     monday=date.fromisoformat(week_start)
     if monday.weekday()!=0 or monday<=today or monday>today+timedelta(days=56):
         raise ValueError('Choose a future Monday within the next eight weeks.')
-    sessions=[(pattern['start_time'],pattern['end_time'])]
-    if pattern.get('second_start_time') is not None:
-        sessions.append((pattern['second_start_time'],pattern['second_end_time']))
     result=[]
     for weekday in pattern['weekdays']:
         day=monday+timedelta(days=weekday)
+        hours=next((item for item in pattern.get('day_sessions',[]) if item['weekday']==weekday),pattern)
+        sessions=[(hours['start_time'],hours['end_time'])]
+        if hours.get('second_start_time') is not None:
+            sessions.append((hours['second_start_time'],hours['second_end_time']))
         for session_start,session_end in sessions:
             length=int(session_end[:2])*60+int(session_end[3:])-int(session_start[:2])*60-int(session_start[3:])
             start=datetime.fromisoformat(f"{day.isoformat()}T{session_start}:00+08:00")

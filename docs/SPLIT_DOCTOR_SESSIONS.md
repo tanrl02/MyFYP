@@ -15,3 +15,6 @@ Browser: previously unsaved Dr Anita pattern saved as Monday09:00–10:00 and14:
 Android confirmed by the user on19October2026: "Yes, both sessions and existing booking work". After reopening, Anita16November09:00/09:30/14:00/14:30 appear with no slots between10:00 and14:00. Morning/afternoon selection and Back work; Ava L0012November14:00 remains unchanged and hidden from Noah. The pending physical check is resolved.
 
 Runtime: API session9023 PID89084/8000, dashboard PID78988/3000, Expo PID99028/8081; phone API http://192.168.0.2:8000. Auth, Word report, experimental AI/model/training, dependencies and user baseline edit unchanged. No push/deploy/merge.
+
+
+19 October2026: selected weekdays can now have custom first/second session hours while other days inherit shared sessions. See [Different weekday hours](WEEKDAY_DOCTOR_HOURS.md) for current flow and verification.
