@@ -26,7 +26,7 @@ class AssessmentTests(unittest.TestCase):
         self.assertEqual(response.status_code,201)
         saved = response.json()
         self.assertEqual(saved['origin'],'simulation')
-        self.assertIn('No image analysis', saved['message'])
+        self.assertIn('No disease prediction', saved['message'])
         self.assertEqual(self.upload().json()['id'], saved['id'])
         self.assertEqual(self.upload(self.photo('red')).status_code,409)
         self.assertEqual(len(self.client.get('/assessments',headers=self.patient).json()),1)

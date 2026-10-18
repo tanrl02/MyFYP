@@ -13,7 +13,9 @@ switch ($Component) {
     'api' {
         Write-Host 'Synthetic demo API: http://127.0.0.1:8000/docs'
         Write-Host 'LAN access enabled for your phone. No real patient data or secure login.'
-        & '.\.venv\Scripts\python.exe' -m uvicorn app.main:app --app-dir apps/api --host 0.0.0.0 --port 8000
+        Write-Host 'Using the existing AI environment for local photo quality and skin-content checks.'
+        if (-not (Test-Path -LiteralPath '.\.venv-ai\Scripts\python.exe')) { throw 'Photo checks require .venv-ai. See docs/PHOTO_CHECKS.md for setup.' }
+        & '.\.venv-ai\Scripts\python.exe' -m uvicorn app.main:app --app-dir apps/api --host 0.0.0.0 --port 8000
     }
     'dashboard' {
         $env:NEXT_TELEMETRY_DISABLED = '1'

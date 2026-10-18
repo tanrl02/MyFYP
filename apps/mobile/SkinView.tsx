@@ -2,17 +2,27 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
-import { Assessment, DemoApi, DemoPatient, visitTime } from "@smart-skin/shared";
+import { Assessment, DemoApi, DemoPatient, PhotoCheck, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
 import SharingView from "./SharingView";
 type Draft = { uri: string; mime: string; file?: globalThis.File; request: string; local?: File };
+function photoForm(photo:Draft) {
+  const form=new FormData();
+  if(Platform.OS==="web") {
+    if(!photo.file)throw new Error("Please choose the photo again; browser file is unavailable.");
+    form.append("photo",photo.file,"photo-check");
+  } else form.append("photo",photo.local??new File(photo.uri));
+  return form;
+}
 export default function SkinView({ patient, initialAssessmentId, onFindDoctor }: { patient: DemoPatient; initialAssessmentId?: string; onFindDoctor?:(assessmentId:string)=>void }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [history, setHistory] = useState<Assessment[]>([]);
   const [result, setResult] = useState<Assessment | null>(null);
   const [busy, setBusy] = useState(false);
+  const [checking,setChecking]=useState(false);
+  const [photoCheck,setPhotoCheck]=useState<PhotoCheck|null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [denied, setDenied] = useState(false);
@@ -25,7 +35,18 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   function discard() {
     if (draft?.local?.exists) draft.local.delete();
-    setDraft(null); setNotice("Photo discarded. No assessment was saved.");
+    setDraft(null);setPhotoCheck(null); setNotice("Photo discarded. No assessment was saved.");
+  }
+  async function validate(selected:Draft) {
+    setChecking(true);setPhotoCheck(null);
+    try {setPhotoCheck(await api.checkPhoto(photoForm(selected)));}
+    finally {setChecking(false);}
+  }
+  async function retryCheck() {
+    if(!draft||busy)return;setBusy(true);setError("");
+    try {await validate(draft);}
+    catch(e){setError(e instanceof Error?e.message:"Photo checking failed. Retry before saving.");}
+    finally{setBusy(false);}
   }
   async function pick(camera: boolean) {
     if (busy) return; setBusy(true); setError(""); setNotice(""); setDenied(false);
@@ -46,27 +67,22 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       let local: File | undefined;
       if (Platform.OS !== "web") { local = new File(Paths.cache, `${request}.${mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg"}`); new File(asset.uri).copy(local); }
       if (draft?.local?.exists) draft.local.delete();
-      setDraft({ uri: local?.uri || asset.uri, mime, file: asset.file, local, request }); setResult(null);
+      const selected={ uri: local?.uri || asset.uri, mime, file: asset.file, local, request };
+      setDraft(selected);setPhotoCheck(null);setResult(null);
+      await validate(selected);
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to select a photo. Retry or use the gallery."); }
     finally { setBusy(false); }
   }
   async function save() {
-    if (!draft || busy) return; setBusy(true); setError(""); setNotice("");
+    if (!draft || busy || !photoCheck?.accepted) return; setBusy(true); setError(""); setNotice("");
     try {
-      const form = new FormData();
+      const form = photoForm(draft);
       form.append("request_id", draft.request);
-      if (Platform.OS === "web") {
-        if (!draft.file) throw new Error("Please choose the photo again; browser file is unavailable.");
-        form.append("photo", draft.file, "demo-photo");
-      } else {
-        // Expo's fetch reads File bytes; legacy React Native URI objects are unsupported.
-        form.append("photo", draft.local ?? new File(draft.uri));
-      }
       const saved = await api.saveAssessment(form);
       setResult(saved); setHistory(current => [saved, ...current.filter(r => r.id !== saved.id)]);
       if (draft.local?.exists) draft.local.delete();
-      setDraft(null); setNotice("Photo and simulated result saved to your local project backend.");
-    } catch (e) { setError(e instanceof Error ? e.message : "Unable to save. Refresh history before retrying."); }
+      setDraft(null);setPhotoCheck(null); setNotice("Checked photo and simulated disease result saved to your local project backend.");
+    } catch (e) { setPhotoCheck(null); setError(e instanceof Error ? e.message : "Unable to save. Refresh history before retrying."); }
     finally { setBusy(false); }
   }
   async function open(id: string) {
@@ -76,13 +92,19 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
     finally { setBusy(false); }
   }
   return <View>
-    <Text style={styles.title}>Skin assessment</Text><Text style={styles.muted}>Capture or select a demonstration photo, preview it, then save. Use synthetic or non-sensitive images while demo identities are in use.</Text>
-    <View style={styles.warning}><Text style={styles.warningText}>SIMULATION — no trained model or image analysis. Example category is not a diagnosis. Saved photos stay on this computer's local backend.</Text></View>
+    <Text style={styles.title}>Skin assessment</Text><Text style={styles.muted}>Take or choose a non-sensitive close-up skin photo. Automatic checks run on your local backend before you can save. Avoid objects, screens, glare and identifying details.</Text>
+    <View style={styles.warning}><Text style={styles.warningText}>SIMULATION — disease results remain fixed examples, not diagnoses. Photo checks assess quality and likely skin content only. Photos stay on this computer's local backend.</Text></View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text>{denied && Platform.OS !== "web" ? <Pressable accessibilityRole="button" onPress={() => Linking.openSettings()}><Text style={styles.link}>Open app settings</Text></Pressable> : null}</View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
     <View style={styles.row}><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => pick(true)}><Text style={styles.buttonText}>Take photo</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.secondary} onPress={() => pick(false)}><Text style={styles.link}>Choose photo</Text></Pressable></View>
-    {draft ? <View style={styles.card}><Text style={styles.subtitle}>Confirm your photo</Text><Image accessibilityLabel="Selected photo preview" source={{ uri: draft.uri }} style={styles.photo} resizeMode="contain" /><Text style={styles.muted}>JPEG, PNG or WebP · maximum 5 MB. Confirming sends the photo only to your local project backend and saves a simulated result.</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={save}><Text style={styles.buttonText}>{busy ? "Saving…" : "Save simulated assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
-    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · SIMULATION</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<Text style={styles.subtitle}>{result.example_category}</Text><Text style={styles.muted}>{result.message}</Text><Text style={styles.muted}>This fixed example does not depend on your photo. Real model inference is later work.</Text><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Suggestions use this simulated example. Booking does not share this assessment; use the sharing controls to authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
+    {draft ? <View style={styles.card}><Text style={styles.subtitle}>{checking?"Checking photo…":photoCheck?.accepted?"Photo checks passed":photoCheck?"Retake required":"Photo not checked"}</Text><Image accessibilityLabel="Selected photo preview" source={{ uri: draft.uri }} style={styles.photo} resizeMode="contain" />
+      {checking?<Text accessibilityRole="alert" style={styles.muted}>Checking detail, lighting and skin content. The first check can take longer while the local model loads.</Text>:null}
+      {photoCheck?<View accessibilityRole="alert" style={photoCheck.accepted?styles.notice:styles.error}><Text>{photoCheck.message}</Text>{photoCheck.reasons.map(reason=><Text key={reason}>{reason}</Text>)}</View>:null}
+      <Text style={styles.muted}>JPEG, PNG or WebP · up to 5 MB · at least 224 pixels per side. Checking does not save an assessment. Save rechecks the uploaded photo.</Text>
+      {!photoCheck?.accepted&&!checking?<Pressable accessibilityRole="button" disabled={busy} onPress={retryCheck}><Text style={styles.link}>Retry photo check</Text></Pressable>:null}
+      {photoCheck&&!photoCheck.accepted?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>pick(true)}><Text style={styles.link}>Retake photo</Text></Pressable>:null}
+      <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted} style={[styles.button,!photoCheck?.accepted&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Saving…":"Save simulated assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
+    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · SIMULATION</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<Text style={styles.subtitle}>{result.example_category}</Text><Text style={styles.muted}>{result.message}</Text><Text style={styles.muted}>This fixed example does not depend on your photo. Disease classification is later work.</Text><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Suggestions use this simulated example. Booking does not share this assessment; use the sharing controls to authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
     <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Your latest 100 saved assessments. Photos survive app/server restarts because they are saved in the shared database.</Text>
     {history.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>Simulation · {item.example_category}</Text><Text style={styles.link}>View saved photo & result →</Text></Pressable>)}
     {!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
@@ -94,5 +116,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12 }, button: { backgroundColor: "#176f5e", padding: 14, borderRadius: 10, marginVertical: 8 }, buttonText: { color: "white", fontWeight: "600" },
   secondary: { backgroundColor: "#e7efeb", paddingHorizontal: 14, borderRadius: 10 }, link: { color: "#176f5e", fontWeight: "600", paddingVertical: 10 },
   card: { backgroundColor: "white", padding: 18, borderWidth: 1, borderColor: "#dce6e0", borderRadius: 16, marginTop: 16 }, photo: { width: "100%", height: 240, marginVertical: 12, backgroundColor: "#f4f7f6", borderRadius: 10 },
-  error: { backgroundColor: "#fff0f0", padding: 14, borderRadius: 12, marginBottom: 12 }, notice: { color: "#176f5e", backgroundColor: "#e7f4ed", padding: 14, borderRadius: 12, marginBottom: 12 }
+  error: { backgroundColor: "#fff0f0", padding: 14, borderRadius: 12, marginBottom: 12 }, notice: { color: "#176f5e", backgroundColor: "#e7f4ed", padding: 14, borderRadius: 12, marginBottom: 12 },disabled:{opacity:.4}
 });

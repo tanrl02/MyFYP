@@ -5,6 +5,7 @@ from typing import Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, Form, Query
 import hashlib
 from .photos import MAX_BYTES, normalise_photo
+from .photo_checks import check_photo
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .store import DOCTORS, PATIENTS, RuleError, Store
@@ -92,7 +93,8 @@ class StockReceiptInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
 
-def create_app(path=None):
+def create_app(path=None,photo_checker=None):
+    photo_checker=photo_checker or check_photo
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
     api.add_middleware(CORSMiddleware,
@@ -233,9 +235,17 @@ def create_app(path=None):
         finally:
             photo.file.close()
         def save():
+            checked=photo_checker(content)
+            if not checked['accepted']:raise RuleError(' '.join(checked['reasons']),422)
             clean, width, height = normalise_photo(content)
             return store.save_assessment(who, request_id, hashlib.sha256(content).hexdigest(), clean, width, height)
         return run(save)
+
+    @api.post('/photo-check')
+    def validate_photo(photo: UploadFile = File(),who=Depends(patient)):
+        try:content=photo.file.read(MAX_BYTES+1)
+        finally:photo.file.close()
+        return run(lambda:photo_checker(content))
 
     @api.get('/medicines')
     def medicines(who=Depends(operational)):

@@ -10,7 +10,7 @@ In MyFYP, double-click in order and leave the three windows open:
 
 Install Expo Go on Android, use the same private Wi-Fi and scan the QR in Expo Go. Choose Ava Demo or Noah Demo. Ctrl+C stops each service. If a port is occupied, stop the previous project window; do not stop unrelated processes.
 
-Launch scripts prefer the bundled Codex Node/pnpm runtime, otherwise pnpm on PATH. API requires existing .venv. On another computer install locked dependencies/create venv first. Report scripts are unrelated.
+Launch scripts prefer the bundled Codex Node/pnpm runtime, otherwise pnpm on PATH. API now uses the existing .venv-ai environment for local photo checks. Install the pinned API/photo-check dependencies and official model as described in [docs/PHOTO_CHECKS.md](docs/PHOTO_CHECKS.md) before launching on another computer. Report scripts are unrelated.
 
 If phone cannot connect, check Wi-Fi/client isolation, VPN and firewall settings; do not disable protections or enable public tunnels. Wrong adapter: set EXPO_PUBLIC_API_URL to http://COMPUTER-LAN-IP:8000 before launching scripts/run-component.ps1 mobile. Dashboard NEXT_PUBLIC_API_URL defaults to http://127.0.0.1:8000. Example environment files contain no secrets.
 

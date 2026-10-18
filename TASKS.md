@@ -173,3 +173,11 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 
 
 18 October fixed upload recipe comparison completed: read docs/ai/UPLOAD_RECIPE_EXPERIMENT.md. All193validation photos accepted; current JPEG85 byte-matches production helper. Compared JPEG85, JPEG95 default, JPEG95 4:4:4 and lossless PNG with identical1600geometry/metadata stripping and both fixed B0 models. Prediction changes full/partial:9/9,2/1,3/0,0/0. PNG preserves original126/193=65.28% and128/193=66.32%; averages404.5KiB versus56.6KiB current (~7.14x); no sample output>5MiB, future output bound still required. 85% unmet; no new classifier improvement beyond raw reference. Two recipe tests,772output checks, raw/current-upload replays, hashes and paired accounting/ranking passed; chart viewed. No training, reserved-test inference, app/backend/database/model-pointer/Word/dependency changes. Next: reusable versioned processing contract/output budget for training and future inference; settle data/class scope before more training. PNG research reference only; no automatic production switch. Preserve user BASELINE_SETUP.md edit; no push/main merge.
+
+## Photo admission, 18 October 2026
+- [x] Quality + local skin-content preflight, explanatory retry/retake, Save disabled until accepted.
+- [x] Server Save rechecks uploaded bytes; rejected/unavailable/uncertain photos cannot save.
+- [x] 90 API tests, TypeScript, Android export, local browser accept/reject/discard, pinned runtime and model setup.
+- [ ] Physical Android capture/gallery, rejection, saving/reopening and patient separation confirmation.
+- [ ] Independent real-phone validation across varied skin appearances and non-skin examples before reliability claims.
+Enhancement training stopped at user request; no verified enhancement winner. Word/auth remain deferred.

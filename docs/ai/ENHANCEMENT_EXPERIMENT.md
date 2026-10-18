@@ -26,4 +26,6 @@ If a candidate passes, replicate the baseline and that candidate with the predec
 
 ## Results
 
-Pending the predeclared runs and checkpoint verification. Prepared-input cache and run checkpoints remain ignored; only aggregate evidence is tracked. Word, real accounts, source images, current offline user-selected pointer and clinic services remain unchanged.
+Stopped at the user's request on 18 October 2026 to prioritise photo quality and skin-content admission. The seed-3403 baseline completed: 120/193 validation cases correct (62.18%), macro-F1 0.5585; checkpoint reproduction and the two lighting probes passed. Mild training jitter was interrupted after epoch 7 and has no completed/verified result. Contrast blend completed smoke checks only. No enhancement comparison or replication conclusion can be drawn. Do not use partial-run scores to select a model. Aggregate evidence is retained under `docs/ai/enhancement/`.
+
+Prepared-input cache and run checkpoints remain ignored. Word, real accounts, source images, eight classes, current offline user-selected pointer and disease simulation remain unchanged. Final-test pixels were not used.

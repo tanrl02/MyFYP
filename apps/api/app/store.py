@@ -649,7 +649,7 @@ class Store:
     def assessment_metadata(self, row):
         return {key: row[key] for key in ('id', 'patient_id', 'width', 'height', 'created_at')} | {
             'origin': 'simulation', 'example_category': 'Acne (example only)',
-            'message': 'No image analysis was performed. This example is not a diagnosis.'}
+            'message': 'No disease prediction was performed. Photo checks do not diagnose a condition.'}
 
     def assessments(self, patient):
         with self.connect() as db:

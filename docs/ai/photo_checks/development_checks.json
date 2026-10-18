@@ -1,0 +1,608 @@
+{
+  "purpose": "Small fixed prototype development set, not clinical or independent performance validation",
+  "examples": [
+    {
+      "kind": "skin",
+      "case_id": "-7776857652459777696",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 48.1795654296875,
+        "laplacian_variance": 87.73451232910156,
+        "dark_fraction": 0.0,
+        "bright_fraction": 4.57763671875e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3012669086456299,
+      "margin": 0.08251835405826569
+    },
+    {
+      "kind": "skin",
+      "case_id": "3083550471820565612",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 51.421024322509766,
+        "laplacian_variance": 865.2772216796875,
+        "dark_fraction": 0.00042724609375,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.29889896512031555,
+      "margin": 0.06705789268016815
+    },
+    {
+      "kind": "skin",
+      "case_id": "3377584127732041409",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 68.39276123046875,
+        "laplacian_variance": 190.79470825195312,
+        "dark_fraction": 0.009501139322916666,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.321747362613678,
+      "margin": 0.08819979429244995
+    },
+    {
+      "kind": "skin",
+      "case_id": "335846587626430311",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 56.38151168823242,
+        "laplacian_variance": 533.1944580078125,
+        "dark_fraction": 0.0037994384765625,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.25788283348083496,
+      "margin": 0.03864528238773346
+    },
+    {
+      "kind": "skin",
+      "case_id": "-919660371744832007",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 38.401519775390625,
+        "laplacian_variance": 95.09283447265625,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.28904014825820923,
+      "margin": 0.07879124581813812
+    },
+    {
+      "kind": "skin",
+      "case_id": "7530181678510252673",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 37.761634826660156,
+        "laplacian_variance": 80.26187133789062,
+        "dark_fraction": 0.0023997856029106027,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3094070553779602,
+      "margin": 0.08816416561603546
+    },
+    {
+      "kind": "skin",
+      "case_id": "5275181661240813075",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 49.53506088256836,
+        "laplacian_variance": 131.79913330078125,
+        "dark_fraction": 0.000294237012987013,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.31156429648399353,
+      "margin": 0.07247471809387207
+    },
+    {
+      "kind": "skin",
+      "case_id": "-7743291557587090042",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 34.8529167175293,
+        "laplacian_variance": 1517.014404296875,
+        "dark_fraction": 0.0,
+        "bright_fraction": 1.0172526041666666e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.31277334690093994,
+      "margin": 0.06602460145950317
+    },
+    {
+      "kind": "skin",
+      "case_id": "-8299809889773574040",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 50.680362701416016,
+        "laplacian_variance": 202.55360412597656,
+        "dark_fraction": 0.005101521809895833,
+        "bright_fraction": 0.0003662109375
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2991633117198944,
+      "margin": 0.06264722347259521
+    },
+    {
+      "kind": "skin",
+      "case_id": "3846988567346853286",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 49.353668212890625,
+        "laplacian_variance": 27.261838912963867,
+        "dark_fraction": 0.001373291015625,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.32271820306777954,
+      "margin": 0.10163471102714539
+    },
+    {
+      "kind": "skin",
+      "case_id": "-8111125152560753978",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 32.220924377441406,
+        "laplacian_variance": 134.5355224609375,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0009125955240174672
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2956646978855133,
+      "margin": 0.08830538392066956
+    },
+    {
+      "kind": "skin",
+      "case_id": "3950839687124807995",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 45.793331146240234,
+        "laplacian_variance": 50.835166931152344,
+        "dark_fraction": 0.0070699896694214875,
+        "bright_fraction": 2.0176911157024794e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3129689693450928,
+      "margin": 0.08156420290470123
+    },
+    {
+      "kind": "skin",
+      "case_id": "5604714673774290686",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 25.933103561401367,
+        "laplacian_variance": 16.94481658935547,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.30112797021865845,
+      "margin": 0.07539141178131104
+    },
+    {
+      "kind": "skin",
+      "case_id": "-130215202506383973",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 41.647560119628906,
+        "laplacian_variance": 64.8438491821289,
+        "dark_fraction": 0.06643391466005666,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2952127754688263,
+      "margin": 0.0696139931678772
+    },
+    {
+      "kind": "skin",
+      "case_id": "1850198155303184343",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 31.100717544555664,
+        "laplacian_variance": 15.984737396240234,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2892484664916992,
+      "margin": 0.04701907932758331
+    },
+    {
+      "kind": "skin",
+      "case_id": "5475014386524307360",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 74.09303283691406,
+        "laplacian_variance": 157.79931640625,
+        "dark_fraction": 0.0735931396484375,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.29761192202568054,
+      "margin": 0.09174889326095581
+    },
+    {
+      "kind": "skin",
+      "case_id": "-4662194556963063742",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 56.466121673583984,
+        "laplacian_variance": 36.00111389160156,
+        "dark_fraction": 0.023140462239583333,
+        "bright_fraction": 8.138020833333333e-06
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3048056960105896,
+      "margin": 0.0909738540649414
+    },
+    {
+      "kind": "skin",
+      "case_id": "2562611754724897853",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 62.980159759521484,
+        "laplacian_variance": 58.8459587097168,
+        "dark_fraction": 0.02886962890625,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3118135929107666,
+      "margin": 0.08031672239303589
+    },
+    {
+      "kind": "skin",
+      "case_id": "255207051194135479",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 72.29912567138672,
+        "laplacian_variance": 41.29441452026367,
+        "dark_fraction": 0.0665435791015625,
+        "bright_fraction": 0.0009511311848958334
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.32054561376571655,
+      "margin": 0.07674294710159302
+    },
+    {
+      "kind": "skin",
+      "case_id": "-2986702064294375651",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 58.174591064453125,
+        "laplacian_variance": 208.97610473632812,
+        "dark_fraction": 0.0005340576171875,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2885177731513977,
+      "margin": 0.08000504970550537
+    },
+    {
+      "kind": "skin",
+      "case_id": "4412120753157054552",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 74.71858978271484,
+        "laplacian_variance": 137.4263153076172,
+        "dark_fraction": 0.0133514404296875,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.28622740507125854,
+      "margin": 0.052639156579971313
+    },
+    {
+      "kind": "skin",
+      "case_id": "4039144254966056317",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 54.248321533203125,
+        "laplacian_variance": 42.282169342041016,
+        "dark_fraction": 0.015363493723849372,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.33279430866241455,
+      "margin": 0.09955459833145142
+    },
+    {
+      "kind": "skin",
+      "case_id": "-3406507834674402591",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 43.79029083251953,
+        "laplacian_variance": 730.2474365234375,
+        "dark_fraction": 0.0006510416666666666,
+        "bright_fraction": 0.0002797444661458333
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2895036041736603,
+      "margin": 0.07272933423519135
+    },
+    {
+      "kind": "skin",
+      "case_id": "7327821802957291496",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 58.79975128173828,
+        "laplacian_variance": 482.21112060546875,
+        "dark_fraction": 0.02252197265625,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3068600296974182,
+      "margin": 0.08158735930919647
+    },
+    {
+      "kind": "skin",
+      "case_id": "-5781127683500413767",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 64.48065185546875,
+        "laplacian_variance": 87.87474822998047,
+        "dark_fraction": 0.0211181640625,
+        "bright_fraction": 3.5603841145833336e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.28428858518600464,
+      "margin": 0.07007178664207458
+    },
+    {
+      "kind": "skin",
+      "case_id": "-3055300247709269077",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 62.96750259399414,
+        "laplacian_variance": 256.3280029296875,
+        "dark_fraction": 0.027094523111979168,
+        "bright_fraction": 0.0007120768229166666
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2823016047477722,
+      "margin": 0.016471832990646362
+    },
+    {
+      "kind": "skin",
+      "case_id": "-2518265086444700975",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 42.12261199951172,
+        "laplacian_variance": 228.71844482421875,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3203853964805603,
+      "margin": 0.07372501492500305
+    },
+    {
+      "kind": "skin",
+      "case_id": "5080913691893238848",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 50.06636428833008,
+        "laplacian_variance": 605.0254516601562,
+        "dark_fraction": 0.0025482177734375,
+        "bright_fraction": 0.0003204345703125
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3105323314666748,
+      "margin": 0.09605328738689423
+    },
+    {
+      "kind": "skin",
+      "case_id": "-6776518044035331491",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 41.7100830078125,
+        "laplacian_variance": 13.612605094909668,
+        "dark_fraction": 0.030100504557291668,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2815219759941101,
+      "margin": 0.05635027587413788
+    },
+    {
+      "kind": "skin",
+      "case_id": "-525038500404864710",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 43.90469741821289,
+        "laplacian_variance": 600.3374633789062,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.32602834701538086,
+      "margin": 0.08211478590965271
+    },
+    {
+      "kind": "skin",
+      "case_id": "6691291750986670327",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 52.65684509277344,
+        "laplacian_variance": 49.60670471191406,
+        "dark_fraction": 0.041798909505208336,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.30265459418296814,
+      "margin": 0.08878469467163086
+    },
+    {
+      "kind": "skin",
+      "case_id": "4716235809681478742",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 55.1997184753418,
+        "laplacian_variance": 296.1676940917969,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0004922084450402145
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.3017216622829437,
+      "margin": 0.07294373214244843
+    },
+    {
+      "kind": "skin",
+      "case_id": "-1694584375310842794",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 57.82330322265625,
+        "laplacian_variance": 472.18597412109375,
+        "dark_fraction": 0.0130767822265625,
+        "bright_fraction": 0.0025075276692708335
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2926342487335205,
+      "margin": 0.06817978620529175
+    },
+    {
+      "kind": "skin",
+      "case_id": "-2420670963295906064",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 64.6772689819336,
+        "laplacian_variance": 47.317344665527344,
+        "dark_fraction": 0.0,
+        "bright_fraction": 4.763719512195122e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2887739837169647,
+      "margin": 0.06578750908374786
+    },
+    {
+      "kind": "skin",
+      "case_id": "2600794538114860588",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 58.304237365722656,
+        "laplacian_variance": 211.62745666503906,
+        "dark_fraction": 0.0,
+        "bright_fraction": 1.3049832962138085e-05
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2826493978500366,
+      "margin": 0.04686318337917328
+    },
+    {
+      "kind": "skin",
+      "case_id": "1872413092507744029",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 63.429473876953125,
+        "laplacian_variance": 58.79608917236328,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.30202680826187134,
+      "margin": 0.04979550838470459
+    },
+    {
+      "kind": "skin",
+      "case_id": "-5642777666164872473",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 52.289703369140625,
+        "laplacian_variance": 1176.2823486328125,
+        "dark_fraction": 0.00017293294270833334,
+        "bright_fraction": 0.007207234700520833
+      },
+      "status": "likely_skin",
+      "positive_similarity": 0.2858831584453583,
+      "margin": 0.0622100830078125
+    },
+    {
+      "kind": "non_skin",
+      "name": "chelsea.png",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 32.12193298339844,
+        "laplacian_variance": 401.51055908203125,
+        "dark_fraction": 0.0013895048041389505,
+        "bright_fraction": 0.0
+      },
+      "status": "not_skin",
+      "positive_similarity": 0.21621929109096527,
+      "margin": -0.05442841351032257
+    },
+    {
+      "kind": "non_skin",
+      "name": "coffee.png",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 57.77217102050781,
+        "laplacian_variance": 1058.31494140625,
+        "dark_fraction": 0.015710914589442817,
+        "bright_fraction": 0.004668026026392962
+      },
+      "status": "not_skin",
+      "positive_similarity": 0.1987002193927765,
+      "margin": -0.11453327536582947
+    },
+    {
+      "kind": "non_skin",
+      "name": "brick.png",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 26.051599502563477,
+        "laplacian_variance": 176.54800415039062,
+        "dark_fraction": 0.0,
+        "bright_fraction": 0.0
+      },
+      "status": "uncertain",
+      "positive_similarity": 0.24493665993213654,
+      "margin": -0.011858955025672913
+    },
+    {
+      "kind": "non_skin",
+      "name": "grass.png",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 38.58552169799805,
+        "laplacian_variance": 5295.447265625,
+        "dark_fraction": 0.0005645751953125,
+        "bright_fraction": 0.0
+      },
+      "status": "uncertain",
+      "positive_similarity": 0.2685980200767517,
+      "margin": -0.00585782527923584
+    },
+    {
+      "kind": "non_skin",
+      "name": "gravel.png",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 38.72110366821289,
+        "laplacian_variance": 1645.7025146484375,
+        "dark_fraction": 0.000530242919921875,
+        "bright_fraction": 0.0
+      },
+      "status": "uncertain",
+      "positive_similarity": 0.2619886100292206,
+      "margin": -0.008253306150436401
+    },
+    {
+      "kind": "non_skin",
+      "name": "rocket.jpg",
+      "quality_reasons": [],
+      "quality": {
+        "gray_std": 30.128143310546875,
+        "laplacian_variance": 532.0322875976562,
+        "dark_fraction": 0.001667580409356725,
+        "bright_fraction": 0.0012221308479532164
+      },
+      "status": "not_skin",
+      "positive_similarity": 0.17306897044181824,
+      "margin": -0.03185458481311798
+    }
+  ],
+  "disease_test_images_evaluated": 0
+}

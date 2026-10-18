@@ -1,0 +1,19 @@
+{
+  "splits": {
+    "train": {
+      "images": 1374,
+      "contrast_changed_images": 1049,
+      "maximum_channel_change_8bit": 32,
+      "prepared_png_bytes": 531008301,
+      "decoded_rgb_bytes": 1102865295
+    },
+    "val": {
+      "images": 193,
+      "contrast_changed_images": 147,
+      "maximum_channel_change_8bit": 22,
+      "prepared_png_bytes": 79944616,
+      "decoded_rgb_bytes": 165367431
+    }
+  },
+  "test_pixels_read": 0
+}

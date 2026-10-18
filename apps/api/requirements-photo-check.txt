@@ -1,0 +1,9 @@
+# Install the existing ai/requirements-ai.txt first; this reuses its torch stack.
+-r requirements.txt
+clip @ git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6
+ftfy==6.3.1
+regex==2026.9.29
+wcwidth==0.9.2
+packaging==26.3
+tqdm==4.70.1
+colorama==0.4.6

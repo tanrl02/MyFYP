@@ -46,14 +46,15 @@ export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
   return `${visitTime(slot.starts_at)} – ${end}`;
 };
 
+export type PhotoCheck = {accepted:boolean;version:string;skin_content:"likely_skin"|"not_skin"|"uncertain"|"not_checked";reasons:string[];message:string};
 export class DemoApi {
   doctorMatches(source:DoctorMatchSource) { return this.request<DoctorMatches>(source.assessmentId?`/doctor-matches?assessment_id=${encodeURIComponent(source.assessmentId)}`:`/doctor-matches?concern=${encodeURIComponent(source.concern)}`); }
   doctors() { return this.request<DoctorProfile[]>("/doctors"); }
   saveDoctor(id:DemoDoctor,body:Pick<DoctorProfile,"specialty"|"expertise"|"version">) { return this.request<DoctorProfile>(`/staff/doctors/${encodeURIComponent(id)}`,body); }
   constructor(private baseUrl: string, private actor: DemoActor) {}
-  private async request<T>(path: string, body?: object | FormData): Promise<T> {
+  private async request<T>(path: string, body?: object | FormData, timeoutMs=10000): Promise<T> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}${path}`, {
         method: body ? "POST" : "GET", signal: controller.signal,
@@ -97,7 +98,8 @@ export class DemoApi {
   publishConsultation(id: string, findings: string, followUp: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp }); }
   assessments() { return this.request<Assessment[]>("/assessments"); }
   assessment(id: string) { return this.request<Assessment>(`/assessments/${encodeURIComponent(id)}`); }
-  saveAssessment(body: FormData) { return this.request<Assessment>("/assessments", body); }
+  checkPhoto(body: FormData) { return this.request<PhotoCheck>("/photo-check", body,60000); }
+  saveAssessment(body: FormData) { return this.request<Assessment>("/assessments", body,60000); }
   shares() { return this.request<AssessmentShare[]>("/assessment-shares"); }
   shareAssessment(id: string, doctor: DemoDoctor, message: string, requestId: string) { return this.request<AssessmentShare>(`/assessments/${encodeURIComponent(id)}/share`, { doctor_id: doctor, patient_message: message, request_id: requestId }); }
   revokeShare(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/revoke`, {}); }
