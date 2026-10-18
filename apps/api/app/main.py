@@ -82,6 +82,12 @@ class AppointmentLinkInput(BaseModel):
 class ConsultationInput(BaseModel):
     findings: str = Field(min_length=1, max_length=2000, pattern=r'\S')
     follow_up: str = Field(min_length=1, max_length=1000, pattern=r'\S')
+    draft_version: int | None = Field(default=None,strict=True,ge=0)
+
+class ConsultationDraftInput(BaseModel):
+    findings: str = Field(max_length=2000)
+    follow_up: str = Field(max_length=1000)
+    version: int = Field(strict=True,ge=0)
 
 class FollowUpInput(BaseModel):
     recommended_date: date
@@ -364,7 +370,15 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/visits/{booking_id}/consultation')
     def publish_consultation(booking_id: str, payload: ConsultationInput, who=Depends(doctor)):
-        return run(lambda: store.publish_consultation(booking_id,who,payload.findings.strip(),payload.follow_up.strip()))
+        return run(lambda: store.publish_consultation(booking_id,who,payload.findings.strip(),payload.follow_up.strip(),payload.draft_version))
+
+    @api.get('/visits/{booking_id}/consultation/draft')
+    def consultation_draft(booking_id: str,who=Depends(doctor)):
+        return run(lambda: store.consultation_draft(booking_id,who))
+
+    @api.post('/visits/{booking_id}/consultation/draft')
+    def save_consultation_draft(booking_id: str,payload: ConsultationDraftInput,who=Depends(doctor)):
+        return run(lambda: store.save_consultation_draft(booking_id,who,payload.findings.strip(),payload.follow_up.strip(),payload.version))
 
     @api.post('/visits/{booking_id}/invoice')
     def invoice(booking_id: str, who=Depends(staff)):

@@ -1,5 +1,6 @@
 export type Status = "waiting" | "called" | "completed" | "cancelled";
 export type ConsultationNote = { id: string; booking_id: string; doctor_id: DemoDoctor; findings: string; follow_up: string; created_at: string };
+export type ConsultationDraft = {booking_id:string;doctor_id:DemoDoctor;findings:string;follow_up:string;version:number;updated_at:string|null};
 export type PatientBackground = { patient_id: DemoPatient; allergies: string; medicines: string; conditions: string; version: number; updated_at: string | null };
 export type FollowUp = {source_booking_id:string;doctor_id:DemoDoctor;recommended_date:string;reason:string;created_at:string;booked_visit:Booking|null};
 export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null; background?: PatientBackground;follow_up?:FollowUp|null };
@@ -99,7 +100,9 @@ export class DemoApi {
   consultationHistory(id:string) { return this.request<ConsultationHistory>(`/visits/${encodeURIComponent(id)}/history`); }
   recommendFollowUp(id:string,recommendedDate:string,reason:string) { return this.request<FollowUp>(`/visits/${encodeURIComponent(id)}/follow-up`,{recommended_date:recommendedDate,reason}); }
   bookFollowUp(id:string,slot:string,requestId:string) { return this.request<Booking>(`/visits/${encodeURIComponent(id)}/follow-up/book`,{slot_id:slot,request_id:requestId}); }
-  publishConsultation(id: string, findings: string, followUp: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp }); }
+  consultationDraft(id:string) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`); }
+  saveConsultationDraft(id:string,findings:string,followUp:string,version:number) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`,{findings,follow_up:followUp,version}); }
+  publishConsultation(id: string, findings: string, followUp: string,draftVersion?:number) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp,draft_version:draftVersion }); }
   assessments() { return this.request<Assessment[]>("/assessments"); }
   assessment(id: string) { return this.request<Assessment>(`/assessments/${encodeURIComponent(id)}`); }
   checkPhoto(body: FormData) { return this.request<PhotoCheck>("/photo-check", body,60000); }

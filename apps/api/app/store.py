@@ -100,6 +100,10 @@ class Store:
                 CREATE TABLE IF NOT EXISTS consultation_notes (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   doctor_id TEXT NOT NULL, findings TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS consultation_drafts (
+                  booking_id TEXT PRIMARY KEY REFERENCES bookings(id), doctor_id TEXT NOT NULL,
+                  findings TEXT NOT NULL, follow_up TEXT NOT NULL, version INTEGER NOT NULL,
+                  updated_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS visit_feedback (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
@@ -965,7 +969,39 @@ class Store:
                 items.append({'visit':self.record(db,row['id']),'note':dict(note) if note else None,'prescription':prescription})
             return {'current_visit_id':booking_id,'items':items,'limit':50}
 
-    def publish_consultation(self, booking_id, doctor, findings, follow_up):
+    def consultation_draft_record(self, db, booking_id, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        record=self.consultation_record(db,booking_id,doctor)
+        if record['note']:
+            raise RuleError('This consultation is already published. Draft editing is closed.')
+        row=db.execute('SELECT * FROM consultation_drafts WHERE booking_id=? AND doctor_id=?',(booking_id,doctor)).fetchone()
+        return dict(row) if row else {'booking_id':booking_id,'doctor_id':doctor,'findings':'','follow_up':'','version':0,'updated_at':None}
+
+    def consultation_draft(self, booking_id, doctor):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return self.consultation_draft_record(db,booking_id,doctor)
+
+    def save_consultation_draft(self, booking_id, doctor, findings, follow_up, version):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            current=self.consultation_draft_record(db,booking_id,doctor)
+            if self.record(db,booking_id)['status']!='called':
+                raise RuleError('This visit is completed. Its private draft is read-only.')
+            if (current['findings'],current['follow_up'])==(findings,follow_up):
+                return current
+            if current['version']!=version:
+                raise RuleError('This draft changed in another tab. Reload the saved draft before editing again.')
+            db.execute('''INSERT INTO consultation_drafts(booking_id,doctor_id,findings,follow_up,version,updated_at) VALUES(?,?,?,?,?,?)
+                ON CONFLICT(booking_id) DO UPDATE SET findings=excluded.findings,follow_up=excluded.follow_up,
+                version=excluded.version,updated_at=excluded.updated_at''',
+                (booking_id,doctor,findings,follow_up,version+1,datetime.now(timezone.utc).isoformat()))
+            return self.consultation_draft_record(db,booking_id,doctor)
+
+    def publish_consultation(self, booking_id, doctor, findings, follow_up, draft_version=None):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             record = self.consultation_record(db,booking_id,doctor)
@@ -976,9 +1012,13 @@ class Store:
                 return record
             if record['visit']['status'] != 'called':
                 raise RuleError('Publish the consultation note while the visit is called.')
+            draft=self.consultation_draft_record(db,booking_id,doctor)
+            if (draft_version is not None and draft_version!=draft['version']) or (draft_version is None and draft['version']>0):
+                raise RuleError('The private draft changed. Reload the saved draft and confirm publication again.')
             db.execute('INSERT INTO consultation_notes VALUES(?,?,?,?,?,?)',
                        (str(uuid4()),booking_id,doctor,findings,follow_up,datetime.now(timezone.utc).isoformat()))
             self.event(db,booking_id,doctor,'consultation-published')
+            db.execute('DELETE FROM consultation_drafts WHERE booking_id=?',(booking_id,))
             return self.consultation_record(db,booking_id,doctor)
 
     def prescription(self, db, booking_id):
