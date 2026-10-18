@@ -22,3 +22,6 @@ Browser: Keep absence preserved the active11November test record, then explicit 
 Only our synthetic absence `96c9a23a-a8e0-4f9f-91b9-55e178fb345f` was cancelled, restoring existing slot `3d4a3d04-d804-4f92-9fea-89b105d57c8e`. Evidence: `tmp/absence-cancellation-fixture.json`, `tmp/absence-cancellation-verified.png`. User confirmed Android on19October: restored time selectable after reopening, Back works, existing Ava booking unchanged and hidden from Noah. The pending physical card is resolved.
 
 Services: verified API restarted session32500 PID107152/8000. Prior dashboard/Expo had stopped, ports were checked free, and both restarted: dashboard session39799 PID78988/3000; Expo session91608 PID99028/8081, phone API `http://192.168.0.2:8000`. Expo's cold web bundle completed. These supersede older runtime IDs. AI/model/training, Word, real auth, dependencies and user's `docs/ai/BASELINE_SETUP.md` edit remain unchanged. No push/deploy/main merge.
+
+
+19 October 2026: staff can now choose a same-day partial absence as well as All day. Separate active periods on one date are supported; active overlap is rejected. History and cancellation retain the exact range. See [Partial-day absences](PARTIAL_DAY_ABSENCES.md) for current behavior and verification.

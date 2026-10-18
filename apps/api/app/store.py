@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+import re
 import sqlite3
 import json
 from uuid import uuid4
@@ -132,7 +133,13 @@ class Store:
                 db.execute('''INSERT INTO doctor_unavailability(id,doctor_id,clinic_date,reason,created_at,request_id)
                     SELECT id,doctor_id,clinic_date,reason,created_at,request_id FROM doctor_unavailability_legacy''')
                 db.execute('DROP TABLE doctor_unavailability_legacy')
-            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS active_doctor_unavailability ON doctor_unavailability(doctor_id,clinic_date) WHERE cancelled_at IS NULL')
+            if not db.in_transaction:
+                db.execute('BEGIN IMMEDIATE')
+            for column in ('start_time','end_time'):
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(doctor_unavailability)')}:
+                    db.execute(f'ALTER TABLE doctor_unavailability ADD COLUMN {column} TEXT')
+            db.execute('DROP INDEX IF EXISTS active_doctor_unavailability')
+            db.execute('CREATE INDEX IF NOT EXISTS doctor_absence_date ON doctor_unavailability(doctor_id,clinic_date) WHERE cancelled_at IS NULL')
             if 'prediction_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
                 db.execute('ALTER TABLE assessments ADD COLUMN prediction_json TEXT')
             if 'symptoms_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
@@ -282,8 +289,8 @@ class Store:
                 FROM slots s LEFT JOIN bookings b ON b.slot_id=s.id AND b.status!='cancelled'
                 WHERE s.starts_at > ? AND s.closed=0 AND NOT EXISTS (
                     SELECT 1 FROM doctor_unavailability u WHERE u.doctor_id=s.doctor_id AND u.cancelled_at IS NULL
-                    AND julianday(u.clinic_date||'T00:00:00+08:00')<julianday(s.starts_at,'+'||s.duration_minutes||' minutes')
-                    AND julianday(u.clinic_date||'T00:00:00+08:00','+1 day')>julianday(s.starts_at))
+                    AND julianday(u.clinic_date||'T'||COALESCE(u.start_time,'00:00')||':00+08:00')<julianday(s.starts_at,'+'||s.duration_minutes||' minutes')
+                    AND julianday(u.clinic_date||'T'||COALESCE(u.end_time,'24:00')||':00+08:00')>julianday(s.starts_at))
                 GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
                 (datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
         return [self.slot_metadata(r) for r in rows]
@@ -366,45 +373,51 @@ class Store:
     @staticmethod
     def unavailable_overlap(db, doctor, start, duration):
         return db.execute('''SELECT id FROM doctor_unavailability WHERE doctor_id=? AND cancelled_at IS NULL
-            AND julianday(clinic_date||'T00:00:00+08:00')<julianday(?)
-            AND julianday(clinic_date||'T00:00:00+08:00','+1 day')>julianday(?) LIMIT 1''',
+            AND julianday(clinic_date||'T'||COALESCE(start_time,'00:00')||':00+08:00')<julianday(?)
+            AND julianday(clinic_date||'T'||COALESCE(end_time,'24:00')||':00+08:00')>julianday(?) LIMIT 1''',
             (doctor,(start+timedelta(minutes=duration)).isoformat(),start.isoformat())).fetchone()
 
     def unavailability(self, doctor):
         if doctor not in DOCTORS:
             raise RuleError('Doctor not found.',404)
         with self.connect() as db:
-            return [dict(row) for row in db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at FROM doctor_unavailability WHERE doctor_id=? ORDER BY clinic_date DESC,created_at DESC,id',
+            return [dict(row) for row in db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time FROM doctor_unavailability WHERE doctor_id=? ORDER BY clinic_date DESC,created_at DESC,id',
                         (doctor,)).fetchall()]
 
-    def add_unavailability(self, doctor, clinic_date, reason, request_id):
+    def add_unavailability(self, doctor, clinic_date, reason, request_id, start_time=None, end_time=None):
         if doctor not in DOCTORS:
             raise RuleError('Doctor not found.',404)
         if not reason.strip() or len(reason)>300:
             raise RuleError('Enter a reason up to 300 characters.',422)
+        if (start_time is None)!=(end_time is None) or (start_time is not None and (
+                any(not isinstance(value,str) or not re.fullmatch(r'(?:[01][0-9]|2[0-3]):[0-5][0-9]',value) for value in (start_time,end_time))
+                or end_time<=start_time)):
+            raise RuleError('Choose both start and end times, with the end later on the same day.',422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             old=db.execute('SELECT * FROM doctor_unavailability WHERE request_id=?',(request_id,)).fetchone()
             if old:
-                if (old['doctor_id'],old['clinic_date'],old['reason'])!=(doctor,clinic_date,reason):
+                if (old['doctor_id'],old['clinic_date'],old['reason'],old['start_time'],old['end_time'])!=(doctor,clinic_date,reason,start_time,end_time):
                     raise RuleError('This request already saved different unavailability details.')
-                return {key:old[key] for key in ('id','doctor_id','clinic_date','reason','created_at','cancelled_at')}
+                return {key:old[key] for key in ('id','doctor_id','clinic_date','reason','created_at','cancelled_at','start_time','end_time')}
             day=date.fromisoformat(clinic_date)
             if day<=datetime.now(MALAYSIA).date():
                 raise RuleError('Choose a date after today in Malaysia.',422)
             try:next_day=day+timedelta(days=1)
             except OverflowError:raise RuleError('Choose an earlier date.',422)
-            start=f'{day.isoformat()}T00:00:00+08:00';end=f'{next_day.isoformat()}T00:00:00+08:00'
-            if db.execute('SELECT 1 FROM doctor_unavailability WHERE doctor_id=? AND clinic_date=? AND cancelled_at IS NULL',(doctor,clinic_date)).fetchone():
-                raise RuleError('This doctor is already unavailable on that date.')
+            start=f'{day.isoformat()}T{start_time or "00:00"}:00+08:00'
+            end=f'{day.isoformat()}T{end_time}:00+08:00' if end_time else f'{next_day.isoformat()}T00:00:00+08:00'
+            duration=int((datetime.fromisoformat(end)-datetime.fromisoformat(start)).total_seconds()/60)
+            if self.unavailable_overlap(db,doctor,datetime.fromisoformat(start),duration):
+                raise RuleError('This period overlaps an active absence for this doctor.')
             booked=db.execute('''SELECT 1 FROM bookings b JOIN slots s ON s.id=b.slot_id
                 WHERE s.doctor_id=? AND b.status!='cancelled'
                 AND julianday(s.starts_at)<julianday(?)
                 AND julianday(s.starts_at,'+'||s.duration_minutes||' minutes')>julianday(?) LIMIT 1''',(doctor,end,start)).fetchone()
             if booked:
-                raise RuleError('This date overlaps booked visits. Resolve those appointments first; no visits were changed.')
-            result={'id':str(uuid4()),'doctor_id':doctor,'clinic_date':clinic_date,'reason':reason,'created_at':datetime.now(timezone.utc).isoformat(),'cancelled_at':None}
-            db.execute('INSERT INTO doctor_unavailability(id,doctor_id,clinic_date,reason,created_at,cancelled_at,request_id) VALUES(?,?,?,?,?,?,?)',(*result.values(),request_id))
+                raise RuleError('This period overlaps booked visits. Resolve those appointments first; no visits were changed.')
+            result={'id':str(uuid4()),'doctor_id':doctor,'clinic_date':clinic_date,'reason':reason,'created_at':datetime.now(timezone.utc).isoformat(),'cancelled_at':None,'start_time':start_time,'end_time':end_time}
+            db.execute('INSERT INTO doctor_unavailability(id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time,request_id) VALUES(?,?,?,?,?,?,?,?,?)',(*result.values(),request_id))
             return result
 
     def cancel_unavailability(self, doctor, absence_id):
@@ -420,7 +433,7 @@ class Store:
                     raise RuleError('Only absences on a future Malaysia date can be cancelled.')
                 db.execute('UPDATE doctor_unavailability SET cancelled_at=? WHERE id=?',
                            (datetime.now(timezone.utc).isoformat(),absence_id))
-            saved=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at FROM doctor_unavailability WHERE id=?',(absence_id,)).fetchone()
+            saved=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time FROM doctor_unavailability WHERE id=?',(absence_id,)).fetchone()
             return dict(saved)
 
     def schedule_patterns(self):
@@ -524,7 +537,7 @@ class Store:
                 # Operational schedule only: no background, notes, photo, reason, prescription or bill.
                 slot['visits']=[{'id':visit['id'],'queue_number':visit['queue_number'],'status':visit['status'],'patient_name':PATIENTS[visit['patient_id']]} for visit in visits]
                 slots.append(slot)
-            absences=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at FROM doctor_unavailability WHERE doctor_id=? AND clinic_date>=? AND clinic_date<? ORDER BY clinic_date,created_at,id',
+            absences=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time FROM doctor_unavailability WHERE doctor_id=? AND clinic_date>=? AND clinic_date<? ORDER BY clinic_date,created_at,id',
                                 (doctor,week_start,(monday+timedelta(days=7)).isoformat())).fetchall()
             return {'pattern':self.schedule_pattern(db,doctor),'week_start':week_start,'slots':slots,'unavailability':[dict(row) for row in absences]}
 

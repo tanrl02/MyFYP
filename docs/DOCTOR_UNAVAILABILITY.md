@@ -23,3 +23,6 @@ Runtime: API session13970 PID66672 port8000 using `.venv-ai`; existing dashboard
 
 
 19 October update: future absences can now be cancelled by staff while retaining history. See docs/ABSENCE_CANCELLATION.md; the original creation/booking protection rules above remain applicable to active absences.
+
+
+19 October 2026: staff can now choose a same-day partial absence as well as All day. Separate active periods on one date are supported; active overlap is rejected. History and cancellation retain the exact range. See [Partial-day absences](PARTIAL_DAY_ABSENCES.md) for current behavior and verification.

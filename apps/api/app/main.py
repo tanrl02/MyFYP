@@ -55,6 +55,9 @@ class ScheduleGenerateInput(SchedulePreviewInput):
     request_id: str = Field(min_length=8,max_length=100)
 
 class UnavailabilityInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    start_time: str | None = Field(default=None,pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
+    end_time: str | None = Field(default=None,pattern=r'^(?:[01][0-9]|2[0-3]):[0-5][0-9]$')
     clinic_date: date
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
@@ -222,7 +225,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/staff/schedules/{doctor_id}/unavailability',status_code=201)
     def add_unavailability(doctor_id: str,payload: UnavailabilityInput,who=Depends(staff)):
-        return run(lambda: store.add_unavailability(doctor_id,payload.clinic_date.isoformat(),payload.reason.strip(),payload.request_id))
+        return run(lambda: store.add_unavailability(doctor_id,payload.clinic_date.isoformat(),payload.reason.strip(),payload.request_id,payload.start_time,payload.end_time))
 
     @api.post('/staff/schedules/{doctor_id}/unavailability/{absence_id}/cancel')
     def cancel_unavailability(doctor_id: str,absence_id: str,who=Depends(staff)):
