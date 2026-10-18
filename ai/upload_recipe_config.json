@@ -1,0 +1,12 @@
+{
+  "experiment": "upload-recipes-v1",
+  "seed": 3403,
+  "validation_images": 193,
+  "test_evaluation": "disabled",
+  "training_steps": 0,
+  "maximum_edge": 1600,
+  "recipes": ["current_jpeg85", "jpeg95_default", "jpeg95_444", "png_lossless"],
+  "checkpoints": ["comparison-v1-efficientnet_b0", "tuning-v1-partial-freeze"],
+  "selection": "lowest_worst_model_prediction_changes_then_total_changes_then_total_output_bytes",
+  "purpose": "Preserve fixed-checkpoint predictions through upload processing; not clinical model selection"
+}
