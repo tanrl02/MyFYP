@@ -1,0 +1,36 @@
+{
+  "experiment": "efficientnet-tuning-v1",
+  "architectures": [
+    "efficientnet_b0"
+  ],
+  "dataset_version": "eight-class-v1",
+  "dataset_lock_sha256_lf": "2f3314000b9f29eb544ac298539a9453ebd67a1b0b11203e25d4776c49ba7954",
+  "seed": 3403,
+  "batch_size": 16,
+  "warmup_epochs": 3,
+  "finetune_epochs": 15,
+  "minimum_finetune_epochs": 6,
+  "early_stopping_patience": 5,
+  "warmup_head_lr": 0.001,
+  "feature_lr": 0.0001,
+  "head_lr": 0.0005,
+  "weight_decay": 0.0001,
+  "cpu_threads": 4,
+  "num_workers": 0,
+  "batchnorm": "all_affine_parameters_and_running_statistics_frozen",
+  "loss": "inverse_training_class_frequency_cross_entropy",
+  "checkpoint_selection": "finetune_validation_accuracy_then_macro_f1_then_lower_unweighted_loss",
+  "preprocessing": "common_bicubic_resize256_centrecrop224_ImageNet_normalisation",
+  "augmentation": "train_only_RandomResizedCrop224_scale0.85to1_ratio0.9to1.1_horizontal_flip0.5",
+  "scheduler": "cosine_during_full_finetuning_eta_min_1e-6",
+  "test_evaluation": "disabled",
+  "accuracy_target": 0.85,
+  "scin_images_included": false,
+  "report_folder": "efficientnet_tuning",
+  "tuning_variant": "partial_freeze",
+  "feature_blocks": [
+    6,
+    7,
+    8
+  ]
+}

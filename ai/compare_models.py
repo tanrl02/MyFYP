@@ -35,15 +35,22 @@ def build(architecture, classes=8, pretrained=True):
 def head(model, architecture): return model.fc if architecture == 'resnet50' else model.classifier
 
 
-def configure(model, architecture, full):
-    model.requires_grad_(full)
+def configure(model, architecture, full, blocks=None):
+    if blocks is not None and (architecture != 'efficientnet_b0' or blocks != [6,7,8]):
+        raise ValueError('Partial freezing requires EfficientNet-B0 blocks 6,7,8')
+    model.requires_grad_(full and blocks is None)
+    if full and blocks is not None:
+        for index in blocks: model.features[index].requires_grad_(True)
     head(model, architecture).requires_grad_(True)
     for module in model.modules():
         if isinstance(module, nn.modules.batchnorm._BatchNorm): module.requires_grad_(False)
 
 
-def training_mode(model, architecture, full):
+def training_mode(model, architecture, full, blocks=None):
     model.train() if full else model.eval()
+    if full and blocks is not None:
+        model.features.eval()
+        for index in blocks: model.features[index].train()
     head(model, architecture).train()
     for module in model.modules():
         if isinstance(module, nn.modules.batchnorm._BatchNorm): module.eval()
@@ -70,6 +77,16 @@ def transforms_for():
 def score(metrics): return metrics['accuracy'], metrics['macro_f1'], -metrics['loss']
 
 
+def validate_tuning_config(config, control):
+    variant=config.get('tuning_variant')
+    if variant not in ('lower_lr_full','partial_freeze'): raise ValueError('Unknown tuning variant')
+    expected=dict(control,experiment='efficientnet-tuning-v1',architectures=['efficientnet_b0'],
+                  report_folder='efficientnet_tuning',tuning_variant=variant)
+    if variant=='lower_lr_full': expected.update(feature_lr=3e-5,head_lr=1.5e-4)
+    else: expected['feature_blocks']=[6,7,8]
+    if config!=expected: raise ValueError('Tuning changed an unapproved setting')
+
+
 def weight_path(architecture):
     torch.hub.set_dir(str(ROOT/'ai/weights'))
     return Path(torch.hub.get_dir())/'checkpoints'/Path(SPECS[architecture][1].url).name
@@ -89,7 +106,8 @@ def verify(folder, device):
     mapping,rows,_=load_baseline_data(config)
     if mapping != run['class_to_index']: raise ValueError('Class mapping changed')
     seed_everything(config['seed'],config['cpu_threads'])
-    model=build(arch,pretrained=False); model.load_state_dict(saved['model_state_dict']); configure(model,arch,True)
+    blocks=config.get('feature_blocks')
+    model=build(arch,pretrained=False); model.load_state_dict(saved['model_state_dict']); configure(model,arch,True,blocks)
     if frozen_digest(model) != run['full_frozen_digest']: raise ValueError('Frozen BatchNorm state changed')
     if hashlib.sha256(weight_path(arch).read_bytes()).hexdigest() != run['pretrained_sha256']: raise ValueError('Source weights changed')
     original=build(arch,pretrained=True)
@@ -97,15 +115,21 @@ def verify(folder, device):
     feature_names=[name for name,param in original.named_parameters() if id(param) not in original_head]
     if not any(not torch.equal(model.state_dict()[name], original.state_dict()[name]) for name in feature_names):
         raise ValueError('No feature updates found')
+    changed_blocks={str(i):any(not torch.equal(model.state_dict()[name],original.state_dict()[name])
+        for name in feature_names if name.startswith(f'features.{i}.')) for i in blocks or []}
+    if blocks and not all(changed_blocks.values()): raise ValueError('A selected feature block was not updated')
     model.to(device)
     loader=DataLoader(FrozenImages(rows['val'],transforms_for()[1]),batch_size=config['batch_size'])
     metrics=evaluate(model,loader,device,len(mapping)); assert_metrics(metrics,saved['validation'])
-    output=ROOT/'docs/ai/model_comparison'/folder.name; output.mkdir(parents=True,exist_ok=True)
+    report_folder=config.get('report_folder','model_comparison')
+    if report_folder not in ('model_comparison','efficientnet_tuning'): raise ValueError('Unknown report destination')
+    output=ROOT/'docs/ai'/report_folder/folder.name; output.mkdir(parents=True,exist_ok=True)
     result={'run_id':folder.name,'architecture':arch,'run':run,'checkpoint_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
         'best_epoch':saved['epoch'],'epochs_completed':len(history),'validation':metrics,'macro_precision':macro_precision(metrics),
         'validation_replay_verified':True,'frozen_batchnorm_verified':True,'features_updated':True,
         'epoch_seconds':sum(r['seconds'] for r in history),'accuracy_target_reached':metrics['accuracy']>=config['accuracy_target'],
         'test_images_evaluated':0}
+    if blocks: result['changed_feature_blocks']=changed_blocks
     (output/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
     (output/'epochs.json').write_text(json.dumps(history,indent=2)+'\n')
     print(json.dumps({k:result[k] for k in ('architecture','best_epoch','epochs_completed','macro_precision','accuracy_target_reached','validation_replay_verified')}),flush=True)
@@ -118,6 +142,7 @@ def main():
     parser.add_argument('--architecture',choices=tuple(SPECS),required=True)
     parser.add_argument('--run-id')
     parser.add_argument('--device',choices=('cuda','cpu'),default='cuda')
+    parser.add_argument('--config',default='ai/model_comparison_config.json')
     args=parser.parse_args()
     arch=args.architecture; path=weight_path(arch)
     if args.mode=='fetch':
@@ -128,17 +153,23 @@ def main():
     device=torch.device(args.device)
     if device.type=='cuda' and not torch.cuda.is_available(): raise ValueError('CUDA unavailable')
     folder=ROOT/'ai/runs'/args.run_id
-    if args.mode=='verify': return verify(folder,device)
+    if args.mode=='verify':
+        if json.loads((folder/'run.json').read_text())['architecture']!=arch: raise ValueError('Wrong verification architecture')
+        return verify(folder,device)
     if folder.exists(): raise ValueError('Run already exists')
     if not path.exists(): raise ValueError('Pretrained weights missing; fetch separately')
     weight_sha=hashlib.sha256(path.read_bytes()).hexdigest()
     if not weight_sha.startswith(path.stem.rsplit('-',1)[1]): raise ValueError('Pretrained hash-prefix mismatch')
-    config=json.loads((ROOT/'ai/model_comparison_config.json').read_text())
+    config=json.loads((ROOT/args.config).read_text())
+    if config.get('experiment')=='efficientnet-tuning-v1':
+        validate_tuning_config(config,json.loads((ROOT/'ai/model_comparison_config.json').read_text()))
+    if arch not in config['architectures']: raise ValueError('Architecture outside configured experiment')
+    blocks=config.get('feature_blocks')
     mapping,rows,dataset=load_baseline_data(config)
     seed_everything(config['seed'],config['cpu_threads'])
     model=build(arch,len(mapping)).to(device)
     train_transform,val_transform=transforms_for()
-    configure(model,arch,True); full_frozen=frozen_digest(model)
+    configure(model,arch,True,blocks); full_frozen=frozen_digest(model)
     configure(model,arch,False); warm_frozen=frozen_digest(model)
     run={'architecture':arch,'config':config,'class_to_index':mapping,'dataset_lock':dataset,'mode':args.mode,
         'pretrained_url':SPECS[arch][1].url,'pretrained_sha256':weight_sha,'full_frozen_digest':full_frozen,
@@ -152,7 +183,7 @@ def main():
     if args.mode=='smoke':
         images,labels=next(iter(DataLoader(FrozenImages(one_per_class(rows['train']),train_transform),batch_size=8)))
         for full in (False,True):
-            configure(model,arch,full); before=frozen_digest(model); training_mode(model,arch,full)
+            configure(model,arch,full,blocks); before=frozen_digest(model); training_mode(model,arch,full,blocks)
             optimizer=torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],lr=1e-4)
             optimizer.zero_grad(); loss=criterion(model(images.to(device)),labels.to(device)); loss.backward(); optimizer.step()
             if not torch.isfinite(loss) or frozen_digest(model)!=before: raise ValueError('Smoke invariants failed')
@@ -167,13 +198,13 @@ def main():
         full=epoch>config['warmup_epochs']
         if epoch==config['warmup_epochs']+1:
             if frozen_digest(model)!=warm_frozen: raise ValueError('Warm-up changed frozen features')
-            configure(model,arch,True)
+            configure(model,arch,True,blocks)
             head_ids={id(p) for p in head(model,arch).parameters()}
             optimizer=torch.optim.AdamW([
                 {'params':[p for p in model.parameters() if p.requires_grad and id(p) not in head_ids],'lr':config['feature_lr']},
                 {'params':head(model,arch).parameters(),'lr':config['head_lr']}],weight_decay=config['weight_decay'])
             scheduler=torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max=config['finetune_epochs'],eta_min=1e-6)
-        started=time.monotonic(); training_mode(model,arch,full); total=batches=0
+        started=time.monotonic(); training_mode(model,arch,full,blocks); total=batches=0
         for images,labels in loader:
             optimizer.zero_grad(set_to_none=True)
             loss=criterion(model(images.to(device)),labels.to(device))

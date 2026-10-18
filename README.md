@@ -21,3 +21,6 @@ Added Skin check: camera/gallery/photo confirmation, local-backend saved photo/h
 
 
 Offline AI comparison (18 October): three matched pretrained models completed. Best EfficientNet-B0 validation accuracy 65.28%; 85% target not met. App predictions remain simulated; final test reserved. See [protocol, results and limitations](docs/ai/MODEL_COMPARISON.md).
+
+
+Bounded B0 tuning (18 October): partial freezing reaches 66.32% validation accuracy but lower macro-F1 than the 65.28% control. 85% remains unmet; repeat-seed comparison pending. See [settings, trade-offs and verification](docs/ai/EFFICIENTNET_TUNING.md).

@@ -3,7 +3,7 @@ import unittest
 HAS_TORCH=importlib.util.find_spec('torch') is not None
 if HAS_TORCH:
     import torch
-    from ai.compare_models import build,head,configure,training_mode,frozen_digest,score
+    from ai.compare_models import build,head,configure,training_mode,frozen_digest,score,validate_tuning_config
     from ai.train_baseline import seed_everything
 
 
@@ -35,6 +35,34 @@ class ModelComparisonTests(unittest.TestCase):
         self.assertGreater(score(a),score({'accuracy':.69,'macro_f1':.6,'loss':.5}))
         self.assertGreater(score({**a,'macro_f1':.6}),score(a))
         self.assertGreater(score({**a,'loss':.9}),score(a))
+
+    def test_partial_tuning_preserves_lower_blocks_and_batchnorm(self):
+        seed_everything(3403,2)
+        model=build('efficientnet_b0',pretrained=False)
+        blocks=[6,7,8]
+        configure(model,'efficientnet_b0',True,blocks)
+        before=frozen_digest(model)
+        training_mode(model,'efficientnet_b0',True,blocks)
+        self.assertFalse(model.features[5].training)
+        self.assertTrue(model.features[6].training)
+        optimizer=torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],lr=1e-3)
+        loss=torch.nn.functional.cross_entropy(model(torch.randn(2,3,64,64)),torch.tensor([0,7]))
+        loss.backward();optimizer.step()
+        self.assertEqual(before,frozen_digest(model))
+        for i in blocks:self.assertTrue(any(p.grad is not None for p in model.features[i].parameters()))
+        for i in range(6):self.assertTrue(all(p.grad is None for p in model.features[i].parameters()))
+        with self.assertRaises(ValueError):configure(model,'efficientnet_b0',True,[5,6,7,8])
+
+    def test_tuning_configs_only_change_predeclared_settings(self):
+        import json
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[2]
+        control=json.loads((root/'ai/model_comparison_config.json').read_text())
+        for name in ('lower_lr_full','partial_freeze'):
+            config=json.loads((root/f'ai/tuning_{name}_config.json').read_text())
+            validate_tuning_config(config,control)
+            with self.assertRaises(ValueError):validate_tuning_config(dict(config,seed=999),control)
+            with self.assertRaises(ValueError):validate_tuning_config(dict(config,feature_lr=.01),control)
 
 
 if __name__=='__main__': unittest.main()
