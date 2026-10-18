@@ -1,6 +1,6 @@
 # Photo admission checks
 
-Implemented 18 October 2026. Capture/select → local backend check → preview with pass or retake explanation → Save. Save checks its actual uploaded bytes again. Preflight never saves an assessment. Existing saved photos remain accessible without retroactive checks. Disease results remain explicitly simulated.
+Implemented 18 October 2026. Capture/select → local backend check → preview with pass or retake explanation → Analyse & save. Save checks its actual uploaded bytes again. Preflight never saves an assessment. Existing saved photos remain accessible without retroactive checks. New assessments now use [experimental local disease inference](EXPERIMENTAL_AI.md); historical records remain simulations. Photo admission and disease prediction are separate steps.
 
 Quality checks reject undecodable/unsupported images, files above 5 MiB, sides below 224 pixels, nearly blank dark/washed-out frames, flat frames and severe blur. These conservative engineering thresholds do not establish clinical image quality. Skin content uses a local, frozen OpenAI CLIP ViT-B/32 with skin and non-skin text prompts; no skin-colour threshold or demographic classifier is used. Low-confidence content is blocked along with non-skin content. Missing dependencies/weights fail closed with a retry message.
 

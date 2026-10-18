@@ -62,7 +62,7 @@ export default function App() {
       <VisitNotes key={patient} patient={patient}/>
       <FeedbackView key={`feedback-${patient}`} api={api} bookings={bookings}/>
     </>}
-    <Text style={styles.footnote}>Shared skin assessment history, booking, queue, prescriptions and billing. AI results and payments are simulated; identities are demo only.</Text>
+    <Text style={styles.footnote}>Shared skin assessment history, booking, queue, prescriptions and billing. New AI suggestions are experimental; older AI examples and payments are simulated. Identities are demo only.</Text>
   </ScrollView></SafeAreaView>;
 }
 const styles=StyleSheet.create({

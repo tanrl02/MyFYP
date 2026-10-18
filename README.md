@@ -1,6 +1,9 @@
 # Smart Skin Disease System
 
-Current increment: shared booking, queue, prescriptions and simulated billing.
+Current increment: experimental local disease-model inference, shared booking,
+queue, prescriptions and simulated billing. New assessments show saved top-three
+suggestions from the user-selected59.6%-validation model; older records remain
+simulations. See [experimental AI setup, flow and limitations](docs/EXPERIMENTAL_AI.md).
 One Python API saves records locally; the Expo app and Next.js dashboard read
 the same database. Supabase integration and secure authentication are pending.
 

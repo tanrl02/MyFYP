@@ -13,7 +13,7 @@ class WorkflowTests(unittest.TestCase):
         root.mkdir(exist_ok=True)
         self.path = Path(tempfile.mkdtemp(dir=root)) / 'test.sqlite3'
         # Workflow fixtures are synthetic blocks, not skin-validation examples.
-        self.client = TestClient(create_app(self.path,photo_checker=lambda content:{'accepted':True}))
+        self.client = TestClient(create_app(self.path,photo_checker=lambda content:{'accepted':True},predictor=lambda content:None))
         self.slot = self.client.get('/slots').json()[0]
         self.patient = {'X-Demo-Actor':'patient-ava'}
         self.other = {'X-Demo-Actor':'patient-noah'}

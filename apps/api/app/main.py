@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, UploadFile, File, F
 import hashlib
 from .photos import MAX_BYTES, normalise_photo
 from .photo_checks import check_photo
+from .disease_model import predict_disease
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .store import DOCTORS, PATIENTS, RuleError, Store
@@ -93,8 +94,9 @@ class StockReceiptInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
 
-def create_app(path=None,photo_checker=None):
+def create_app(path=None,photo_checker=None,predictor=None):
     photo_checker=photo_checker or check_photo
+    predictor=predictor or predict_disease
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
     api.add_middleware(CORSMiddleware,
@@ -235,10 +237,14 @@ def create_app(path=None,photo_checker=None):
         finally:
             photo.file.close()
         def save():
+            source_hash=hashlib.sha256(content).hexdigest()
+            existing=store.assessment_retry(who,request_id,source_hash)
+            if existing is not None:return existing
             checked=photo_checker(content)
             if not checked['accepted']:raise RuleError(' '.join(checked['reasons']),422)
             clean, width, height = normalise_photo(content)
-            return store.save_assessment(who, request_id, hashlib.sha256(content).hexdigest(), clean, width, height)
+            prediction=predictor(content)
+            return store.save_assessment(who,request_id,source_hash,clean,width,height,prediction=prediction)
         return run(save)
 
     @api.post('/photo-check')

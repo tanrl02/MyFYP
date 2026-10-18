@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
-import { Assessment, DemoApi, DemoPatient, PhotoCheck, visitTime } from "@smart-skin/shared";
+import { Assessment, DemoApi, DemoPatient, PhotoCheck, assessmentCategory, assessmentOrigin, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
 import SharingView from "./SharingView";
+import AssessmentResult from "./AssessmentResult";
 type Draft = { uri: string; mime: string; file?: globalThis.File; request: string; local?: File };
 function photoForm(photo:Draft) {
   const form=new FormData();
@@ -90,7 +91,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       const saved = await api.saveAssessment(form);
       setResult(saved); setHistory(current => [saved, ...current.filter(r => r.id !== saved.id)]);
       if (draft.local?.exists) draft.local.delete();
-      setDraft(null);setPhotoCheck(null); setNotice("Checked photo and simulated disease result saved to your local project backend.");
+      setDraft(null);setPhotoCheck(null); setNotice("Photo and experimental AI suggestions saved. You can share them with a doctor for review.");
     } catch (e) { setPhotoCheck(null); setError(e instanceof Error ? e.message : "Unable to save. Refresh history before retrying."); }
     finally { setBusy(false); }
   }
@@ -102,7 +103,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   return <View>
     <Text style={styles.title}>Skin assessment</Text><Text style={styles.muted}>Take or choose a non-sensitive close-up skin photo. Automatic checks run on your local backend before you can save. Avoid objects, screens, glare and identifying details.</Text>
-    <View style={styles.warning}><Text style={styles.warningText}>SIMULATION — disease results remain fixed examples, not diagnoses. Photo checks assess quality and likely skin content only. Photos stay on this computer's local backend.</Text></View>
+    <View style={styles.warning}><Text style={styles.warningText}>EXPERIMENTAL AI — new assessments use a research model and can be wrong. Photo quality/skin checks are separate. A doctor should review the result. Older records remain labelled simulations.</Text></View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text>{denied && Platform.OS !== "web" ? <Pressable accessibilityRole="button" onPress={() => Linking.openSettings()}><Text style={styles.link}>Open app settings</Text></Pressable> : null}</View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
     <View style={styles.row}><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => pick(true)}><Text style={styles.buttonText}>Take photo</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.secondary} onPress={() => pick(false)}><Text style={styles.link}>Choose photo</Text></Pressable></View>
@@ -112,10 +113,10 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       <Text style={styles.muted}>JPEG, PNG or WebP · up to 5 MB · at least 224 pixels per side. Checking does not save an assessment. Save rechecks the uploaded photo.</Text>
       {!photoCheck?.accepted&&!checking?<Pressable accessibilityRole="button" disabled={busy} onPress={retryCheck}><Text style={styles.link}>Retry photo check</Text></Pressable>:null}
       {photoCheck&&!photoCheck.accepted?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>pick(true)}><Text style={styles.link}>Retake photo</Text></Pressable>:null}
-      <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted} style={[styles.button,!photoCheck?.accepted&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Saving…":"Save simulated assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
-    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · SIMULATION</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<Text style={styles.subtitle}>{result.example_category}</Text><Text style={styles.muted}>{result.message}</Text><Text style={styles.muted}>This fixed example does not depend on your photo. Disease classification is later work.</Text><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Suggestions use this simulated example. Booking does not share this assessment; use the sharing controls to authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
+      <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted} style={[styles.button,!photoCheck?.accepted&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
+    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Doctor suggestions use the saved result and staff-entered expertise. You can choose a different concern. Booking does not share the assessment; authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
     <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Your latest 100 saved assessments. Photos survive app/server restarts because they are saved in the shared database.</Text>
-    {history.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>Simulation · {item.example_category}</Text><Text style={styles.link}>View saved photo & result →</Text></Pressable>)}
+    {history.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text><Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
     {!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
   </View>;
 }

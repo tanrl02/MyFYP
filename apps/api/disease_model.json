@@ -1,0 +1,18 @@
+{
+  "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4",
+  "checkpoint_path": "ai/runs/efficientnet-b0-finetune-v1/best.pt",
+  "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+  "architecture": "efficientnet_b0",
+  "epoch": 7,
+  "preprocessing": "exif_rgb_official_centre_crop_v1",
+  "dataset_version": "eight-class-v1",
+  "validation_accuracy": 0.5958549222797928,
+  "validation_macro_f1": 0.5214449327801965,
+  "validation_cases": 193,
+  "test_evaluated": false,
+  "class_to_index": {
+    "acne": 0, "eczema": 1, "psoriasis": 2, "folliculitis": 3,
+    "urticaria": 4, "allergic_contact_dermatitis": 5,
+    "seborrheic_dermatitis": 6, "scabies": 7
+  }
+}

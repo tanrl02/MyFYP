@@ -40,7 +40,7 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
   const linked = shares.some(s => s.booking_id === bookingId && !s.revoked_at);
   return <View style={styles.box}>
     <Text style={styles.title}>Doctor sharing & review</Text>
-    <Text style={styles.body}>Choose who can open this photo, its simulation result and your message. Other assessments stay private. Demo accounts only.</Text>
+    <Text style={styles.body}>Choose who can open this photo, its saved result and your message. Other assessments stay private. Demo accounts only.</Text>
     {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     {notice ? <Text style={styles.body}>{notice}</Text> : null}
     <View style={styles.row}>{(["doctor","appointment"] as const).map(value => <Pressable accessibilityRole="button" key={value} disabled={busy || confirm} style={[styles.choice,mode===value&&styles.selected]} onPress={() => { setMode(value); setRequest(requestKey()); setNotice(""); }}><Text style={{color:mode===value?"white":"#176f5e"}}>{value==="doctor"?"Share with doctor":"Link to appointment"}</Text></Pressable>)}</View>

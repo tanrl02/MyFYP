@@ -1,0 +1,120 @@
+{
+  "purpose": "Integration replay, not disease accuracy evaluation",
+  "runtime_contract_sha256": "9bc20d75da2215f4fa256372e72413aeb9e31a2aae60f475ef283798916e1464",
+  "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4",
+  "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+  "independent_forward_comparisons": 3,
+  "missing_model_fails_closed": true,
+  "cases": [
+    {
+      "case_id": "-7776857652459777696",
+      "input_sha256": "c9353dd03387fb9ec47d922d828180e60b061dbb5bfc36d3d8ab7d5ed283e610",
+      "reference_matches": true,
+      "prediction": {
+        "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4",
+        "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+        "preprocessing": "exif_rgb_official_centre_crop_v1",
+        "dataset_version": "eight-class-v1",
+        "validation_accuracy": 0.5958549222797928,
+        "validation_macro_f1": 0.5214449327801965,
+        "validation_cases": 193,
+        "test_evaluated": false,
+        "top_predictions": [
+          {
+            "condition": "allergic_contact_dermatitis",
+            "label": "Allergic contact dermatitis",
+            "score": 0.4545770585536957
+          },
+          {
+            "condition": "urticaria",
+            "label": "Urticaria",
+            "score": 0.2455260008573532
+          },
+          {
+            "condition": "scabies",
+            "label": "Scabies",
+            "score": 0.14148107171058655
+          }
+        ],
+        "input_sha256": "c9353dd03387fb9ec47d922d828180e60b061dbb5bfc36d3d8ab7d5ed283e610",
+        "created_at": "2026-10-18T11:25:42.609611+00:00"
+      },
+      "reopen_matches": true,
+      "other_patient_denied": true
+    },
+    {
+      "case_id": "3083550471820565612",
+      "input_sha256": "7bada9b46feeef61e243ca16c255ec967aafb6983e9e019c3622a974b13659ee",
+      "reference_matches": true,
+      "prediction": {
+        "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4",
+        "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+        "preprocessing": "exif_rgb_official_centre_crop_v1",
+        "dataset_version": "eight-class-v1",
+        "validation_accuracy": 0.5958549222797928,
+        "validation_macro_f1": 0.5214449327801965,
+        "validation_cases": 193,
+        "test_evaluated": false,
+        "top_predictions": [
+          {
+            "condition": "urticaria",
+            "label": "Urticaria",
+            "score": 0.9404945969581604
+          },
+          {
+            "condition": "folliculitis",
+            "label": "Folliculitis",
+            "score": 0.02291201800107956
+          },
+          {
+            "condition": "scabies",
+            "label": "Scabies",
+            "score": 0.017658110707998276
+          }
+        ],
+        "input_sha256": "7bada9b46feeef61e243ca16c255ec967aafb6983e9e019c3622a974b13659ee",
+        "created_at": "2026-10-18T11:25:43.104863+00:00"
+      },
+      "reopen_matches": true,
+      "other_patient_denied": true
+    },
+    {
+      "case_id": "3377584127732041409",
+      "input_sha256": "3595aac6aa9d82b2b292c1f0393f964035c5705dd8889491d9ceb1c367039e59",
+      "reference_matches": true,
+      "prediction": {
+        "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4",
+        "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
+        "preprocessing": "exif_rgb_official_centre_crop_v1",
+        "dataset_version": "eight-class-v1",
+        "validation_accuracy": 0.5958549222797928,
+        "validation_macro_f1": 0.5214449327801965,
+        "validation_cases": 193,
+        "test_evaluated": false,
+        "top_predictions": [
+          {
+            "condition": "allergic_contact_dermatitis",
+            "label": "Allergic contact dermatitis",
+            "score": 0.47610729932785034
+          },
+          {
+            "condition": "urticaria",
+            "label": "Urticaria",
+            "score": 0.27167707681655884
+          },
+          {
+            "condition": "scabies",
+            "label": "Scabies",
+            "score": 0.14325889945030212
+          }
+        ],
+        "input_sha256": "3595aac6aa9d82b2b292c1f0393f964035c5705dd8889491d9ceb1c367039e59",
+        "created_at": "2026-10-18T11:25:43.722108+00:00"
+      },
+      "reopen_matches": true,
+      "other_patient_denied": true
+    }
+  ],
+  "disease_final_test_images_read": 0,
+  "live_database_written": false
+}

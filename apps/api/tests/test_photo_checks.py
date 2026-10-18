@@ -18,7 +18,7 @@ class PhotoCheckTests(unittest.TestCase):
     def setUp(self):
         workflow.WorkflowTests.setUp(self)
         self.screener=FixedScreener()
-        self.client=TestClient(create_app(self.path,photo_checker=lambda body:check_photo(body,self.screener)))
+        self.client=TestClient(create_app(self.path,photo_checker=lambda body:check_photo(body,self.screener),predictor=lambda content:None))
 
     def photo(self,kind='detail'):
         image=Image.new('RGB',(384,384),(160,115,85))

@@ -13,13 +13,16 @@ export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => 
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; low_stock_threshold: number };
 export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: Record<Status | "rescheduled" | "total",number>; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; items: { medicine_id: string; name: string; received: number; dispensed: number }[] }; feedback: { count: number; average_rating: number | null } };
-export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"; example_category: string; message: string; photo_uri?: string };
+export type DiseasePrediction = {model_id:string;checkpoint_sha256:string;preprocessing:string;dataset_version:string;validation_accuracy:number;validation_macro_f1:number;validation_cases:number;test_evaluated:boolean;input_sha256:string;created_at:string;top_predictions:{condition:string;label:string;score:number}[]};
+export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; message: string; photo_uri?: string };
+export const assessmentCategory=(assessment:Assessment)=>assessment.prediction?.top_predictions[0]?.label??assessment.example_category??"No suggestion";
+export const assessmentOrigin=(assessment:Assessment)=>assessment.origin==="experimental_ai"?"Experimental AI":"Simulation";
 export type DemoDoctor = "doctor-lim" | "doctor-anita";
 export const concernLabels = {general:"General skin concerns / not sure",acne:"Acne",eczema:"Eczema",psoriasis:"Psoriasis"};
 export type DoctorConcern = keyof typeof concernLabels;
 export type DoctorProfile = {doctor_id:DemoDoctor;doctor_name:string;specialty:string;expertise:DoctorConcern[];version:number;updated_at:string|null};
 export type DoctorMatchSource = {concern:DoctorConcern;assessmentId?:string};
-export type DoctorMatches = {concern:DoctorConcern;source:"manual"|"simulation";assessment_id:string|null;message:string;doctors:(DoctorProfile & {match_level:"concern"|"general"|"none";match_reason:string})[]};
+export type DoctorMatches = {concern:DoctorConcern;source:"manual"|"simulation"|"experimental_ai";assessment_id:string|null;message:string;doctors:(DoctorProfile & {match_level:"concern"|"general"|"none";match_reason:string})[]};
 export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim (demo)", "doctor-anita": "Dr. Anita (demo)" };
 export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDoctor; note: string; follow_up: string; created_at: string };
 export type ReviewDraft = {share_id:string;doctor_id:DemoDoctor;note:string;follow_up:string;version:number;updated_at:string|null};

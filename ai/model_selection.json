@@ -1,6 +1,6 @@
 {
   "selected_on": "2026-10-18",
-  "status": "offline_development_only_not_integrated_into_app",
+  "status": "experimental_local_app_integration",
   "run_id": "efficientnet-b0-finetune-v1",
   "checkpoint_path": "ai/runs/efficientnet-b0-finetune-v1/best.pt",
   "checkpoint_sha256": "b7eb8b2762f4f5d246ad29b07c64c1dfcccea83ab6d38992da781e04f792ead8",
@@ -14,5 +14,7 @@
   "test_images_evaluated": 0,
   "retained_experiment": "efficientnet-b0-full-frame-v1",
   "historical_comparison": "docs/ai/full_frame_results/summary.json records the metric-rule winner, not the current user-selected offline model",
-  "report": "docs/ai/DATA_ACCESS_PLAN.md"
+  "report": "docs/ai/DATA_ACCESS_PLAN.md",
+  "integrated_on": "2026-10-18",
+  "runtime_contract": "apps/api/disease_model.json"
 }

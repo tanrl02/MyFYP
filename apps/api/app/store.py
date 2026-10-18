@@ -105,6 +105,8 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            if 'prediction_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
+                db.execute('ALTER TABLE assessments ADD COLUMN prediction_json TEXT')
             for column, definition in [('closed', 'INTEGER NOT NULL DEFAULT 0'),('request_id','TEXT'),
                                        ('duration_minutes','INTEGER NOT NULL DEFAULT 30 CHECK(duration_minutes BETWEEN 15 AND 120 AND duration_minutes%15=0)')]:
                 if column not in {row['name'] for row in db.execute('PRAGMA table_info(slots)')}:
@@ -155,16 +157,20 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             if assessment_id is not None:
-                row=db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE id=? AND patient_id=?',
+                row=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE id=? AND patient_id=?',
                                (assessment_id,patient)).fetchone()
                 if row is None:
                     raise RuleError('Assessment not found for this patient.',404)
                 metadata=self.assessment_metadata(row)
                 # Explicit categories only. Unknown/uncertain results use general support.
-                concern={'Acne (example only)':'acne','Eczema (example only)':'eczema',
-                         'Psoriasis (example only)':'psoriasis'}.get(metadata['example_category'],'general')
+                if metadata['origin']=='experimental_ai':
+                    condition=metadata['prediction']['top_predictions'][0]['condition']
+                    concern=condition if condition in DOCTOR_CONCERNS else 'general'
+                else:
+                    concern={'Acne (example only)':'acne','Eczema (example only)':'eczema',
+                             'Psoriasis (example only)':'psoriasis'}.get(metadata['example_category'],'general')
                 source=metadata['origin']
-                message='SIMULATION: suggestions use a fixed example category, not image analysis or a diagnosis. No assessment is shared by viewing suggestions or booking.'
+                message=('EXPERIMENTAL AI: suggestions use an unverified model suggestion and staff-entered expertise. You can choose another concern. This is not a diagnosis.' if source=='experimental_ai' else 'SIMULATION: suggestions use a fixed example category, not image analysis or a diagnosis.')+' No assessment is shared by viewing suggestions or booking.'
             profiles=[self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
         for profile in profiles:
             if concern in profile['expertise']:
@@ -425,7 +431,7 @@ class Store:
             linked=[]
             for row in db.execute('SELECT id FROM assessment_shares WHERE booking_id=? ORDER BY created_at DESC LIMIT 100',(booking_id,)).fetchall():
                 share=self.share_record(db,row['id'],patient)
-                assessment=db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
+                assessment=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
                 linked.append(dict(share,assessment=self.assessment_metadata(assessment)))
             feedback=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
             replacement=self.record(db,visit['rescheduled_to_id']) if visit['rescheduled_to_id'] else None
@@ -647,13 +653,18 @@ class Store:
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
     def assessment_metadata(self, row):
-        return {key: row[key] for key in ('id', 'patient_id', 'width', 'height', 'created_at')} | {
+        metadata={key:row[key] for key in ('id','patient_id','width','height','created_at')}
+        if 'prediction_json' in row.keys() and row['prediction_json']:
+            return metadata | {'origin':'experimental_ai','example_category':None,
+                'prediction':json.loads(row['prediction_json']),
+                'message':'Experimental model suggestions only; may be wrong. Not a diagnosis. Ask a doctor to review.'}
+        return metadata | {
             'origin': 'simulation', 'example_category': 'Acne (example only)',
             'message': 'No disease prediction was performed. Photo checks do not diagnose a condition.'}
 
     def assessments(self, patient):
         with self.connect() as db:
-            rows = db.execute('SELECT id,patient_id,width,height,created_at FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
+            rows = db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
             return [self.assessment_metadata(row) for row in rows]
 
     def assessment(self, assessment_id, patient):
@@ -664,7 +675,14 @@ class Store:
                 raise RuleError('Assessment not found for this patient.', 404)
             return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii')}
 
-    def save_assessment(self, patient, request_id, source_hash, photo, width, height):
+    def assessment_retry(self,patient,request_id,source_hash):
+        with self.connect() as db:
+            existing=db.execute('SELECT id,source_hash FROM assessments WHERE patient_id=? AND request_id=?',(patient,request_id)).fetchone()
+            if existing is None:return None
+            if existing['source_hash']!=source_hash:raise RuleError('This request already saved a different photo. Refresh history.')
+        return self.assessment(existing['id'],patient)
+
+    def save_assessment(self, patient, request_id, source_hash, photo, width, height, prediction=None):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing = db.execute('SELECT id,source_hash FROM assessments WHERE patient_id=? AND request_id=?', (patient, request_id)).fetchone()
@@ -674,8 +692,9 @@ class Store:
                 assessment_id = existing['id']
             else:
                 assessment_id = str(uuid4())
-                db.execute('INSERT INTO assessments VALUES(?,?,?,?,?,?,?,?)',
-                    (assessment_id, patient, request_id, source_hash, photo, width, height, datetime.now(timezone.utc).isoformat()))
+                db.execute('INSERT INTO assessments(id,patient_id,request_id,source_hash,photo,width,height,created_at,prediction_json) VALUES(?,?,?,?,?,?,?,?,?)',
+                    (assessment_id,patient,request_id,source_hash,photo,width,height,datetime.now(timezone.utc).isoformat(),
+                     json.dumps(prediction,allow_nan=False) if prediction is not None else None))
         return self.assessment(assessment_id, patient)
 
     def share_record(self, db, share_id, actor):

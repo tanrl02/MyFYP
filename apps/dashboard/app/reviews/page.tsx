@@ -1,4 +1,5 @@
 "use client";
+import AssessmentResult from "../components/AssessmentResult";
 import { useEffect, useMemo, useState } from "react";
 import { AssessmentShare, DemoApi, DemoDoctor, ReviewDraft, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
 
@@ -8,7 +9,7 @@ export default function ReviewsPage() {
   const [busy,setBusy]=useState(false);
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10">
     <header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div><strong className="text-xl">Smart Skin</strong><p className="muted text-sm">Doctor assessment review</p></div><nav className="flex gap-3"><a className="btn secondary" href="/">Patient queue</a><a className="btn secondary" href="/care">Prescriptions & billing</a></nav></header>
-    <div className="mb-7 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Demo identities only. Use fictional review text. AI results are fixed simulations; no image analysis or diagnosis was performed.</div>
+    <div className="mb-7 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Demo identities only. Use fictional review text. New AI suggestions are experimental and may be wrong; earlier records remain simulations. Review each photo independently.</div>
     <h1 className="text-3xl font-semibold">Shared assessments</h1><p className="muted my-3">Patients choose which assessment to share with you. Revoked shares leave your inbox.</p>
     <label className="panel my-6 block max-w-md text-sm font-semibold">Doctor demo identity<select className="mt-2" value={doctor} disabled={busy} onChange={e => setDoctor(e.target.value as DemoDoctor)}>{(Object.keys(doctorNames) as DemoDoctor[]).map(id => <option key={id} value={id}>{doctorNames[id]}</option>)}</select></label>
     <ReviewInbox key={doctor} doctor={doctor} onBusy={setBusy} />
@@ -72,7 +73,7 @@ function ReviewInbox({ doctor,onBusy }: { doctor: DemoDoctor;onBusy:(busy:boolea
         <h2 className="text-xl font-semibold">{detail.patient_name} · assessment</h2><p className="muted mt-2 text-sm">Saved {detail.assessment ? visitTime(detail.assessment.created_at) : ""}</p>
         {detail.visit ? <p className="my-3 rounded-xl bg-[#edf4f1] p-3 text-sm">Linked appointment: {queueToken(detail.visit)} · {detail.visit.doctor_name} · {visitTime(detail.visit.starts_at)} · {detail.visit.status}</p> : <p className="muted mt-3 text-sm">Direct doctor share · no appointment linked</p>}
         {detail.assessment?.photo_uri ? <img alt="Patient-shared assessment photo" src={detail.assessment.photo_uri} className="my-5 max-h-80 w-full rounded-xl bg-[#f4f7f6] object-contain" /> : null}
-        <div className="my-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900"><strong>AI result · SIMULATION</strong><p className="mt-2">{detail.assessment?.example_category}</p><p>{detail.assessment?.message}</p></div>
+        {detail.assessment?<AssessmentResult assessment={detail.assessment}/>:null}
         <h3 className="font-semibold">Patient message</h3><p className="muted my-3 whitespace-pre-wrap">{detail.patient_message || "No message provided."}</p>
         {detail.review ? <div className="mt-5 border-t border-[#dce6e0] pt-5"><h3 className="font-semibold">Published doctor review · demo</h3><p className="muted my-3 whitespace-pre-wrap">{detail.review.note}</p><h3 className="font-semibold">Follow-up</h3><p className="muted my-3 whitespace-pre-wrap">{detail.review.follow_up}</p><p className="muted text-xs">Published {visitTime(detail.review.created_at)} · saved reviews cannot be replaced.</p></div> : <div className="mt-5 border-t border-[#dce6e0] pt-5">
           <h3 className="mb-4 font-semibold">Write a review</h3><p className="muted mb-3 text-sm">Private draft: only this doctor can reopen it while patient access remains active. Save before leaving this screen.</p>{savedDraft?.updated_at?<p className="muted mb-3 text-sm">Draft saved {visitTime(savedDraft.updated_at)}{note.trim()!==savedDraft.note||followUp.trim()!==savedDraft.follow_up?" · Unsaved changes":""}</p>:null}<label className="block text-sm">Review note<textarea aria-label="Review note" className="my-2 block min-h-32 w-full rounded-lg border border-[#ccdcd4] p-3" maxLength={2000} disabled={busy || confirm} value={note} onChange={e => setNote(e.target.value)} placeholder="Fictional observations for demonstration." /></label>

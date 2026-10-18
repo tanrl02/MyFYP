@@ -198,3 +198,12 @@ Enhancement training stopped at user request; no verified enhancement winner. Wo
 - [x] Reject both candidates for skin-original acceptance loss; keep live gate unchanged.
 - [ ] Independent phone/skin/negative dataset before further admission reliability claims.
 Next suggested small task: review weak disease classes and data quality;85% target remains unmet.
+
+## Temporary experimental AI integration, 18 October 2026
+- [x] Pin user-selected8class model, mapping and original-upload preprocessing; local CPU inference in existing API.
+- [x] Persist immutable versioned top3 predictions; migrate old rows as simulations; preserve retry/concurrency/access boundaries.
+- [x] Update patient/doctor result views, appointment details and doctor matching with experimental labels and model-score limitations.
+- [x]95 API tests, TS/Android/dashboard builds;3 real API/reference replays, persistence/isolation/failure checks; live browser result rendering.
+- [ ] Android new prediction/reopening/patient separation confirmation (card pending).
+- [ ] Independent disease-test/phone-domain evaluation;85% target remains unmet. No retraining in this increment.
+Word/auth remain deferred. Payment processing remains simulated.
