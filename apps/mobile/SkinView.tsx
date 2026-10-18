@@ -12,7 +12,11 @@ function photoForm(photo:Draft) {
   if(Platform.OS==="web") {
     if(!photo.file)throw new Error("Please choose the photo again; browser file is unavailable.");
     form.append("photo",photo.file,"photo-check");
-  } else form.append("photo",photo.local??new File(photo.uri));
+  } else {
+    const source=photo.local??new File(photo.uri);
+    if(!source.exists)throw new Error("The preview photo is no longer available. Take or choose the photo again.");
+    form.append("photo",source);
+  }
   return form;
 }
 export default function SkinView({ patient, initialAssessmentId, onFindDoctor }: { patient: DemoPatient; initialAssessmentId?: string; onFindDoctor?:(assessmentId:string)=>void }) {
@@ -65,7 +69,12 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       if (!["image/jpeg", "image/png", "image/webp"].includes(mime)) throw new Error("Choose a JPEG, PNG or WebP photo. Other formats are not supported yet.");
       const request = `photo-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       let local: File | undefined;
-      if (Platform.OS !== "web") { local = new File(Paths.cache, `${request}.${mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg"}`); new File(asset.uri).copy(local); }
+      if (Platform.OS !== "web") {
+        local = new File(Paths.cache, `${request}.${mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg"}`);
+        // Expo's native copy is asynchronous: publish/check only after bytes exist.
+        await new File(asset.uri).copy(local);
+        if(!local.exists)throw new Error("Could not prepare the photo. Take or choose it again.");
+      }
       if (draft?.local?.exists) draft.local.delete();
       const selected={ uri: local?.uri || asset.uri, mime, file: asset.file, local, request };
       setDraft(selected);setPhotoCheck(null);setResult(null);
