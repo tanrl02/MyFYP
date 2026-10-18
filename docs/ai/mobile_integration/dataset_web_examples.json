@@ -1,0 +1,94 @@
+{
+  "purpose": "Three deterministic per-class validation examples uploaded and saved through mobile web UI; not overall accuracy or clinical validation",
+  "selection": "First md5-sorted validation image for acne, eczema, psoriasis; no output-based selection",
+  "patient": "Ava Demo",
+  "all_photo_checks_passed": true,
+  "disease_final_test_images_read": 0,
+  "code_changed": false,
+  "examples": [
+    {
+      "dataset_label": "acne",
+      "partition": "val",
+      "image_md5": "0376a6f51c123bf0f52c57f3f834afce",
+      "source_sha256": "1e83194653f76fa0cef7d8c1aed1077e0e54580cf407a1818e0a6d144dd5037f",
+      "upload_matches_source": true,
+      "assessment_id": "422708a1-d45c-4561-b7b4-0fe7f29ac3e9",
+      "created_at": "2026-10-18T11:48:39.750090+00:00",
+      "top_predictions": [
+        {
+          "condition": "acne",
+          "label": "Acne",
+          "score": 0.9205514788627625
+        },
+        {
+          "condition": "seborrheic_dermatitis",
+          "label": "Seborrhoeic dermatitis",
+          "score": 0.049497514963150024
+        },
+        {
+          "condition": "allergic_contact_dermatitis",
+          "label": "Allergic contact dermatitis",
+          "score": 0.01645345613360405
+        }
+      ],
+      "top_label_matches_dataset": true,
+      "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4"
+    },
+    {
+      "dataset_label": "eczema",
+      "partition": "val",
+      "image_md5": "100aecaaac433ac3b9d08869e29a5c73",
+      "source_sha256": "d8330e7778e76122adb4ac0f7446bcc4a61da1fcf07fb09b2800c60abc66f016",
+      "upload_matches_source": true,
+      "assessment_id": "35188a10-d56c-43e2-9ee6-79e0e8226274",
+      "created_at": "2026-10-18T11:49:28.228479+00:00",
+      "top_predictions": [
+        {
+          "condition": "psoriasis",
+          "label": "Psoriasis",
+          "score": 0.8339806795120239
+        },
+        {
+          "condition": "scabies",
+          "label": "Scabies",
+          "score": 0.09469520300626755
+        },
+        {
+          "condition": "allergic_contact_dermatitis",
+          "label": "Allergic contact dermatitis",
+          "score": 0.04462912678718567
+        }
+      ],
+      "top_label_matches_dataset": false,
+      "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4"
+    },
+    {
+      "dataset_label": "psoriasis",
+      "partition": "val",
+      "image_md5": "01d1e597bf5f33da0ee11b63b77c9b16",
+      "source_sha256": "6e36eee65a2d9e73d166eaa7d96c8c1aafa9947639f9c6522b97d66faba360ea",
+      "upload_matches_source": true,
+      "assessment_id": "d8546014-9f6f-440b-ace1-776c09ea6feb",
+      "created_at": "2026-10-18T11:50:02.053097+00:00",
+      "top_predictions": [
+        {
+          "condition": "psoriasis",
+          "label": "Psoriasis",
+          "score": 0.834783136844635
+        },
+        {
+          "condition": "eczema",
+          "label": "Eczema",
+          "score": 0.05618928745388985
+        },
+        {
+          "condition": "allergic_contact_dermatitis",
+          "label": "Allergic contact dermatitis",
+          "score": 0.04968557134270668
+        }
+      ],
+      "top_label_matches_dataset": true,
+      "model_id": "efficientnet-b0-finetune-v1@b7eb8b2762f4"
+    }
+  ]
+}
