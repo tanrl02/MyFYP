@@ -12,6 +12,6 @@ Verification: final mobile TypeScript passed with existing Expo globals explicit
 
 Evidence: tmp/booking-date-calendar.png and tmp/booking-date-filter-verified.png visually inspected. tmp/booking-date-empty.png was captured before the final empty-state wording was shortened. No temporary viewport override was applied.
 
-Android pending: reopen Book a visit, choose21November and see only Anita10:00/10:30; select then Back retains date.22November shows no times; Show all dates restores the broader list. Ava L0012November14:00 stays unchanged and hidden from Noah. Do not claim physical verification until user reply.
+Android confirmed by the user on19October2026: "Yes, date filtering and existing booking work".21November shows only Anita10:00/10:30; selection and Back retain the date.22November shows no times and Show all dates restores the list. Ava L0012November14:00 stays unchanged and hidden from Noah. The pending physical check is resolved.
 
 Runtime retained: API PID117592/8000, dashboardPID78988/3000, ExpoPID99028/8081; phone API http://192.168.0.2:8000. AI/model/training, auth, Word report, dependencies and user baseline edit unchanged. No push/deploy/merge.
