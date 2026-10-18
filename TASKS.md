@@ -214,3 +214,10 @@ Word/auth remain deferred. Payment processing remains simulated.
 - [x]98API tests, TS/Android/dashboard builds; browser draft privacy/publication/reload/patient separation checks.
 - [x] Android new panel, reopening and patient separation confirmed by user18 October2026.
 No AI-display reversal, training, Word or auth work in this increment.
+
+## Assessment symptom context,18 October2026
+- [x] Required bodyarea/onset plus tri-state itching/pain and optional description before mobile save.
+- [x] Persist per-assessment context with canonical retry/concurrency protection and legacy missing-context migration.
+- [x] Authorised doctor/patient views show reported context separately; image-only AI unchanged.
+- [x]103API tests, TS/Android/dashboard builds; browser entry/save/reload/doctor access/patient separation checks.
+- [ ] Android saved details/new form/reopening/patient separation confirmation (test card pending).

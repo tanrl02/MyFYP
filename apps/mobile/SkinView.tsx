@@ -7,6 +7,7 @@ import { Assessment, DemoApi, DemoPatient, PhotoCheck, assessmentCategory, asses
 import { apiBase as base } from "./apiConfig";
 import SharingView from "./SharingView";
 import AssessmentResult from "./AssessmentResult";
+import SymptomsForm,{emptySymptoms} from "./SymptomsForm";
 type Draft = { uri: string; mime: string; file?: globalThis.File; request: string; local?: File };
 function photoForm(photo:Draft) {
   const form=new FormData();
@@ -27,6 +28,9 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const [result, setResult] = useState<Assessment | null>(null);
   const [busy, setBusy] = useState(false);
   const [checking,setChecking]=useState(false);
+  const [symptoms,setSymptoms]=useState(emptySymptoms);
+  const [symptomsLocked,setSymptomsLocked]=useState(false);
+  const symptomsComplete=Boolean(symptoms.body_area.trim()&&symptoms.onset.trim());
   const [photoCheck,setPhotoCheck]=useState<PhotoCheck|null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -40,7 +44,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   function discard() {
     if (draft?.local?.exists) draft.local.delete();
-    setDraft(null);setPhotoCheck(null); setNotice("Photo discarded. No assessment was saved.");
+    setDraft(null);setPhotoCheck(null);setSymptoms(emptySymptoms());setSymptomsLocked(false); setNotice(symptomsLocked?"Preview discarded. Refresh history if you previously attempted to save.":"Photo discarded. No assessment was saved.");
   }
   async function validate(selected:Draft) {
     setChecking(true);setPhotoCheck(null);
@@ -78,20 +82,22 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       }
       if (draft?.local?.exists) draft.local.delete();
       const selected={ uri: local?.uri || asset.uri, mime, file: asset.file, local, request };
-      setDraft(selected);setPhotoCheck(null);setResult(null);
+      setDraft(selected);setPhotoCheck(null);setResult(null);setSymptoms(emptySymptoms());setSymptomsLocked(false);
       await validate(selected);
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to select a photo. Retry or use the gallery."); }
     finally { setBusy(false); }
   }
   async function save() {
-    if (!draft || busy || !photoCheck?.accepted) return; setBusy(true); setError(""); setNotice("");
+    if (!draft || busy || !photoCheck?.accepted || !symptomsComplete) return; setBusy(true); setError(""); setNotice("");
     try {
       const form = photoForm(draft);
       form.append("request_id", draft.request);
+      form.append("symptoms",JSON.stringify({...symptoms,body_area:symptoms.body_area.trim(),onset:symptoms.onset.trim(),description:symptoms.description.trim()}));
+      setSymptomsLocked(true);
       const saved = await api.saveAssessment(form);
       setResult(saved); setHistory(current => [saved, ...current.filter(r => r.id !== saved.id)]);
       if (draft.local?.exists) draft.local.delete();
-      setDraft(null);setPhotoCheck(null); setNotice("Photo and experimental AI suggestions saved. You can share them with a doctor for review.");
+      setDraft(null);setPhotoCheck(null); setNotice("Photo, symptom details and experimental AI suggestions saved. You can share them with a doctor for review.");
     } catch (e) { setPhotoCheck(null); setError(e instanceof Error ? e.message : "Unable to save. Refresh history before retrying."); }
     finally { setBusy(false); }
   }
@@ -111,9 +117,10 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       {checking?<Text accessibilityRole="alert" style={styles.muted}>Checking detail, lighting and skin content. The first check can take longer while the local model loads.</Text>:null}
       {photoCheck?<View accessibilityRole="alert" style={photoCheck.accepted?styles.notice:styles.error}><Text>{photoCheck.message}</Text>{photoCheck.reasons.map(reason=><Text key={reason}>{reason}</Text>)}</View>:null}
       <Text style={styles.muted}>JPEG, PNG or WebP · up to 5 MB · at least 224 pixels per side. Checking does not save an assessment. Save rechecks the uploaded photo.</Text>
+      <SymptomsForm value={symptoms} onChange={setSymptoms} disabled={busy||symptomsLocked}/>{symptomsLocked?<Text style={styles.muted}>Details are locked for this save attempt. Retry unchanged, or refresh history before starting again.</Text>:null}
       {!photoCheck?.accepted&&!checking?<Pressable accessibilityRole="button" disabled={busy} onPress={retryCheck}><Text style={styles.link}>Retry photo check</Text></Pressable>:null}
       {photoCheck&&!photoCheck.accepted?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>pick(true)}><Text style={styles.link}>Retake photo</Text></Pressable>:null}
-      <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted} style={[styles.button,!photoCheck?.accepted&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
+      <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted||!symptomsComplete} style={[styles.button,(!photoCheck?.accepted||!symptomsComplete)&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
     {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Doctor suggestions use the saved result and staff-entered expertise. You can choose a different concern. Booking does not share the assessment; authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
     <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Your latest 100 saved assessments. Photos survive app/server restarts because they are saved in the shared database.</Text>
     {history.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text><Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}

@@ -107,6 +107,8 @@ class Store:
             ''')
             if 'prediction_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
                 db.execute('ALTER TABLE assessments ADD COLUMN prediction_json TEXT')
+            if 'symptoms_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
+                db.execute('ALTER TABLE assessments ADD COLUMN symptoms_json TEXT')
             for table in ('assessment_reviews','assessment_review_drafts'):
                 if 'doctor_assessment' not in {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}:
                     db.execute(f"ALTER TABLE {table} ADD COLUMN doctor_assessment TEXT NOT NULL DEFAULT ''")
@@ -160,7 +162,7 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             if assessment_id is not None:
-                row=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE id=? AND patient_id=?',
+                row=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json FROM assessments WHERE id=? AND patient_id=?',
                                (assessment_id,patient)).fetchone()
                 if row is None:
                     raise RuleError('Assessment not found for this patient.',404)
@@ -434,7 +436,7 @@ class Store:
             linked=[]
             for row in db.execute('SELECT id FROM assessment_shares WHERE booking_id=? ORDER BY created_at DESC LIMIT 100',(booking_id,)).fetchall():
                 share=self.share_record(db,row['id'],patient)
-                assessment=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
+                assessment=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
                 linked.append(dict(share,assessment=self.assessment_metadata(assessment)))
             feedback=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
             replacement=self.record(db,visit['rescheduled_to_id']) if visit['rescheduled_to_id'] else None
@@ -657,6 +659,7 @@ class Store:
 
     def assessment_metadata(self, row):
         metadata={key:row[key] for key in ('id','patient_id','width','height','created_at')}
+        metadata['symptoms']=json.loads(row['symptoms_json']) if 'symptoms_json' in row.keys() and row['symptoms_json'] else None
         if 'prediction_json' in row.keys() and row['prediction_json']:
             return metadata | {'origin':'experimental_ai','example_category':None,
                 'prediction':json.loads(row['prediction_json']),
@@ -667,7 +670,7 @@ class Store:
 
     def assessments(self, patient):
         with self.connect() as db:
-            rows = db.execute('SELECT id,patient_id,width,height,created_at,prediction_json FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
+            rows = db.execute('SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
             return [self.assessment_metadata(row) for row in rows]
 
     def assessment(self, assessment_id, patient):
@@ -678,26 +681,31 @@ class Store:
                 raise RuleError('Assessment not found for this patient.', 404)
             return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii')}
 
-    def assessment_retry(self,patient,request_id,source_hash):
+    def assessment_retry(self,patient,request_id,source_hash,symptoms=None):
         with self.connect() as db:
-            existing=db.execute('SELECT id,source_hash FROM assessments WHERE patient_id=? AND request_id=?',(patient,request_id)).fetchone()
+            existing=db.execute('SELECT id,source_hash,symptoms_json FROM assessments WHERE patient_id=? AND request_id=?',(patient,request_id)).fetchone()
             if existing is None:return None
             if existing['source_hash']!=source_hash:raise RuleError('This request already saved a different photo. Refresh history.')
+            if (json.loads(existing['symptoms_json']) if existing['symptoms_json'] else None)!=symptoms:
+                raise RuleError('This request already saved different symptom details. Refresh history before starting another assessment.')
         return self.assessment(existing['id'],patient)
 
-    def save_assessment(self, patient, request_id, source_hash, photo, width, height, prediction=None):
+    def save_assessment(self, patient, request_id, source_hash, photo, width, height, prediction=None,symptoms=None):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
-            existing = db.execute('SELECT id,source_hash FROM assessments WHERE patient_id=? AND request_id=?', (patient, request_id)).fetchone()
+            existing = db.execute('SELECT id,source_hash,symptoms_json FROM assessments WHERE patient_id=? AND request_id=?', (patient, request_id)).fetchone()
             if existing:
                 if existing['source_hash'] != source_hash:
                     raise RuleError('This request already saved a different photo. Refresh history.')
+                if (json.loads(existing['symptoms_json']) if existing['symptoms_json'] else None)!=symptoms:
+                    raise RuleError('This request already saved different symptom details. Refresh history before starting another assessment.')
                 assessment_id = existing['id']
             else:
                 assessment_id = str(uuid4())
-                db.execute('INSERT INTO assessments(id,patient_id,request_id,source_hash,photo,width,height,created_at,prediction_json) VALUES(?,?,?,?,?,?,?,?,?)',
+                db.execute('INSERT INTO assessments(id,patient_id,request_id,source_hash,photo,width,height,created_at,prediction_json,symptoms_json) VALUES(?,?,?,?,?,?,?,?,?,?)',
                     (assessment_id,patient,request_id,source_hash,photo,width,height,datetime.now(timezone.utc).isoformat(),
-                     json.dumps(prediction,allow_nan=False) if prediction is not None else None))
+                     json.dumps(prediction,allow_nan=False) if prediction is not None else None,
+                     json.dumps(symptoms,allow_nan=False) if symptoms is not None else None))
         return self.assessment(assessment_id, patient)
 
     def share_record(self, db, share_id, actor):

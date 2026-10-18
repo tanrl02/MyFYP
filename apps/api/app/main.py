@@ -8,7 +8,7 @@ from .photos import MAX_BYTES, normalise_photo
 from .photo_checks import check_photo
 from .disease_model import predict_disease
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from .store import DOCTORS, PATIENTS, RuleError, Store
 
 class BackgroundInput(BaseModel):
@@ -16,6 +16,14 @@ class BackgroundInput(BaseModel):
     medicines: str = Field(max_length=1000)
     conditions: str = Field(max_length=1000)
     version: int = Field(strict=True, ge=0)
+
+class AssessmentSymptomsInput(BaseModel):
+    model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+    body_area: str = Field(min_length=1,max_length=80,pattern=r'\S')
+    onset: str = Field(min_length=1,max_length=100,pattern=r'\S')
+    itching: Literal['yes','no','not_sure']
+    pain: Literal['yes','no','not_sure']
+    description: str = Field(default='',max_length=1000)
 
 class DoctorProfileInput(BaseModel):
     specialty: str = Field(min_length=1,max_length=80,pattern=r'\S')
@@ -233,20 +241,23 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return run(lambda: store.assessment(assessment_id, who))
 
     @api.post('/assessments', status_code=201)
-    def save_assessment(photo: UploadFile = File(), request_id: str = Form(min_length=8, max_length=100), who=Depends(patient)):
+    def save_assessment(photo: UploadFile = File(), request_id: str = Form(min_length=8, max_length=100), symptoms: str | None = Form(default=None,max_length=5000),who=Depends(patient)):
         try:
             content = photo.file.read(MAX_BYTES + 1)
         finally:
             photo.file.close()
         def save():
+            try:reported=AssessmentSymptomsInput.model_validate_json(symptoms).model_dump() if symptoms is not None else None
+            except ValidationError as error:
+                raise RuleError('Enter a body area (up to 80 characters), onset (up to 100), itching and pain choices, and an optional description up to 1000 characters.',422) from error
             source_hash=hashlib.sha256(content).hexdigest()
-            existing=store.assessment_retry(who,request_id,source_hash)
+            existing=store.assessment_retry(who,request_id,source_hash,symptoms=reported)
             if existing is not None:return existing
             checked=photo_checker(content)
             if not checked['accepted']:raise RuleError(' '.join(checked['reasons']),422)
             clean, width, height = normalise_photo(content)
             prediction=predictor(content)
-            return store.save_assessment(who,request_id,source_hash,clean,width,height,prediction=prediction)
+            return store.save_assessment(who,request_id,source_hash,clean,width,height,prediction=prediction,symptoms=reported)
         return run(save)
 
     @api.post('/photo-check')

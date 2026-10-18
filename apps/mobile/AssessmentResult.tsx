@@ -1,11 +1,12 @@
 import React from "react";
 import {StyleSheet,Text,View} from "react-native";
 import {Assessment} from "@smart-skin/shared";
+import AssessmentSymptomsView from "./AssessmentSymptomsView";
 
 export default function AssessmentResult({assessment}:{assessment:Assessment}){
   const prediction=assessment.prediction;
-  if(assessment.origin!=="experimental_ai"||!prediction)return <View><Text style={styles.title}>SIMULATION · {assessment.example_category}</Text><Text style={styles.body}>{assessment.message}</Text></View>;
-  return <View><Text style={styles.title}>AI suggestions · EXPERIMENTAL</Text><Text style={styles.body}>{assessment.message}</Text>
+  if(assessment.origin!=="experimental_ai"||!prediction)return <View><AssessmentSymptomsView symptoms={assessment.symptoms}/><Text style={styles.title}>SIMULATION · {assessment.example_category}</Text><Text style={styles.body}>{assessment.message}</Text></View>;
+  return <View><AssessmentSymptomsView symptoms={assessment.symptoms}/><Text style={styles.title}>AI suggestions · EXPERIMENTAL</Text><Text style={styles.body}>{assessment.message}</Text>
     {prediction.top_predictions.map((item,index)=><View key={item.condition} style={styles.row}><Text style={styles.body}>{index+1}. {item.label}</Text><Text style={styles.score}>{(item.score*100).toFixed(1)}%</Text></View>)}
     <Text style={styles.body}>Model scores rank suggestions; they are not diagnostic certainty. The model only compares eight learned conditions and cannot reliably identify other conditions.</Text>
     <Text style={styles.small}>Development validation: {(prediction.validation_accuracy*100).toFixed(1)}% accuracy on {prediction.validation_cases} images. Independent final testing is pending.</Text>
