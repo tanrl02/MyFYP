@@ -17,3 +17,6 @@ Browser: created one new synthetic zero-stock item5ccac2e7-a7e9-4581-bb62-d81b39
 Android existing-history check confirmed by the user on19October2026: "Yes, existing prescription and bill are unchanged". After reopening Ava Care & bills, L00116October10am retains original Fictional catalogue cream x2, total RM55 and Paid simulation, and remains hidden from Noah. The pending physical history check is resolved. New prescription pricing remains an automated test result.
 
 Runtime API session9440 PID106640/8000,dashboardPID78988/3000,ExpoPID99028/8081,phone API http://192.168.0.2:8000. Auth,Word,experimental AI/model/training,dependencies and user's baseline edit unchanged. No push/deploy/merge.
+
+
+19October2026: staff active/inactive status control is now implemented with shared version protection. See [Medicine active status](MEDICINE_ACTIVE_STATUS.md). Name/price editing and receiving remain available for inactive items; new doctor prescription choices exclude them.

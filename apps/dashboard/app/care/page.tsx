@@ -41,6 +41,7 @@ export default function CarePage() {
   }
   function issue(visitId: string) {
     if (Object.values(quantities).some(q => !Number.isInteger(Number(q)) || Number(q) < 0 || Number(q) > 20)) { setError("Quantities must be whole numbers from 0 to 20. Zero leaves an item out."); return; }
+    if(Object.entries(quantities).some(([id,value])=>Number(value)>0&&!catalog.some(item=>item.id===id))){setError("A selected medicine is no longer active. Cancel and reopen the prescription to review current choices.");return;}
     const items: PrescriptionItem[] = catalog.filter(m => Number(quantities[m.id]) > 0).map(m => ({ medicine_id: m.id, quantity: Number(quantities[m.id]), directions: directions.trim() }));
     if (!items.length || !directions.trim() || items.some(i => !Number.isInteger(i.quantity) || i.quantity > 20)) { setError("Select at least one item with a whole quantity from 1 to 20 and enter demo directions."); return; }
     void action(() => api.prescribe(visitId, items), "Prescription issued. Staff and patient can see the saved items.");

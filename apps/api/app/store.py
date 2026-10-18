@@ -162,7 +162,7 @@ class Store:
                           WHERE revoked_at IS NULL AND booking_id IS NULL''')
             db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS active_visit_share ON assessment_shares(booking_id)
                           WHERE revoked_at IS NULL AND booking_id IS NOT NULL''')
-            for column, definition in [('strength',"TEXT NOT NULL DEFAULT ''"),('form',"TEXT NOT NULL DEFAULT ''"),('request_id','TEXT'),('version','INTEGER NOT NULL DEFAULT 0'),('updated_at','TEXT'),('creation_json','TEXT')]:
+            for column, definition in [('strength',"TEXT NOT NULL DEFAULT ''"),('form',"TEXT NOT NULL DEFAULT ''"),('request_id','TEXT'),('version','INTEGER NOT NULL DEFAULT 0'),('updated_at','TEXT'),('creation_json','TEXT'),('active','INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))')]:
                 if column not in {r['name'] for r in db.execute('PRAGMA table_info(medicines)')}:
                     db.execute(f'ALTER TABLE medicines ADD COLUMN {column} {definition}')
             db.execute('CREATE UNIQUE INDEX IF NOT EXISTS medicine_request ON medicines(request_id) WHERE request_id IS NOT NULL')
@@ -175,6 +175,10 @@ class Store:
                 request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
                 from_version INTEGER NOT NULL, name TEXT NOT NULL, price_cents INTEGER NOT NULL,
                 old_name TEXT NOT NULL, old_price_cents INTEGER NOT NULL,
+                actor_id TEXT NOT NULL, created_at TEXT NOT NULL, result_json TEXT NOT NULL)''')
+            db.execute('''CREATE TABLE IF NOT EXISTS medicine_status_changes (
+                request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                from_version INTEGER NOT NULL, active INTEGER NOT NULL, old_active INTEGER NOT NULL,
                 actor_id TEXT NOT NULL, created_at TEXT NOT NULL, result_json TEXT NOT NULL)''')
             for column, definition in [('name','TEXT'),('price_cents','INTEGER'),('strength','TEXT'),('form','TEXT')]:
                 if column not in {r['name'] for r in db.execute('PRAGMA table_info(prescription_items)')}:
@@ -850,9 +854,15 @@ class Store:
             self.event(db, booking_id, staff, 'completed')
             return self.record(db, booking_id)
 
-    def catalog(self):
+    @staticmethod
+    def medicine_record(row):
+        result=dict(row)
+        result['active']=bool(result['active'])
+        return result
+
+    def catalog(self, active_only=False):
         with self.connect() as db:
-            return [dict(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at FROM medicines ORDER BY id')]
+            return [self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines WHERE (?=0 OR active=1) ORDER BY id',(int(active_only),))]
 
     def add_medicine(self, name, strength, form, price_cents, request_id):
         with self.connect() as db:
@@ -863,14 +873,14 @@ class Store:
                 original=json.loads(old['creation_json']) if old['creation_json'] else old
                 if tuple(original[k] for k in ('name','strength','form','price_cents')) != values:
                     raise RuleError('This catalogue request was already saved with different details.')
-                return {k:old[k] for k in ('id','name','strength','form','price_cents','stock','version','updated_at')}
+                return self.medicine_record({k:old[k] for k in ('id','name','strength','form','price_cents','stock','version','updated_at','active')})
             if db.execute('''SELECT 1 FROM medicines WHERE lower(name)=lower(?)
                              AND lower(strength)=lower(?) AND lower(form)=lower(?)''',values[:3]).fetchone():
                 raise RuleError('This name, strength and form already exist. Receive stock for the existing item.')
             medicine_id = str(uuid4())
             db.execute('INSERT INTO medicines(id,name,strength,form,price_cents,stock,request_id,creation_json) VALUES(?,?,?,?,?,0,?,?)',
                        (medicine_id,*values,request_id,json.dumps(dict(zip(('name','strength','form','price_cents'),values)))))
-            return {'id':medicine_id,'name':name,'strength':strength,'form':form,'price_cents':price_cents,'stock':0,'version':0,'updated_at':None}
+            return {'id':medicine_id,'name':name,'strength':strength,'form':form,'price_cents':price_cents,'stock':0,'version':0,'updated_at':None,'active':True}
 
     def edit_medicine(self, medicine_id, name, price_cents, version, request_id, staff):
         if not name.strip() or len(name)>100 or type(price_cents) is not int or not 0<=price_cents<=1000000 or type(version) is not int or version<0:
@@ -882,7 +892,7 @@ class Store:
             if retry:
                 if (retry['medicine_id'],retry['name'],retry['price_cents'],retry['from_version'])!=(medicine_id,name,price_cents,version):
                     raise RuleError('This request already saved different catalogue changes.')
-                return json.loads(retry['result_json'])
+                return {'active':True,**json.loads(retry['result_json'])}
             current=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
             if current is None:raise RuleError('Medicine not found.',404)
             if current['version']!=version:
@@ -894,9 +904,32 @@ class Store:
                 raise RuleError('This name, strength and form already exist. Choose a different name.')
             now=datetime.now(timezone.utc).isoformat()
             db.execute('UPDATE medicines SET name=?,price_cents=?,version=version+1,updated_at=? WHERE id=?',(name,price_cents,now,medicine_id))
-            saved=dict(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines WHERE id=?',(medicine_id,)).fetchone())
             db.execute('INSERT INTO medicine_edits VALUES(?,?,?,?,?,?,?,?,?,?)',
                        (request_id,medicine_id,version,name,price_cents,current['name'],current['price_cents'],staff,now,json.dumps(saved)))
+            return saved
+
+    def set_medicine_active(self, medicine_id, active, version, request_id, staff):
+        if type(active) is not bool or type(version) is not int or version<0:
+            raise RuleError('Choose a valid catalogue status and version.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            retry=db.execute('SELECT * FROM medicine_status_changes WHERE request_id=?',(request_id,)).fetchone()
+            if retry:
+                if (retry['medicine_id'],bool(retry['active']),retry['from_version'])!=(medicine_id,active,version):
+                    raise RuleError('This request already saved a different catalogue status change.')
+                return json.loads(retry['result_json'])
+            current=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if current is None:raise RuleError('Medicine not found.',404)
+            if current['version']!=version:
+                raise RuleError('This catalogue item changed. Reload the latest item before changing its status.')
+            if bool(current['active'])==active:
+                raise RuleError('This item already has that status. Reload the catalogue.',422)
+            now=datetime.now(timezone.utc).isoformat()
+            db.execute('UPDATE medicines SET active=?,version=version+1,updated_at=? WHERE id=?',(int(active),now,medicine_id))
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            db.execute('INSERT INTO medicine_status_changes VALUES(?,?,?,?,?,?,?,?)',
+                       (request_id,medicine_id,version,int(active),current['active'],staff,now,json.dumps(saved)))
             return saved
 
     def daily_report(self, clinic_date):
@@ -928,7 +961,7 @@ class Store:
 
     def stock(self):
         with self.connect() as db:
-            medicines=[dict(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at FROM medicines ORDER BY id')]
+            medicines=[self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines ORDER BY id')]
             receipts=[dict(r) for r in db.execute('''SELECT r.*,m.name FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
                 ORDER BY r.created_at DESC LIMIT 100''')]
             return {'medicines':medicines,'receipts':receipts,'low_stock_threshold':5}
@@ -1373,8 +1406,11 @@ class Store:
             if self.invoice(db, booking_id):
                 raise RuleError('This visit has been billed. A prescription cannot be added afterwards.')
             for item in normalised:
-                if not db.execute('SELECT 1 FROM medicines WHERE id=?', (item['medicine_id'],)).fetchone():
+                medicine=db.execute('SELECT active FROM medicines WHERE id=?', (item['medicine_id'],)).fetchone()
+                if medicine is None:
                     raise RuleError('Unknown demo item.', 422)
+                if not medicine['active']:
+                    raise RuleError('This medicine is inactive. Reload the catalogue and review the prescription.')
             prescription_id = str(uuid4())
             db.execute('INSERT INTO prescriptions VALUES(?,?,?,?,?,NULL)',
                        (prescription_id, booking_id, doctor, 'issued', datetime.now(timezone.utc).isoformat()))

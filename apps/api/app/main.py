@@ -149,6 +149,12 @@ class MedicineEditInput(BaseModel):
     version: int = Field(strict=True,ge=0)
     request_id: str = Field(min_length=8,max_length=100)
 
+class MedicineStatusInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    active: bool = Field(strict=True)
+    version: int = Field(strict=True,ge=0)
+    request_id: str = Field(min_length=8,max_length=100)
+
 class StockReceiptInput(BaseModel):
     medicine_id: str = Field(min_length=1,max_length=100)
     quantity: int = Field(strict=True,ge=1,le=1000)
@@ -351,7 +357,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.get('/medicines')
     def medicines(who=Depends(operational)):
-        return store.catalog()
+        return store.catalog(active_only=who!='staff-demo')
 
     @api.post('/medicines',status_code=201)
     def add_medicine(payload: MedicineInput,who=Depends(staff)):
@@ -360,6 +366,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/medicines/{medicine_id}/edit')
     def edit_medicine(medicine_id: str,payload: MedicineEditInput,who=Depends(staff)):
         return run(lambda: store.edit_medicine(medicine_id,payload.name.strip(),payload.price_cents,payload.version,payload.request_id,who))
+
+    @api.post('/medicines/{medicine_id}/status')
+    def medicine_status(medicine_id: str,payload: MedicineStatusInput,who=Depends(staff)):
+        return run(lambda: store.set_medicine_active(medicine_id,payload.active,payload.version,payload.request_id,who))
 
     @api.get('/stock')
     def stock(who=Depends(staff)):
