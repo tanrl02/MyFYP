@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { AssessmentShare, Booking, DemoApi, DemoDoctor, DemoPatient, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
+import PublishedReview from "./PublishedReview";
 import { apiBase } from "./apiConfig";
 
 const requestKey = () => `share-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -60,7 +61,7 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
       {share.visit ? <Text style={styles.body}>Linked appointment: {queueToken(share.visit)} · {visitTime(share.visit.starts_at)} · {share.visit.status}</Text> : <Text style={styles.body}>Direct doctor share</Text>}
       <Text style={styles.body}>Shared {visitTime(share.created_at)}{share.revoked_at ? ` · revoked ${visitTime(share.revoked_at)}` : ""}</Text>
       {share.patient_message ? <Text style={styles.body}>Your message: {share.patient_message}</Text> : null}
-      {share.review ? <View><Text style={styles.label}>Published doctor review · demo</Text><Text style={styles.body}>{share.review.note}</Text><Text style={styles.label}>Follow-up</Text><Text style={styles.body}>{share.review.follow_up}</Text><Text style={styles.body}>{visitTime(share.review.created_at)}</Text></View> : null}
+      {share.review ? <PublishedReview review={share.review}/> : null}
       {!share.revoked_at ? revoke === share.id ? <View><Text style={styles.body}>Revoke this doctor's future access to this assessment? Published reviews remain visible to you.</Text><Pressable accessibilityRole="button" disabled={busy} onPress={() => act(() => api.revokeShare(share.id), "Doctor access revoked.")}><Text style={styles.link}>Confirm revoke</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => setRevoke("")}><Text style={styles.link}>Keep sharing</Text></Pressable></View> : <Pressable accessibilityRole="button" disabled={busy} onPress={() => setRevoke(share.id)}><Text style={styles.link}>Revoke access</Text></Pressable> : null}
     </View>)}
     {!shares.length ? <Text style={styles.body}>No doctor has access to this assessment yet.</Text> : null}

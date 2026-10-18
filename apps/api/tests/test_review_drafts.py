@@ -55,7 +55,7 @@ class ReviewDraftTests(unittest.TestCase):
         _,share,url=self.fixture()
         self.client.post(url,headers=self.lim,json={'note':'Saved private','follow_up':'Later','version':0})
         publish=f"/assessment-shares/{share['id']}/review"
-        body={'note':'Confirmed fictional final','follow_up':'Fictional follow-up','draft_version':0}
+        body={'doctor_assessment':'Fictional doctor assessment','note':'Confirmed fictional final','follow_up':'Fictional follow-up','draft_version':0}
         self.assertEqual(self.client.post(publish,headers=self.lim,json=body).status_code,409)
         body['draft_version']=1
         result=self.client.post(publish,headers=self.lim,json=body).json()

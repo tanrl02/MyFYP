@@ -18,7 +18,7 @@ class ReviewTests(unittest.TestCase):
 
     def publish(self, share_id, actor=None, note='Fictional review only.', follow_up='Demo follow-up appointment.'):
         return self.client.post(f'/assessment-shares/{share_id}/review',headers=actor or self.lim,
-            json={'note':note,'follow_up':follow_up})
+            json={'doctor_assessment':'Fictional doctor assessment','note':note,'follow_up':follow_up})
 
     def test_explicit_share_scoping_and_publication(self):
         photo=self.upload().json()

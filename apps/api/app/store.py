@@ -107,6 +107,9 @@ class Store:
             ''')
             if 'prediction_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
                 db.execute('ALTER TABLE assessments ADD COLUMN prediction_json TEXT')
+            for table in ('assessment_reviews','assessment_review_drafts'):
+                if 'doctor_assessment' not in {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}:
+                    db.execute(f"ALTER TABLE {table} ADD COLUMN doctor_assessment TEXT NOT NULL DEFAULT ''")
             for column, definition in [('closed', 'INTEGER NOT NULL DEFAULT 0'),('request_id','TEXT'),
                                        ('duration_minutes','INTEGER NOT NULL DEFAULT 30 CHECK(duration_minutes BETWEEN 15 AND 120 AND duration_minutes%15=0)')]:
                 if column not in {row['name'] for row in db.execute('PRAGMA table_info(slots)')}:
@@ -789,42 +792,42 @@ class Store:
         if share['review']:
             raise RuleError('This review is already published. Draft editing is closed.')
         row=db.execute('SELECT * FROM assessment_review_drafts WHERE share_id=? AND doctor_id=?',(share_id,doctor)).fetchone()
-        return dict(row) if row else {'share_id':share_id,'doctor_id':doctor,'note':'','follow_up':'','version':0,'updated_at':None}
+        return dict(row) if row else {'share_id':share_id,'doctor_id':doctor,'doctor_assessment':'','note':'','follow_up':'','version':0,'updated_at':None}
 
     def review_draft(self, share_id, doctor):
         with self.connect() as db:
             db.execute('BEGIN')
             return self.review_draft_record(db,share_id,doctor)
 
-    def save_review_draft(self, share_id, doctor, note, follow_up, version):
+    def save_review_draft(self, share_id, doctor, note, follow_up, version, doctor_assessment=''):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             current=self.review_draft_record(db,share_id,doctor)
-            if (current['note'],current['follow_up'])==(note,follow_up):
+            if (current['note'],current['follow_up'],current['doctor_assessment'])==(note,follow_up,doctor_assessment):
                 return current
             if current['version']!=version:
                 raise RuleError('This draft changed in another tab. Reload the saved draft before editing again.')
-            db.execute('''INSERT INTO assessment_review_drafts VALUES(?,?,?,?,?,?)
+            db.execute('''INSERT INTO assessment_review_drafts(share_id,doctor_id,note,follow_up,version,updated_at,doctor_assessment) VALUES(?,?,?,?,?,?,?)
                 ON CONFLICT(share_id) DO UPDATE SET note=excluded.note,follow_up=excluded.follow_up,
-                version=excluded.version,updated_at=excluded.updated_at''',
-                (share_id,doctor,note,follow_up,version+1,datetime.now(timezone.utc).isoformat()))
+                version=excluded.version,updated_at=excluded.updated_at,doctor_assessment=excluded.doctor_assessment''',
+                (share_id,doctor,note,follow_up,version+1,datetime.now(timezone.utc).isoformat(),doctor_assessment))
             return self.review_draft_record(db,share_id,doctor)
 
-    def publish_review(self, share_id, doctor, note, follow_up, draft_version=None):
+    def publish_review(self, share_id, doctor, note, follow_up, draft_version=None, doctor_assessment=''):
         with self.connect() as db:
             # Serializes publication and revocation: a revoked share cannot accept a new review.
             db.execute('BEGIN IMMEDIATE')
             share = self.share_record(db, share_id, doctor)
             if share['review']:
-                if (share['review']['note'],share['review']['follow_up']) != (note,follow_up):
+                if (share['review']['note'],share['review']['follow_up'],share['review']['doctor_assessment']) != (note,follow_up,doctor_assessment):
                     raise RuleError('Review already published. Published reviews cannot be replaced.')
                 return share
             if draft_version is not None:
                 draft=self.review_draft_record(db,share_id,doctor)
                 if draft['version']!=draft_version:
                     raise RuleError('This draft changed in another tab. Reload the saved draft before publishing.')
-            db.execute('INSERT INTO assessment_reviews VALUES(?,?,?,?,?,?)',
-                       (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat()))
+            db.execute('INSERT INTO assessment_reviews(id,share_id,doctor_id,note,follow_up,created_at,doctor_assessment) VALUES(?,?,?,?,?,?,?)',
+                       (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat(),doctor_assessment))
             self.notify(db,share['patient_id'],'review_published',share_id,share['assessment_id'],'Doctor review is ready',
                         f"{DOCTORS[doctor]} published a review. Open the assessment to read it.")
             db.execute('DELETE FROM assessment_review_drafts WHERE share_id=?',(share_id,))
