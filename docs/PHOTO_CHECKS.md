@@ -31,4 +31,4 @@ Source and licence: [official CLIP repository](https://github.com/openai/CLIP), 
 3. Save an accepted photo, reopen it from history after restarting, then switch to Noah and confirm Ava's assessment is hidden.
 4. If checking fails due to connection/model availability, retry after starting the API. Failure must not enable Save.
 
-Physical-phone verification is pending until confirmed by the user.
+Android confirmation, 18 October 2026: after fixing the asynchronous cache copy, the user confirmed a freshly captured/selected skin photo checks and saves, while an object/dark photo shows retake guidance with Save disabled. No new phone reopening/separation check was requested for this increment; persistence and patient separation remain covered by API regression tests and earlier phone checks.

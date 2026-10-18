@@ -178,6 +178,6 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 - [x] Quality + local skin-content preflight, explanatory retry/retake, Save disabled until accepted.
 - [x] Server Save rechecks uploaded bytes; rejected/unavailable/uncertain photos cannot save.
 - [x] 90 API tests, TypeScript, Android export, local browser accept/reject/discard, pinned runtime and model setup.
-- [ ] Physical Android capture/gallery, rejection, saving/reopening and patient separation confirmation.
+- [x] Physical Android fresh capture/selection, accepted saving and unsuitable-photo rejection confirmed after asynchronous copy fix.
 - [ ] Independent real-phone validation across varied skin appearances and non-skin examples before reliability claims.
 Enhancement training stopped at user request; no verified enhancement winner. Word/auth remain deferred.
