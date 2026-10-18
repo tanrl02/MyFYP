@@ -28,4 +28,4 @@ No training, class/threshold/model change, additional dependency, second backend
 
 103 API tests passed, including five new tests for validation/unknown choices, unchanged model input, canonical retries/conflicts, concurrency, reopening, migration and authorised sharing. TypeScript checks, Android export and dashboard production build passed. Live browser checks confirmed Save disabled before required details, fictional context saved, context visible after reload, same authorised-doctor context, legacy missing-context wording, and Noah unable to see Ava's assessment. Screenshot: ignored `tmp/saved-assessment-symptoms.png`.
 
-Android saved-details/form/reopening/patient-separation confirmation is pending the user's test-card reply.
+The user confirmed Android saved details, required fields, Yes/No/Not sure controls, reopening persistence and patient separation on18 October2026.

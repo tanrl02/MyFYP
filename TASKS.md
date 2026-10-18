@@ -220,4 +220,4 @@ No AI-display reversal, training, Word or auth work in this increment.
 - [x] Persist per-assessment context with canonical retry/concurrency protection and legacy missing-context migration.
 - [x] Authorised doctor/patient views show reported context separately; image-only AI unchanged.
 - [x]103API tests, TS/Android/dashboard builds; browser entry/save/reload/doctor access/patient separation checks.
-- [ ] Android saved details/new form/reopening/patient separation confirmation (test card pending).
+- [x] Android saved details/new form/reopening/patient separation confirmed by user18 October2026.
