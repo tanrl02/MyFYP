@@ -181,3 +181,11 @@ Runtime API81883 PID40176 port8000; dashboard54920 port3000 Ready; Expo68293 por
 - [x] Physical Android fresh capture/selection, accepted saving and unsuitable-photo rejection confirmed after asynchronous copy fix.
 - [ ] Independent real-phone validation across varied skin appearances and non-skin examples before reliability claims.
 Enhancement training stopped at user request; no verified enhancement winner. Word/auth remain deferred.
+
+## Photo-validation challenge, 18 October 2026
+- [x] Freeze protocol and prepare270 deterministic checks from43 real source images plus synthetic graphics.
+- [x] Run existing production gate without tuning; retain all failures and category results.
+- [x] Three evaluator tests;270 hash/accounting checks;13 representative replays; viewed hard-negative fixtures.
+- [x] Record35/37 skin-screenshot false acceptances and one checkerboard false acceptance.
+- [ ] Independent phone matrix and additional independent negatives; no reliability/clinical claim yet.
+- [ ] Discuss targeted whole-frame context experiment before changing production gate.

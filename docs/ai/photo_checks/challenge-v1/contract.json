@@ -1,0 +1,1365 @@
+{
+  "protocol_sha256": "60826484ed73fcdcf1182dbd21ba511867dc9cafb06e45b166c1180f6c18f347",
+  "script_sha256": "39ae3ed82cd1f46073f31a54c9577051e4571a9ba9563d01a1d80e77222a5ef2",
+  "photo_checker_sha256": "1baaf9bb1798a2caae2d7029231c0503e5ab76eb9310797d055f352efa28e216",
+  "photos_helper_sha256": "d2eb386f0758af99f26c7f8a39acc4cd385c3546653a2bea45e881d698bff125",
+  "model_sha256": "40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af",
+  "review_sha256": "2247d1bf77c1db1d98ddec2aeb25a5a86d2d91a84324049d331084fdafaf65e2",
+  "manifest_sha256": "df60930bef92ed03169f1816eb82af717821bc2258c12f9405eb129c82d0ba79",
+  "negative_manifest_sha256": "9929532740b11881031eff7da7966e0d9b6328c995b5594568fb9f3618052612",
+  "version": "photo-check-v1",
+  "real_source_count": 43,
+  "check_count": 270,
+  "cases": [
+    {
+      "group": "original_skin",
+      "source_id": "-7776857652459777696",
+      "sha256": "c9353dd03387fb9ec47d922d828180e60b061dbb5bfc36d3d8ab7d5ed283e610"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-7776857652459777696",
+      "sha256": "506dc7360ef285e4ca02122d0086bc1bcec86edf45181e0af433bd8d6a8322ca"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-7776857652459777696",
+      "sha256": "6e80e0b8a365e23aac73d8e2999640d62178ced1e29efd5da8ebe119916ca3aa"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-7776857652459777696",
+      "sha256": "0fb2f83ab39777af509106e33758d41550b9c7f460bceee3d8d61c559e7a2068"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-7776857652459777696",
+      "sha256": "3e325b15ad67ef94aac83c1aa3240c6a01b1ca474d1aba2e585e4f222cbca612"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-7776857652459777696",
+      "sha256": "2b20723443eb9585da5288bf48abb93369fcb95f10488800d1e9ceca7f6d2fb8"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-7776857652459777696",
+      "sha256": "2c97e7cef39eaab1d5e7165fc23888a7a49b6ef3c4df36aec2a8700665714d08"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "3083550471820565612",
+      "sha256": "7bada9b46feeef61e243ca16c255ec967aafb6983e9e019c3622a974b13659ee"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "3083550471820565612",
+      "sha256": "f558204e0df235178eac8dd9e36fb89ba1cc9a264bf8d71ebc0fa50767449ad4"
+    },
+    {
+      "group": "brighter",
+      "source_id": "3083550471820565612",
+      "sha256": "8cb077d00121b9998e72ed3854667a21ac237de0230c19cb042af17312e3ca20"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "3083550471820565612",
+      "sha256": "e5f52c6082705b265b1c61797e01381dfcda3901422d0f438e1c41ad9301e8b6"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "3083550471820565612",
+      "sha256": "1b6d7e8efaeef275cbcfde5cf8bafffc945e367eb4e9ed53e6389ac7aecd2da2"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "3083550471820565612",
+      "sha256": "8b882047fbefbc9b36925e99847557b535ee0485c939d928dab14c20e4dee8b7"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "3083550471820565612",
+      "sha256": "1043a6fe75f34bdd86876637ba6c77f7aa9110467b764079b6e12c99f6d70246"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "3377584127732041409",
+      "sha256": "3595aac6aa9d82b2b292c1f0393f964035c5705dd8889491d9ceb1c367039e59"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "3377584127732041409",
+      "sha256": "ffa132ec759f528b1a67648717bb7be7ed22fdb5bcc26ae0c78e55301ebd3cc0"
+    },
+    {
+      "group": "brighter",
+      "source_id": "3377584127732041409",
+      "sha256": "653624c1c9fab3581a11c861188916ac068102b9b25e40cc80cb1b3a3957ef4c"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "3377584127732041409",
+      "sha256": "3357ee51a00db94585610e2737e80a028dc92fecb2a89d916db308dfac9fa091"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "3377584127732041409",
+      "sha256": "f8bd1eaf34004e4256720f2cc3ae0ecda5609a3279d6a416b40f93250db3bbe3"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "3377584127732041409",
+      "sha256": "cc73267d819ccf293409ac000bcd4959a187fca217e752c3d2697ea21a75eb6a"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "3377584127732041409",
+      "sha256": "abff2e9badb31d0fcd43ffeeda5c3e3ef6c6ecb726f6a6dcce48928fc7eeb438"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "335846587626430311",
+      "sha256": "2791181234464aeb96999b52986f363efc1debf8ba399135d6982b6e444c6a86"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "335846587626430311",
+      "sha256": "680c34c8f35e8ae2eeb37edf2219eeabb0b3a87646e3721799b5d390e9fd1191"
+    },
+    {
+      "group": "brighter",
+      "source_id": "335846587626430311",
+      "sha256": "85f2c5e4141a3f58184ee231621447c4739ef2131a502d28a7cc2e0792a884ba"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "335846587626430311",
+      "sha256": "18431d4022383ca7d233cd58b3562038b4325ba61a987cff456a8ba90b86c364"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "335846587626430311",
+      "sha256": "e2df7a1df3820ca263a980a5ec1eb1a0410cbe5a3724859a7883ab1da8afa3f7"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "335846587626430311",
+      "sha256": "36cefc6412baa279e1840d74bcc6f8fee51759535851a9bbd14ec59a1b755e23"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "335846587626430311",
+      "sha256": "2d13e785a313cfecedc1ac0b6a92932003f459b6365bf089366c86ce8a1b3547"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-919660371744832007",
+      "sha256": "d3a64340c31fc18aa0228421cc94781b28ca77b3c6ec259f4229aff438c162d6"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-919660371744832007",
+      "sha256": "8e58d80fa5360b1031d697fad706f898bc17ab4a0c66df0a8c01c2a35cba2185"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-919660371744832007",
+      "sha256": "ec8ccc67a4ff79bbeccee39430397b7d5f112463a6be301eec8c616a076e52f3"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-919660371744832007",
+      "sha256": "6ce4e3831b60fdfb5b9bf9d8a6e3396da4ef7eca341a9c98845a84c362d5b8a9"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-919660371744832007",
+      "sha256": "f9f5428c95555ba66d25d76b40faa48d4f9af42649a68c700f0954153d2ec378"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-919660371744832007",
+      "sha256": "8c4dd3a2bbb791a42bb40f871c684cf112a98efa9839b2fa01d1563478284ec7"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-919660371744832007",
+      "sha256": "c43f573c93b8a2911c85cbe072e98dbb8168dcc9ef7b9ba0363e218d6289ea15"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "7530181678510252673",
+      "sha256": "ae5e0ac95506664d35324a98fa891a205864d8798f59b3c24a451ac714d04bb4"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "7530181678510252673",
+      "sha256": "e275a1b1c4dcb8d595bbc47961240d77982b062130410d4cafe812d0e8bbc246"
+    },
+    {
+      "group": "brighter",
+      "source_id": "7530181678510252673",
+      "sha256": "42ac612865ce49a30a68c18e0ea37e8894f619f99a179aedc1e050439e5cf7d8"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "7530181678510252673",
+      "sha256": "63057e5dfb147761c1aa1a8ba2503e162f76e4b46c357d9046cd32e4fb40e2e0"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "7530181678510252673",
+      "sha256": "fb2059980a1a3f377b69f03fff796099315f830f94439b19c14bc54c1e466167"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "7530181678510252673",
+      "sha256": "ff34010fa041f921d194eb6ee5e2630434aaac2c08699ca5fb26c5d4864ee98f"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "7530181678510252673",
+      "sha256": "4967786b809b059e9438ae532fc3e43cd164b8dec8d7880114db5796584de7ec"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "5275181661240813075",
+      "sha256": "4727670ca93f040bf66e6d1187f787dd92c097bc0d008445a1c292bc949ae1a9"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "5275181661240813075",
+      "sha256": "07478959d37da897da6864b41822fcedc0a8b829dc7511698fb0c841a488d809"
+    },
+    {
+      "group": "brighter",
+      "source_id": "5275181661240813075",
+      "sha256": "7e97dff27f014f630aa48657fc4a3696eb5086ef64c184d4419661ca2839eb03"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "5275181661240813075",
+      "sha256": "16b4790edc6002984a4d4c4d31835b45020c15b086cc1b7a7911099c7a626213"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "5275181661240813075",
+      "sha256": "5b4ea06e8e970db0f162c97212ea66601adcbe7ac95f03e56b851db79caea2d8"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "5275181661240813075",
+      "sha256": "1837991b7969de33b65e59d111541ee8487a8b1bcab32b4e0b3ad446b6f940f2"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "5275181661240813075",
+      "sha256": "a5b5252d85a8d18555f35eee814d94ab4cfa35439ec7cb1889ef8a66fc8ebc51"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-7743291557587090042",
+      "sha256": "387f0c6b5be1d33007b91fb68269de9561a52fa8dc2e2e2f64263a36e39fbeac"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-7743291557587090042",
+      "sha256": "0bc8762a1bd153f5094bf6c7fb3aa2b98fb761cfc4344565d462f5817f4dde5d"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-7743291557587090042",
+      "sha256": "93ef2b70ff19ece1e67b68d7ff530cffa8567344cb6c9b967130b65b50db3dc8"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-7743291557587090042",
+      "sha256": "e941c52ed5bbb1c71bfaebef7d01c38a91190831e6850727e707be304826b03a"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-7743291557587090042",
+      "sha256": "38c53f60e00f0587d371ed0e13dc274ea9835584f3c0bec3ca82b41c6a555bda"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-7743291557587090042",
+      "sha256": "65d54791dba1235936bdbe997d2f2447408d575c0a5ef7cb2c6cb72fc6a46efa"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-7743291557587090042",
+      "sha256": "374e85feed3c59093eb78a4234c44164d6ef3a0881bdbb15f92de94aafe96d5d"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-8299809889773574040",
+      "sha256": "f5f1ef263c68c48e3f1504098999ab98db7f193f5b149a29e565f104b120dfa0"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-8299809889773574040",
+      "sha256": "08efa342ef5d2493d87c7778a3bd074663180acc655971ffeb23a6fd311b4231"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-8299809889773574040",
+      "sha256": "5d3010e3625bdc44dad907de32ff2ad767836b51dcde91f8f764ebd95be0e572"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-8299809889773574040",
+      "sha256": "d2330a1cfc546baf944d240be46c67f3e33addf21d383f61cc2adb6740883dce"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-8299809889773574040",
+      "sha256": "a88f3bfb9c0f7fb217839f1479d6db8680f97bde5055454af99d0e9cc4085a1e"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-8299809889773574040",
+      "sha256": "16c18502c89ab999a1f98c0df541a04f7b3c2cc2792eb8ec37c0e6e624a7c8af"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-8299809889773574040",
+      "sha256": "31864ccbea5ed3602ef858921648b15ff17d90d2d3a0a941e9c37fa1e33876d0"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "3846988567346853286",
+      "sha256": "9690450e6f0cd895d55ad67bf298d52bf643a2b645e892dc19d63c6c5f2edf0a"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "3846988567346853286",
+      "sha256": "bffb0eb03f42952c63cc8624f29000b96fd294b85f7e1427423f82f365e14fd1"
+    },
+    {
+      "group": "brighter",
+      "source_id": "3846988567346853286",
+      "sha256": "0d387f85af9f158b5354ac57ba67092094a5b50eed12c1b6fcefbe8460ef5f22"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "3846988567346853286",
+      "sha256": "2e296960021181c995e7b30a53365cac3c183a5f533525bfad6abb036c5ff3b2"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "3846988567346853286",
+      "sha256": "6f9f0a4232bb637df11360aa8fc58e9389a60d49f5afb5f7d3d405dc6eb9c7da"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "3846988567346853286",
+      "sha256": "8db6aa77cc71421a64fffe514909da452f2a6e6dc0741ebbc0640deba55b3eec"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "3846988567346853286",
+      "sha256": "4579c3ba9848547ac49361b5488e8f64d67c73f1f50654400fb5f3cbcd367fd9"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-8111125152560753978",
+      "sha256": "e67339324b82e2de79716c819f8b29348d8caa70ab72f1b80f95fa97518c2401"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-8111125152560753978",
+      "sha256": "91ddb32f360252132c53f23508ebb78b663e0c8b38adab19e54fd29e498ad451"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-8111125152560753978",
+      "sha256": "31bd2c46254a83272feaaab94914403cea3a33b7f6deb6e36e397f63e29c052b"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-8111125152560753978",
+      "sha256": "4f31d9702277d2860be372112f58052a2362b2132c629b0e7a788e4196194dd2"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-8111125152560753978",
+      "sha256": "0837023f8c720b8ff5b33e682442ad1b1f06d236b4fc1215b0e8827762a30124"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-8111125152560753978",
+      "sha256": "36018a09f3eb657a7f5b5174790c73696b26a673562812fe3cf67c04a02ec2bd"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-8111125152560753978",
+      "sha256": "d3caaf62dc0c4914147be4df197cce232a6d00cf66b868abed39e5ee04d300d0"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "3950839687124807995",
+      "sha256": "235ac0c376e867cf0b0ef17b812a9a18b113c07898bbeb533b26083cfc40334d"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "3950839687124807995",
+      "sha256": "5f4a4301dae1deb0e30aa3474fdccf73e125cc6dd1efcc4c2a1efb50acc8bce1"
+    },
+    {
+      "group": "brighter",
+      "source_id": "3950839687124807995",
+      "sha256": "739ab87e6fb7aea3881176789717335be809ced9625e8390d4495b46c12afbe3"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "3950839687124807995",
+      "sha256": "3f85e709fe67b7915854b6db217a6378ecf933519ed4eda5c9e02b9abb935df7"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "3950839687124807995",
+      "sha256": "a8ebc408c31b4e1a3301739aa8cda798963d32d8260608242eb51fe4a6b8693b"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "3950839687124807995",
+      "sha256": "1e408f84b7c6630b7dbc1181f0de36f1baa44a52fcdf5134fabe54fceadb124a"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "3950839687124807995",
+      "sha256": "0f6d9bb932b7f7938c44ea915a26491c6dfe4412245f13b53d47338069adbfb7"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "5604714673774290686",
+      "sha256": "b34c00773e335cbb10745db093c87f7dd23adf3f9cb72fde23072595731f847f"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "5604714673774290686",
+      "sha256": "457b25f1f6ea15e8e2316a4b82627bd6e0087f1c40388ebf21301f1c1161994d"
+    },
+    {
+      "group": "brighter",
+      "source_id": "5604714673774290686",
+      "sha256": "3ae76256b69ebe97914467c6e4b6c2b66c848de35b9bd59a1987faa0edcf2dd4"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "5604714673774290686",
+      "sha256": "c11b1742068edc217e3b6a8c085c992075d3725cdfdd5926b898dec50b1102c0"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "5604714673774290686",
+      "sha256": "f95de6f1d00e57e5f55cbd71c95cda4f49493c0ecf5a88034db6c285868b1f73"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "5604714673774290686",
+      "sha256": "5983d71eb4404847118c14f4f0a925e8756010116fa7acefe21f75dba63661c2"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "5604714673774290686",
+      "sha256": "32d56de04429767905c7edbb3e300ef47a7fddc196cc9c5b9a5faf4e91f6c9e4"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-130215202506383973",
+      "sha256": "24d5630891b7f8f9873ed2b138bfc330776a89396a479750064abbd44da492b0"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-130215202506383973",
+      "sha256": "44f76fa358d58a3f5b35c071029208bd30d799d912fcb35d0409097a8959f8c5"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-130215202506383973",
+      "sha256": "6f573758a04442161805403e98ca53bab29bf343dcc0fa27da65bafcc908896a"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-130215202506383973",
+      "sha256": "ab4f2d0d2935a07b4ee2f15164920adbedfb5393ad946aeec28b22ff542e4a2b"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-130215202506383973",
+      "sha256": "e76152eea2f82554faf96e900e027c38812f7aba5c09c0e7ffd26389c69390a0"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-130215202506383973",
+      "sha256": "e55a75e205c2e3bb29e0d076dde7ed54e36679232fbb389d8b401d3ba0a55852"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-130215202506383973",
+      "sha256": "de025749228f507056960546e6a8ef51595118d28d93b933eaa6e47beee794d2"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "1850198155303184343",
+      "sha256": "472ef18d1fe2f41d1fbbc3f18e84285e0b0c2629603d318e58f1b79057445cfe"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "1850198155303184343",
+      "sha256": "3b8ce0fcf321aa314111101f73caf24edc12a6bd63e11b151e97e84523c8eeae"
+    },
+    {
+      "group": "brighter",
+      "source_id": "1850198155303184343",
+      "sha256": "551d0415062f1c101dded69cfdbf0845ee073a7132faa847fd65c44f16ee9f4f"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "1850198155303184343",
+      "sha256": "3af701ec0a9d85d3a38acd10a95d96edef7ecfdc8e79abd51c199dedb2038d9e"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "1850198155303184343",
+      "sha256": "16c343141d62c2b2f32c1915d2be95106b962fdf6882af5cdcf6616a8fef3700"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "1850198155303184343",
+      "sha256": "fbc7939efd8bc8c137279c449d97e8bd097cee2427833633b0bd8fea60561c78"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "1850198155303184343",
+      "sha256": "3e7bdc81182eef4bb3981f4e84c9e9769ac823d690f6dcb79c604bbe28fc504d"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "5475014386524307360",
+      "sha256": "dc9098773b66a8858018fb9110961416ff4508ea128dec9f9c4d129963381c1b"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "5475014386524307360",
+      "sha256": "bb4cdc10d30a8356804bd4426ceb03dff75ba768d0724197fbf6d392ed9be6b5"
+    },
+    {
+      "group": "brighter",
+      "source_id": "5475014386524307360",
+      "sha256": "e3f9fe1946be230417d56c5a89f24b9a5f40fc030c85e4f1ae3286f1d1a306c4"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "5475014386524307360",
+      "sha256": "1470aa24a09b821c23669f7bfa0c0d0c93a6d978abd7969ef27b01fce5bba934"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "5475014386524307360",
+      "sha256": "e2ed994ba30be0a164cfb85be90c07b3a7f5480f02e36158b77cca7246eef304"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "5475014386524307360",
+      "sha256": "bbd84a0c5622962af4881f404a50c378644f30f39df8d1849d69a9b1aca41d9a"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "5475014386524307360",
+      "sha256": "294b4f40f2cc6e4adac56fffe8e812850e5541f816a233d1273f8358946aaf16"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-4662194556963063742",
+      "sha256": "eb92f07b6d6104d4d59aaa29edc520eb268c6d7279e4d0a1297e31e2ce05d848"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-4662194556963063742",
+      "sha256": "b815aea3c420ffa42d549d9cb864a0072f6e51641ac492e7f5130194464d8c26"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-4662194556963063742",
+      "sha256": "668f15969532fdd1d19dfbb07e5a1956ee3cd683c3bf03582a25d98e1708a060"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-4662194556963063742",
+      "sha256": "87aa426b7bf5508f8e80f0828069222037a8118fb791a523e51f0f591e174028"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-4662194556963063742",
+      "sha256": "a1979887951af031acd532bf072afafc520613e40b8e701ff8bdb9699687d3c8"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-4662194556963063742",
+      "sha256": "fe1b0c3a7ddeab3c63adda5e8b736c8fffe79679bea10f23a24938626dde8ed9"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-4662194556963063742",
+      "sha256": "9dea7c7a99fa326df29be156d8966b9f5419d4240271d92e239c4324de66d26b"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "2562611754724897853",
+      "sha256": "8fc1a15a5ffb07f151dec73fc5d952f8ff69c22d2e225c41f2f6162e4e510eba"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "2562611754724897853",
+      "sha256": "a7c3b89bbcb5e4f8f86d6f391ff32139c0b1ffbb335c82949ba06b1eb95d87e2"
+    },
+    {
+      "group": "brighter",
+      "source_id": "2562611754724897853",
+      "sha256": "5e850b7b16c3dac1b34c72619e4c7e22ceb60fbb75661f437ca1960f288ab514"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "2562611754724897853",
+      "sha256": "d067b86aec988ecb157a56bad53ee8c49da1c2d1f5abaca87d0e5c151872b577"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "2562611754724897853",
+      "sha256": "2545c525b9f648ff443ecf234956f7219f39fa0a185a7a69521e5472a3a01d64"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "2562611754724897853",
+      "sha256": "03efac27bc4554717d052913da8b5a6c85a7201a6127652fcd65901ed0d4a8ce"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "2562611754724897853",
+      "sha256": "13f6976da466902875d2553e3af527bfd227c9eabe7da3faaadbafdfbf540aae"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "255207051194135479",
+      "sha256": "6b81170fdb313829bdf71af0312fe6d39e59092cc4a25062a776b686351a6729"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "255207051194135479",
+      "sha256": "8f21e58618dcdae0cb130959dd1a62ed99b4aa13929ba0bc73118aa0f407184d"
+    },
+    {
+      "group": "brighter",
+      "source_id": "255207051194135479",
+      "sha256": "839a87499e33cb6da18e6cef1969436010f27126df0daef4c34f205177fe1737"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "255207051194135479",
+      "sha256": "2a7cf9e80c5df876e46ad55f33126d1438fbdd42d04cbbaed42bd6a017fa2ea3"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "255207051194135479",
+      "sha256": "c7d79bc9d5ea8e9b77a5c288748cf55ff787644e308d6c08067a7f2d76a3a2cb"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "255207051194135479",
+      "sha256": "b91db487f332fc6abee9dbb571454c1864030493d2b7c85f6062a14de83fc33a"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "255207051194135479",
+      "sha256": "fb9063d9efd7b40de8e32009fafcc9b5efbbbb4f95cc78fdf288529c8ba64457"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-2986702064294375651",
+      "sha256": "0aa95a0c655eb78a3feeaa8661e9baa00626b3daf92183e03dcfb889cdcfc554"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-2986702064294375651",
+      "sha256": "9dadb9bfcc809a32395f78142664adc33fa1a56d05a77f524d3d8201758f96e2"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-2986702064294375651",
+      "sha256": "34b6a872eda8f064fd2d140ae62e378c5bedd2c409835c3b1d52f9cc3ce24b42"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-2986702064294375651",
+      "sha256": "dbbc5219c9dc1e3d0012381b7557b28575ee0219d43cea22bae256c64855b455"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-2986702064294375651",
+      "sha256": "8b12dd6962080bbedcde516e67c9e2832f77a1923e4bae5c237128e0f5a43cf4"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-2986702064294375651",
+      "sha256": "47da40a6105762e303b6c8cb87724b15617346f794d4e859ceb83164acbb6e33"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-2986702064294375651",
+      "sha256": "a2354d8bf48a420f4d049481c40de0a3121f7fb188859cc5d2c349e1b5757461"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "4412120753157054552",
+      "sha256": "2de9fd1b591d186b1386b7c8848d9d9a6352c45d0d0a9c6dc7adc00abeb060fd"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "4412120753157054552",
+      "sha256": "232c9d6df360cbcbc0a61d75fa9d208770c2af606ac0483ce7225c687cefd388"
+    },
+    {
+      "group": "brighter",
+      "source_id": "4412120753157054552",
+      "sha256": "dbdee1d399824ab0c32cfaef87ff8634008b4f5971900cf2af0ca09659fd7782"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "4412120753157054552",
+      "sha256": "e1a0af121d3f04dfad92a0ab2471dbebb4afdeeccb33bad8a1454ebfb8688eac"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "4412120753157054552",
+      "sha256": "6d603aad9e2105781f899d7d7230fc8a74647ebb70930241627ef24203930e93"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "4412120753157054552",
+      "sha256": "d7b8c3476b075fb2366ef67fc5eb45f1381b76d4bf436f01ddd99e9f4060540a"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "4412120753157054552",
+      "sha256": "210769c38d4440fc66e3ef053c4adcd600ae22b185548b25b80ffe3c9bc99254"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "4039144254966056317",
+      "sha256": "16b4b679e3d870945835dcaba9e31836cb66926c0e93a86717ca9acb0b431efd"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "4039144254966056317",
+      "sha256": "bf59a03242989bcdb02b16b48e29425704384fdb3cb34663f09cea2758a1b48a"
+    },
+    {
+      "group": "brighter",
+      "source_id": "4039144254966056317",
+      "sha256": "9bcb8d9d9acec6267b76a6859fa5b9b46a0b1c97b93f5b2045bb3dcfd542523d"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "4039144254966056317",
+      "sha256": "bb9429b3e9a5e2c5cc9a9ff81ecd905341eebf76d5381c186486b5a4f4ef83db"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "4039144254966056317",
+      "sha256": "a55ac71012c7890298e42d6fc7453f915f4bede5439afb125d9050b9181c4838"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "4039144254966056317",
+      "sha256": "ad1e9fcdc048dd2ac2b4adc3dbd677dc4f67ee4a977e92c71ea783654b844a90"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "4039144254966056317",
+      "sha256": "2a8428a153d9c8180af8588a7da961eac18024302ba6502fd6101fd605c1b2bf"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-3406507834674402591",
+      "sha256": "549ac716776007caf2b138beb7475226200543847dea69ddbd260c9af69227d5"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-3406507834674402591",
+      "sha256": "cdfffb1c26eecc37e048de6b0e3e2063a778c3f8fb5f2a4367404198e170f6f8"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-3406507834674402591",
+      "sha256": "7cee80093bb3fc48a1cedb5e5ae7d4bd66c41537bfbb2cb0a39ffc3e81a2d170"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-3406507834674402591",
+      "sha256": "a98037998432c75a016754b05a79d79aba190b96c3038749c5fd2a129b3a7ab2"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-3406507834674402591",
+      "sha256": "87e6d2a1f654459f6fc24fa6abf80f230eb803bdf5d5776fea3c8367f9af9686"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-3406507834674402591",
+      "sha256": "b8142e265e06a45f3729e942afe3b0dad73e300e2ddd819d33c96bfc9a8ac607"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-3406507834674402591",
+      "sha256": "b5847e09a95ae713e3f0b9d157da97c17c6b80d2554e25ac7b882d59a374b475"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "7327821802957291496",
+      "sha256": "a72ee6d1d2e86f8f24b21929456553ad5658a771e34fef5c74b6744816d798aa"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "7327821802957291496",
+      "sha256": "d58eb72b8d2a787edfd1c4804d0085406d09ded8a225623ed5b59faa6b30ef25"
+    },
+    {
+      "group": "brighter",
+      "source_id": "7327821802957291496",
+      "sha256": "a2276f1800c6d358922a06d41a76f5bec8a61b786eeb32956ef302fe403e643f"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "7327821802957291496",
+      "sha256": "89210ccc13a9f0523cde9293b244bc77c45ab73c08048cce1ad8dc1abc79b8ca"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "7327821802957291496",
+      "sha256": "8065b3cb83f93915f1459140f1e7f6f4f57ee871b6da21e38ea4ae5208c4cf46"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "7327821802957291496",
+      "sha256": "22f8283b4eacb68bd63a669ddf6bb79f4a7e8abef39e976f6b82f0bbc92d4a1d"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "7327821802957291496",
+      "sha256": "18398a7695b9ae05b5f9a6ed3d1829bf260be35cd3685dcd4e9a3245db8502aa"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-5781127683500413767",
+      "sha256": "cf9c0e2f673d985885c3d66324a000e330f000883b7095c2d174a898c9c6cea7"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-5781127683500413767",
+      "sha256": "5853f00c3f7631213bf6232bdd87a4102ede8b31f2cf11db1cc43d9fdec43e2b"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-5781127683500413767",
+      "sha256": "11abe9e5c2e61872816acf1383f98e80d9055bab38371a229b046f7d0dae88a1"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-5781127683500413767",
+      "sha256": "75d1282f8071842e7f61907d8e1b53c00c22e243f5f9000b1f6a168848079da4"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-5781127683500413767",
+      "sha256": "5f987ae58afe7d7fa40e3546409475f935e560460831843c33948ffb38c3fe7f"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-5781127683500413767",
+      "sha256": "b0e57e34d45ce3f9c77449af943656163bc554174546a7d61ccfd857e6aee5d3"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-5781127683500413767",
+      "sha256": "5455e76bd3f10e43ccca9d99b37d8c0d491976bcc1382d657a31d832485cd54a"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-3055300247709269077",
+      "sha256": "cc4353cc0b436a03470021dd41e2a5dbe691b60c03f3eb5e8ad527ed913bea18"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-3055300247709269077",
+      "sha256": "ba3e5397b2f86988f07a6ac0fac8fa88a046be10b922d0f0e6905b5b7f2ce036"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-3055300247709269077",
+      "sha256": "d1815b569c3e7ce445cef79433e51ca87713d43160c06bec9bddeea0c5026d12"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-3055300247709269077",
+      "sha256": "c123cc90194be933b01d8abbe2d9a303e867f76eb67c8503f3a81986c7687f7b"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-3055300247709269077",
+      "sha256": "ef144fa5e4ec323881875be452a68508a01b206a5a785e7ffc5a6e609d3e59c3"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-3055300247709269077",
+      "sha256": "e21a03e5cb1e917dd4d9ed2326705836f804b213d1e95cc345f89aa86882a331"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-3055300247709269077",
+      "sha256": "1dc4380dc1a712a3ca5b0f6dca66c0e4d3398dd98cadeb6394ed44baec54f9c6"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-2518265086444700975",
+      "sha256": "7aeda81d4b8f08e059a189d0a638cc5f5de95df994e7c331bd384a2fd4fd0e67"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-2518265086444700975",
+      "sha256": "bdd3ea7ffede8a326373c301f827039071deb465e85ec69ed86609d8cd21be71"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-2518265086444700975",
+      "sha256": "c1652e56d0c63feb41124ddf3127e28e6a0404730079dbef718d2d422122ddee"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-2518265086444700975",
+      "sha256": "3ad6391f612ff9d6b67ef60595216fdd4b10b2b9092a127aad317d755069034e"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-2518265086444700975",
+      "sha256": "abb84532787a6e88b23eff71a470f8261769c5b1bd5b595a894237db5101dd47"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-2518265086444700975",
+      "sha256": "6aa49d4369a43c9505ee284baeed89b9f6083d0a96e6f53b752f129e5b8b4e30"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-2518265086444700975",
+      "sha256": "f69db9386a995c4413e92c8271bad44ba9fc2ed0dd242252b416a7629944a501"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "5080913691893238848",
+      "sha256": "c78ac4d9e526c84cdbb30e7382f61ba8fef597810f6294156bb5dab0aa2e6a67"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "5080913691893238848",
+      "sha256": "05cae869ccce1ce1e3518aef9b7a36c741938bf59b893c885299c67f4236fa3d"
+    },
+    {
+      "group": "brighter",
+      "source_id": "5080913691893238848",
+      "sha256": "6c062c46c74724a11e0ce3dc1ac391da9576761442040836c9271f2a59378110"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "5080913691893238848",
+      "sha256": "751b1741ec07580b9d70cd9edafe6fb9390ebebad101fcabde11ce17dfdda44e"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "5080913691893238848",
+      "sha256": "48b2d0a8ad9c30f4855886729d0c230da0640886caa7296455dbb652285f0df0"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "5080913691893238848",
+      "sha256": "94f7644234ee055d06e80dac44d3f8c593e717ba25a363af8b8eb9ba8105ad41"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "5080913691893238848",
+      "sha256": "53a6ee9b5bcccecaf64e999a563c1d139ea14cde8fe01ab4075f54471b70ff90"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-6776518044035331491",
+      "sha256": "8f79bf43855eed8c00f1afb2062a94c4cb758454958e5978bf9c80df8fa0a421"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-6776518044035331491",
+      "sha256": "b4e1ec187bf53bf5db3887fbbd8e2e463adb16245bb756aa626927b08b7aeeaf"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-6776518044035331491",
+      "sha256": "4d4f2a54b308bf8d81444bb3dc5273a151b92fb82148fabbef69b9abaa3f0447"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-6776518044035331491",
+      "sha256": "b1830f986ab53f99003ea946734bf6db91a31f76f30158fe7d1ddfa6fec7ef50"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-6776518044035331491",
+      "sha256": "8be0028c689145bff092abce1b4e8d9e3c40aa3eb93811249525f1e095eac247"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-6776518044035331491",
+      "sha256": "3c9342a0319be9f855c05b50b40e17bcc9525db15a4f1e4bf526969033eb8d71"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-6776518044035331491",
+      "sha256": "16f306a14ae7a0416dbc8d252f7ccbec793b855dc276af93f71c121a1bb19154"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-525038500404864710",
+      "sha256": "1403199225ffed87daf04b00ed9916b81138b2d6efb2f0611d32dd0abf9a3da5"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-525038500404864710",
+      "sha256": "1df196c57493bc941b38b76d47cb9802067e2a5cbfe135debaaf749c754b26b8"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-525038500404864710",
+      "sha256": "220bd1848c11c89b40bd0402549c9a7247b39157e77bf041d6b90fc6d00ef2f8"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-525038500404864710",
+      "sha256": "f5f38b4352279f3f9827b534ab606fa800177ee12a2c84732be0151141fcbb0a"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-525038500404864710",
+      "sha256": "6a35617666a0964122d96e94cf3adbd8f742539101d526b7d9ad922596aa61c3"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-525038500404864710",
+      "sha256": "54c5a9866f17a87586d48402574bfbb1340eb3be01480392bf9b9c6ed63d1a06"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-525038500404864710",
+      "sha256": "e547281b8259e7736ddadbea945dabddb759503cdfabf0ff273092c327a87dab"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "6691291750986670327",
+      "sha256": "68ab01939dcf0f85a13adb6a2a99082fa20687429e0120c58612d808ae548cf7"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "6691291750986670327",
+      "sha256": "f0cb0bd66f65d111bd1f748f5a9c892a66f94fdd2932afcbfd7490d00aaebd10"
+    },
+    {
+      "group": "brighter",
+      "source_id": "6691291750986670327",
+      "sha256": "b92c753b1b2fc037901faec362b90455ad64234f241d6d2cbe9946aa639ef6de"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "6691291750986670327",
+      "sha256": "4b2433b88f38e6ed085864dbb9d2c3acac0632b5bd8d39544beec5b1fcdbf62b"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "6691291750986670327",
+      "sha256": "f1c66f06fbaa661cfd428f98ad98c2a46244aa4c52706eea33321235a864fbde"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "6691291750986670327",
+      "sha256": "21717a0176091ad2d03cfda78bcc93a8a1508a51006afe79879a4945d352d0ca"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "6691291750986670327",
+      "sha256": "36ea78ceb973537bafffe63ca32cd65194f5ab0e2cc23e11623e8e9706668f1d"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "4716235809681478742",
+      "sha256": "b8972e9eb29dacdb0124b7dbed8df22b5c494f67d1520cb89517c14954036cd6"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "4716235809681478742",
+      "sha256": "5bcce64b45542fd1621e1c2899b23b9a74a5ce7f4dd40c353b251ce991e5dfff"
+    },
+    {
+      "group": "brighter",
+      "source_id": "4716235809681478742",
+      "sha256": "77a87a9e31a4271354dbfa5327b1b326bd710f01017804941a95df5f4f743eb8"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "4716235809681478742",
+      "sha256": "fa680e5c1472faa06da06ab7ae530b449b54d9b6513a719cef042410d7719f65"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "4716235809681478742",
+      "sha256": "d904b27cece677ded4855343d97c64b937bb15dff371b87697a7fca3ba53072b"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "4716235809681478742",
+      "sha256": "2b5545f06e8c7bf4b85e69a92184e01383b70f32d24b591dd5ce9fa8ac9c9121"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "4716235809681478742",
+      "sha256": "b74102f0b8d35bc859627fa2b2afcd5dcfea9ba3689b3aae70f6814d50982971"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-1694584375310842794",
+      "sha256": "9f5f1e600f7d5a5ea2a8318cd349a903e7ca3339f8d95e449161e8ab5414399f"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-1694584375310842794",
+      "sha256": "9f2821e1443edef0aeb4b580a6f72ec19226ee119446cd6989251d0cd7adf5dd"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-1694584375310842794",
+      "sha256": "c50985745e3d0c1cd4fa15e15b680b1a1d17bc45034217500ee2b88694e8f89e"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-1694584375310842794",
+      "sha256": "120b71e7dc6eb2f5e00be940179050e55af59c78865ee973c02eb64ddf1a9ed6"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-1694584375310842794",
+      "sha256": "23b9644b82fa5bb22dd32dda04ec5c84e5c47dcb3dcede61b639365e21736eab"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-1694584375310842794",
+      "sha256": "15adc65d51d84c4f1d1f0209bd316d28f9f3312aee28127f90ae15bfebb1f40e"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-1694584375310842794",
+      "sha256": "166e9823c889dc1490f97d1bdcffdef243001b0c2768788068139be9897eefaf"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-2420670963295906064",
+      "sha256": "e3f7ef7691f7905c51bd1100d18b96e9a48a5beb9c09809f1fa49c2257767a8e"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-2420670963295906064",
+      "sha256": "cede7302b161a450d454ad55a1199d5dfa0b86f5160fef7c600c702efa9e7142"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-2420670963295906064",
+      "sha256": "053115864db8e809836208a9120e40dd4b73b351138e99842c45ed9655a1558f"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-2420670963295906064",
+      "sha256": "44c255d371b1b612ed1dd94cd44a74cf7d62d1de0d56d2d8886bd6e3a44b321e"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-2420670963295906064",
+      "sha256": "d832517677560b09cf9da93aecdb2d4e790eb29da773bf31a78d3d716549d383"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-2420670963295906064",
+      "sha256": "d3597511ce03fbcd4b818d46de9f00c1be8ce759a7c7c3ec79416a8569e823bf"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-2420670963295906064",
+      "sha256": "ead59707e07cb8880fc486c5105295237fb2383e9d70ff142a56dfa5154d8a92"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "2600794538114860588",
+      "sha256": "0f274d2f1a9ddbb2c6a1c3ab4e94e7fc133620ae9f31e9b0d4441f23890ec8fc"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "2600794538114860588",
+      "sha256": "d6a1276a61667eed4293e7d1fe32881a2af178459c654553da2a366089fdf7be"
+    },
+    {
+      "group": "brighter",
+      "source_id": "2600794538114860588",
+      "sha256": "3019d2876cbe11ff9711f2e2bae4ece44cfe041040cefa817aca538e25721824"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "2600794538114860588",
+      "sha256": "8fd09db971a34690ae46b4fe10011df2fd3f2e6d5a72e9de80195a486c17b343"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "2600794538114860588",
+      "sha256": "2739ae64ceebb12ba12081f0feb1ff3bb9de01663413c88ff4bb2a768d29156d"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "2600794538114860588",
+      "sha256": "0838b0ab556c47adbc40b7214a80fbb944c81fc494f72da602fcbe01757ad241"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "2600794538114860588",
+      "sha256": "1408b0b15ae9a02564aa349ac47ee72aa4e83075ac98a49146c04d48217d6d2c"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "1872413092507744029",
+      "sha256": "07eb1804e58f938cc99daca286ba3bc719353e2ac275a07e1d04b9e6e6c6b19d"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "1872413092507744029",
+      "sha256": "6b93d447d60598bb2ee0e36984dff90f3732bb018d386fd29e09c683c7665c84"
+    },
+    {
+      "group": "brighter",
+      "source_id": "1872413092507744029",
+      "sha256": "4a74bcd882660faa574e7a3e21c0ff63ee11bb48b46a9c3e57295d35a8bf12a3"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "1872413092507744029",
+      "sha256": "c44f57311d835694b14ccc03927867bb1744a66b7afb66b10ef92002ae464a95"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "1872413092507744029",
+      "sha256": "d2cb7f54aace4011af8e8d4cfa963f05c04cfdace83ab1e8388752507d3ffa8f"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "1872413092507744029",
+      "sha256": "9c253391e244d418695d4e50b725432551214dfe399b8af300c0a4da2ca8ce92"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "1872413092507744029",
+      "sha256": "87467a0800c1dfa2f6c9a7f4f828694635beb8912a9c7968d1e03358afb48404"
+    },
+    {
+      "group": "original_skin",
+      "source_id": "-5642777666164872473",
+      "sha256": "3f2f67a7ee0709e0e0cb03b260c03e3c49dd53e82e0b10ba49b7dce8113956fd"
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-5642777666164872473",
+      "sha256": "300b8f59312ce7ad80969fc3707712e43ad95f35ed77a5bf7f69b6fe4db3184a"
+    },
+    {
+      "group": "brighter",
+      "source_id": "-5642777666164872473",
+      "sha256": "42a1e3770660d4a0112e6dca22f8ac3ecb92e5f977bc61c70736736f42e99eeb"
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-5642777666164872473",
+      "sha256": "e36913bce5bea39497e9a938fccd3edb00a3ca1085202bfd14e85494f69ac920"
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-5642777666164872473",
+      "sha256": "8155fed8c259444698efc2a1893892e5367e163e1318652c44cf45979238caa7"
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-5642777666164872473",
+      "sha256": "011068f8f85565cb107b13a42b1c5ebb31f583c02a182267e92797e0bb34eb9b"
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-5642777666164872473",
+      "sha256": "dd3610f278f2abb0421dcdef05422f39808d10544f3202812824cf5a56abda09"
+    },
+    {
+      "group": "object",
+      "source_id": "chelsea.png",
+      "sha256": "596aa1e7cb875eb79f437e310381d26b338a81c2da23439704a73c4651e8c4bb"
+    },
+    {
+      "group": "object",
+      "source_id": "coffee.png",
+      "sha256": "cc02f8ca188b167c775a7101b5d767d1e71792cf762c33d6fa15a4599b5a8de7"
+    },
+    {
+      "group": "object",
+      "source_id": "brick.png",
+      "sha256": "7966caf324f6ba843118d98f7a07746d22f6a343430add0233eca5f6eaaa8fcf"
+    },
+    {
+      "group": "object",
+      "source_id": "grass.png",
+      "sha256": "b6b6022426b38936c43a4ac09635cd78af074e90f42ffa8227ac8b7452d39f89"
+    },
+    {
+      "group": "object",
+      "source_id": "gravel.png",
+      "sha256": "c48615b451bf1e606fbd72c0aa9f8cc0f068ab7111ef7d93bb9b0f2586440c12"
+    },
+    {
+      "group": "object",
+      "source_id": "rocket.jpg",
+      "sha256": "c2dd0de7c538df8d111e479619b129464d0269d0ae5fd18ca91d33a7fdfea95c"
+    },
+    {
+      "group": "document",
+      "source_id": "synthetic-document",
+      "sha256": "273a3d0818d6a1020f5fff134115e3f25e9d2700305c64c401ff9830464d6ced"
+    },
+    {
+      "group": "dashboard",
+      "source_id": "synthetic-dashboard",
+      "sha256": "84ea525f8b0053c086c5f05f0a1998aec7a86a8ec213230f032ebc82ffc34de0"
+    },
+    {
+      "group": "pattern",
+      "source_id": "synthetic-pattern",
+      "sha256": "2a533a1f0dc51d9c457f000ad205f4595d087104a32df5d47fd96c4e4cb13dae"
+    },
+    {
+      "group": "black",
+      "source_id": "synthetic-black",
+      "sha256": "5ed9a326fd4a39da1aa5e1a3361c05e88fa1d29428428efa92436fe35b7e737a"
+    },
+    {
+      "group": "white",
+      "source_id": "synthetic-white",
+      "sha256": "32af64b25e8f82dbb736ed5eb2756fe69dedd6fc986a0a94c5d4d75ae5319e37"
+    }
+  ]
+}

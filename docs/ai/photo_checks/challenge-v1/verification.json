@@ -1,0 +1,75 @@
+{
+  "all_270_case_hashes_verified": true,
+  "all_dependency_hashes_verified": true,
+  "summary_accounting_verified": true,
+  "representative_replays": [
+    {
+      "group": "original_skin",
+      "source_id": "-7776857652459777696",
+      "matches": true
+    },
+    {
+      "group": "dimmer",
+      "source_id": "-3055300247709269077",
+      "matches": true
+    },
+    {
+      "group": "brighter",
+      "source_id": "-3055300247709269077",
+      "matches": true
+    },
+    {
+      "group": "severe_blur",
+      "source_id": "-7776857652459777696",
+      "matches": true
+    },
+    {
+      "group": "low_resolution",
+      "source_id": "-7776857652459777696",
+      "matches": true
+    },
+    {
+      "group": "skin_screenshot",
+      "source_id": "-5642777666164872473",
+      "matches": true
+    },
+    {
+      "group": "cropped_skin_screenshot",
+      "source_id": "-7776857652459777696",
+      "matches": true
+    },
+    {
+      "group": "object",
+      "source_id": "chelsea.png",
+      "matches": true
+    },
+    {
+      "group": "document",
+      "source_id": "synthetic-document",
+      "matches": true
+    },
+    {
+      "group": "dashboard",
+      "source_id": "synthetic-dashboard",
+      "matches": true
+    },
+    {
+      "group": "pattern",
+      "source_id": "synthetic-pattern",
+      "matches": true
+    },
+    {
+      "group": "black",
+      "source_id": "synthetic-black",
+      "matches": true
+    },
+    {
+      "group": "white",
+      "source_id": "synthetic-white",
+      "matches": true
+    }
+  ],
+  "results_sha256": "12e4113938eb95277d5ea76caf0bfd8e194a3f57f645d8bf8b77057ff50a6d86",
+  "contract_sha256": "dc9b9487f8527fec672351394524643ff4f91941061ef3d8c539a69e6d3ab310",
+  "disease_test_images_read": 0
+}
