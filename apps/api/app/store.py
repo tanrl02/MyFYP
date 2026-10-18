@@ -945,6 +945,11 @@ class Store:
                 raise RuleError('Choose a follow-up date after today and after this appointment date.',422)
             db.execute('INSERT INTO follow_up_recommendations VALUES(?,?,?,?,?)',
                        (booking_id,doctor,recommended_date,reason,datetime.now(timezone.utc).isoformat()))
+            token=f"{'L' if doctor=='doctor-lim' else 'A'}{source['queue_number']:03d}"
+            visit_date=datetime.fromisoformat(source['starts_at']).astimezone(timezone(timedelta(hours=8)))
+            earliest=date.fromisoformat(recommended_date)
+            self.notify(db,source['patient_id'],'follow_up_recommended',booking_id,booking_id,'Follow-up visit recommended',
+                        f"{DOCTORS[doctor]} recommended a follow-up on or after {earliest:%d %b %Y} (Malaysia date) for {token}, your visit on {visit_date:%d %b %Y, %I:%M %p} (Malaysia time). Open the original visit to review the recommendation and latest booking status. No appointment is booked by this notification.")
             return self.follow_up_record(db,booking_id)
 
     def consultation_history(self, booking_id, doctor):
