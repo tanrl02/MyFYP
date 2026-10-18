@@ -4,7 +4,7 @@ export type ConsultationDraft = {booking_id:string;doctor_id:DemoDoctor;findings
 export type PatientBackground = { patient_id: DemoPatient; allergies: string; medicines: string; conditions: string; version: number; updated_at: string | null };
 export type FollowUp = {source_booking_id:string;doctor_id:DemoDoctor;recommended_date:string;reason:string;created_at:string;booked_visit:Booking|null};
 export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null; background?: PatientBackground;follow_up?:FollowUp|null };
-export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; visit: Booking };
+export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; version:number; edited_at:string|null;edit_deadline:string;visit: Booking };
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number};
@@ -96,6 +96,7 @@ export class DemoApi {
   saveBackground(body: Pick<PatientBackground,"allergies"|"medicines"|"conditions"|"version">) { return this.request<PatientBackground>("/patient-background",body); }
   feedback() { return this.request<VisitFeedback[]>("/feedback"); }
   submitFeedback(id: string,rating: number,comment: string) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback`,{rating,comment}); }
+  editFeedback(id:string,rating:number,comment:string,version:number) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback/edit`,{rating,comment,version}); }
   consultation(id: string) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`); }
   consultationHistory(id:string) { return this.request<ConsultationHistory>(`/visits/${encodeURIComponent(id)}/history`); }
   recommendFollowUp(id:string,recommendedDate:string,reason:string) { return this.request<FollowUp>(`/visits/${encodeURIComponent(id)}/follow-up`,{recommended_date:recommendedDate,reason}); }

@@ -97,6 +97,9 @@ class FeedbackInput(BaseModel):
     rating: int = Field(strict=True,ge=1,le=5)
     comment: str = Field(max_length=1000)
 
+class FeedbackEditInput(FeedbackInput):
+    version: int = Field(strict=True,ge=0)
+
 class MedicineInput(BaseModel):
     name: str = Field(min_length=1,max_length=100,pattern=r'\S')
     strength: str = Field(min_length=1,max_length=60,pattern=r'\S')
@@ -351,6 +354,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/visits/{booking_id}/feedback',status_code=201)
     def submit_feedback(booking_id: str,payload: FeedbackInput,who=Depends(patient)):
         return run(lambda: store.submit_feedback(booking_id,who,payload.rating,payload.comment.strip()))
+
+    @api.post('/visits/{booking_id}/feedback/edit')
+    def edit_feedback(booking_id: str,payload: FeedbackEditInput,who=Depends(patient)):
+        return run(lambda: store.edit_feedback(booking_id,who,payload.rating,payload.comment.strip(),payload.version))
 
     @api.get('/visits/{booking_id}/consultation')
     def consultation(booking_id: str, who=Depends(actor)):

@@ -113,6 +113,9 @@ class Store:
                 db.execute('ALTER TABLE assessments ADD COLUMN prediction_json TEXT')
             if 'symptoms_json' not in {row['name'] for row in db.execute('PRAGMA table_info(assessments)')}:
                 db.execute('ALTER TABLE assessments ADD COLUMN symptoms_json TEXT')
+            for column,definition in [('version','INTEGER NOT NULL DEFAULT 0'),('edited_at','TEXT')]:
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(visit_feedback)')}:
+                    db.execute(f'ALTER TABLE visit_feedback ADD COLUMN {column} {definition}')
             for table in ('assessment_reviews','assessment_review_drafts'):
                 if 'doctor_assessment' not in {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}:
                     db.execute(f"ALTER TABLE {table} ADD COLUMN doctor_assessment TEXT NOT NULL DEFAULT ''")
@@ -447,9 +450,13 @@ class Store:
             origin=db.execute('SELECT source_booking_id FROM follow_up_bookings WHERE booking_id=?',(booking_id,)).fetchone()
             return {'visit':visit,'linked_shares':linked,'note':dict(note) if note else None,
                     'prescription':self.prescription(db,booking_id),'invoice':self.invoice(db,booking_id),
-                    'feedback':dict(feedback) if feedback else None,'replacement':replacement,
+                    'feedback':self.feedback_metadata(feedback) if feedback else None,'replacement':replacement,
                     'follow_up':self.follow_up_record(db,booking_id),
                     'follow_up_of':self.record(db,origin['source_booking_id']) if origin else None}
+
+    @staticmethod
+    def feedback_metadata(row):
+        return dict(row,edit_deadline=(datetime.fromisoformat(row['created_at'])+timedelta(hours=24)).isoformat())
 
     def feedback(self, actor):
         if actor not in {*PATIENTS,'staff-demo'}:
@@ -457,7 +464,7 @@ class Store:
         with self.connect() as db:
             rows = db.execute('''SELECT * FROM visit_feedback WHERE (?='staff-demo' OR patient_id=?)
                 ORDER BY created_at DESC LIMIT 100''',(actor,actor)).fetchall()
-            return [dict(row,visit=self.record(db,row['booking_id'])) for row in rows]
+            return [dict(self.feedback_metadata(row),visit=self.record(db,row['booking_id'])) for row in rows]
 
     def submit_feedback(self, booking_id, patient, rating, comment):
         with self.connect() as db:
@@ -473,11 +480,40 @@ class Store:
             if existing:
                 if existing['rating']!=rating or existing['comment']!=comment:
                     raise RuleError('Feedback was already submitted for this visit. Refresh to view it.')
-                return dict(existing,visit=visit)
+                return dict(self.feedback_metadata(existing),visit=visit)
             feedback_id=str(uuid4())
-            db.execute('INSERT INTO visit_feedback VALUES(?,?,?,?,?,?)',(feedback_id,booking_id,patient,rating,comment,datetime.now(timezone.utc).isoformat()))
+            db.execute('INSERT INTO visit_feedback(id,booking_id,patient_id,rating,comment,created_at) VALUES(?,?,?,?,?,?)',(feedback_id,booking_id,patient,rating,comment,datetime.now(timezone.utc).isoformat()))
             self.event(db,booking_id,patient,'feedback-submitted')
-            return dict(db.execute('SELECT * FROM visit_feedback WHERE id=?',(feedback_id,)).fetchone(),visit=visit)
+            return dict(self.feedback_metadata(db.execute('SELECT * FROM visit_feedback WHERE id=?',(feedback_id,)).fetchone()),visit=visit)
+
+    def edit_feedback(self, booking_id, patient, rating, comment, version):
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if patient not in PATIENTS or visit['patient_id']!=patient:
+                raise RuleError('You cannot edit feedback for this visit.',403)
+            if visit['status']!='completed':
+                raise RuleError('Feedback is available after the visit is completed.')
+            if type(rating) is not int or not 1<=rating<=5 or len(comment)>1000 or type(version) is not int or version<0:
+                raise RuleError('Choose a rating from 1 to 5, a comment up to 1000 characters and a valid version.',422)
+            row=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
+            if not row:
+                raise RuleError('Submit feedback before editing it.',404)
+            same=(row['rating'],row['comment'])==(rating,comment)
+            # Return an exact successful retry even if its response was lost near the deadline.
+            if row['version']==version+1 and same:
+                return dict(self.feedback_metadata(row),visit=visit)
+            if row['version']!=version:
+                raise RuleError('This feedback changed in another session. Cancel and reopen it before editing again.')
+            now=datetime.now(timezone.utc)
+            if now>=datetime.fromisoformat(row['created_at'])+timedelta(hours=24):
+                raise RuleError('The 24-hour editing window has closed. Your saved feedback is unchanged.')
+            if not same:
+                db.execute('UPDATE visit_feedback SET rating=?,comment=?,version=version+1,edited_at=? WHERE id=?',
+                           (rating,comment,now.isoformat(),row['id']))
+                self.event(db,booking_id,patient,'feedback-edited')
+            saved=db.execute('SELECT * FROM visit_feedback WHERE id=?',(row['id'],)).fetchone()
+            return dict(self.feedback_metadata(saved),visit=visit)
 
     def reschedule(self, booking_id, actor, slot_id, request_id):
         with self.connect() as db:
