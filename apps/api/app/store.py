@@ -974,6 +974,28 @@ class Store:
             losses=[dict(row) for row in db.execute('SELECT * FROM stock_losses ORDER BY created_at DESC,id DESC LIMIT 100')]
             return {'medicines':medicines,'receipts':receipts,'losses':losses,'low_stock_threshold':5}
 
+    def stock_movements(self, medicine_id):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            medicine=db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if medicine is None:raise RuleError('Stock item not found.',404)
+            rows=db.execute("""SELECT * FROM (
+                SELECT id AS source_id,'received' AS kind,quantity AS change,created_at,
+                    reason,stock_before,stock_after,actor_id,NULL AS item_label
+                FROM stock_receipts WHERE medicine_id=?
+                UNION ALL
+                SELECT id,kind,-quantity,created_at,reason,stock_before,stock_after,actor_id,item_label
+                FROM stock_losses WHERE medicine_id=?
+                UNION ALL
+                SELECT p.id,'dispensed',-i.quantity,p.dispensed_at,NULL,NULL,NULL,NULL,
+                    i.name || CASE WHEN i.strength!='' THEN ' · '||i.strength ELSE '' END ||
+                    CASE WHEN i.form!='' THEN ' · '||i.form ELSE '' END
+                FROM prescription_items i JOIN prescriptions p ON p.id=i.prescription_id
+                WHERE i.medicine_id=? AND p.status='dispensed'
+                ) ORDER BY julianday(created_at) DESC,kind,source_id DESC LIMIT 101""",
+                (medicine_id,medicine_id,medicine_id)).fetchall()
+            return {'medicine':self.medicine_record(medicine),'movements':[dict(r) for r in rows[:100]],'has_more':len(rows)>100}
+
     def receive_stock(self, medicine_id, quantity, reason, request_id, staff):
         if staff!='staff-demo':
             raise RuleError('Staff demo identity required.',403)

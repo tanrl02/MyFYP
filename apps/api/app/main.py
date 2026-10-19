@@ -379,6 +379,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def stock(who=Depends(staff)):
         return store.stock()
 
+    @api.get('/stock/{medicine_id}/movements')
+    def stock_movements(medicine_id: str,who=Depends(staff)):
+        return run(lambda: store.stock_movements(medicine_id))
+
     @api.get('/reports/daily')
     def daily_report(clinic_date: date,who=Depends(staff)):
         return store.daily_report(clinic_date.isoformat())
