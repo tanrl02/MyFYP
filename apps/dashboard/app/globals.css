@@ -17,3 +17,20 @@ select { padding: 12px; border: 1px solid #ccdcd4; border-radius: 10px; backgrou
 th, td { padding: 16px 12px; text-align: left; border-bottom: 1px solid #edf1ee; }
 th { font-size: 12px; color: #637970; text-transform: uppercase; letter-spacing: .05em; }
 @media(max-width: 720px) { th,td { padding: 12px 8px; } .panel { padding: 16px; } }
+
+@media print {
+  @page { size: A4; margin: 16mm; }
+  body:has(.simulated-receipt) { background: white; color: black; }
+  .simulated-receipt { max-width: none; padding: 0; margin: 0; font-size: 11pt; }
+  .simulated-receipt .receipt-actions { display: none !important; }
+  .simulated-receipt .receipt-sheet { border: 0; border-radius: 0; padding: 0; box-shadow: none; }
+  .simulated-receipt .muted { color: #333; }
+  .simulated-receipt .receipt-simulation { border-color: black; }
+  .simulated-receipt dl { display: grid; grid-template-columns: 1fr 1fr; }
+  .simulated-receipt dl > div:last-child { grid-column: 1 / -1; }
+  .simulated-receipt table { width: 100%; table-layout: fixed; }
+  .simulated-receipt th:first-child { width: 48%; }
+  .simulated-receipt th, .simulated-receipt td { padding: 10px 6px; overflow-wrap: anywhere; }
+  .simulated-receipt thead { display: table-header-group; }
+  .simulated-receipt tr, .simulated-receipt header, .simulated-receipt dl { break-inside: avoid; }
+}
