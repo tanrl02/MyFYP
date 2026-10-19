@@ -161,6 +161,10 @@ class StockReceiptInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
 
+class StockLossInput(StockReceiptInput):
+    model_config=ConfigDict(extra='forbid')
+    kind: Literal['damaged','lost']
+
 def create_app(path=None,photo_checker=None,predictor=None):
     photo_checker=photo_checker or check_photo
     predictor=predictor or predict_disease
@@ -382,6 +386,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/stock/receive',status_code=201)
     def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
         return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))
+
+    @api.post('/stock/losses',status_code=201)
+    def stock_loss(payload: StockLossInput,who=Depends(staff)):
+        return run(lambda: store.record_stock_loss(payload.medicine_id,payload.quantity,payload.kind,payload.reason,payload.request_id,who))
 
     @api.get('/assessment-shares')
     def shares(who=Depends(actor)):

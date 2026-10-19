@@ -180,6 +180,11 @@ class Store:
                 request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
                 from_version INTEGER NOT NULL, active INTEGER NOT NULL, old_active INTEGER NOT NULL,
                 actor_id TEXT NOT NULL, created_at TEXT NOT NULL, result_json TEXT NOT NULL)''')
+            db.execute('''CREATE TABLE IF NOT EXISTS stock_losses (
+                id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                quantity INTEGER NOT NULL CHECK(quantity>0), kind TEXT NOT NULL CHECK(kind IN ('damaged','lost')),
+                reason TEXT NOT NULL, stock_before INTEGER NOT NULL, stock_after INTEGER NOT NULL CHECK(stock_after>=0),
+                actor_id TEXT NOT NULL, request_id TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, item_label TEXT NOT NULL)''')
             for column, definition in [('name','TEXT'),('price_cents','INTEGER'),('strength','TEXT'),('form','TEXT')]:
                 if column not in {r['name'] for r in db.execute('PRAGMA table_info(prescription_items)')}:
                     db.execute(f'ALTER TABLE prescription_items ADD COLUMN {column} {definition}')
@@ -953,18 +958,21 @@ class Store:
                 dispensed=db.execute('''SELECT COALESCE(SUM(i.quantity),0) FROM prescription_items i
                     JOIN prescriptions p ON p.id=i.prescription_id
                     WHERE i.medicine_id=? AND p.status='dispensed' AND date(p.dispensed_at,'+8 hours')=?''',(medicine['id'],clinic_date)).fetchone()[0]
-                movements.append({'medicine_id':medicine['id'],'name':medicine['name'],'received':received,'dispensed':dispensed})
+                lost=db.execute("SELECT COALESCE(SUM(quantity),0) FROM stock_losses WHERE medicine_id=? AND date(created_at,'+8 hours')=?",(medicine['id'],clinic_date)).fetchone()[0]
+                movements.append({'medicine_id':medicine['id'],'name':medicine['name'],'received':received,'dispensed':dispensed,'lost':lost})
             feedback=db.execute("SELECT COUNT(*) AS total,AVG(rating) AS average FROM visit_feedback WHERE date(created_at,'+8 hours')=?",(clinic_date,)).fetchone()
             return {'clinic_date':clinic_date,'timezone':'Asia/Kuala_Lumpur','generated_at':datetime.now(timezone.utc).isoformat(),
-                    'visits':visits,'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements)},
+                    'visits':visits,'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements),'lost_units':sum(m['lost'] for m in movements)},
                     'feedback':{'count':feedback['total'],'average_rating':round(feedback['average'],2) if feedback['average'] is not None else None}}
 
     def stock(self):
         with self.connect() as db:
+            db.execute('BEGIN')
             medicines=[self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines ORDER BY id')]
             receipts=[dict(r) for r in db.execute('''SELECT r.*,m.name FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
                 ORDER BY r.created_at DESC LIMIT 100''')]
-            return {'medicines':medicines,'receipts':receipts,'low_stock_threshold':5}
+            losses=[dict(row) for row in db.execute('SELECT * FROM stock_losses ORDER BY created_at DESC,id DESC LIMIT 100')]
+            return {'medicines':medicines,'receipts':receipts,'losses':losses,'low_stock_threshold':5}
 
     def receive_stock(self, medicine_id, quantity, reason, request_id, staff):
         if staff!='staff-demo':
@@ -990,6 +998,30 @@ class Store:
             db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
                 (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat()))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
+
+    def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff):
+        if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
+        if type(quantity) is not int or not 1<=quantity<=1000 or kind not in ('damaged','lost') or not reason.strip() or len(reason)>300:
+            raise RuleError('Choose damaged or lost, a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
+        reason=reason.strip()
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM stock_losses WHERE request_id=?',(request_id,)).fetchone()
+            if existing:
+                if (existing['medicine_id'],existing['quantity'],existing['kind'],existing['reason'])!=(medicine_id,quantity,kind,reason):
+                    raise RuleError('This stock-loss request already saved different details. Check the history.')
+                return dict(existing)
+            medicine=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if medicine is None:raise RuleError('Stock item not found.',404)
+            if medicine['stock']<quantity:
+                raise RuleError('Insufficient stock for this deduction. Reload the current stock; nothing was deducted.')
+            after=medicine['stock']-quantity
+            db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
+            label=' · '.join(value for value in (medicine['name'],medicine['strength'],medicine['form']) if value)
+            loss_id=str(uuid4())
+            db.execute('INSERT INTO stock_losses VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+                       (loss_id,medicine_id,quantity,kind,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),label))
+            return dict(db.execute('SELECT * FROM stock_losses WHERE id=?',(loss_id,)).fetchone())
 
     def assessment_metadata(self, row):
         metadata={key:row[key] for key in ('id','patient_id','width','height','created_at')}

@@ -12,8 +12,9 @@ export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anit
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
-export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; low_stock_threshold: number };
-export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: Record<Status | "rescheduled" | "total",number>; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; items: { medicine_id: string; name: string; received: number; dispensed: number }[] }; feedback: { count: number; average_rating: number | null } };
+export type StockLoss=StockReceipt & {kind:"damaged"|"lost";item_label:string};
+export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; losses:StockLoss[]; low_stock_threshold: number };
+export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: Record<Status | "rescheduled" | "total",number>; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; lost_units:number; items: { medicine_id: string; name: string; received: number; dispensed: number; lost:number }[] }; feedback: { count: number; average_rating: number | null } };
 export type DiseasePrediction = {model_id:string;checkpoint_sha256:string;preprocessing:string;dataset_version:string;validation_accuracy:number;validation_macro_f1:number;validation_cases:number;test_evaluated:boolean;input_sha256:string;created_at:string;top_predictions:{condition:string;label:string;score:number}[]};
 export type AssessmentSymptoms={body_area:string;onset:string;itching:"yes"|"no"|"not_sure";pain:"yes"|"no"|"not_sure";description:string};
 export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; symptoms:AssessmentSymptoms|null; message: string; photo_uri?: string };
@@ -137,6 +138,7 @@ export class DemoApi {
   dailyReport(date: string) { return this.request<DailyReport>(`/reports/daily?clinic_date=${encodeURIComponent(date)}`); }
   editMedicine(id:string,body:Pick<Medicine,"name"|"price_cents"|"version"> & {request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/edit`,body); }
   setMedicineActive(id:string,body:{active:boolean;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/status`,body); }
+  recordStockLoss(body:{medicine_id:string;quantity:number;kind:"damaged"|"lost";reason:string;request_id:string}) { return this.request<StockLoss>("/stock/losses",body); }
   receiveStock(medicineId: string,quantity: number,reason: string,requestId: string) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId}); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
   dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }
