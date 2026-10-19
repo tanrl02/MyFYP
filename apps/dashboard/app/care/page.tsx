@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Care, DemoActor, DemoApi, Medicine, PrescriptionItem, medicineLabel, money, queueToken, visitTime } from "@smart-skin/shared";
 
+import DispensingReview from "./DispensingReview";
+
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function CarePage() {
   const [actor, setActor] = useState<DemoActor>("doctor-lim");
@@ -9,6 +11,7 @@ export default function CarePage() {
   const [records, setRecords] = useState<Care[]>([]);
   const [catalog, setCatalog] = useState<Medicine[]>([]);
   const [selected, setSelected] = useState("");
+  const [dispensing,setDispensing]=useState("");
   const [medicineSearch,setMedicineSearch]=useState("");
   const searchTerm=medicineSearch.trim().toLowerCase();
   const visibleCatalog=catalog.filter(m=>!searchTerm||[m.name,m.strength,m.form].some(value=>value.toLowerCase().includes(searchTerm)));
@@ -24,7 +27,7 @@ export default function CarePage() {
   const staff = actor === "staff-demo";
   useEffect(() => {
     let active = true, fetching = false;
-    setRecords([]); setCatalog([]); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
+    setRecords([]); setCatalog([]); setDispensing(""); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
     async function load() {
       if (fetching) return; fetching = true;
       try {
@@ -39,7 +42,7 @@ export default function CarePage() {
   async function action(fn: () => Promise<unknown>, message: string) {
     if (busy) return; setBusy(true); setNotice(""); setError("");
     try {
-      await fn(); setSelected(""); setReview(null);
+      await fn(); setDispensing(""); setSelected(""); setReview(null);
       const [care, medicines] = await Promise.all([api.care(), api.medicines()]);
       setRecords(care); setCatalog(medicines); setNotice(message);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not save. Refresh before retrying."); }
@@ -59,6 +62,14 @@ export default function CarePage() {
     const items=review.items.map(({medicine_id,quantity,directions})=>({medicine_id,quantity,directions}));
     void action(()=>api.prescribe(visitId,items),"Prescription issued. Staff and patient can see the saved items.");
   }
+  function confirmDispensing(record:Care){
+    const prescription=record.prescription;
+    if(!staff||busy||!prescription||prescription.status!=="issued"||dispensing!==prescription.id)return;
+    if(prescription.items.some(item=>{const medicine=catalog.find(m=>m.id===item.medicine_id);return !medicine||medicine.stock<item.quantity;})){
+      setError("Insufficient or unavailable stock. Nothing was dispensed. Review the latest stock.");return;
+    }
+    void action(()=>api.dispense(prescription.id),"Dispensing saved. Stock deducted once.");
+  }
   const visits = records.filter(r => r.visit.status === "called" || r.visit.status === "completed");
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10">
     <header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div><strong className="text-xl">Smart Skin</strong><p className="muted text-sm">Visit care & billing</p></div><nav className="flex flex-wrap gap-3">{staff?<a className="btn secondary" href="/stock">Stock</a>:null}<a className="btn secondary" href="/consultations">Consultation notes</a><a className="btn secondary" href="/reviews">Doctor reviews</a><a className="btn secondary" href="/">← Patient queue</a></nav></header>
@@ -72,7 +83,7 @@ export default function CarePage() {
     <div className="grid gap-6">{visits.map(({ visit, prescription, invoice }) => <section key={visit.id} className="panel">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-semibold">{queueToken(visit)} · {visit.patient_name}</h2><p className="muted mt-1 text-sm">{visit.doctor_name} · {visitTime(visit.starts_at)}</p></div><span className="badge">{visit.status}</span></div>
       <div className="grid gap-6 md:grid-cols-2"><div><h3 className="mb-3 font-semibold">Prescription</h3>
-        {prescription ? <><span className="badge">{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</span><ul className="my-4 space-y-3">{prescription.items.map(item => <li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="muted text-sm">{item.directions}</p></li>)}</ul>{staff && prescription.status === "issued" && <button className="btn" disabled={busy} onClick={() => action(() => api.dispense(prescription.id), "Dispensing saved. Stock deducted once.")}>Confirm dispensing</button>}</> : <>
+        {prescription ? <><span className="badge">{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</span><ul className="my-4 space-y-3">{prescription.items.map(item => <li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="muted text-sm">{item.directions}</p></li>)}</ul>{staff && prescription.status === "issued" && (dispensing===prescription.id?<DispensingReview record={{visit,prescription,invoice}} catalog={catalog} busy={busy} onConfirm={()=>confirmDispensing({visit,prescription,invoice})} onCancel={()=>{setDispensing("");setError("");}}/>:<button className="btn" disabled={busy} onClick={()=>{setDispensing(prescription.id);setError("");}}>Review dispensing</button>)}</> : <>
           <p className="muted mb-3 text-sm">No prescription issued.{invoice ? " This visit has been billed; new items cannot be added." : " Issue before generating a bill if items are needed."}</p>
           {!staff && !invoice && selected !== visit.id && <button className="btn" disabled={busy} onClick={() => { setSelected(visit.id); setReview(null); setQuantities({}); setMedicineSearch(""); setDirections("Demo instructions only — not medical advice."); setError(""); }}>Create prescription</button>}
           {!staff && selected === visit.id && <div className="rounded-xl bg-[#f4f7f6] p-4"><fieldset disabled={busy||!!review}><p className="muted mb-3 text-sm">Issued items are fixed for this demo. Check quantities before saving.</p><label className="mb-3 block text-sm">Search prescription medicines<input type="search" disabled={busy} maxLength={100} value={medicineSearch} onChange={e=>setMedicineSearch(e.target.value)} placeholder="Name, strength or form" className="mt-2 w-full rounded-lg border border-[#ccdcd4] bg-white p-2"/></label><button className="btn secondary mb-3" disabled={busy||!medicineSearch} onClick={()=>setMedicineSearch("")}>Clear medicine search</button><p role="status" className="muted mb-3 text-sm">Showing {visibleCatalog.length} of {catalog.length} active medicines. Search keeps selected quantities.</p>{chosenItems.length?<div className="mb-3 rounded-lg border border-[#ccdcd4] bg-white p-3"><h4 className="font-semibold">Selected medicines ({chosenItems.length})</h4><ul className="mt-2 space-y-2">{chosenItems.map(([id,quantity])=>{const medicine=catalog.find(m=>m.id===id);return <li key={id}>{medicine?medicineLabel(medicine):"Unavailable medicine — cancel and reopen to review"} × {quantity}</li>;})}</ul></div>:<p className="muted mb-3 text-sm">No medicines selected yet.</p>}{visibleCatalog.length===0?<p className="mb-3 text-sm">{searchTerm?"No active medicines match your search. Clear search to view all choices.":"No active medicines available."}</p>:null}{visibleCatalog.map(m => <label key={m.id} className="mb-3 block text-sm">{medicineLabel(m)} · {money(m.price_cents)} · {m.stock} in stock<input aria-label={`Quantity ${m.id}`} className="mt-2 block w-full rounded-lg border border-[#ccdcd4] bg-white p-2" type="number" min="0" max="20" step="1" disabled={busy} value={quantities[m.id] || "0"} onChange={e => setQuantities(q => ({ ...q, [m.id]: e.target.value }))} /></label>)}<label className="block text-sm">Demo directions<textarea className="mt-2 w-full rounded-lg border border-[#ccdcd4] p-2" maxLength={300} disabled={busy} value={directions} onChange={e => setDirections(e.target.value)} /></label></fieldset>{review&&review.visitId===visit.id?<section aria-label="Prescription review" className="mt-4 rounded-lg border border-[#ccdcd4] bg-white p-4"><h4 className="font-semibold">Review prescription</h4><p className="my-3">{queueToken(visit)} · {visit.patient_name} · {visit.doctor_name} · {visitTime(visit.starts_at)}</p><ul className="my-3 space-y-3">{review.items.map(item=><li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="whitespace-pre-wrap break-words text-sm">{item.directions}</p></li>)}</ul><p className="muted my-3 text-sm">Confirming saves these quantities and directions as a fixed prescription. Staff will check stock when dispensing.</p>{reviewChanged?<p role="alert" className="my-3 text-red-800">Medicine details changed. Keep editing and review the current choices again.</p>:null}<div className="flex flex-wrap gap-3"><button className="btn" disabled={busy||reviewChanged} onClick={()=>confirmPrescription(visit.id)}>{busy?"Saving…":"Confirm issue prescription"}</button><button className="btn secondary" disabled={busy} onClick={()=>{setReview(null);setError("");}}>Keep editing prescription</button><button className="btn secondary" disabled={busy} onClick={()=>{setReview(null);setSelected("");setError("");}}>Cancel prescription</button></div></section>:<div className="mt-4 flex flex-wrap gap-3"><button className="btn" disabled={busy} onClick={() => reviewPrescription(visit.id)}>Review prescription</button><button className="btn secondary" disabled={busy} onClick={() => setSelected("")}>Cancel</button></div>}</div>}
