@@ -145,6 +145,6 @@ export class DemoApi {
   receiveStock(medicineId: string,quantity: number,reason: string,requestId: string) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId}); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
   dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }
-  invoice(id: string) { return this.request<Invoice>(`/visits/${encodeURIComponent(id)}/invoice`, {}); }
+  invoice(id: string,review?:{prescription_id:string|null}) { return this.request<Invoice>(`/visits/${encodeURIComponent(id)}/invoice`, review??{}); }
   paySimulated(id: string) { return this.request<Invoice>(`/invoices/${encodeURIComponent(id)}/pay-simulated`, {}); }
 }

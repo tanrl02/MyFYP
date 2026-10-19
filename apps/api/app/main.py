@@ -161,6 +161,10 @@ class StockReceiptInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
 
+class InvoiceReviewInput(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    prescription_id: str | None = Field(default=None,max_length=100)
+
 class StockLossInput(StockReceiptInput):
     model_config=ConfigDict(extra='forbid')
     kind: Literal['damaged','lost']
@@ -488,8 +492,8 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return run(lambda: store.save_consultation_draft(booking_id,who,payload.findings.strip(),payload.follow_up.strip(),payload.version))
 
     @api.post('/visits/{booking_id}/invoice')
-    def invoice(booking_id: str, who=Depends(staff)):
-        return run(lambda: store.generate_invoice(booking_id, who))
+    def invoice(booking_id: str, payload: InvoiceReviewInput | None=None, who=Depends(staff)):
+        return run(lambda: store.generate_invoice(booking_id, who, payload.model_dump() if payload and "prescription_id" in payload.model_fields_set else None))
 
     @api.post('/invoices/{invoice_id}/pay-simulated')
     def pay(invoice_id: str, who=Depends(payer)):

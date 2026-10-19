@@ -1507,17 +1507,19 @@ class Store:
             self.event(db, row['booking_id'], staff, 'prescription-dispensed')
             return self.prescription(db, row['booking_id'])
 
-    def generate_invoice(self, booking_id, staff):
+    def generate_invoice(self, booking_id, staff, reviewed=None):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             visit = self.record(db, booking_id)
             if visit['status'] != 'completed':
                 raise RuleError('Complete the visit before generating a bill.')
+            prescription = self.prescription(db, booking_id)
+            if reviewed is not None and reviewed['prescription_id']!=(prescription['id'] if prescription else None):
+                raise RuleError('The prescription changed since review. Cancel and review the bill again. No new bill was created.')
             existing = self.invoice(db, booking_id)
             if existing:
                 return existing
             lines = [('Demo consultation', 1, 3000)]
-            prescription = self.prescription(db, booking_id)
             if prescription:
                 lines.extend((' · '.join(v for v in (i['name'],i['strength'],i['form']) if v), i['quantity'], i['price_cents']) for i in prescription['items'])
             invoice_id = str(uuid4())
