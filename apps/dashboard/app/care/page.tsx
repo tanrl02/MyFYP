@@ -13,6 +13,7 @@ export default function CarePage() {
   const api = useMemo(() => new DemoApi(base, actor), [actor]);
   const [records, setRecords] = useState<Care[]>([]);
   const [catalog, setCatalog] = useState<Medicine[]>([]);
+  const [careFilter,setCareFilter]=useState<"all"|"dispensing"|"unpaid">("all");
   const [selected, setSelected] = useState("");
   const [receipt,setReceipt]=useState<Care|null>(null);
   const [paymentReview,setPaymentReview]=useState("");
@@ -35,7 +36,7 @@ export default function CarePage() {
   const staff = actor === "staff-demo";
   useEffect(() => {
     let active = true, fetching = false;
-    setRecords([]); setCatalog([]); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
+    setRecords([]); setCatalog([]); setCareFilter("all"); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
     async function load() {
       if (fetching) return; fetching = true;
       try {
@@ -96,17 +97,19 @@ export default function CarePage() {
     }
     void action(()=>api.paySimulated(invoice.id),"Simulated payment saved. No money was transferred.");
   }
-  const visits = records.filter(r => r.visit.status === "called" || r.visit.status === "completed");
+  const consultationVisits=records.filter(r=>r.visit.status==="called"||r.visit.status==="completed");
+  const visits=consultationVisits.filter(record=>!staff||careFilter==="all"||(careFilter==="dispensing"?record.prescription?.status==="issued":record.invoice?.status==="unpaid"));
   if(staff&&receipt?.invoice?.status==="paid")return <SimulatedReceipt record={receipt} onClose={()=>setReceipt(null)}/>;
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10">
     <header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div><strong className="text-xl">Smart Skin</strong><p className="muted text-sm">Visit care & billing</p></div><nav className="flex flex-wrap gap-3">{staff?<a className="btn secondary" href="/stock">Stock</a>:null}<a className="btn secondary" href="/consultations">Consultation notes</a><a className="btn secondary" href="/reviews">Doctor reviews</a><a className="btn secondary" href="/">← Patient queue</a></nav></header>
     <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Synthetic demonstration. Demo identities are not secure login. Items are placeholders, not medication. All prices and payments are simulated; no money moves.</div>
     <h1 className="mb-2 text-3xl font-semibold">From consultation to checkout.</h1><p className="muted mb-6">Doctor issues → staff dispenses → completed visit is billed → simulated payment.</p>
     <section className="panel mb-6"><label className="text-sm font-semibold">Demo role<select className="mt-2" disabled={busy} value={actor} onChange={e => setActor(e.target.value as DemoActor)}><option value="doctor-lim">Dr. Lim (demo)</option><option value="doctor-anita">Dr. Anita (demo)</option><option value="staff-demo">Staff Demo — dispensing & billing</option></select></label><p className="muted mt-3 text-sm">{staff ? "Staff view operational prescription and bill details." : "Doctors see only their assigned visits. Call a patient from the queue before issuing."}</p></section>
+    {staff&&!loading?<section aria-label="Staff care filters" className="panel mb-6"><label className="text-sm font-semibold">Care list<select disabled={busy} value={careFilter} onChange={e=>{setCareFilter(e.target.value as "all"|"dispensing"|"unpaid");setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}><option value="all">All</option><option value="dispensing">Awaiting dispensing</option><option value="unpaid">Unpaid bills</option></select></label><p role="status" className="muted mt-3 text-sm">Showing {visits.length} of {consultationVisits.length} consultation visits{careFilter==="dispensing"?" awaiting dispensing":careFilter==="unpaid"?" with unpaid bills":""}. Refreshes every three seconds.</p></section>:null}
     {error && <div role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-800">{error}</div>}
     {notice && <div role="status" className="mb-5 rounded-xl bg-emerald-50 p-4 text-emerald-800">{notice}</div>}
     {loading && <p className="muted">Loading saved visits…</p>}
-    {!loading && visits.length === 0 && <div className="panel"><h2 className="font-semibold">No consultation visits yet</h2><p className="muted mt-2">Book and call a patient from the queue, then choose the assigned doctor here.</p></div>}
+    {!loading&&visits.length===0&&<div className="panel"><h2 className="font-semibold">{staff&&consultationVisits.length>0?(careFilter==="dispensing"?"No prescriptions awaiting dispensing.":"No unpaid bills."):"No consultation visits yet"}</h2><p className="muted mt-2">{staff&&consultationVisits.length>0?"Choose All to view the other consultation visits.":"Book and call a patient from the queue, then choose the assigned doctor here."}</p></div>}
     <div className="grid gap-6">{visits.map(({ visit, prescription, invoice }) => <section key={visit.id} className="panel">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-semibold">{queueToken(visit)} · {visit.patient_name}</h2><p className="muted mt-1 text-sm">{visit.doctor_name} · {visitTime(visit.starts_at)}</p></div><span className="badge">{visit.status}</span></div>
       <div className="grid gap-6 md:grid-cols-2"><div><h3 className="mb-3 font-semibold">Prescription</h3>
