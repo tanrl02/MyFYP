@@ -380,8 +380,8 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return store.stock()
 
     @api.get('/stock/{medicine_id}/movements')
-    def stock_movements(medicine_id: str,who=Depends(staff)):
-        return run(lambda: store.stock_movements(medicine_id))
+    def stock_movements(medicine_id: str,cursor: str | None=Query(default=None,min_length=1,max_length=200),who=Depends(staff)):
+        return run(lambda: store.stock_movements(medicine_id,cursor))
 
     @api.get('/reports/daily')
     def daily_report(clinic_date: date,who=Depends(staff)):

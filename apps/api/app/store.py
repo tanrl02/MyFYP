@@ -974,12 +974,12 @@ class Store:
             losses=[dict(row) for row in db.execute('SELECT * FROM stock_losses ORDER BY created_at DESC,id DESC LIMIT 100')]
             return {'medicines':medicines,'receipts':receipts,'losses':losses,'low_stock_threshold':5}
 
-    def stock_movements(self, medicine_id):
+    def stock_movements(self, medicine_id, cursor=None):
         with self.connect() as db:
             db.execute('BEGIN')
             medicine=db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active FROM medicines WHERE id=?',(medicine_id,)).fetchone()
             if medicine is None:raise RuleError('Stock item not found.',404)
-            rows=db.execute("""SELECT * FROM (
+            movements_sql="""WITH movements AS (
                 SELECT id AS source_id,'received' AS kind,quantity AS change,created_at,
                     reason,stock_before,stock_after,actor_id,NULL AS item_label
                 FROM stock_receipts WHERE medicine_id=?
@@ -992,9 +992,22 @@ class Store:
                     CASE WHEN i.form!='' THEN ' · '||i.form ELSE '' END
                 FROM prescription_items i JOIN prescriptions p ON p.id=i.prescription_id
                 WHERE i.medicine_id=? AND p.status='dispensed'
-                ) ORDER BY julianday(created_at) DESC,kind,source_id DESC LIMIT 101""",
-                (medicine_id,medicine_id,medicine_id)).fetchall()
-            return {'medicine':self.medicine_record(medicine),'movements':[dict(r) for r in rows[:100]],'has_more':len(rows)>100}
+                ) """
+            params=(medicine_id,medicine_id,medicine_id)
+            boundary_sql=''
+            boundary_params=()
+            if cursor is not None:
+                if not isinstance(cursor,str) or len(cursor)>200 or ':' not in cursor:
+                    raise RuleError('Invalid movement cursor. Refresh newest movements.',422)
+                kind,source_id=cursor.split(':',1)
+                anchor=db.execute(movements_sql+'SELECT julianday(created_at) AS time FROM movements WHERE kind=? AND source_id=?',params+(kind,source_id)).fetchone()
+                if anchor is None or anchor['time'] is None:
+                    raise RuleError('Movement cursor does not belong to this medicine. Refresh newest movements.',422)
+                boundary_sql='WHERE julianday(created_at)<? OR (julianday(created_at)=? AND (kind>? OR (kind=? AND source_id<?)))'
+                boundary_params=(anchor['time'],anchor['time'],kind,kind,source_id)
+            rows=db.execute(movements_sql+'SELECT * FROM movements '+boundary_sql+' ORDER BY julianday(created_at) DESC,kind,source_id DESC LIMIT 101',params+boundary_params).fetchall()
+            next_cursor=f"{rows[99]['kind']}:{rows[99]['source_id']}" if len(rows)>100 else None
+            return {'medicine':self.medicine_record(medicine),'movements':[dict(r) for r in rows[:100]],'has_more':len(rows)>100,'next_cursor':next_cursor}
 
     def receive_stock(self, medicine_id, quantity, reason, request_id, staff):
         if staff!='staff-demo':

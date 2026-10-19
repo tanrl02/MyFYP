@@ -76,3 +76,44 @@ class StockMovementTests(unittest.TestCase):
         self.assertEqual(saved['movements'][1]['source_id'],'a-102')
         other=self.history('demo-b').json()
         self.assertFalse(other['has_more']);self.assertEqual(other['movements'][0]['source_id'],'b-old')
+
+    def seed_pages(self):
+        with Store(self.path).connect() as db:
+            for n in range(205):
+                db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
+                    (f'page-{n:03}','demo-a',1,'Pagination fixture',0,1,'staff-demo',f'page-request-{n}','2026-10-19T00:00:00+00:00'))
+            for kind in ('lost','damaged'):
+                db.execute('INSERT INTO stock_losses VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+                    (f'page-{kind}','demo-a',1,kind,'Pagination fixture',1,0,'staff-demo',f'page-loss-{kind}','2026-10-19T00:00:00+00:00','Fictional saved label'))
+
+    def test_older_pages_are_complete_deterministic_and_not_shifted_by_new_movements(self):
+        self.seed_pages()
+        first=self.history().json()
+        self.assertEqual(len(first['movements']),100)
+        self.assertEqual([m['kind'] for m in first['movements'][:2]],['damaged','lost'])
+        cursor=first['next_cursor'];self.assertIsNotNone(cursor)
+        store=Store(self.path)
+        store.receive_stock('demo-a',1,'Newer while browsing','new-during-pages','staff-demo')
+        all_rows=first['movements'][:]
+        while cursor:
+            response=self.client.get('/stock/demo-a/movements',headers=self.staff,params={'cursor':cursor})
+            self.assertEqual(response.status_code,200)
+            page=response.json()
+            self.assertEqual(self.client.get('/stock/demo-a/movements',headers=self.staff,params={'cursor':cursor}).json(),page)
+            all_rows.extend(page['movements']);cursor=page['next_cursor']
+            self.assertEqual(page['has_more'],cursor is not None)
+        keys=[(m['kind'],m['source_id']) for m in all_rows]
+        self.assertEqual(len(keys),207);self.assertEqual(len(set(keys)),207)
+        self.assertEqual({source for kind,source in keys}, {f'page-{n:03}' for n in range(205)}|{'page-lost','page-damaged'})
+        self.assertEqual(self.history().json()['movements'][0]['reason'],'Newer while browsing')
+
+    def test_cursor_validation_scope_permissions_and_empty_end(self):
+        self.seed_pages();cursor=self.history().json()['next_cursor']
+        for invalid in ('', 'not-a-cursor','received:missing','x'*201, "received:' OR 1=1 --"):
+            result=self.client.get('/stock/demo-a/movements',headers=self.staff,params={'cursor':invalid})
+            self.assertEqual(result.status_code,422,invalid)
+        self.assertEqual(self.client.get('/stock/demo-b/movements',headers=self.staff,params={'cursor':cursor}).status_code,422)
+        for actor in (self.patient,self.other,{'X-Demo-Actor':'doctor-lim'}):
+            self.assertEqual(self.client.get('/stock/demo-a/movements',headers=actor,params={'cursor':cursor}).status_code,403)
+        end=self.client.get('/stock/demo-a/movements',headers=self.staff,params={'cursor':'received:page-000'}).json()
+        self.assertEqual(end['movements'],[]);self.assertIsNone(end['next_cursor']);self.assertFalse(end['has_more'])
