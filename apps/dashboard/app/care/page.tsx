@@ -15,6 +15,7 @@ export default function CarePage() {
   const [catalog, setCatalog] = useState<Medicine[]>([]);
   const [careDoctor,setCareDoctor]=useState<"all"|"doctor-lim"|"doctor-anita">("all");
   const [careDate,setCareDate]=useState("");
+  const [careSort,setCareSort]=useState<"newest"|"oldest">("newest");
   const [careSearch,setCareSearch]=useState("");
   const careSearchTerm=careSearch.trim().toLowerCase();
   const [careFilter,setCareFilter]=useState<"all"|"dispensing"|"billing"|"unpaid">("all");
@@ -40,7 +41,7 @@ export default function CarePage() {
   const staff = actor === "staff-demo";
   useEffect(() => {
     let active = true, fetching = false;
-    setRecords([]); setCatalog([]); setCareFilter("all"); setCareDoctor("all"); setCareDate(""); setCareSearch(""); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
+    setRecords([]); setCatalog([]); setCareSort("newest"); setCareFilter("all"); setCareDoctor("all"); setCareDate(""); setCareSearch(""); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
     async function load() {
       if (fetching) return; fetching = true;
       try {
@@ -108,6 +109,10 @@ export default function CarePage() {
   }
   const workload: {filter:typeof careFilter;label:string}[]=[{filter:"dispensing",label:"Awaiting dispensing"},{filter:"billing",label:"Awaiting bill"},{filter:"unpaid",label:"Unpaid bills"}];
   const visits=scopedVisits.filter(record=>!staff||matchesWork(record,careFilter));
+  if(staff)visits.sort((a,b)=>{
+    const timeDifference=Date.parse(a.visit.starts_at)-Date.parse(b.visit.starts_at);
+    return (careSort==="oldest"?timeDifference:-timeDifference)||a.visit.queue_number-b.visit.queue_number||a.visit.id.localeCompare(b.visit.id);
+  });
   function selectCareFilter(filter:typeof careFilter){
     setCareFilter(filter);setDispensing("");setBillReview(null);setPaymentReview("");setError("");
   }
@@ -118,6 +123,10 @@ export default function CarePage() {
     <h1 className="mb-2 text-3xl font-semibold">From consultation to checkout.</h1><p className="muted mb-6">Doctor issues → staff dispenses → completed visit is billed → simulated payment.</p>
     <section className="panel mb-6"><label className="text-sm font-semibold">Demo role<select className="mt-2" disabled={busy} value={actor} onChange={e => setActor(e.target.value as DemoActor)}><option value="doctor-lim">Dr. Lim (demo)</option><option value="doctor-anita">Dr. Anita (demo)</option><option value="staff-demo">Staff Demo — dispensing & billing</option></select></label><p className="muted mt-3 text-sm">{staff ? "Staff view operational prescription and bill details." : "Doctors see only their assigned visits. Call a patient from the queue before issuing."}</p></section>
     {staff&&!loading?<section aria-label="Staff care filters" className="panel mb-6"><label className="block text-sm font-semibold">Search patient or queue number<input type="search" maxLength={100} disabled={busy} value={careSearch} onChange={e=>{setCareSearch(e.target.value);setDispensing("");setBillReview(null);setPaymentReview("");setError("");}} placeholder="Patient name or queue number" className="mt-2 w-full rounded-lg border border-[#ccdcd4] bg-white p-3"/></label><button className="btn secondary my-3" disabled={busy||!careSearch} onClick={()=>{setCareSearch("");setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}>Clear care search</button><label className="block text-sm font-semibold">Care list<select disabled={busy} value={careFilter} onChange={e=>selectCareFilter(e.target.value as typeof careFilter)}><option value="all">All</option><option value="dispensing">Awaiting dispensing</option><option value="billing">Awaiting bill</option><option value="unpaid">Unpaid bills</option></select></label><label className="mt-4 block text-sm font-semibold">Visit doctor<select disabled={busy} value={careDoctor} onChange={e=>{setCareDoctor(e.target.value as "all"|"doctor-lim"|"doctor-anita");setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}><option value="all">All doctors</option><option value="doctor-lim">Dr. Lim (demo)</option><option value="doctor-anita">Dr. Anita (demo)</option></select></label><label className="mt-4 block text-sm font-semibold">Visit date · Malaysia time<input type="date" disabled={busy} value={careDate} onChange={e=>{setCareDate(e.target.value);setDispensing("");setBillReview(null);setPaymentReview("");setError("");}} className="mt-2 w-full rounded-lg border border-[#ccdcd4] bg-white p-3"/></label><button className="btn secondary mt-3" disabled={busy||!careDate} onClick={()=>{setCareDate("");setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}>All dates</button><button className="btn secondary ml-3 mt-3" disabled={busy||(!careSearch&&careFilter==="all"&&careDoctor==="all"&&!careDate)} onClick={()=>{setCareSearch("");setCareFilter("all");setCareDoctor("all");setCareDate("");setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}>Reset all filters</button><p role="status" className="muted mt-3 text-sm">Showing {visits.length} of {consultationVisits.length} consultation visits{careDoctor!=="all"?` for ${careDoctor==="doctor-lim"?"Dr. Lim":"Dr. Anita"}`:""}{careDate?` on ${careDate} (Malaysia time)`:""}{careSearchTerm?" matching your search":""}{careFilter==="dispensing"?" awaiting dispensing":careFilter==="billing"?" awaiting a bill":careFilter==="unpaid"?" with unpaid bills":""}. Refreshes every three seconds.</p></section>:null}
+    {staff&&!loading?<section aria-label="Staff care sorting" className="panel mb-6">
+      <label className="block text-sm font-semibold">Visit order<select className="mt-2" disabled={busy} value={careSort} onChange={e=>{setCareSort(e.target.value as typeof careSort);setDispensing("");setBillReview(null);setPaymentReview("");setError("");}}><option value="newest">Newest visit first</option><option value="oldest">Oldest visit first</option></select></label>
+      <p className="muted mt-2 text-sm">Orders by scheduled visit time. Filters and workload counts stay the same.</p>
+    </section>:null}
     {staff&&!loading?<section aria-label="Staff workload summary" className="panel mb-6">
       <h2 className="text-lg font-semibold">Staff workload</h2>
       <p className="muted mt-2 text-sm">Counts follow the patient search, doctor and date above, across all work statuses. A visit can need more than one step. Choose a count to filter the care list.</p>
