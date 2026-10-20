@@ -10,6 +10,7 @@ import RescheduleView from "./RescheduleView";
 import BackgroundView from "./BackgroundView";
 import NotificationsView from "./NotificationsView";
 import DoctorMatchingView from "./DoctorMatchingView";
+import type {BookingTimePreference} from "./BookingTimeFilter";
 import { Booking, DemoApi, DemoPatient, DoctorMatchSource, Slot, patientNames, queueToken, statusLabels, visitTime,visitWindow } from "@smart-skin/shared";
 import { apiBase as base } from "./apiConfig";
 export default function App() {
@@ -26,13 +27,14 @@ export default function App() {
   const [assessmentTarget,setAssessmentTarget]=useState<string|undefined>();
   const [inboxReturn,setInboxReturn]=useState(false);
   const [bookingDate,setBookingDate]=useState<string|null>(null);
+  const [bookingTime,setBookingTime]=useState<BookingTimePreference>("any");
   const [matchSource,setMatchSource]=useState<DoctorMatchSource>({concern:"general"});
   const scrollRef=useRef<ScrollView>(null);
   useEffect(()=>{scrollRef.current?.scrollTo({y:0,animated:false});},[detailId,tab,patient,selected?.id]);
   const refresh=useCallback(async()=>{ const [s,b]=await Promise.all([api.slots(),api.bookings()]);setSlots(s);setBookings(b);setError(""); },[api]);
   useEffect(()=>{
     let active=true, fetching=false;
-    setBookingDate(null);setSelected(null);setCancelId(null);setMoving(null);setBookings([]);setNotice("");setLoading(true);
+    setBookingDate(null);setBookingTime("any");setSelected(null);setCancelId(null);setMoving(null);setBookings([]);setNotice("");setLoading(true);
     const load=async()=>{if(fetching)return;fetching=true;try{const [s,b]=await Promise.all([api.slots(),api.bookings()]);if(active){setSlots(s);setBookings(b);setError("");}}catch(e){if(active)setError(e instanceof Error ? e.message : "Unable to load.");}finally{fetching=false;if(active)setLoading(false);}};
     void load(); const timer=setInterval(load,3000); const subscription=AppState.addEventListener("change",state=>{if(state==="active")void load();});
     return()=>{active=false;clearInterval(timer);subscription.remove();};
@@ -54,7 +56,7 @@ export default function App() {
     {tab==="notifications"?<NotificationsView key={patient} api={api} onBusy={setBusy} onOpen={item=>{setInboxReturn(true);if(item.kind!=="review_published"){setTab("visits");setDetailId(item.target_id);}else{setTab("skin");setAssessmentTarget(item.target_id);}}}/>:tab==="profile"?<BackgroundView key={patient} api={api}/>:tab==="skin"?<SkinView key={`${patient}-${assessmentTarget||""}`} patient={patient} initialAssessmentId={assessmentTarget} onFindDoctor={id=>{setMatchSource({concern:"general",assessmentId:id});setTab("book");setSelected(null);setNotice("");setInboxReturn(false);}}/>:tab==="care"?<CareView key={patient} patient={patient}/>:tab==="book"?<>
       <Text style={styles.title}>{selected?"Confirm your visit":"Find a consultation"}</Text><Text style={[styles.muted,{marginBottom:18}]}>Times shown in Malaysia time. Available places update automatically.</Text>
       {!selected&&matchSource.assessmentId?<Pressable accessibilityRole="button" onPress={()=>{setAssessmentTarget(matchSource.assessmentId);setTab("skin");}}><Text style={styles.link}>← Back to assessment</Text></Pressable>:null}
-      {selected?<View style={styles.card}><Text style={styles.cardTitle}>{selected.doctor_name}</Text><Text style={styles.muted}>{visitWindow(selected)}</Text><Text style={styles.body}>Confirming saves a shared booking and issues your queue number.</Text><Pressable accessibilityRole="button" disabled={busy} style={[styles.button,busy&&styles.disabled]} onPress={()=>act(()=>api.book(selected.id,requestId),"Your visit is booked. Staff can now see it in the shared queue.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm booking"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setSelected(null)}><Text style={styles.link}>Back to available times</Text></Pressable></View>:<DoctorMatchingView key={patient} date={bookingDate} onDate={setBookingDate} api={api} source={matchSource} onSource={setMatchSource} slots={slots} bookings={bookings} busy={busy} onSelect={choose}/>}
+      {selected?<View style={styles.card}><Text style={styles.cardTitle}>{selected.doctor_name}</Text><Text style={styles.muted}>{visitWindow(selected)}</Text><Text style={styles.body}>Confirming saves a shared booking and issues your queue number.</Text><Pressable accessibilityRole="button" disabled={busy} style={[styles.button,busy&&styles.disabled]} onPress={()=>act(()=>api.book(selected.id,requestId),"Your visit is booked. Staff can now see it in the shared queue.")}><Text style={styles.buttonText}>{busy?"Saving…":"Confirm booking"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.quietButton} onPress={()=>setSelected(null)}><Text style={styles.link}>Back to available times</Text></Pressable></View>:<DoctorMatchingView key={patient} time={bookingTime} onTime={setBookingTime} date={bookingDate} onDate={setBookingDate} api={api} source={matchSource} onSource={setMatchSource} slots={slots} bookings={bookings} busy={busy} onSelect={choose}/>}
     </>:detailId?<VisitDetailsView key={`${patient}-${detailId}`} api={api} id={detailId} onBack={()=>setDetailId(null)} onOpen={setDetailId} onBusy={setBusy}/>:<>
       <View style={styles.between}><Text style={styles.title}>My visits</Text><Pressable accessibilityRole="button" onPress={()=>refresh().catch(e=>setError(e.message))}><Text style={styles.link}>Refresh</Text></Pressable></View><Text style={[styles.muted,{marginBottom:18}]}>Queue changes refresh every few seconds.</Text>
       {moving?<RescheduleView key={moving.id} api={api} booking={moving} slots={slots} busy={busy} onBusy={setBusy} onClose={()=>setMoving(null)} onSaved={saved=>{setMoving(null);setNotice(`Visit rescheduled: ${queueToken(saved)} · ${saved.doctor_name} · ${visitTime(saved.starts_at)}.`);void refresh().catch(e=>setError(e.message));}}/>:null}
