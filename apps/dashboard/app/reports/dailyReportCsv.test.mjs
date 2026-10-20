@@ -1,0 +1,36 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { dailyReportCsv } from "./dailyReportCsv.ts";
+
+function fixture() {
+  return {clinic_date:"2026-10-12",timezone:"Asia/Kuala_Lumpur",generated_at:"2026-10-20T14:00:00+00:00",visits:{total:13,waiting:1,called:1,completed:6,cancelled:3,rescheduled:2},billing:{invoice_count:5,billed_cents:20400,paid_cents:20400,unpaid_cents:0},stock:{received_units:12,dispensed_units:9,lost_units:0,items:[{medicine_id:"demo-a",name:"Demo item A",received:7,dispensed:4,lost:0}]},feedback:{count:2,average_rating:4.5}};
+}
+test("exports report identity, date meanings and numeric MYR values",()=>{
+  const csv=dailyReportCsv(fixture());
+  assert.ok(csv.startsWith("\uFEFF"));
+  assert.ok(csv.endsWith("\r\n"));
+  for(const value of ["2026-10-12","2026-10-20T14:00:00+00:00","Asia/Kuala_Lumpur","no money moves.","Appointment date","Activity date in Malaysia time","Submission date in Malaysia time"]) assert.ok(csv.includes(value),value);
+  assert.ok(csv.includes('"Billed","","","204.00","MYR (simulated)"'));
+  assert.ok(csv.includes('"Paid","","","204.00","MYR (simulated)"'));
+  assert.ok(csv.includes('"Average rating","","","4.50","out of 5"'));
+  assert.ok(csv.includes('"Stock items","Dispensed","demo-a","Demo item A","4","units"'));
+});
+test("preserves commas, quotes, Unicode and embedded line breaks",()=>{
+  const report=fixture(); report.stock.items[0].name='Crème, "示范"\r\nLine two';
+  assert.ok(dailyReportCsv(report).includes('"Crème, ""示范""\r\nLine two"'));
+});
+test("exports potentially executable catalogue text as text",()=>{
+  for(const name of ['=1+1','+SUM(A1:A2)','-1+1','@SUM(A1:A2)','  =1+1','\t=1+1','\r=1+1']){
+    const report=fixture(); report.stock.items[0].name=name;
+    assert.ok(dailyReportCsv(report).includes(`"'${name}"`),JSON.stringify(name));
+  }
+});
+test("empty feedback has blank average; zero values and source are preserved",()=>{
+  const report=fixture(); report.feedback={count:0,average_rating:null}; report.stock.items=[];
+  const original=JSON.stringify(report);
+  const csv=dailyReportCsv(report);
+  assert.ok(csv.includes('"Average rating","","","","out of 5"'));
+  assert.ok(csv.includes('"Submitted ratings","","","0","ratings"'));
+  assert.ok(csv.includes('"Unpaid","","","0.00","MYR (simulated)"'));
+  assert.equal(JSON.stringify(report),original);
+});
