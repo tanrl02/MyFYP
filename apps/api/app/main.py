@@ -11,6 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from .store import DOCTORS, PATIENTS, RuleError, Store
 
+class RestoreWaitingInput(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    missed_event_id: str = Field(min_length=1,max_length=100)
+
 class BackgroundInput(BaseModel):
     allergies: str = Field(max_length=1000)
     medicines: str = Field(max_length=1000)
@@ -324,6 +328,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/queue/{booking_id}/missed')
     def mark_missed(booking_id: str, who=Depends(staff)):
         return run(lambda: store.mark_missed(booking_id, who))
+
+    @api.post('/queue/{booking_id}/restore-waiting')
+    def restore_waiting(booking_id: str,payload: RestoreWaitingInput,who=Depends(staff)):
+        return run(lambda: store.restore_waiting(booking_id,payload.missed_event_id,who))
 
     @api.post('/queue/{booking_id}/complete')
     def complete(booking_id: str, who=Depends(staff)):

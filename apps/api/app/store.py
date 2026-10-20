@@ -67,6 +67,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS events (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL REFERENCES bookings(id),
                   actor_id TEXT NOT NULL, action TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS missed_restorations (
+                  missed_event_id TEXT PRIMARY KEY REFERENCES events(id),
+                  restored_event_id TEXT NOT NULL UNIQUE REFERENCES events(id));
                 CREATE TABLE IF NOT EXISTS reschedules (
                   actor_id TEXT NOT NULL, request_id TEXT NOT NULL, old_booking_id TEXT NOT NULL REFERENCES bookings(id),
                   new_booking_id TEXT NOT NULL REFERENCES bookings(id), slot_id TEXT NOT NULL REFERENCES slots(id),
@@ -560,8 +563,10 @@ class Store:
             return {'pattern':self.schedule_pattern(db,doctor),'week_start':week_start,'slots':slots,'unavailability':[dict(row) for row in absences]}
 
     def event(self, db, booking_id, actor, action):
+        event_id=str(uuid4())
         db.execute('INSERT INTO events VALUES(?,?,?,?,?)',
-                   (str(uuid4()), booking_id, actor, action, datetime.now(timezone.utc).isoformat()))
+                   (event_id, booking_id, actor, action, datetime.now(timezone.utc).isoformat()))
+        return event_id
 
     def notify(self, db, patient, kind, source_id, target_id, title, message):
         db.execute('INSERT OR IGNORE INTO patient_notifications VALUES(?,?,?,?,?,?,?,?,NULL)',
@@ -611,7 +616,11 @@ class Store:
         replacement = db.execute('SELECT new_booking_id FROM reschedules WHERE old_booking_id=?',(booking_id,)).fetchone()
         follow_up=db.execute('''SELECT f.source_booking_id,r.recommended_date FROM follow_up_bookings f
             JOIN follow_up_recommendations r ON r.source_booking_id=f.source_booking_id WHERE f.booking_id=?''',(booking_id,)).fetchone()
-        return dict(r, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
+        attendance={}
+        if r['status']=='missed':
+            event=db.execute("SELECT id FROM events WHERE booking_id=? AND action='missed' ORDER BY rowid DESC LIMIT 1",(booking_id,)).fetchone()
+            attendance={'missed_event_id':event['id'] if event else None}
+        return dict(r, **attendance, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
                     ends_at=(datetime.fromisoformat(r['starts_at'])+timedelta(minutes=r['duration_minutes'])).isoformat(),
                     rescheduled_to_id=replacement['new_booking_id'] if replacement else None,
                     follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
@@ -865,6 +874,30 @@ class Store:
             db.execute('UPDATE assessment_shares SET revoked_at=? WHERE booking_id=? AND revoked_at IS NULL',
                        (datetime.now(timezone.utc).isoformat(),booking_id))
             self.event(db,booking_id,staff,'missed')
+            return self.record(db,booking_id)
+
+    def restore_waiting(self, booking_id, missed_event_id, staff):
+        if staff!='staff-demo':
+            raise RuleError('Staff demo identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            latest=db.execute("SELECT id FROM events WHERE booking_id=? AND action='missed' ORDER BY rowid DESC LIMIT 1",(booking_id,)).fetchone()
+            if not latest or latest['id']!=missed_event_id:
+                raise RuleError('Attendance changed. Refresh and review the latest missed appointment.')
+            restored=db.execute('SELECT 1 FROM missed_restorations WHERE missed_event_id=?',(missed_event_id,)).fetchone()
+            if visit['status']=='waiting' and restored:
+                return visit
+            if visit['status']!='missed' or restored:
+                raise RuleError('Only the currently missed appointment can be restored to waiting.')
+            source=visit.get('follow_up_source_id')
+            if source and db.execute("""SELECT 1 FROM follow_up_bookings f JOIN bookings b ON b.id=f.booking_id
+                    WHERE f.source_booking_id=? AND b.id!=? AND b.status NOT IN ('cancelled','missed') LIMIT 1""",(source,booking_id)).fetchone():
+                raise RuleError('Another follow-up is already active. Review that booking before restoring this visit.')
+            db.execute("UPDATE bookings SET status='waiting' WHERE id=?",(booking_id,))
+            event_id=self.event(db,booking_id,staff,'missed-restored')
+            db.execute('INSERT INTO missed_restorations VALUES(?,?)',(missed_event_id,event_id))
+            # Revoked assessment grants stay revoked; sharing requires patient consent.
             return self.record(db,booking_id)
 
     def complete(self, booking_id, staff):
@@ -1342,7 +1375,8 @@ class Store:
         if not row:
             return None
         latest=db.execute('''SELECT b.id FROM follow_up_bookings f JOIN bookings b ON b.id=f.booking_id
-            WHERE f.source_booking_id=? ORDER BY b.created_at DESC,b.rowid DESC LIMIT 1''',(booking_id,)).fetchone()
+            WHERE f.source_booking_id=? ORDER BY CASE WHEN b.status NOT IN ('cancelled','missed') THEN 0 ELSE 1 END,
+            b.created_at DESC,b.rowid DESC LIMIT 1''',(booking_id,)).fetchone()
         return dict(row,booked_visit=self.record(db,latest['id']) if latest else None)
 
     @staticmethod

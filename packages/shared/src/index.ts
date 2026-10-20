@@ -50,7 +50,7 @@ export type SchedulePreview={doctor_id:DemoDoctor;doctor_name:string;week_start:
 export type ScheduleGeneration={id:string;doctor_id:DemoDoctor;week_start:string;pattern_version:number;created_count:number;existing_count:number;unavailable_count?:number;slot_ids:string[];created_at:string};
 export type DoctorUnavailability={id:string;doctor_id:DemoDoctor;clinic_date:string;reason:string;created_at:string;cancelled_at:string|null;start_time:string|null;end_time:string|null};
 export type DoctorSchedule={pattern:SchedulePattern;week_start:string;unavailability:DoctorUnavailability[];slots:(ManagedSlot & {visits:{id:string;queue_number:number;status:Status;patient_name:string}[]})[]};
-export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
+export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; missed_event_id?:string|null; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
 export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled", missed: "Missed" };
 export const queueToken = (booking: Booking) => `${booking.doctor_id === "doctor-lim" ? "L" : "A"}${String(booking.queue_number).padStart(3, "0")}`;
@@ -108,6 +108,7 @@ export class DemoApi {
   reschedule(id: string, slotId: string, requestId: string) { return this.request<Booking>(`/bookings/${encodeURIComponent(id)}/reschedule`, {slot_id:slotId,request_id:requestId}); }
   queue(doctor: string, date: string) { return this.request<Booking[]>(`/queue?doctor_id=${encodeURIComponent(doctor)}&clinic_date=${encodeURIComponent(date)}`); }
   callNext(doctor: string, date: string) { return this.request<Booking>("/queue/call-next", { doctor_id: doctor, clinic_date: date }); }
+  restoreWaiting(id:string,missedEventId:string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/restore-waiting`,{missed_event_id:missedEventId}); }
   markMissed(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/missed`, {}); }
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
   care() { return this.request<Care[]>("/care"); }
