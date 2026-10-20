@@ -8,7 +8,7 @@ function csvCell(value: string | number): string {
 
 export function dailyReportCsv(report: DailyReport): string {
   type Row = (string | number)[];
-  const rows: Row[] = [["Section", "Metric", "Item ID", "Item name", "Value", "Unit", "Date basis", "Notes"]];
+  const rows: Row[] = [["Section", "Metric", "Record ID", "Record name", "Value", "Unit", "Date basis", "Notes"]];
   const add = (section: string, metric: string, value: string | number, unit = "", basis = "", notes = "", id = "", name = "") => rows.push([section, metric, id, name, value, unit, basis, notes]);
   add("Report", "Title", "Daily clinic report");
   add("Report", "Report date", report.clinic_date, "", "Malaysia clinic date");
@@ -18,6 +18,11 @@ export function dailyReportCsv(report: DailyReport): string {
   const appointment = "Appointment date";
   for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["rescheduled", "Rescheduled"]] as const) {
     add("Visits", label, report.visits[key], "visits", appointment, key === "total" ? "Includes rescheduled original booking records." : "Current saved status.");
+  }
+  for (const doctor of report.visits_by_doctor) {
+    for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["rescheduled", "Rescheduled"]] as const) {
+      add("Visits by doctor", label, doctor.visits[key], "visits", appointment, "Current saved status; rescheduled originals are separate from cancellations.", doctor.doctor_id, doctor.doctor_name);
+    }
   }
   add("Billing - simulation", "Invoice count", report.billing.invoice_count, "invoices", appointment);
   for (const [key, label] of [["billed_cents", "Billed"], ["paid_cents", "Paid"], ["unpaid_cents", "Unpaid"]] as const) {

@@ -36,6 +36,12 @@ class ReportTests(unittest.TestCase):
             db.execute('UPDATE invoices SET paid_at=? WHERE id=?',((start-timedelta(days=2)).isoformat(),invoice['id']))
         response=self.report();self.assertEqual(response.status_code,200);report=response.json()
         self.assertEqual(report['visits'],{'waiting':1,'called':0,'completed':2,'cancelled':1,'rescheduled':1,'total':5})
+        doctors={row['doctor_id']:row for row in report['visits_by_doctor']}
+        self.assertEqual(doctors[self.slot['doctor_id']]['visits'],{'waiting':1,'called':0,'completed':1,'cancelled':1,'rescheduled':1,'total':4})
+        self.assertEqual(doctors[other['doctor_id']]['visits'],{'waiting':0,'called':0,'completed':1,'cancelled':0,'rescheduled':0,'total':1})
+        for state,total in report['visits'].items():
+            self.assertEqual(sum(row['visits'][state] for row in doctors.values()),total)
+        self.assertTrue(all(set(row)=={'doctor_id','doctor_name','visits'} for row in doctors.values()))
         self.assertEqual(report['billing'],{'invoice_count':2,'billed_cents':7000,'paid_cents':4000,'unpaid_cents':3000})
         self.assertEqual((report['stock']['received_units'],report['stock']['dispensed_units']),(3,2))
         self.assertEqual(report['feedback'],{'count':2,'average_rating':3.0})
@@ -60,9 +66,33 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(next_day['stock']['received_units'],4);self.assertEqual(next_day['stock']['dispensed_units'],2)
         self.assertEqual(next_day['visits']['total'],0);self.assertEqual(next_day['billing']['invoice_count'],0)
     def test_staff_only_validation_and_empty_date(self):
-        for actor in (self.patient,self.other,{'X-Demo-Actor':'doctor-lim'}):self.assertEqual(self.report(actor=actor).status_code,403)
+        for actor in (self.patient,self.other,{'X-Demo-Actor':'doctor-lim'},{'X-Demo-Actor':'doctor-anita'}):self.assertEqual(self.report(actor=actor).status_code,403)
         self.assertEqual(self.report('2026-02-30').status_code,422)
         self.assertEqual(self.report('not-a-date').status_code,422)
         empty=self.report('2000-01-01').json()
         self.assertEqual(empty['visits']['total'],0);self.assertEqual(empty['billing']['billed_cents'],0)
         self.assertEqual(empty['stock']['received_units'],0);self.assertIsNone(empty['feedback']['average_rating'])
+
+    def test_doctor_breakdown_called_waiting_and_date_isolation(self):
+        store=Store(self.path)
+        other=next(s for s in store.slots() if s['clinic_date']==self.slot['clinic_date'] and s['doctor_id']!=self.slot['doctor_id'])
+        store.book('patient-ava',self.slot['id'],'doctor-called')
+        store.call_next(self.slot['doctor_id'],self.slot['clinic_date'],'staff-demo')
+        store.book('patient-noah',other['id'],'doctor-waiting')
+        future=next(s for s in store.slots() if s['clinic_date']!=self.slot['clinic_date'])
+        store.book('patient-ava',future['id'],'different-report-date')
+        report=self.report().json()
+        doctors={row['doctor_id']:row['visits'] for row in report['visits_by_doctor']}
+        self.assertEqual(doctors[self.slot['doctor_id']]['called'],1)
+        self.assertEqual(doctors[self.slot['doctor_id']]['waiting'],0)
+        self.assertEqual(doctors[other['doctor_id']]['waiting'],1)
+        self.assertEqual(report['visits']['total'],2)
+        for state,total in report['visits'].items():
+            self.assertEqual(sum(row[state] for row in doctors.values()),total)
+
+    def test_empty_date_includes_both_doctors_with_zero_counts(self):
+        report=self.report('2000-01-01').json()
+        self.assertEqual({row['doctor_id'] for row in report['visits_by_doctor']},{'doctor-lim','doctor-anita'})
+        self.assertEqual({row['doctor_name'] for row in report['visits_by_doctor']},{'Dr. Lim (demo)','Dr. Anita (demo)'})
+        self.assertTrue(all(row['visits']==report['visits'] for row in report['visits_by_doctor']))
+        self.assertEqual(report['visits']['total'],0)

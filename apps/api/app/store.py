@@ -941,10 +941,13 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             visits={key:0 for key in ('waiting','called','completed','cancelled','rescheduled')}
-            for row in db.execute('''SELECT CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
+            doctor_visits={doctor:dict(visits,total=0) for doctor in DOCTORS}
+            for row in db.execute('''SELECT s.doctor_id,CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
                     THEN 'rescheduled' ELSE b.status END AS state,COUNT(*) AS total
-                FROM bookings b JOIN slots s ON s.id=b.slot_id WHERE s.clinic_date=? GROUP BY state''',(clinic_date,)):
-                visits[row['state']]=row['total']
+                FROM bookings b JOIN slots s ON s.id=b.slot_id WHERE s.clinic_date=? GROUP BY s.doctor_id,state''',(clinic_date,)):
+                visits[row['state']]+=row['total']
+                doctor_visits[row['doctor_id']][row['state']]=row['total']
+                doctor_visits[row['doctor_id']]['total']+=row['total']
             visits['total']=sum(visits.values())
             billing=dict(db.execute('''SELECT COUNT(*) AS invoice_count,
                 COALESCE(SUM(i.total_cents),0) AS billed_cents,
@@ -962,7 +965,8 @@ class Store:
                 movements.append({'medicine_id':medicine['id'],'name':medicine['name'],'received':received,'dispensed':dispensed,'lost':lost})
             feedback=db.execute("SELECT COUNT(*) AS total,AVG(rating) AS average FROM visit_feedback WHERE date(created_at,'+8 hours')=?",(clinic_date,)).fetchone()
             return {'clinic_date':clinic_date,'timezone':'Asia/Kuala_Lumpur','generated_at':datetime.now(timezone.utc).isoformat(),
-                    'visits':visits,'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements),'lost_units':sum(m['lost'] for m in movements)},
+                    'visits':visits,'visits_by_doctor':[{'doctor_id':doctor,'doctor_name':name,'visits':doctor_visits[doctor]} for doctor,name in DOCTORS.items()],
+                    'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements),'lost_units':sum(m['lost'] for m in movements)},
                     'feedback':{'count':feedback['total'],'average_rating':round(feedback['average'],2) if feedback['average'] is not None else None}}
 
     def stock(self):

@@ -61,3 +61,9 @@ th { font-size: 12px; color: #637970; text-transform: uppercase; letter-spacing:
   .daily-report thead { display: table-header-group; }
   .daily-report tr { break-inside: avoid; }
 }
+
+@media print {
+  .daily-report .report-doctors th:first-child { width: 25%; }
+  .daily-report .report-doctors th { text-transform: none; }
+  .daily-report .report-doctors th, .daily-report .report-doctors td { font-size: 8pt; letter-spacing: normal; }
+}
