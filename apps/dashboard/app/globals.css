@@ -63,7 +63,10 @@ th { font-size: 12px; color: #637970; text-transform: uppercase; letter-spacing:
 }
 
 @media print {
-  .daily-report .report-doctors th:first-child { width: 25%; }
+  .daily-report .report-doctors th:first-child { width: 18%; }
+  .daily-report .report-doctors thead th:last-child { width: 14%; }
   .daily-report .report-doctors th { text-transform: none; }
   .daily-report .report-doctors th, .daily-report .report-doctors td { font-size: 8pt; letter-spacing: normal; }
 }
+
+.badge.missed { background: #fff0d0; color: #754a00; }

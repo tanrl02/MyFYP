@@ -6,6 +6,7 @@ import re
 import sqlite3
 import json
 from uuid import uuid4
+from .booking_migrations import allow_missed_bookings
 from .scheduling import MALAYSIA, pattern_values, week_slots, preview_hash
 
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
@@ -53,7 +54,7 @@ class Store:
                   clinic_date TEXT NOT NULL, capacity INTEGER NOT NULL CHECK(capacity > 0));
                 CREATE TABLE IF NOT EXISTS bookings (
                   id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, slot_id TEXT NOT NULL REFERENCES slots(id),
-                  queue_number INTEGER NOT NULL, status TEXT NOT NULL CHECK(status IN ('waiting','called','completed','cancelled')),
+                  queue_number INTEGER NOT NULL, status TEXT NOT NULL CHECK(status IN ('waiting','called','completed','cancelled','missed')),
                   created_at TEXT NOT NULL, request_id TEXT NOT NULL,
                   UNIQUE(patient_id, request_id));
                 CREATE TABLE IF NOT EXISTS follow_up_recommendations (
@@ -121,6 +122,7 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            allow_missed_bookings(db)
             if 'cancelled_at' not in {row['name'] for row in db.execute('PRAGMA table_info(doctor_unavailability)')}:
                 # Replace the old permanent doctor/date uniqueness with active-only uniqueness.
                 # No tables reference absence IDs; preserve every ID, request key and source value.
@@ -638,7 +640,7 @@ class Store:
                     if not link or link['source_booking_id']!=follow_up_source:
                         raise RuleError('This request belongs to another booking. Use a new request.')
                 return self.record(db, existing['id'])
-            if recommendation and recommendation['booked_visit'] and recommendation['booked_visit']['status']!='cancelled':
+            if recommendation and recommendation['booked_visit'] and recommendation['booked_visit']['status'] not in ('cancelled','missed'):
                 raise RuleError('A follow-up is already booked. Open that visit to reschedule or cancel it.')
             slot = db.execute('SELECT * FROM slots WHERE id=?', (slot_id,)).fetchone()
             if slot is None:
@@ -847,6 +849,24 @@ class Store:
                         f"{token} with {DOCTORS[doctor]} was called. Open the visit to check its current status.")
             return self.record(db, row['id'])
 
+    def mark_missed(self, booking_id, staff):
+        if staff!='staff-demo':
+            raise RuleError('Staff demo identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if visit['status']=='missed':
+                return visit
+            if visit['status']!='waiting':
+                raise RuleError('Only a waiting appointment can be marked missed.')
+            if datetime.fromisoformat(visit['ends_at'])>datetime.now(timezone.utc):
+                raise RuleError('Wait until the scheduled appointment has ended before marking it missed.')
+            db.execute("UPDATE bookings SET status='missed' WHERE id=?",(booking_id,))
+            db.execute('UPDATE assessment_shares SET revoked_at=? WHERE booking_id=? AND revoked_at IS NULL',
+                       (datetime.now(timezone.utc).isoformat(),booking_id))
+            self.event(db,booking_id,staff,'missed')
+            return self.record(db,booking_id)
+
     def complete(self, booking_id, staff):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -940,7 +960,7 @@ class Store:
     def daily_report(self, clinic_date):
         with self.connect() as db:
             db.execute('BEGIN')
-            visits={key:0 for key in ('waiting','called','completed','cancelled','rescheduled')}
+            visits={key:0 for key in ('waiting','called','completed','cancelled','missed','rescheduled')}
             doctor_visits={doctor:dict(visits,total=0) for doctor in DOCTORS}
             for row in db.execute('''SELECT s.doctor_id,CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
                     THEN 'rescheduled' ELSE b.status END AS state,COUNT(*) AS total
@@ -1119,7 +1139,7 @@ class Store:
             actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or actor not in {*PATIENTS, *DOCTORS}:
             raise RuleError('Shared assessment is unavailable for this identity.', 404)
         visit = self.record(db, row['booking_id']) if row['booking_id'] else None
-        if actor in DOCTORS and visit and (visit['status'] == 'cancelled' or visit['doctor_id'] != actor):
+        if actor in DOCTORS and visit and (visit['status'] in ('cancelled','missed') or visit['doctor_id'] != actor):
             raise RuleError('Appointment access is no longer available.', 404)
         review = db.execute('SELECT * FROM assessment_reviews WHERE share_id=?', (share_id,)).fetchone()
         return dict(row, patient_name=PATIENTS[row['patient_id']], doctor_name=DOCTORS[row['doctor_id']],
@@ -1131,7 +1151,7 @@ class Store:
                 rows = db.execute('SELECT id FROM assessment_shares WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (actor,))
             elif actor in DOCTORS:
                 rows = db.execute('''SELECT s.id FROM assessment_shares s LEFT JOIN bookings b ON b.id=s.booking_id
-                    WHERE s.doctor_id=? AND s.revoked_at IS NULL AND (s.booking_id IS NULL OR b.status!='cancelled')
+                    WHERE s.doctor_id=? AND s.revoked_at IS NULL AND (s.booking_id IS NULL OR b.status NOT IN ('cancelled','missed'))
                     ORDER BY s.created_at DESC LIMIT 100''', (actor,))
             else:
                 raise RuleError('Patient or doctor identity required.', 403)

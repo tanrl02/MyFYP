@@ -16,11 +16,11 @@ export function dailyReportCsv(report: DailyReport): string {
   add("Report", "Timezone", report.timezone);
   add("Report", "Data label", "Synthetic demonstration; billing and payments simulated; no money moves.");
   const appointment = "Appointment date";
-  for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["rescheduled", "Rescheduled"]] as const) {
+  for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["missed", "Missed"], ["rescheduled", "Rescheduled"]] as const) {
     add("Visits", label, report.visits[key], "visits", appointment, key === "total" ? "Includes rescheduled original booking records." : "Current saved status.");
   }
   for (const doctor of report.visits_by_doctor) {
-    for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["rescheduled", "Rescheduled"]] as const) {
+    for (const [key, label] of [["total", "Booking records"], ["waiting", "Waiting"], ["called", "Called"], ["completed", "Completed"], ["cancelled", "Cancelled"], ["missed", "Missed"], ["rescheduled", "Rescheduled"]] as const) {
       add("Visits by doctor", label, doctor.visits[key], "visits", appointment, "Current saved status; rescheduled originals are separate from cancellations.", doctor.doctor_id, doctor.doctor_name);
     }
   }

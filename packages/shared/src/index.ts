@@ -1,4 +1,4 @@
-export type Status = "waiting" | "called" | "completed" | "cancelled";
+export type Status = "waiting" | "called" | "completed" | "cancelled" | "missed";
 export type ConsultationNote = { id: string; booking_id: string; doctor_id: DemoDoctor; findings: string; follow_up: string; created_at: string };
 export type ConsultationDraft = {booking_id:string;doctor_id:DemoDoctor;findings:string;follow_up:string;version:number;updated_at:string|null};
 export type PatientBackground = { patient_id: DemoPatient; allergies: string; medicines: string; conditions: string; version: number; updated_at: string | null };
@@ -52,7 +52,7 @@ export type DoctorUnavailability={id:string;doctor_id:DemoDoctor;clinic_date:str
 export type DoctorSchedule={pattern:SchedulePattern;week_start:string;unavailability:DoctorUnavailability[];slots:(ManagedSlot & {visits:{id:string;queue_number:number;status:Status;patient_name:string}[]})[]};
 export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
-export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled" };
+export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled", missed: "Missed" };
 export const queueToken = (booking: Booking) => `${booking.doctor_id === "doctor-lim" ? "L" : "A"}${String(booking.queue_number).padStart(3, "0")}`;
 export const visitTime = (iso: string) => new Date(iso).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
@@ -108,6 +108,7 @@ export class DemoApi {
   reschedule(id: string, slotId: string, requestId: string) { return this.request<Booking>(`/bookings/${encodeURIComponent(id)}/reschedule`, {slot_id:slotId,request_id:requestId}); }
   queue(doctor: string, date: string) { return this.request<Booking[]>(`/queue?doctor_id=${encodeURIComponent(doctor)}&clinic_date=${encodeURIComponent(date)}`); }
   callNext(doctor: string, date: string) { return this.request<Booking>("/queue/call-next", { doctor_id: doctor, clinic_date: date }); }
+  markMissed(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/missed`, {}); }
   complete(id: string) { return this.request<Booking>(`/queue/${encodeURIComponent(id)}/complete`, {}); }
   care() { return this.request<Care[]>("/care"); }
   consultations() { return this.request<Consultation[]>("/consultations"); }

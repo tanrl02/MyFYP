@@ -35,10 +35,10 @@ class ReportTests(unittest.TestCase):
             # Current paid invoice balance belongs to appointment date even when payment occurred elsewhere.
             db.execute('UPDATE invoices SET paid_at=? WHERE id=?',((start-timedelta(days=2)).isoformat(),invoice['id']))
         response=self.report();self.assertEqual(response.status_code,200);report=response.json()
-        self.assertEqual(report['visits'],{'waiting':1,'called':0,'completed':2,'cancelled':1,'rescheduled':1,'total':5})
+        self.assertEqual(report['visits'],{'waiting':1,'called':0,'completed':2,'cancelled':1,'missed':0,'rescheduled':1,'total':5})
         doctors={row['doctor_id']:row for row in report['visits_by_doctor']}
-        self.assertEqual(doctors[self.slot['doctor_id']]['visits'],{'waiting':1,'called':0,'completed':1,'cancelled':1,'rescheduled':1,'total':4})
-        self.assertEqual(doctors[other['doctor_id']]['visits'],{'waiting':0,'called':0,'completed':1,'cancelled':0,'rescheduled':0,'total':1})
+        self.assertEqual(doctors[self.slot['doctor_id']]['visits'],{'waiting':1,'called':0,'completed':1,'cancelled':1,'missed':0,'rescheduled':1,'total':4})
+        self.assertEqual(doctors[other['doctor_id']]['visits'],{'waiting':0,'called':0,'completed':1,'cancelled':0,'missed':0,'rescheduled':0,'total':1})
         for state,total in report['visits'].items():
             self.assertEqual(sum(row['visits'][state] for row in doctors.values()),total)
         self.assertTrue(all(set(row)=={'doctor_id','doctor_name','visits'} for row in doctors.values()))

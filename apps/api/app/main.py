@@ -321,6 +321,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def call_next(payload: QueueInput, who=Depends(staff)):
         return run(lambda: store.call_next(payload.doctor_id, payload.clinic_date.isoformat(), who))
 
+    @api.post('/queue/{booking_id}/missed')
+    def mark_missed(booking_id: str, who=Depends(staff)):
+        return run(lambda: store.mark_missed(booking_id, who))
+
     @api.post('/queue/{booking_id}/complete')
     def complete(booking_id: str, who=Depends(staff)):
         return run(lambda: store.complete(booking_id, who))
