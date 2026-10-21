@@ -153,6 +153,12 @@ class MedicineEditInput(BaseModel):
     version: int = Field(strict=True,ge=0)
     request_id: str = Field(min_length=8,max_length=100)
 
+class MedicineTargetInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    target_stock: int | None = Field(...,strict=True,ge=0,le=99999)
+    version: int = Field(strict=True,ge=0)
+    request_id: str = Field(min_length=8,max_length=100)
+
 class MedicineThresholdInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     low_stock_threshold: int = Field(strict=True,ge=0,le=99999)
@@ -392,6 +398,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/medicines/{medicine_id}/edit')
     def edit_medicine(medicine_id: str,payload: MedicineEditInput,who=Depends(staff)):
         return run(lambda: store.edit_medicine(medicine_id,payload.name.strip(),payload.price_cents,payload.version,payload.request_id,who))
+
+    @api.post('/medicines/{medicine_id}/target')
+    def medicine_target(medicine_id: str,payload: MedicineTargetInput,who=Depends(staff)):
+        return run(lambda: store.set_medicine_target(medicine_id,payload.target_stock,payload.version,payload.request_id,who))
 
     @api.post('/medicines/{medicine_id}/threshold')
     def medicine_threshold(medicine_id: str,payload: MedicineThresholdInput,who=Depends(staff)):

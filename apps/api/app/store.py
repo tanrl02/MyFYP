@@ -167,7 +167,7 @@ class Store:
                           WHERE revoked_at IS NULL AND booking_id IS NULL''')
             db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS active_visit_share ON assessment_shares(booking_id)
                           WHERE revoked_at IS NULL AND booking_id IS NOT NULL''')
-            for column, definition in [('low_stock_threshold','INTEGER NOT NULL DEFAULT 5 CHECK(low_stock_threshold BETWEEN 0 AND 99999)'),('strength',"TEXT NOT NULL DEFAULT ''"),('form',"TEXT NOT NULL DEFAULT ''"),('request_id','TEXT'),('version','INTEGER NOT NULL DEFAULT 0'),('updated_at','TEXT'),('creation_json','TEXT'),('active','INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))')]:
+            for column, definition in [('target_stock','INTEGER CHECK(target_stock BETWEEN 0 AND 99999)'),('low_stock_threshold','INTEGER NOT NULL DEFAULT 5 CHECK(low_stock_threshold BETWEEN 0 AND 99999)'),('strength',"TEXT NOT NULL DEFAULT ''"),('form',"TEXT NOT NULL DEFAULT ''"),('request_id','TEXT'),('version','INTEGER NOT NULL DEFAULT 0'),('updated_at','TEXT'),('creation_json','TEXT'),('active','INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))')]:
                 if column not in {r['name'] for r in db.execute('PRAGMA table_info(medicines)')}:
                     db.execute(f'ALTER TABLE medicines ADD COLUMN {column} {definition}')
             db.execute('CREATE UNIQUE INDEX IF NOT EXISTS medicine_request ON medicines(request_id) WHERE request_id IS NOT NULL')
@@ -180,6 +180,10 @@ class Store:
                 request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
                 from_version INTEGER NOT NULL, name TEXT NOT NULL, price_cents INTEGER NOT NULL,
                 old_name TEXT NOT NULL, old_price_cents INTEGER NOT NULL,
+                actor_id TEXT NOT NULL, created_at TEXT NOT NULL, result_json TEXT NOT NULL)''')
+            db.execute('''CREATE TABLE IF NOT EXISTS medicine_target_changes (
+                request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                from_version INTEGER NOT NULL, target INTEGER, old_target INTEGER,
                 actor_id TEXT NOT NULL, created_at TEXT NOT NULL, result_json TEXT NOT NULL)''')
             db.execute('''CREATE TABLE IF NOT EXISTS medicine_threshold_changes (
                 request_id TEXT PRIMARY KEY, medicine_id TEXT NOT NULL REFERENCES medicines(id),
@@ -936,12 +940,13 @@ class Store:
         result=dict(row)
         # Saved retry responses from before per-item levels retain their historical default.
         result.setdefault('low_stock_threshold',5)
+        result.setdefault('target_stock',None)
         result['active']=bool(result['active'])
         return result
 
     def catalog(self, active_only=False):
         with self.connect() as db:
-            return [self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines WHERE (?=0 OR active=1) ORDER BY id',(int(active_only),))]
+            return [self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE (?=0 OR active=1) ORDER BY id',(int(active_only),))]
 
     def add_medicine(self, name, strength, form, price_cents, request_id):
         with self.connect() as db:
@@ -952,14 +957,14 @@ class Store:
                 original=json.loads(old['creation_json']) if old['creation_json'] else old
                 if tuple(original[k] for k in ('name','strength','form','price_cents')) != values:
                     raise RuleError('This catalogue request was already saved with different details.')
-                return self.medicine_record({k:old[k] for k in ('id','name','strength','form','price_cents','stock','version','updated_at','active','low_stock_threshold')})
+                return self.medicine_record({k:old[k] for k in ('id','name','strength','form','price_cents','stock','version','updated_at','active','low_stock_threshold','target_stock')})
             if db.execute('''SELECT 1 FROM medicines WHERE lower(name)=lower(?)
                              AND lower(strength)=lower(?) AND lower(form)=lower(?)''',values[:3]).fetchone():
                 raise RuleError('This name, strength and form already exist. Receive stock for the existing item.')
             medicine_id = str(uuid4())
             db.execute('INSERT INTO medicines(id,name,strength,form,price_cents,stock,request_id,creation_json) VALUES(?,?,?,?,?,0,?,?)',
                        (medicine_id,*values,request_id,json.dumps(dict(zip(('name','strength','form','price_cents'),values)))))
-            return {'id':medicine_id,'name':name,'strength':strength,'form':form,'price_cents':price_cents,'stock':0,'version':0,'updated_at':None,'active':True,'low_stock_threshold':5}
+            return {'id':medicine_id,'name':name,'strength':strength,'form':form,'price_cents':price_cents,'stock':0,'version':0,'updated_at':None,'active':True,'low_stock_threshold':5,'target_stock':None}
 
     def edit_medicine(self, medicine_id, name, price_cents, version, request_id, staff):
         if not name.strip() or len(name)>100 or type(price_cents) is not int or not 0<=price_cents<=1000000 or type(version) is not int or version<0:
@@ -983,9 +988,33 @@ class Store:
                 raise RuleError('This name, strength and form already exist. Choose a different name.')
             now=datetime.now(timezone.utc).isoformat()
             db.execute('UPDATE medicines SET name=?,price_cents=?,version=version+1,updated_at=? WHERE id=?',(name,price_cents,now,medicine_id))
-            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone())
             db.execute('INSERT INTO medicine_edits VALUES(?,?,?,?,?,?,?,?,?,?)',
                        (request_id,medicine_id,version,name,price_cents,current['name'],current['price_cents'],staff,now,json.dumps(saved)))
+            return saved
+
+    def set_medicine_target(self, medicine_id, target, version, request_id, staff):
+        if (target is not None and (type(target) is not int or not 0<=target<=99999)) or type(version) is not int or version<0:
+            raise RuleError('Enter a whole target from 0 to 99,999, or leave it unset.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            retry=db.execute('SELECT * FROM medicine_target_changes WHERE request_id=?',(request_id,)).fetchone()
+            if retry:
+                if (retry['medicine_id'],retry['target'],retry['from_version'])!=(medicine_id,target,version):
+                    raise RuleError('This request already saved a different stock target.')
+                return self.medicine_record(json.loads(retry['result_json']))
+            current=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if current is None:raise RuleError('Medicine not found.',404)
+            if current['version']!=version:
+                raise RuleError('This catalogue item changed. Reload the latest item before changing its target.')
+            if target is not None and target<current['low_stock_threshold']:
+                raise RuleError('Target stock must be at least the alert level.',422)
+            if current['target_stock']==target:raise RuleError('Change the target before saving.',422)
+            now=datetime.now(timezone.utc).isoformat()
+            db.execute('UPDATE medicines SET target_stock=?,version=version+1,updated_at=? WHERE id=?',(target,now,medicine_id))
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            db.execute('INSERT INTO medicine_target_changes VALUES(?,?,?,?,?,?,?,?)',
+                (request_id,medicine_id,version,target,current['target_stock'],staff,now,json.dumps(saved)))
             return saved
 
     def set_medicine_threshold(self, medicine_id, threshold, version, request_id, staff):
@@ -997,16 +1026,18 @@ class Store:
             if retry:
                 if (retry['medicine_id'],retry['threshold'],retry['from_version'])!=(medicine_id,threshold,version):
                     raise RuleError('This request already saved a different alert level.')
-                return json.loads(retry['result_json'])
+                return self.medicine_record(json.loads(retry['result_json']))
             current=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
             if current is None:raise RuleError('Medicine not found.',404)
             if current['version']!=version:
                 raise RuleError('This catalogue item changed. Reload the latest item before changing its alert level.')
+            if current['target_stock'] is not None and threshold>current['target_stock']:
+                raise RuleError('Alert level cannot exceed target stock. Raise or clear the target first.',422)
             if current['low_stock_threshold']==threshold:
                 raise RuleError('Change the alert level before saving.',422)
             now=datetime.now(timezone.utc).isoformat()
             db.execute('UPDATE medicines SET low_stock_threshold=?,version=version+1,updated_at=? WHERE id=?',(threshold,now,medicine_id))
-            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone())
             db.execute('INSERT INTO medicine_threshold_changes VALUES(?,?,?,?,?,?,?,?)',
                        (request_id,medicine_id,version,threshold,current['low_stock_threshold'],staff,now,json.dumps(saved)))
             return saved
@@ -1029,7 +1060,7 @@ class Store:
                 raise RuleError('This item already has that status. Reload the catalogue.',422)
             now=datetime.now(timezone.utc).isoformat()
             db.execute('UPDATE medicines SET active=?,version=version+1,updated_at=? WHERE id=?',(int(active),now,medicine_id))
-            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines WHERE id=?',(medicine_id,)).fetchone())
+            saved=self.medicine_record(db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone())
             db.execute('INSERT INTO medicine_status_changes VALUES(?,?,?,?,?,?,?,?)',
                        (request_id,medicine_id,version,int(active),current['active'],staff,now,json.dumps(saved)))
             return saved
@@ -1116,7 +1147,7 @@ class Store:
     def stock(self):
         with self.connect() as db:
             db.execute('BEGIN')
-            medicines=[self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines ORDER BY id')]
+            medicines=[self.medicine_record(r) for r in db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines ORDER BY id')]
             receipts=[dict(r) for r in db.execute('''SELECT r.*,m.name FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
                 ORDER BY r.created_at DESC LIMIT 100''')]
             losses=[dict(row) for row in db.execute('SELECT * FROM stock_losses ORDER BY created_at DESC,id DESC LIMIT 100')]
@@ -1126,7 +1157,7 @@ class Store:
     def stock_movements(self, medicine_id, cursor=None):
         with self.connect() as db:
             db.execute('BEGIN')
-            medicine=db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            medicine=db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone()
             if medicine is None:raise RuleError('Stock item not found.',404)
             movements_sql="""WITH movements AS (
                 SELECT id AS source_id,'received' AS kind,quantity AS change,created_at,

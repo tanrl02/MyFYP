@@ -9,7 +9,7 @@ export type DemoPatient = "patient-ava" | "patient-noah";
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number};
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
-export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number };
+export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
 export type StockLoss=StockReceipt & {kind:"damaged"|"lost";item_label:string};
@@ -152,6 +152,7 @@ export class DemoApi {
   visitSummary(filter:VisitSummaryFilter) { return this.request<VisitSummary>(`/reports/summary?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }
   inventorySummary(filter:ReportPeriodFilter) { return this.request<InventorySummary>(`/reports/inventory?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }
   editMedicine(id:string,body:Pick<Medicine,"name"|"price_cents"|"version"> & {request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/edit`,body); }
+  setMedicineTarget(id:string,body:{target_stock:number|null;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/target`,body); }
   setMedicineThreshold(id:string,body:{low_stock_threshold:number;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/threshold`,body); }
   setMedicineActive(id:string,body:{active:boolean;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/status`,body); }
   recordStockLoss(body:{medicine_id:string;quantity:number;kind:"damaged"|"lost";reason:string;request_id:string}) { return this.request<StockLoss>("/stock/losses",body); }
