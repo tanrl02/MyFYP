@@ -407,6 +407,12 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def weekly_report(week_of: date,who=Depends(staff)):
         return run(lambda: store.weekly_report(week_of.isoformat()))
 
+    @api.get('/reports/summary')
+    def visit_summary(period: Literal['month','quarter','year'],year: int=Query(ge=2,le=9998),
+                      month: int | None=Query(default=None,ge=1,le=12),
+                      quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
+        return run(lambda: store.visit_summary(period,year,month,quarter))
+
     @api.post('/stock/receive',status_code=201)
     def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
         return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))

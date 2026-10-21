@@ -1005,6 +1005,17 @@ class Store:
                        (request_id,medicine_id,version,int(active),current['active'],staff,now,json.dumps(saved)))
             return saved
 
+    def visit_summary(self,period,year,month=None,quarter=None):
+        from .visit_reporting import summary
+        valid=period in ('month','quarter','year') and type(year) is int and 2<=year<=9998
+        if period=='month':valid=valid and type(month) is int and 1<=month<=12 and quarter is None
+        elif period=='quarter':valid=valid and type(quarter) is int and 1<=quarter<=4 and month is None
+        elif period=='year':valid=valid and month is None and quarter is None
+        if not valid:raise RuleError('Choose a valid month, quarter or year (year 2–9998) with its matching filter.',422)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return summary(db,period,year,month,quarter)
+
     def weekly_report(self, week_of):
         try:
             chosen=date.fromisoformat(week_of)

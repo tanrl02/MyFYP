@@ -18,6 +18,8 @@ export type StockMovementHistory = {medicine:Medicine;movements:StockMovement[];
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; losses:StockLoss[]; low_stock_threshold: number };
 export type VisitCounts = Record<Status | "rescheduled" | "total",number>;
 export type WeeklyVisitReport = {week_start:string;week_end:string;timezone:string;generated_at:string;visits:VisitCounts;days:{clinic_date:string;visits:VisitCounts}[]};
+export type VisitSummaryFilter={period:"month";year:number;month:number}|{period:"quarter";year:number;quarter:number}|{period:"year";year:number};
+export type VisitSummary={period:VisitSummaryFilter["period"];start_date:string;end_date:string;timezone:string;generated_at:string;granularity:"day"|"month";visits:VisitCounts;buckets:{start_date:string;end_date:string;visits:VisitCounts}[];previous:{start_date:string;end_date:string;visits:VisitCounts}};
 export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: VisitCounts; visits_by_doctor: {doctor_id: DemoDoctor; doctor_name: string; visits: VisitCounts}[]; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; lost_units:number; items: { medicine_id: string; name: string; received: number; dispensed: number; lost:number }[] }; feedback: { count: number; average_rating: number | null } };
 export type DiseasePrediction = {model_id:string;checkpoint_sha256:string;preprocessing:string;dataset_version:string;validation_accuracy:number;validation_macro_f1:number;validation_cases:number;test_evaluated:boolean;input_sha256:string;created_at:string;top_predictions:{condition:string;label:string;score:number}[]};
 export type AssessmentSymptoms={body_area:string;onset:string;itching:"yes"|"no"|"not_sure";pain:"yes"|"no"|"not_sure";description:string};
@@ -144,6 +146,7 @@ export class DemoApi {
   stock() { return this.request<StockOverview>("/stock"); }
   dailyReport(date: string) { return this.request<DailyReport>(`/reports/daily?clinic_date=${encodeURIComponent(date)}`); }
   weeklyReport(weekOf:string) { return this.request<WeeklyVisitReport>(`/reports/weekly?week_of=${encodeURIComponent(weekOf)}`); }
+  visitSummary(filter:VisitSummaryFilter) { return this.request<VisitSummary>(`/reports/summary?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }
   editMedicine(id:string,body:Pick<Medicine,"name"|"price_cents"|"version"> & {request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/edit`,body); }
   setMedicineActive(id:string,body:{active:boolean;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/status`,body); }
   recordStockLoss(body:{medicine_id:string;quantity:number;kind:"damaged"|"lost";reason:string;request_id:string}) { return this.request<StockLoss>("/stock/losses",body); }

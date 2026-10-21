@@ -22,7 +22,7 @@ export default function WeeklyReportsPage(){
     return()=>{active=false;clearInterval(timer);};
   },[api,weekOf,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
-    <a href="/reports" className="underline">← Daily clinic report</a>
+    <p className="mb-4"><a className="underline" href="/reports/summary">Monthly / quarterly / yearly analysis →</a></p><a href="/reports" className="underline">← Daily clinic report</a>
     <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Weekly visit summary</h1><span className="badge">Staff Demo · synthetic data</span></div>
     <section className="panel mb-5">
       <form className="flex flex-wrap items-end gap-4" onSubmit={e=>{e.preventDefault();setWeekOf(String(new FormData(e.currentTarget).get("week_of")||""));setRetry(n=>n+1);}}>
