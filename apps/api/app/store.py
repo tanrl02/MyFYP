@@ -626,6 +626,18 @@ class Store:
                     follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
                     follow_up_date=follow_up['recommended_date'] if follow_up else None)
 
+    @staticmethod
+    def check_patient_overlap(db, patient, starts_at, duration_minutes, exclude_booking=None):
+        # Half-open intervals allow adjacent appointments; julianday normalises UTC offsets.
+        # Call inside the same BEGIN IMMEDIATE transaction as the booking/status change.
+        conflict=db.execute('''SELECT 1 FROM bookings b JOIN slots s ON s.id=b.slot_id
+            WHERE b.patient_id=? AND b.status IN ('waiting','called') AND b.id!=?
+              AND julianday(s.starts_at)<julianday(?,'+'||?||' minutes')
+              AND julianday(s.starts_at,'+'||s.duration_minutes||' minutes')>julianday(?)
+            LIMIT 1''',(patient,exclude_booking or '',starts_at,duration_minutes,starts_at)).fetchone()
+        if conflict:
+            raise RuleError('This patient already has an active visit that overlaps this time. Choose another time. No bookings were changed.')
+
     def book(self, patient, slot_id, request_id, created_by=None, follow_up_source=None):
         if patient not in PATIENTS:
             raise RuleError('Choose a recognised demo patient.', 422)
@@ -668,6 +680,7 @@ class Store:
             used = db.execute("SELECT COUNT(*) FROM bookings WHERE slot_id=? AND status!='cancelled'", (slot_id,)).fetchone()[0]
             if used >= slot['capacity']:
                 raise RuleError('This slot is full. Please choose another time.')
+            self.check_patient_overlap(db,patient,slot['starts_at'],slot['duration_minutes'])
             number = db.execute('''SELECT COALESCE(MAX(b.queue_number),0)+1 FROM bookings b JOIN slots s ON s.id=b.slot_id
                 WHERE s.doctor_id=? AND s.clinic_date=?''', (slot['doctor_id'], slot['clinic_date'])).fetchone()[0]
             booking_id = str(uuid4())
@@ -798,6 +811,7 @@ class Store:
             used = db.execute("SELECT COUNT(*) FROM bookings WHERE slot_id=? AND status!='cancelled'",(slot_id,)).fetchone()[0]
             if used >= slot['capacity']:
                 raise RuleError('This slot is full. Your original booking is unchanged.')
+            self.check_patient_overlap(db,old['patient_id'],slot['starts_at'],slot['duration_minutes'],booking_id)
             number = db.execute('''SELECT COALESCE(MAX(b.queue_number),0)+1 FROM bookings b JOIN slots s ON s.id=b.slot_id
                 WHERE s.doctor_id=? AND s.clinic_date=?''',(slot['doctor_id'],slot['clinic_date'])).fetchone()[0]
             new_id, now = str(uuid4()), datetime.now(timezone.utc).isoformat()
@@ -894,6 +908,7 @@ class Store:
             if source and db.execute("""SELECT 1 FROM follow_up_bookings f JOIN bookings b ON b.id=f.booking_id
                     WHERE f.source_booking_id=? AND b.id!=? AND b.status NOT IN ('cancelled','missed') LIMIT 1""",(source,booking_id)).fetchone():
                 raise RuleError('Another follow-up is already active. Review that booking before restoring this visit.')
+            self.check_patient_overlap(db,visit['patient_id'],visit['starts_at'],visit['duration_minutes'],booking_id)
             db.execute("UPDATE bookings SET status='waiting' WHERE id=?",(booking_id,))
             event_id=self.event(db,booking_id,staff,'missed-restored')
             db.execute('INSERT INTO missed_restorations VALUES(?,?)',(missed_event_id,event_id))
