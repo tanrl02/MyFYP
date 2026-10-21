@@ -1005,6 +1005,31 @@ class Store:
                        (request_id,medicine_id,version,int(active),current['active'],staff,now,json.dumps(saved)))
             return saved
 
+    def weekly_report(self, week_of):
+        try:
+            chosen=date.fromisoformat(week_of)
+            start=chosen-timedelta(days=chosen.weekday())
+            end=start+timedelta(days=6)
+        except (ValueError,OverflowError):
+            raise RuleError('Choose a date within a complete Monday-to-Sunday week.',422)
+        states=('waiting','called','completed','cancelled','missed','rescheduled','total')
+        days={ (start+timedelta(days=offset)).isoformat():dict.fromkeys(states,0) for offset in range(7) }
+        totals=dict.fromkeys(states,0)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            for row in db.execute('''SELECT s.clinic_date,
+                    CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
+                    THEN 'rescheduled' ELSE b.status END AS state,COUNT(*) AS total
+                FROM bookings b JOIN slots s ON s.id=b.slot_id
+                WHERE s.clinic_date BETWEEN ? AND ? GROUP BY s.clinic_date,state''',(start.isoformat(),end.isoformat())):
+                days[row['clinic_date']][row['state']]+=row['total']
+                days[row['clinic_date']]['total']+=row['total']
+                totals[row['state']]+=row['total']
+                totals['total']+=row['total']
+            return {'week_start':start.isoformat(),'week_end':end.isoformat(),'timezone':'Asia/Kuala_Lumpur',
+                'generated_at':datetime.now(timezone.utc).isoformat(),'visits':totals,
+                'days':[{'clinic_date':day,'visits':counts} for day,counts in days.items()]}
+
     def daily_report(self, clinic_date):
         with self.connect() as db:
             db.execute('BEGIN')

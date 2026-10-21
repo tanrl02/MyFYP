@@ -403,6 +403,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def daily_report(clinic_date: date,who=Depends(staff)):
         return store.daily_report(clinic_date.isoformat())
 
+    @api.get('/reports/weekly')
+    def weekly_report(week_of: date,who=Depends(staff)):
+        return run(lambda: store.weekly_report(week_of.isoformat()))
+
     @api.post('/stock/receive',status_code=201)
     def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
         return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))
