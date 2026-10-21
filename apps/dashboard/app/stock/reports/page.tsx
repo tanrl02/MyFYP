@@ -15,7 +15,7 @@ export default function InventoryReportPage(){
     void load();const timer=setInterval(load,10000);return()=>{active=false;clearInterval(timer);};
   },[api,filter,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
-    <nav className="flex flex-wrap gap-5"><a href="/stock" className="underline">← Pharmacy stock</a><a href="/reports" className="underline">Daily clinic report</a><a href="/reports/summary" className="underline">Visit analysis</a></nav>
+    <nav className="flex flex-wrap gap-5"><a href="/stock" className="underline">← Pharmacy stock</a><a href="/stock/replenishment" className="underline">Replenishment list</a><a href="/reports" className="underline">Daily clinic report</a><a href="/reports/summary" className="underline">Visit analysis</a></nav>
     <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Inventory summary & analysis</h1><span className="badge">Staff Demo · synthetic items</span></div>
     <section className="panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{e.preventDefault();const form=new FormData(e.currentTarget),year=Number(form.get("year"));setFilter(period==="month"?{period,year,month:Number(form.get("month"))}:period==="quarter"?{period,year,quarter:Number(form.get("quarter"))}:{period,year});setRetry(n=>n+1);}}>
       <label className="font-semibold">Period<select aria-label="Inventory period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)} className="mt-2 block rounded-lg border p-3"><option value="month">Monthly</option><option value="quarter">Quarterly</option><option value="year">Yearly</option></select></label>

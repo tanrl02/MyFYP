@@ -1,4 +1,22 @@
 @import "tailwindcss";
+.replenishment-print-unavailable { display: none; }
+@media print {
+  body:has(.replenishment-list) { background: white; color: black; }
+  .replenishment-list { max-width: none; margin: 0; padding: 0; font-size: 10pt; }
+  .replenishment-list .replenishment-actions { display: none !important; }
+  .replenishment-list .replenishment-print-unavailable { display: block; }
+  .replenishment-list:not(.replenishment-ready) > :not(h1):not(.replenishment-print-unavailable):not(header) { display: none; }
+  .replenishment-list .panel { border: 0; border-radius: 0; padding: 0; }
+  .replenishment-list .muted, .replenishment-list th { color: #333; }
+  .replenishment-list h1 { font-size: 20pt; }
+  .replenishment-list h2 { font-size: 13pt; break-after: avoid; }
+  .replenishment-list .overflow-x-auto { overflow: visible; }
+  .replenishment-list table { width: 100%; table-layout: fixed; }
+  .replenishment-list th:first-child { width: 38%; }
+  .replenishment-list th, .replenishment-list td { padding: 6pt 4pt; overflow-wrap: anywhere; }
+  .replenishment-list thead { display: table-header-group; }
+  .replenishment-list tr { break-inside: avoid; }
+}
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
 body { margin: 0; background: #f4f7f6; color: #19352e; font-family: Arial, Helvetica, sans-serif; }
