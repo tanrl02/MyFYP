@@ -1,0 +1,43 @@
+"use client";
+import {useEffect,useMemo,useState} from "react";
+import {DemoApi,InventorySummary,ReportPeriodFilter,medicineLabel} from "@smart-skin/shared";
+import InventoryTrend,{activityLabel,movementColumns} from "./InventoryTrend";
+
+const months=Array.from({length:12},(_,i)=>new Date(Date.UTC(2000,i,1)).toLocaleDateString("en-GB",{month:"long",timeZone:"UTC"}));
+export default function InventoryReportPage(){
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const [filter,setFilter]=useState<ReportPeriodFilter>(()=>{const today=new Date(Date.now()+8*3600000);return {period:"month",year:today.getUTCFullYear(),month:today.getUTCMonth()+1};});
+  const [period,setPeriod]=useState<ReportPeriodFilter["period"]>("month");
+  const [data,setData]=useState<InventorySummary|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
+  useEffect(()=>{
+    let active=true,fetching=false;setData(null);setError("");setLoading(true);
+    async function load(){if(fetching)return;fetching=true;try{const result=await api.inventorySummary(filter);if(active){setData(result);setError("");}}catch(e){if(active){setData(null);setError(e instanceof Error?e.message:"Cannot load inventory report.");}}finally{fetching=false;if(active)setLoading(false);}}
+    void load();const timer=setInterval(load,10000);return()=>{active=false;clearInterval(timer);};
+  },[api,filter,retry]);
+  return <main className="mx-auto max-w-6xl px-5 py-8">
+    <nav className="flex flex-wrap gap-5"><a href="/stock" className="underline">← Pharmacy stock</a><a href="/reports" className="underline">Daily clinic report</a><a href="/reports/summary" className="underline">Visit analysis</a></nav>
+    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Inventory summary & analysis</h1><span className="badge">Staff Demo · synthetic items</span></div>
+    <section className="panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{e.preventDefault();const form=new FormData(e.currentTarget),year=Number(form.get("year"));setFilter(period==="month"?{period,year,month:Number(form.get("month"))}:period==="quarter"?{period,year,quarter:Number(form.get("quarter"))}:{period,year});setRetry(n=>n+1);}}>
+      <label className="font-semibold">Period<select aria-label="Inventory period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)} className="mt-2 block rounded-lg border p-3"><option value="month">Monthly</option><option value="quarter">Quarterly</option><option value="year">Yearly</option></select></label>
+      <label className="font-semibold">Year<input aria-label="Inventory year" type="number" name="year" required min="2" max="9998" step="1" defaultValue={filter.year} className="mt-2 block w-32 rounded-lg border p-3"/></label>
+      {period==="month"?<label className="font-semibold">Month<select aria-label="Inventory month" name="month" defaultValue={filter.period==="month"?filter.month:1} className="mt-2 block rounded-lg border p-3">{months.map((label,index)=><option value={index+1} key={label}>{label}</option>)}</select></label>:null}
+      {period==="quarter"?<label className="font-semibold">Quarter<select aria-label="Inventory quarter" name="quarter" defaultValue="1" className="mt-2 block rounded-lg border p-3">{[1,2,3,4].map(q=><option key={q} value={q}>Q{q} · {months[(q-1)*3].slice(0,3)}–{months[q*3-1].slice(0,3)}</option>)}</select></label>:null}
+      <button type="submit" className="btn">View inventory report</button>
+    </form><p className="muted mt-3 text-sm">Choose filters, then View inventory report. Activity uses Malaysia dates (UTC+8); the current stock snapshot always describes stock now. Refreshes every ten seconds.</p></section>
+    {error?<div role="alert" className="panel mb-5 text-red-800">{error}<button className="btn secondary ml-3" onClick={()=>setRetry(n=>n+1)}>Retry inventory report</button></div>:null}
+    {loading?<p role="status">Loading inventory report…</p>:null}
+    {data?<>
+      <section aria-label="Current stock snapshot" className="panel mb-5"><h2 className="text-xl font-semibold">Current stock · now</h2><p className="muted my-3 text-sm">Independent of the selected activity period. Alerts count active catalogue items only. Low stock means 1–{data.current_stock.low_stock_threshold} units; out of stock means zero. {data.current_stock.inactive_items} inactive items are excluded from these alerts.</p>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[["Active items",data.current_stock.active_items],["Units in active items",data.current_stock.active_units],["Low-stock items",data.current_stock.low_stock_items],["Out-of-stock items",data.current_stock.out_of_stock_items]].map(([label,value])=><div key={label}><p className="muted">{label}</p><strong className="mt-2 block text-3xl">{value}</strong></div>)}</div>
+        {data.current_stock.alerts.length?<details className="mt-4"><summary className="cursor-pointer font-semibold">View items needing replenishment ({data.current_stock.alerts.length})</summary><ul className="mt-3 space-y-2">{data.current_stock.alerts.map(item=><li key={item.medicine_id}>{medicineLabel(item)} · <strong>{item.stock===0?"Out of stock":`${item.stock} units remaining`}</strong></li>)}</ul></details>:<p className="mt-4">No active items are low or out of stock.</p>}
+      </section>
+      <h2 className="mb-3 text-2xl font-semibold">{data.period==="month"?"Monthly":data.period==="quarter"?"Quarterly":"Yearly"} activity · {activityLabel(data.start_date,"day")} – {activityLabel(data.end_date,"day")}</h2>
+      <div className="mb-5 grid grid-cols-2 gap-4 md:grid-cols-4">{movementColumns.map(([key,label,color])=><section className="panel" key={key}><h3 className="font-semibold" style={{color}}>{label}</h3><strong className="mt-2 block text-3xl">{data.units[key]}</strong><p className="muted text-sm">units in selected period</p></section>)}</div>
+      <section className="panel mb-5"><h2 className="text-xl font-semibold">Movement analysis</h2><p className="mt-3 font-semibold">Net recorded movement: {data.units.net_change>0?"+":""}{data.units.net_change} units.</p><p className="muted mt-2 text-sm">Received minus dispensed, damaged and lost units. This is not an opening or closing stock balance. Issued but undispensed prescriptions are excluded. Historical activity includes items that are now inactive.</p></section>
+      <InventoryTrend report={data}/>
+      <section className="panel mb-5"><h2 className="text-xl font-semibold">Most-dispensed items · selected period</h2><p className="muted my-3 text-sm">Top five by units dispensed, using current catalogue names. Ties are ordered by name. This describes stock usage, not treatment recommendations.</p>{data.top_dispensed.length?<div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr><th scope="col">Item</th><th scope="col">Current status</th><th scope="col">Units dispensed</th></tr></thead><tbody>{data.top_dispensed.map(item=><tr key={item.medicine_id}><th scope="row">{medicineLabel(item)}</th><td>{item.active?"Active":"Inactive"}</td><td>{item.units}</td></tr>)}</tbody></table></div>:<p>No items were dispensed in this period.</p>}</section>
+      <section className="panel"><h2 className="text-xl font-semibold">Activity detail by {data.granularity}</h2><div className="mt-4 overflow-x-auto"><table className="w-full text-sm"><caption className="sr-only">Inventory activity quantities and net movement</caption><thead><tr><th scope="col">Activity {data.granularity}</th>{movementColumns.map(([key,label])=><th scope="col" key={key}>{label}</th>)}<th scope="col">Net movement</th></tr></thead><tbody>{data.buckets.map(row=><tr key={row.start_date}><th scope="row">{activityLabel(row.start_date,data.granularity)}</th>{movementColumns.map(([key])=><td key={key}>{row.units[key]}</td>)}<td>{row.units.net_change}</td></tr>)}</tbody><tfoot><tr className="font-semibold"><th scope="row">Period total</th>{movementColumns.map(([key])=><td key={key}>{data.units[key]}</td>)}<td>{data.units.net_change}</td></tr></tfoot></table></div></section>
+      <p className="muted mt-5 text-sm">Generated {new Date(data.generated_at).toLocaleString("en-MY",{timeZone:"Asia/Kuala_Lumpur",dateStyle:"medium",timeStyle:"medium"})} (Malaysia time). Synthetic inventory only.</p>
+    </>:null}
+  </main>;
+}

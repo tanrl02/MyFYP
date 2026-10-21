@@ -413,6 +413,12 @@ def create_app(path=None,photo_checker=None,predictor=None):
                       quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.visit_summary(period,year,month,quarter))
 
+    @api.get('/reports/inventory')
+    def inventory_summary(period: Literal['month','quarter','year'],year: int=Query(ge=2,le=9998),
+                          month: int | None=Query(default=None,ge=1,le=12),
+                          quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
+        return run(lambda: store.inventory_summary(period,year,month,quarter))
+
     @api.post('/stock/receive',status_code=201)
     def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
         return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))
