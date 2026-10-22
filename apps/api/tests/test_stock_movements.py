@@ -83,7 +83,7 @@ class StockMovementTests(unittest.TestCase):
                 db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
                     (f'page-{n:03}','demo-a',1,'Pagination fixture',0,1,'staff-demo',f'page-request-{n}','2026-10-19T00:00:00+00:00'))
             for kind in ('lost','damaged'):
-                db.execute('INSERT INTO stock_losses VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+                db.execute('INSERT INTO stock_losses(id,medicine_id,quantity,kind,reason,stock_before,stock_after,actor_id,request_id,created_at,item_label) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
                     (f'page-{kind}','demo-a',1,kind,'Pagination fixture',1,0,'staff-demo',f'page-loss-{kind}','2026-10-19T00:00:00+00:00','Fictional saved label'))
 
     def test_older_pages_are_complete_deterministic_and_not_shifted_by_new_movements(self):

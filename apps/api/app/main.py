@@ -189,6 +189,7 @@ class InvoiceReviewInput(BaseModel):
 class StockLossInput(StockReceiptInput):
     model_config=ConfigDict(extra='forbid')
     kind: Literal['damaged','lost']
+    receipt_id: str | None = Field(default=None,strict=True,min_length=1,max_length=100)
 
 def create_app(path=None,photo_checker=None,predictor=None):
     photo_checker=photo_checker or check_photo
@@ -444,6 +445,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
                           quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.inventory_summary(period,year,month,quarter))
 
+    @api.get('/stock/{medicine_id}/batches')
+    def stock_batches(medicine_id: str,who=Depends(staff)):
+        return run(lambda: store.stock_batches(medicine_id))
+
     @api.get('/stock/expiry')
     def stock_expiry(who=Depends(staff)):
         return store.stock_expiry()
@@ -454,7 +459,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/stock/losses',status_code=201)
     def stock_loss(payload: StockLossInput,who=Depends(staff)):
-        return run(lambda: store.record_stock_loss(payload.medicine_id,payload.quantity,payload.kind,payload.reason,payload.request_id,who))
+        return run(lambda: store.record_stock_loss(payload.medicine_id,payload.quantity,payload.kind,payload.reason,payload.request_id,who,payload.receipt_id))
 
     @api.get('/assessment-shares')
     def shares(who=Depends(actor)):

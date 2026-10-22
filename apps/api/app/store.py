@@ -201,6 +201,9 @@ class Store:
                 quantity INTEGER NOT NULL CHECK(quantity>0), kind TEXT NOT NULL CHECK(kind IN ('damaged','lost')),
                 reason TEXT NOT NULL, stock_before INTEGER NOT NULL, stock_after INTEGER NOT NULL CHECK(stock_after>=0),
                 actor_id TEXT NOT NULL, request_id TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL, item_label TEXT NOT NULL)''')
+            for column, definition in [('receipt_id','TEXT REFERENCES stock_receipts(id)'),('batch_number','TEXT'),('expiry_date','TEXT')]:
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(stock_losses)')}:
+                    db.execute(f'ALTER TABLE stock_losses ADD COLUMN {column} {definition}')
             for column, definition in [('name','TEXT'),('price_cents','INTEGER'),('strength','TEXT'),('form','TEXT')]:
                 if column not in {r['name'] for r in db.execute('PRAGMA table_info(prescription_items)')}:
                     db.execute(f'ALTER TABLE prescription_items ADD COLUMN {column} {definition}')
@@ -1243,16 +1246,29 @@ class Store:
                 (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),batch_number,expiry_date))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
-    def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff):
+    def stock_batches(self, medicine_id):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            if not db.execute('SELECT 1 FROM medicines WHERE id=?',(medicine_id,)).fetchone():raise RuleError('Stock item not found.',404)
+            rows=[dict(row) for row in db.execute("""SELECT r.id AS receipt_id,r.batch_number,r.expiry_date,r.quantity,r.created_at,
+                COALESCE(SUM(l.quantity),0) AS loss_units FROM stock_receipts r LEFT JOIN stock_losses l ON l.receipt_id=r.id
+                WHERE r.medicine_id=? AND r.batch_number IS NOT NULL AND r.expiry_date IS NOT NULL
+                GROUP BY r.id ORDER BY r.expiry_date,r.created_at,r.id""",(medicine_id,))]
+            for row in rows:row['loss_allowance']=max(0,row['quantity']-row['loss_units'])
+            return rows
+
+    def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff, receipt_id=None):
         if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
         if type(quantity) is not int or not 1<=quantity<=1000 or kind not in ('damaged','lost') or not reason.strip() or len(reason)>300:
             raise RuleError('Choose damaged or lost, a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
         reason=reason.strip()
+        if receipt_id is not None and (not isinstance(receipt_id,str) or not receipt_id or len(receipt_id)>100):
+            raise RuleError('Choose a valid receipt batch.',422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing=db.execute('SELECT * FROM stock_losses WHERE request_id=?',(request_id,)).fetchone()
             if existing:
-                if (existing['medicine_id'],existing['quantity'],existing['kind'],existing['reason'])!=(medicine_id,quantity,kind,reason):
+                if (existing['medicine_id'],existing['quantity'],existing['kind'],existing['reason'],existing['receipt_id'])!=(medicine_id,quantity,kind,reason,receipt_id):
                     raise RuleError('This stock-loss request already saved different details. Check the history.')
                 return dict(existing)
             medicine=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
@@ -1262,9 +1278,18 @@ class Store:
             after=medicine['stock']-quantity
             db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
             label=' · '.join(value for value in (medicine['name'],medicine['strength'],medicine['form']) if value)
+            receipt=None
+            if receipt_id is not None:
+                receipt=db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone()
+                if receipt is None:raise RuleError('Receipt batch not found.',404)
+                if receipt['medicine_id']!=medicine_id or receipt['batch_number'] is None or receipt['expiry_date'] is None:
+                    raise RuleError('Choose a recorded batch receipt for this medicine.',422)
+                used=db.execute('SELECT COALESCE(SUM(quantity),0) FROM stock_losses WHERE receipt_id=?',(receipt_id,)).fetchone()[0]
+                if quantity>receipt['quantity']-used:
+                    raise RuleError('Batch-linked losses would exceed the quantity originally received. Reload batches and check physical stock.')
             loss_id=str(uuid4())
-            db.execute('INSERT INTO stock_losses VALUES(?,?,?,?,?,?,?,?,?,?,?)',
-                       (loss_id,medicine_id,quantity,kind,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),label))
+            db.execute('INSERT INTO stock_losses(id,medicine_id,quantity,kind,reason,stock_before,stock_after,actor_id,request_id,created_at,item_label,receipt_id,batch_number,expiry_date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                       (loss_id,medicine_id,quantity,kind,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),label,receipt_id,receipt['batch_number'] if receipt else None,receipt['expiry_date'] if receipt else None))
             return dict(db.execute('SELECT * FROM stock_losses WHERE id=?',(loss_id,)).fetchone())
 
     def assessment_metadata(self, row):
