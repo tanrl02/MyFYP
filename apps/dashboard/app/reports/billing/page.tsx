@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,BillingSummary,ReportPeriodFilter,money} from "@smart-skin/shared";
+import {downloadBillingReport} from "./billingReportCsv";
 
 const months=Array.from({length:12},(_,i)=>new Date(Date.UTC(2000,i,1)).toLocaleDateString("en-GB",{month:"long",timeZone:"UTC"}));
 export default function BillingAnalysisPage(){
@@ -26,7 +27,7 @@ export default function BillingAnalysisPage(){
       {period==="month"?<label className="font-semibold">Month<select aria-label="Report month" name="month" defaultValue={filter.period==="month"?filter.month:1} className="mt-2 block rounded-lg border p-3">{months.map((name,i)=><option key={name} value={i+1}>{name}</option>)}</select></label>:null}
       {period==="quarter"?<label className="font-semibold">Quarter<select aria-label="Report quarter" name="quarter" defaultValue="1" className="mt-2 block rounded-lg border p-3">{[1,2,3,4].map(q=><option key={q} value={q}>Q{q} · {months[(q-1)*3]}–{months[q*3-1]}</option>)}</select></label>:null}
       <button type="submit" className="btn">View analysis</button>
-    </form><button type="button" className="btn secondary mt-4" disabled={loading||!!error||!report} onClick={()=>window.print()}>Print billing analysis</button><p className="muted mt-2 text-sm">Prints the displayed summary, chart and breakdown, including its period and update time. Choose Save as PDF in your browser’s print dialog if available.</p><p className="muted mt-3 text-sm">Calendar periods by invoice issue date in Malaysia time (UTC+8). Refreshes every ten seconds.</p></section>
+    </form><button type="button" className="btn secondary mt-4" disabled={loading||!!error||!report} onClick={()=>window.print()}>Print billing analysis</button><button type="button" className="btn secondary ml-3 mt-4" disabled={loading||!!error||!report} onClick={()=>{if(report)downloadBillingReport(report);}}>Download billing CSV</button><p className="muted mt-2 text-sm">Prints the displayed summary, chart and breakdown, including its period and update time. Choose Save as PDF in your browser’s print dialog if available.</p><p className="muted mt-3 text-sm">CSV downloads the displayed totals and breakdown with the period, update time and simulation labels. Calendar periods by invoice issue date in Malaysia time (UTC+8). Refreshes every ten seconds.</p></section>
     {error?<div role="alert" className="panel mb-5 text-red-800">{error}<button className="btn secondary ml-3" onClick={()=>setRetry(n=>n+1)}>Retry analysis</button></div>:null}
     {loading?<p role="status">Loading billing analysis…</p>:null}
     {report?<>
