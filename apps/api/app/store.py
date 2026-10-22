@@ -132,6 +132,12 @@ class Store:
                 receipt_id TEXT REFERENCES stock_receipts(id),quantity INTEGER NOT NULL CHECK(quantity>0),batch_number TEXT,expiry_date TEXT,
                 actor_id TEXT NOT NULL,created_at TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS allocation_prescription ON dispensing_allocations(prescription_id);''')
+            for column,definition in [('held','INTEGER NOT NULL DEFAULT 0 CHECK(held IN (0,1))'),('hold_reason','TEXT'),('hold_version','INTEGER NOT NULL DEFAULT 0'),('hold_updated_at','TEXT')]:
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(receipt_balances)')}:
+                    db.execute(f'ALTER TABLE receipt_balances ADD COLUMN {column} {definition}')
+            db.execute('''CREATE TABLE IF NOT EXISTS batch_hold_changes (
+                request_id TEXT PRIMARY KEY,medicine_id TEXT NOT NULL REFERENCES medicines(id),receipt_id TEXT NOT NULL REFERENCES stock_receipts(id),
+                from_version INTEGER NOT NULL,held INTEGER NOT NULL,reason TEXT NOT NULL,actor_id TEXT NOT NULL,created_at TEXT NOT NULL,result_json TEXT NOT NULL)''')
             for column in ('batch_number','expiry_date'):
                 if column not in {row['name'] for row in db.execute('PRAGMA table_info(stock_receipts)')}:
                     db.execute(f'ALTER TABLE stock_receipts ADD COLUMN {column} TEXT')
@@ -1251,8 +1257,14 @@ class Store:
             db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
             db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at,batch_number,expiry_date) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
                 (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),batch_number,expiry_date))
-            if batch_number is not None:db.execute('INSERT INTO receipt_balances VALUES(?,?)',(receipt_id,quantity))
+            if batch_number is not None:db.execute('INSERT INTO receipt_balances(receipt_id,remaining_units) VALUES(?,?)',(receipt_id,quantity))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
+
+    def set_batch_hold(self, medicine_id, receipt_id, held, reason, version, request_id, staff):
+        from .batch_holds import change
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            return change(db,medicine_id,receipt_id,held,reason,version,request_id,staff,RuleError)
 
     def batch_movement_history(self, medicine_id, receipt_id):
         from .batch_history import history

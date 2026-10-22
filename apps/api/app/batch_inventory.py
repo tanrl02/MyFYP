@@ -7,11 +7,13 @@ from .scheduling import MALAYSIA
 def sources(db,medicine_id):
     row=db.execute('SELECT stock FROM medicines WHERE id=?',(medicine_id,)).fetchone()
     if row is None:return None
-    batches=[dict(r) for r in db.execute('''SELECT r.id AS receipt_id,r.batch_number,r.expiry_date,b.remaining_units
+    batches=[dict(r) for r in db.execute('''SELECT r.id AS receipt_id,r.batch_number,r.expiry_date,b.remaining_units,b.held,b.hold_reason,b.hold_version,b.hold_updated_at
         FROM receipt_balances b JOIN stock_receipts r ON r.id=b.receipt_id
         WHERE r.medicine_id=? ORDER BY r.expiry_date,r.created_at,r.id''',(medicine_id,))]
     today=datetime.now(MALAYSIA).date().isoformat()
-    for batch in batches:batch['expired']=batch['expiry_date']<today
+    for batch in batches:
+        batch['expired']=batch['expiry_date']<today
+        batch['held']=bool(batch['held'])
     return {'medicine_id':medicine_id,'stock':row['stock'],'untracked_units':max(0,row['stock']-sum(b['remaining_units'] for b in batches)),
             'batches':batches}
 
@@ -45,6 +47,7 @@ def allocate(db,prescription,allocations,staff,error):
         else:
             batch=next((b for b in available['batches'] if b['receipt_id']==receipt),None)
             if batch is None:raise error('Recorded batch is unavailable for this medicine. Reload stock sources.')
+            if batch['held']:raise error('This batch is on hold and cannot be dispensed. Choose another stock source.')
             if batch['expired']:raise error('Expired batches cannot be dispensed. Choose another stock source.')
             if quantity>batch['remaining_units']:raise error('Insufficient stock in the selected batch. Reload stock sources.')
         checked.append((part,batch))

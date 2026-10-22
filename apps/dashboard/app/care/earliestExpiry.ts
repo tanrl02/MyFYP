@@ -8,7 +8,7 @@ export function earliestExpiryQuantities(items:Pick<PrescriptionItem,"medicine_i
     quantities[`${item.medicine_id}|`]="0";
     for(const batch of current?.batches??[])quantities[`${item.medicine_id}|${batch.receipt_id}`]="0";
     let needed=Math.min(item.quantity,current?.stock??0);
-    const batches=[...(current?.batches??[])].filter(batch=>!batch.expired&&batch.expiry_date>=asOf&&batch.remaining_units>0)
+    const batches=[...(current?.batches??[])].filter(batch=>!batch.held&&!batch.expired&&batch.expiry_date>=asOf&&batch.remaining_units>0)
       .sort((a,b)=>a.expiry_date.localeCompare(b.expiry_date)||a.receipt_id.localeCompare(b.receipt_id));
     for(const batch of batches){
       if(needed<=0)break;

@@ -196,6 +196,13 @@ class DispensingInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     allocations: list[DispensingAllocation] | None = Field(default=None,min_length=1,max_length=100)
 
+class BatchHoldInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    held: bool = Field(strict=True)
+    reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+    version: int = Field(strict=True,ge=0)
+    request_id: str = Field(min_length=8,max_length=100)
+
 class StockLossInput(StockReceiptInput):
     model_config=ConfigDict(extra='forbid')
     kind: Literal['damaged','lost']
@@ -454,6 +461,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
                           month: int | None=Query(default=None,ge=1,le=12),
                           quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.inventory_summary(period,year,month,quarter))
+
+    @api.post('/stock/{medicine_id}/batches/{receipt_id}/hold')
+    def set_batch_hold(medicine_id: str,receipt_id: str,payload: BatchHoldInput,who=Depends(staff)):
+        return run(lambda: store.set_batch_hold(medicine_id,receipt_id,payload.held,payload.reason,payload.version,payload.request_id,who))
 
     @api.get('/stock/{medicine_id}/batches/{receipt_id}/history')
     def batch_movement_history(medicine_id: str,receipt_id: str,who=Depends(staff)):
