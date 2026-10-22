@@ -14,6 +14,7 @@ export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => 
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
 export type DispensingAllocation={medicine_id:string;receipt_id:string|null;quantity:number};
 export type DispensingStock={status:"issued"|"dispensed";items:{medicine_id:string;stock:number;untracked_units:number;batches:{receipt_id:string;batch_number:string;expiry_date:string;remaining_units:number;expired:boolean}[]}[];allocations:(DispensingAllocation & {batch_number:string|null;expiry_date:string|null;actor_id:string;created_at:string})[]};
+export type BatchMovementHistory={medicine_id:string;receipt_id:string;batch_number:string;expiry_date:string;remaining_units:number;totals:Record<"received"|"dispensed"|"damaged"|"lost",number>;calculated_remaining:number;reconciled:boolean;movements:{id:string;kind:"received"|"dispensed"|"damaged"|"lost";quantity:number;change:number;created_at:string;actor_id:string;reason:string|null;balance_after:number}[]};
 export type BatchStockOverview=DispensingStock["items"][number] & {medicine:Medicine;as_of:string};
 export type ReceiptBatch={receipt_id:string;batch_number:string;expiry_date:string;quantity:number;created_at:string;loss_units:number;loss_allowance:number;remaining_units:number|null};
 export type StockLoss=StockReceipt & {kind:"damaged"|"lost";item_label:string;receipt_id:string|null};
@@ -160,6 +161,7 @@ export class DemoApi {
   setMedicineTarget(id:string,body:{target_stock:number|null;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/target`,body); }
   setMedicineThreshold(id:string,body:{low_stock_threshold:number;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/threshold`,body); }
   setMedicineActive(id:string,body:{active:boolean;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/status`,body); }
+  batchMovementHistory(medicineId:string,receiptId:string) { return this.request<BatchMovementHistory>(`/stock/${encodeURIComponent(medicineId)}/batches/${encodeURIComponent(receiptId)}/history`); }
   batchStockOverview(id:string) { return this.request<BatchStockOverview>(`/stock/${encodeURIComponent(id)}/batch-overview`); }
   stockBatches(id:string) { return this.request<ReceiptBatch[]>(`/stock/${encodeURIComponent(id)}/batches`); }
   recordStockLoss(body:{medicine_id:string;quantity:number;kind:"damaged"|"lost";reason:string;request_id:string;receipt_id?:string|null}) { return this.request<StockLoss>("/stock/losses",body); }

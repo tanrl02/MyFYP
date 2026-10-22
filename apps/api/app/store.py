@@ -1254,6 +1254,12 @@ class Store:
             if batch_number is not None:db.execute('INSERT INTO receipt_balances VALUES(?,?)',(receipt_id,quantity))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
+    def batch_movement_history(self, medicine_id, receipt_id):
+        from .batch_history import history
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return history(db,medicine_id,receipt_id,RuleError)
+
     def batch_stock_overview(self, medicine_id):
         from .batch_inventory import sources
         with self.connect() as db:
