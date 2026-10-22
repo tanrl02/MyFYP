@@ -28,6 +28,8 @@ export type VisitCounts = Record<Status | "rescheduled" | "total",number>;
 export type WeeklyVisitReport = {week_start:string;week_end:string;timezone:string;generated_at:string;visits:VisitCounts;days:{clinic_date:string;visits:VisitCounts}[]};
 export type VisitSummaryFilter={period:"month";year:number;month:number}|{period:"quarter";year:number;quarter:number}|{period:"year";year:number};
 export type ReportPeriodFilter=VisitSummaryFilter;
+export type BillingTotals={invoice_count:number;paid_invoice_count:number;unpaid_invoice_count:number;billed_cents:number;paid_cents:number;unpaid_cents:number};
+export type BillingSummary={period:ReportPeriodFilter["period"];start_date:string;end_date:string;timezone:string;generated_at:string;granularity:"day"|"month";billing:BillingTotals;buckets:{start_date:string;end_date:string;billing:BillingTotals}[]};
 export type FeedbackSummary={period:ReportPeriodFilter["period"];start_date:string;end_date:string;timezone:string;generated_at:string;count:number;average_rating:number|null;ratings:{rating:number;count:number}[]};
 export type InventoryUnits=Record<"received"|"dispensed"|"damaged"|"lost"|"net_change",number>;
 export type InventorySummary={period:ReportPeriodFilter["period"];start_date:string;end_date:string;timezone:string;generated_at:string;granularity:"day"|"month";units:InventoryUnits;buckets:{start_date:string;end_date:string;units:InventoryUnits}[];top_dispensed:{medicine_id:string;name:string;strength:string;form:string;active:boolean;units:number}[];current_stock:{active_items:number;inactive_items:number;active_units:number;low_stock_items:number;out_of_stock_items:number;low_stock_threshold:number;alerts:{medicine_id:string;name:string;strength:string;form:string;stock:number;low_stock_threshold:number}[]}};
@@ -131,6 +133,7 @@ export class DemoApi {
   background() { return this.request<PatientBackground>("/patient-background"); }
   saveBackground(body: Pick<PatientBackground,"allergies"|"medicines"|"conditions"|"version">) { return this.request<PatientBackground>("/patient-background",body); }
   feedback() { return this.request<VisitFeedback[]>("/feedback"); }
+  billingSummary(filter:ReportPeriodFilter) { return this.request<BillingSummary>(`/reports/billing?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }
   feedbackSummary(filter:ReportPeriodFilter) { return this.request<FeedbackSummary>(`/reports/feedback?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }
   submitFeedback(id: string,rating: number,comment: string) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback`,{rating,comment}); }
   editFeedback(id:string,rating:number,comment:string,version:number) { return this.request<VisitFeedback>(`/visits/${encodeURIComponent(id)}/feedback/edit`,{rating,comment,version}); }
