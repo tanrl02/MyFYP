@@ -1254,6 +1254,14 @@ class Store:
             if batch_number is not None:db.execute('INSERT INTO receipt_balances VALUES(?,?)',(receipt_id,quantity))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
+    def batch_stock_overview(self, medicine_id):
+        from .batch_inventory import sources
+        with self.connect() as db:
+            db.execute('BEGIN')
+            medicine=db.execute('SELECT id,name,strength,form,price_cents,stock,version,updated_at,active,low_stock_threshold,target_stock FROM medicines WHERE id=?',(medicine_id,)).fetchone()
+            if medicine is None:raise RuleError('Stock item not found.',404)
+            return {**sources(db,medicine_id),'medicine':self.medicine_record(medicine),'as_of':datetime.now(MALAYSIA).date().isoformat()}
+
     def stock_batches(self, medicine_id):
         with self.connect() as db:
             db.execute('BEGIN')

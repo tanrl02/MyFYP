@@ -455,6 +455,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
                           quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.inventory_summary(period,year,month,quarter))
 
+    @api.get('/stock/{medicine_id}/batch-overview')
+    def batch_stock_overview(medicine_id: str,who=Depends(staff)):
+        return run(lambda: store.batch_stock_overview(medicine_id))
+
     @api.get('/stock/{medicine_id}/batches')
     def stock_batches(medicine_id: str,who=Depends(staff)):
         return run(lambda: store.stock_batches(medicine_id))
