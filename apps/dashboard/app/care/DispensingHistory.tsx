@@ -1,0 +1,8 @@
+"use client";
+import {useEffect,useState} from "react";
+import {DemoApi,DispensingStock,medicineLabel,Prescription,visitTime} from "@smart-skin/shared";
+export default function DispensingHistory({api,prescription}:{api:DemoApi;prescription:Prescription}){
+  const [open,setOpen]=useState(false),[data,setData]=useState<DispensingStock|null>(null),[error,setError]=useState("");
+  useEffect(()=>{let active=true;if(open){setError("");void api.dispensingStock(prescription.id).then(result=>{if(active)setData(result);}).catch(e=>{if(active)setError(e instanceof Error?e.message:"Cannot load allocations.");});}return()=>{active=false;};},[api,prescription.id,open]);
+  return <div className="my-3"><button className="text-sm underline" onClick={()=>setOpen(value=>!value)}>{open?"Hide stock allocations":"View saved stock allocations"}</button>{open?<div className="mt-3 rounded-lg border p-3">{error?<p role="alert">{error} Close and reopen to retry.</p>:data?data.allocations.length?<ul className="space-y-3">{data.allocations.map(part=><li key={`${part.medicine_id}-${part.receipt_id??"untracked"}`} className="break-words text-sm">{prescription.items.find(item=>item.medicine_id===part.medicine_id)?medicineLabel(prescription.items.find(item=>item.medicine_id===part.medicine_id)!):part.medicine_id} × {part.quantity} · {part.receipt_id?`${part.batch_number} · expiry ${part.expiry_date} · receipt ${part.receipt_id.slice(0,8)}`:"Untracked stock"}<p className="muted mt-1">{visitTime(part.created_at)} · {part.actor_id}</p></li>)}</ul>:<p className="text-sm">Historical dispensing · stock source allocations were not recorded.</p>:<p>Loading allocations…</p>}</div>:null}</div>;
+}

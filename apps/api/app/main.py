@@ -186,6 +186,16 @@ class InvoiceReviewInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
     prescription_id: str | None = Field(default=None,max_length=100)
 
+class DispensingAllocation(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    medicine_id: str = Field(min_length=1,max_length=100)
+    receipt_id: str | None = Field(default=None,strict=True,min_length=1,max_length=100)
+    quantity: int = Field(strict=True,ge=1,le=20)
+
+class DispensingInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    allocations: list[DispensingAllocation] | None = Field(default=None,min_length=1,max_length=100)
+
 class StockLossInput(StockReceiptInput):
     model_config=ConfigDict(extra='forbid')
     kind: Literal['damaged','lost']
@@ -497,9 +507,13 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def prescribe(booking_id: str, payload: PrescriptionInput, who=Depends(doctor)):
         return run(lambda: store.issue_prescription(booking_id, who, [i.model_dump() for i in payload.items]))
 
+    @api.get('/prescriptions/{prescription_id}/stock-sources')
+    def dispensing_stock(prescription_id: str,who=Depends(staff)):
+        return run(lambda: store.dispensing_stock(prescription_id))
+
     @api.post('/prescriptions/{prescription_id}/dispense')
-    def dispense(prescription_id: str, who=Depends(staff)):
-        return run(lambda: store.dispense(prescription_id, who))
+    def dispense(prescription_id: str, payload: DispensingInput=DispensingInput(), who=Depends(staff)):
+        return run(lambda: store.dispense(prescription_id, who,[part.model_dump() for part in payload.allocations] if payload.allocations is not None else None))
 
     @api.get('/patient-background')
     def background(who=Depends(patient)):

@@ -125,6 +125,13 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            db.executescript('''CREATE TABLE IF NOT EXISTS receipt_balances (
+                receipt_id TEXT PRIMARY KEY REFERENCES stock_receipts(id),remaining_units INTEGER NOT NULL CHECK(remaining_units>=0));
+                CREATE TABLE IF NOT EXISTS dispensing_allocations (
+                id TEXT PRIMARY KEY,prescription_id TEXT NOT NULL REFERENCES prescriptions(id),medicine_id TEXT NOT NULL REFERENCES medicines(id),
+                receipt_id TEXT REFERENCES stock_receipts(id),quantity INTEGER NOT NULL CHECK(quantity>0),batch_number TEXT,expiry_date TEXT,
+                actor_id TEXT NOT NULL,created_at TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS allocation_prescription ON dispensing_allocations(prescription_id);''')
             for column in ('batch_number','expiry_date'):
                 if column not in {row['name'] for row in db.execute('PRAGMA table_info(stock_receipts)')}:
                     db.execute(f'ALTER TABLE stock_receipts ADD COLUMN {column} TEXT')
@@ -1200,10 +1207,10 @@ class Store:
         end=today+timedelta(days=30)
         with self.connect() as db:
             db.execute('BEGIN')
-            counts=db.execute("SELECT SUM(CASE WHEN expiry_date<? THEN 1 ELSE 0 END) AS expired, SUM(CASE WHEN expiry_date>=? AND expiry_date<=? THEN 1 ELSE 0 END) AS due_soon, SUM(CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END) AS untracked FROM stock_receipts",(today.isoformat(),today.isoformat(),end.isoformat())).fetchone()
+            counts=db.execute("SELECT SUM(CASE WHEN expiry_date<? THEN 1 ELSE 0 END) AS expired, SUM(CASE WHEN expiry_date>=? AND expiry_date<=? THEN 1 ELSE 0 END) AS due_soon, SUM(CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END) AS untracked FROM stock_receipts r LEFT JOIN receipt_balances b ON b.receipt_id=r.id WHERE b.receipt_id IS NULL OR b.remaining_units>0",(today.isoformat(),today.isoformat(),end.isoformat())).fetchone()
             rows=[dict(row) for row in db.execute("""SELECT r.id,r.medicine_id,r.batch_number,r.expiry_date,r.quantity,r.created_at,
-                m.name,m.strength,m.form,m.active FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
-                WHERE r.expiry_date IS NOT NULL AND r.expiry_date<=? ORDER BY r.expiry_date,r.id LIMIT 201""",(end.isoformat(),))]
+                m.name,m.strength,m.form,m.active,b.remaining_units FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id LEFT JOIN receipt_balances b ON b.receipt_id=r.id
+                WHERE r.expiry_date IS NOT NULL AND r.expiry_date<=? AND (b.receipt_id IS NULL OR b.remaining_units>0) ORDER BY r.expiry_date,r.id LIMIT 201""",(end.isoformat(),))]
             for row in rows:
                 row['active']=bool(row['active'])
                 row['days_to_expiry']=(date.fromisoformat(row['expiry_date'])-today).days
@@ -1244,6 +1251,7 @@ class Store:
             db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
             db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at,batch_number,expiry_date) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
                 (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),batch_number,expiry_date))
+            if batch_number is not None:db.execute('INSERT INTO receipt_balances VALUES(?,?)',(receipt_id,quantity))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
     def stock_batches(self, medicine_id):
@@ -1254,7 +1262,10 @@ class Store:
                 COALESCE(SUM(l.quantity),0) AS loss_units FROM stock_receipts r LEFT JOIN stock_losses l ON l.receipt_id=r.id
                 WHERE r.medicine_id=? AND r.batch_number IS NOT NULL AND r.expiry_date IS NOT NULL
                 GROUP BY r.id ORDER BY r.expiry_date,r.created_at,r.id""",(medicine_id,))]
-            for row in rows:row['loss_allowance']=max(0,row['quantity']-row['loss_units'])
+            for row in rows:
+                row['loss_allowance']=max(0,row['quantity']-row['loss_units'])
+                balance=db.execute('SELECT remaining_units FROM receipt_balances WHERE receipt_id=?',(row['receipt_id'],)).fetchone()
+                row['remaining_units']=balance['remaining_units'] if balance else None
             return rows
 
     def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff, receipt_id=None):
@@ -1276,7 +1287,6 @@ class Store:
             if medicine['stock']<quantity:
                 raise RuleError('Insufficient stock for this deduction. Reload the current stock; nothing was deducted.')
             after=medicine['stock']-quantity
-            db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
             label=' · '.join(value for value in (medicine['name'],medicine['strength'],medicine['form']) if value)
             receipt=None
             if receipt_id is not None:
@@ -1287,6 +1297,15 @@ class Store:
                 used=db.execute('SELECT COALESCE(SUM(quantity),0) FROM stock_losses WHERE receipt_id=?',(receipt_id,)).fetchone()[0]
                 if quantity>receipt['quantity']-used:
                     raise RuleError('Batch-linked losses would exceed the quantity originally received. Reload batches and check physical stock.')
+            from .batch_inventory import sources
+            available=sources(db,medicine_id)
+            balance=db.execute('SELECT remaining_units FROM receipt_balances WHERE receipt_id=?',(receipt_id,)).fetchone() if receipt_id else None
+            if balance:
+                if quantity>balance['remaining_units']:raise RuleError('Insufficient remaining stock in the selected batch. Reload batches.')
+                db.execute('UPDATE receipt_balances SET remaining_units=remaining_units-? WHERE receipt_id=?',(quantity,receipt_id))
+            elif quantity>available['untracked_units']:
+                raise RuleError('Insufficient untracked stock. Select the affected tracked batch instead.')
+            db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
             loss_id=str(uuid4())
             db.execute('INSERT INTO stock_losses(id,medicine_id,quantity,kind,reason,stock_before,stock_after,actor_id,request_id,created_at,item_label,receipt_id,batch_number,expiry_date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                        (loss_id,medicine_id,quantity,kind,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),label,receipt_id,receipt['batch_number'] if receipt else None,receipt['expiry_date'] if receipt else None))
@@ -1723,7 +1742,19 @@ class Store:
             self.event(db, booking_id, doctor, 'prescription-issued')
             return self.prescription(db, booking_id)
 
-    def dispense(self, prescription_id, staff):
+    def dispensing_stock(self, prescription_id):
+        from .batch_inventory import sources,saved_allocations
+        with self.connect() as db:
+            db.execute('BEGIN')
+            row=db.execute('SELECT booking_id FROM prescriptions WHERE id=?',(prescription_id,)).fetchone()
+            if not row:raise RuleError('Prescription not found.',404)
+            prescription=self.prescription(db,row['booking_id'])
+            return {'items':[sources(db,item['medicine_id']) for item in prescription['items']],
+                    'allocations':saved_allocations(db,prescription_id),'status':prescription['status']}
+
+    def dispense(self, prescription_id, staff, allocations=None):
+        if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
+        from .batch_inventory import allocate,saved_allocations
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             row = db.execute('SELECT booking_id FROM prescriptions WHERE id=?', (prescription_id,)).fetchone()
@@ -1731,7 +1762,13 @@ class Store:
                 raise RuleError('Prescription not found.', 404)
             prescription = self.prescription(db, row['booking_id'])
             if prescription['status'] == 'dispensed':
+                if allocations is not None:
+                    original=saved_allocations(db,prescription_id)
+                    wanted=sorted((part['medicine_id'],part['receipt_id'] or '',part['quantity']) for part in allocations)
+                    saved=sorted((part['medicine_id'],part['receipt_id'] or '',part['quantity']) for part in original)
+                    if wanted!=saved:raise RuleError('This prescription was already dispensed with different stock sources. Check saved allocations.')
                 return prescription
+            allocate(db,prescription,allocations,staff,RuleError)
             for item in prescription['items']:
                 result = db.execute('UPDATE medicines SET stock=stock-? WHERE id=? AND stock>=?',
                                     (item['quantity'], item['medicine_id'], item['quantity']))
