@@ -456,6 +456,12 @@ def create_app(path=None,photo_checker=None,predictor=None):
                       quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.visit_summary(period,year,month,quarter))
 
+    @api.get('/reports/feedback')
+    def feedback_summary(period: Literal['month','quarter','year'],year: int=Query(ge=2,le=9998),
+                         month: int | None=Query(default=None,ge=1,le=12),
+                         quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
+        return run(lambda: store.feedback_summary(period,year,month,quarter))
+
     @api.get('/reports/inventory')
     def inventory_summary(period: Literal['month','quarter','year'],year: int=Query(ge=2,le=9998),
                           month: int | None=Query(default=None,ge=1,le=12),

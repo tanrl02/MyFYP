@@ -1092,6 +1092,13 @@ class Store:
         elif period=='year':valid=valid and month is None and quarter is None
         if not valid:raise RuleError('Choose a valid month, quarter or year (year 2–9998) with its matching filter.',422)
 
+    def feedback_summary(self,period,year,month=None,quarter=None):
+        from .feedback_reporting import summary
+        self.validate_summary_filter(period,year,month,quarter)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            return summary(db,period,year,month,quarter)
+
     def inventory_summary(self,period,year,month=None,quarter=None):
         from .inventory_reporting import summary
         self.validate_summary_filter(period,year,month,quarter)

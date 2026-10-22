@@ -15,7 +15,7 @@ export default function VisitSummaryPage(){
     void load();const timer=setInterval(load,10000);return()=>{active=false;clearInterval(timer);};
   },[api,filter,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
-    <nav className="flex flex-wrap gap-5"><a className="underline" href="/stock/reports">Inventory analysis</a><a className="underline" href="/reports">Daily clinic report</a><a className="underline" href="/reports/weekly">Weekly visits</a></nav>
+    <nav className="flex flex-wrap gap-5"><a className="underline" href="/feedback/analysis">Feedback analysis</a><a className="underline" href="/stock/reports">Inventory analysis</a><a className="underline" href="/reports">Daily clinic report</a><a className="underline" href="/reports/weekly">Weekly visits</a></nav>
     <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Visit summary & analysis</h1><span className="badge">Staff Demo · synthetic data</span></div>
     <section className="panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{
       e.preventDefault();const values=new FormData(e.currentTarget),year=Number(values.get("year"));
