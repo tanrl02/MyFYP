@@ -64,9 +64,9 @@ class StockMovementTests(unittest.TestCase):
         store=Store(self.path)
         with store.connect() as db:
             for n in range(103):
-                db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
+                db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
                     (f'a-{n:03}','demo-a',1,'Fixture',0,1,'staff-demo',f'request-a-{n}','2026-10-19T00:00:00+00:00'))
-            db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
+            db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
                 ('b-old','demo-b',1,'Other fixture',0,1,'staff-demo','request-b-old','2020-01-01T00:00:00+00:00'))
             # Same calendar text, but this offset makes a-000 newer than the +00 rows.
             db.execute("UPDATE stock_receipts SET created_at='2026-10-19T00:00:00-01:00' WHERE id='a-000'")
@@ -80,7 +80,7 @@ class StockMovementTests(unittest.TestCase):
     def seed_pages(self):
         with Store(self.path).connect() as db:
             for n in range(205):
-                db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
+                db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at) VALUES(?,?,?,?,?,?,?,?,?)',
                     (f'page-{n:03}','demo-a',1,'Pagination fixture',0,1,'staff-demo',f'page-request-{n}','2026-10-19T00:00:00+00:00'))
             for kind in ('lost','damaged'):
                 db.execute('INSERT INTO stock_losses VALUES(?,?,?,?,?,?,?,?,?,?,?)',

@@ -177,6 +177,11 @@ class StockReceiptInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     request_id: str = Field(min_length=8,max_length=100)
 
+class StockReceiveInput(StockReceiptInput):
+    model_config=ConfigDict(extra='forbid')
+    batch_number: str | None = Field(default=None,strict=True,min_length=1,max_length=60,pattern=r'\S')
+    expiry_date: str | None = Field(default=None,strict=True,min_length=10,max_length=10)
+
 class InvoiceReviewInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
     prescription_id: str | None = Field(default=None,max_length=100)
@@ -439,9 +444,13 @@ def create_app(path=None,photo_checker=None,predictor=None):
                           quarter: int | None=Query(default=None,ge=1,le=4),who=Depends(staff)):
         return run(lambda: store.inventory_summary(period,year,month,quarter))
 
+    @api.get('/stock/expiry')
+    def stock_expiry(who=Depends(staff)):
+        return store.stock_expiry()
+
     @api.post('/stock/receive',status_code=201)
-    def receive_stock(payload: StockReceiptInput,who=Depends(staff)):
-        return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who))
+    def receive_stock(payload: StockReceiveInput,who=Depends(staff)):
+        return run(lambda: store.receive_stock(payload.medicine_id,payload.quantity,payload.reason,payload.request_id,who,payload.batch_number,payload.expiry_date))
 
     @api.post('/stock/losses',status_code=201)
     def stock_loss(payload: StockLossInput,who=Depends(staff)):

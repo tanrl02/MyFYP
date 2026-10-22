@@ -11,10 +11,11 @@ export type NotificationInbox = {items:PatientNotification[];unread_count:number
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
-export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string };
+export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
 export type StockLoss=StockReceipt & {kind:"damaged"|"lost";item_label:string};
 export type StockMovement = {source_id:string;kind:"received"|"dispensed"|"damaged"|"lost";change:number;created_at:string;reason:string|null;stock_before:number|null;stock_after:number|null;actor_id:string|null;item_label:string|null};
 export type StockMovementHistory = {medicine:Medicine;movements:StockMovement[];has_more:boolean;next_cursor:string|null};
+export type StockExpiry = {as_of:string;through_date:string;timezone:string;expired_receipts:number;due_soon_receipts:number;untracked_receipts:number;has_more:boolean;items:{id:string;medicine_id:string;batch_number:string;expiry_date:string;quantity:number;created_at:string;name:string;strength:string;form:string;active:boolean;days_to_expiry:number}[]};
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; losses:StockLoss[]; low_stock_threshold: number };
 export type VisitCounts = Record<Status | "rescheduled" | "total",number>;
 export type WeeklyVisitReport = {week_start:string;week_end:string;timezone:string;generated_at:string;visits:VisitCounts;days:{clinic_date:string;visits:VisitCounts}[]};
@@ -156,7 +157,8 @@ export class DemoApi {
   setMedicineThreshold(id:string,body:{low_stock_threshold:number;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/threshold`,body); }
   setMedicineActive(id:string,body:{active:boolean;version:number;request_id:string}) { return this.request<Medicine>(`/medicines/${encodeURIComponent(id)}/status`,body); }
   recordStockLoss(body:{medicine_id:string;quantity:number;kind:"damaged"|"lost";reason:string;request_id:string}) { return this.request<StockLoss>("/stock/losses",body); }
-  receiveStock(medicineId: string,quantity: number,reason: string,requestId: string) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId}); }
+  stockExpiry() { return this.request<StockExpiry>("/stock/expiry"); }
+  receiveStock(medicineId: string,quantity: number,reason: string,requestId: string,batch?:{batch_number:string;expiry_date:string}) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId,...batch}); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
   dispense(id: string) { return this.request<Prescription>(`/prescriptions/${encodeURIComponent(id)}/dispense`, {}); }
   invoice(id: string,review?:{prescription_id:string|null}) { return this.request<Invoice>(`/visits/${encodeURIComponent(id)}/invoice`, review??{}); }

@@ -125,6 +125,9 @@ class Store:
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
                   comment TEXT NOT NULL, created_at TEXT NOT NULL);
             ''')
+            for column in ('batch_number','expiry_date'):
+                if column not in {row['name'] for row in db.execute('PRAGMA table_info(stock_receipts)')}:
+                    db.execute(f'ALTER TABLE stock_receipts ADD COLUMN {column} TEXT')
             allow_missed_bookings(db)
             if 'cancelled_at' not in {row['name'] for row in db.execute('PRAGMA table_info(doctor_unavailability)')}:
                 # Replace the old permanent doctor/date uniqueness with active-only uniqueness.
@@ -1189,17 +1192,43 @@ class Store:
             next_cursor=f"{rows[99]['kind']}:{rows[99]['source_id']}" if len(rows)>100 else None
             return {'medicine':self.medicine_record(medicine),'movements':[dict(r) for r in rows[:100]],'has_more':len(rows)>100,'next_cursor':next_cursor}
 
-    def receive_stock(self, medicine_id, quantity, reason, request_id, staff):
+    def stock_expiry(self, as_of=None):
+        today=as_of or datetime.now(MALAYSIA).date()
+        end=today+timedelta(days=30)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            counts=db.execute("SELECT SUM(CASE WHEN expiry_date<? THEN 1 ELSE 0 END) AS expired, SUM(CASE WHEN expiry_date>=? AND expiry_date<=? THEN 1 ELSE 0 END) AS due_soon, SUM(CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END) AS untracked FROM stock_receipts",(today.isoformat(),today.isoformat(),end.isoformat())).fetchone()
+            rows=[dict(row) for row in db.execute("""SELECT r.id,r.medicine_id,r.batch_number,r.expiry_date,r.quantity,r.created_at,
+                m.name,m.strength,m.form,m.active FROM stock_receipts r JOIN medicines m ON m.id=r.medicine_id
+                WHERE r.expiry_date IS NOT NULL AND r.expiry_date<=? ORDER BY r.expiry_date,r.id LIMIT 201""",(end.isoformat(),))]
+            for row in rows:
+                row['active']=bool(row['active'])
+                row['days_to_expiry']=(date.fromisoformat(row['expiry_date'])-today).days
+            return {'as_of':today.isoformat(),'through_date':end.isoformat(),'timezone':'Asia/Kuala_Lumpur',
+                'expired_receipts':counts['expired'] or 0,'due_soon_receipts':counts['due_soon'] or 0,
+                'untracked_receipts':counts['untracked'] or 0,'items':rows[:200],'has_more':len(rows)>200}
+
+    def receive_stock(self, medicine_id, quantity, reason, request_id, staff, batch_number=None, expiry_date=None):
         if staff!='staff-demo':
             raise RuleError('Staff demo identity required.',403)
         if type(quantity) is not int or not 1<=quantity<=1000 or not reason.strip() or len(reason)>300:
             raise RuleError('Enter a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
         reason=reason.strip()
+        if batch_number is not None:
+            if not isinstance(batch_number,str) or not batch_number.strip() or len(batch_number)>60:
+                raise RuleError('Enter a batch number up to 60 characters.',422)
+            batch_number=batch_number.strip()
+        if (batch_number is None)!=(expiry_date is None):
+            raise RuleError('Provide both batch number and expiry date, or leave both unset.',422)
+        if expiry_date is not None:
+            try:
+                if not isinstance(expiry_date,str) or date.fromisoformat(expiry_date).isoformat()!=expiry_date:raise ValueError()
+            except (TypeError,ValueError):raise RuleError('Enter a valid expiry date in YYYY-MM-DD format.',422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             existing=db.execute('SELECT * FROM stock_receipts WHERE request_id=?',(request_id,)).fetchone()
             if existing:
-                if (existing['medicine_id'],existing['quantity'],existing['reason'])!=(medicine_id,quantity,reason):
+                if (existing['medicine_id'],existing['quantity'],existing['reason'],existing['batch_number'],existing['expiry_date'])!=(medicine_id,quantity,reason,batch_number,expiry_date):
                     raise RuleError('This receipt request already saved different details. Check the history.')
                 return dict(existing)
             medicine=db.execute('SELECT * FROM medicines WHERE id=?',(medicine_id,)).fetchone()
@@ -1210,8 +1239,8 @@ class Store:
                 raise RuleError('This receipt would exceed the demo stock limit of 100000.')
             receipt_id=str(uuid4())
             db.execute('UPDATE medicines SET stock=? WHERE id=?',(after,medicine_id))
-            db.execute('INSERT INTO stock_receipts VALUES(?,?,?,?,?,?,?,?,?)',
-                (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat()))
+            db.execute('INSERT INTO stock_receipts(id,medicine_id,quantity,reason,stock_before,stock_after,actor_id,request_id,created_at,batch_number,expiry_date) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+                (receipt_id,medicine_id,quantity,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),batch_number,expiry_date))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
     def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff):
