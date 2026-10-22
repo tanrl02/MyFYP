@@ -17,10 +17,11 @@ export default function BatchStockPage(){
     }catch(e){if(active){setData(null);setError(e instanceof Error?e.message:"Cannot load batch stock.");}}finally{fetching=false;if(active)setLoading(false);}}
     void load();const timer=setInterval(load,5000);return()=>{active=false;clearInterval(timer);};
   },[api,item,retry]);
+  useEffect(()=>{const selected=new URLSearchParams(window.location.search).get("medicine");if(selected)setItem(selected);},[]);
   const tracked=data?.batches.reduce((total,batch)=>total+batch.remaining_units,0)??0;
   const expired=data?.batches.reduce((total,batch)=>total+(batch.expired?batch.remaining_units:0),0)??0;
   const usable=data?.batches.reduce((total,batch)=>total+(!batch.expired&&!batch.held?batch.remaining_units:0),0)??0;
-  return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex flex-wrap gap-5"><a className="underline" href="/stock">← Pharmacy stock</a><a className="underline" href="/stock/expiry">Batch expiry review</a><a className="underline" href="/care">Dispensing & billing</a></nav>
+  return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex flex-wrap gap-5"><a className="underline" href="/stock">← Pharmacy stock</a><a className="underline" href="/stock/usable-alerts">Low usable-stock alerts</a><a className="underline" href="/stock/expiry">Batch expiry review</a><a className="underline" href="/care">Dispensing & billing</a></nav>
     <h1 className="my-6 text-3xl font-semibold">Batch stock overview</h1><p className="mb-4">Staff Demo · synthetic items. Select a medicine to see tracked batches and its separate untracked stock.</p>
     <section className="panel mb-5"><label className="block font-semibold">Medicine<select disabled={holdBusy} aria-label="Batch overview medicine" className="mt-2" value={item} onChange={e=>{setData(null);setError("");setLoading(true);setHistoryReceipt("");setHoldBatch(null);setItem(e.target.value);}}><option value="">Choose a medicine</option>{medicines.map(medicine=><option value={medicine.id} key={medicine.id}>{medicineLabel(medicine)}{medicine.active?"":" · Inactive"}</option>)}</select></label><button className="btn secondary mt-4" disabled={holdBusy} onClick={()=>setRetry(value=>value+1)}>Refresh batch stock</button><p className="muted mt-3 text-sm">Refreshes every five seconds. Inactive catalogue items are included.</p></section>
     {error?<p role="alert" className="panel mb-5 text-red-800">{error} Use Refresh batch stock to retry.</p>:null}

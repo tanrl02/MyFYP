@@ -22,6 +22,7 @@ export type StockLoss=StockReceipt & {kind:"damaged"|"lost";item_label:string;re
 export type StockMovement = {source_id:string;kind:"received"|"dispensed"|"damaged"|"lost";change:number;created_at:string;reason:string|null;stock_before:number|null;stock_after:number|null;actor_id:string|null;item_label:string|null};
 export type StockMovementHistory = {medicine:Medicine;movements:StockMovement[];has_more:boolean;next_cursor:string|null};
 export type StockExpiry = {as_of:string;through_date:string;timezone:string;expired_receipts:number;due_soon_receipts:number;untracked_receipts:number;has_more:boolean;items:{id:string;medicine_id:string;batch_number:string;expiry_date:string;quantity:number;created_at:string;name:string;strength:string;form:string;active:boolean;remaining_units:number|null;days_to_expiry:number}[]};
+export type UsableStockAlerts={as_of:string;active_items:number;no_usable_items:number;low_usable_items:number;untracked_review_items:number;alerts:{medicine_id:string;name:string;strength:string;form:string;stock:number;low_stock_threshold:number;tracked_units:number;usable_units:number;untracked_units:number;blocked_tracked_units:number}[]};
 export type StockOverview = { medicines: Medicine[]; receipts: StockReceipt[]; losses:StockLoss[]; low_stock_threshold: number };
 export type VisitCounts = Record<Status | "rescheduled" | "total",number>;
 export type WeeklyVisitReport = {week_start:string;week_end:string;timezone:string;generated_at:string;visits:VisitCounts;days:{clinic_date:string;visits:VisitCounts}[]};
@@ -154,6 +155,7 @@ export class DemoApi {
   addMedicine(body: Pick<Medicine,"name"|"strength"|"form"|"price_cents"> & {request_id:string}) { return this.request<Medicine>("/medicines",body); }
   stockMovements(id:string,cursor?:string) { return this.request<StockMovementHistory>(`/stock/${encodeURIComponent(id)}/movements${cursor?`?cursor=${encodeURIComponent(cursor)}`:""}`); }
   stock() { return this.request<StockOverview>("/stock"); }
+  usableStockAlerts() { return this.request<UsableStockAlerts>("/stock/usable-alerts"); }
   dailyReport(date: string) { return this.request<DailyReport>(`/reports/daily?clinic_date=${encodeURIComponent(date)}`); }
   weeklyReport(weekOf:string) { return this.request<WeeklyVisitReport>(`/reports/weekly?week_of=${encodeURIComponent(weekOf)}`); }
   visitSummary(filter:VisitSummaryFilter) { return this.request<VisitSummary>(`/reports/summary?${new URLSearchParams(Object.entries(filter).map(([key,value])=>[key,String(value)]))}`); }

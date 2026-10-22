@@ -1260,6 +1260,27 @@ class Store:
             if batch_number is not None:db.execute('INSERT INTO receipt_balances(receipt_id,remaining_units) VALUES(?,?)',(receipt_id,quantity))
             return dict(db.execute('SELECT * FROM stock_receipts WHERE id=?',(receipt_id,)).fetchone())
 
+    def usable_stock_alerts(self):
+        today=datetime.now(MALAYSIA).date().isoformat()
+        with self.connect() as db:
+            db.execute('BEGIN')
+            rows=[dict(row) for row in db.execute('''SELECT m.id AS medicine_id,m.name,m.strength,m.form,m.stock,m.low_stock_threshold,
+                COALESCE(SUM(b.remaining_units),0) AS tracked_units,
+                COALESCE(SUM(CASE WHEN r.expiry_date>=? AND b.held=0 THEN b.remaining_units ELSE 0 END),0) AS usable_units
+                FROM medicines m LEFT JOIN stock_receipts r ON r.medicine_id=m.id
+                LEFT JOIN receipt_balances b ON b.receipt_id=r.id WHERE m.active=1
+                GROUP BY m.id ORDER BY usable_units,m.name COLLATE NOCASE,m.id''',(today,))]
+            alerts=[]
+            for row in rows:
+                if row['usable_units']>row['low_stock_threshold']:continue
+                row['untracked_units']=max(0,row['stock']-row['tracked_units'])
+                row['blocked_tracked_units']=row['tracked_units']-row['usable_units']
+                alerts.append(row)
+            return {'as_of':today,'active_items':len(rows),'alerts':alerts,
+                'no_usable_items':sum(row['usable_units']==0 for row in alerts),
+                'low_usable_items':sum(row['usable_units']>0 for row in alerts),
+                'untracked_review_items':sum(row['untracked_units']>0 for row in alerts)}
+
     def set_batch_hold(self, medicine_id, receipt_id, held, reason, version, request_id, staff):
         from .batch_holds import change
         with self.connect() as db:

@@ -478,6 +478,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def stock_batches(medicine_id: str,who=Depends(staff)):
         return run(lambda: store.stock_batches(medicine_id))
 
+    @api.get('/stock/usable-alerts')
+    def usable_stock_alerts(who=Depends(staff)):
+        return store.usable_stock_alerts()
+
     @api.get('/stock/expiry')
     def stock_expiry(who=Depends(staff)):
         return store.stock_expiry()
