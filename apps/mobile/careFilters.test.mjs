@@ -8,8 +8,24 @@ test("care statuses distinguish issued prescriptions and actual invoice states",
   const ids=status=>filterCare(records,status).map(r=>r.visit.id);
   assert.deepEqual(ids("all"),["issued","issued-bill","dispensed","unpaid","paid","bill-only"]);
   assert.deepEqual(ids("dispensing"),["issued","issued-bill"]);
+  assert.deepEqual(ids("awaitingBill"),["issued","dispensed"]);
   assert.deepEqual(ids("unpaid"),["issued-bill","unpaid","bill-only"]);
   assert.deepEqual(ids("paid"),["paid"]);
+});
+
+test("awaiting bill combines with search/date and moves to unpaid when an invoice arrives",()=>{
+  const records=[record("a","issued"),record("b","dispensed"),record("c","dispensed","unpaid"),record("d",null,"paid"),record("empty")].map((r,i)=>({...r,visit:{...r.visit,doctor_name:i===0?"Dr. Lim":"Dr. Anita",token:i===0?"L001":"A001",clinic_date:i===1?"2032-10-24":"2032-10-23"}}));
+  const token=v=>v.token;
+  const before=JSON.stringify(records);
+  assert.deepEqual(filterCare(records,"awaitingBill"," lim ",token,"2032-10-23").map(r=>r.visit.id),["a"]);
+  assert.deepEqual(filterCare(records,"awaitingBill","a001",token,"2032-10-24").map(r=>r.visit.id),["b"]);
+  assert.deepEqual(filterCare(records,"awaitingBill","lim",token,"2032-10-24"),[]);
+  assert.deepEqual(summarizeCare(filterCare(records,"awaitingBill")),{unpaidCents:0,paidCents:0,awaitingDispensing:1});
+  assert.equal(JSON.stringify(records),before);
+  const refreshed=records.map(r=>r.visit.id==="b"?{...r,invoice:{status:"unpaid",total_cents:3000}}:r);
+  assert.deepEqual(filterCare(refreshed,"awaitingBill").map(r=>r.visit.id),["a"]);
+  assert.deepEqual(filterCare(refreshed,"unpaid","anita",token,"2032-10-24").map(r=>r.visit.id),["b"]);
+  assert.deepEqual(filterCare([],"awaitingBill"),[]);
 });
 test("refresh transitions update membership without altering records or their order",()=>{
   const records=[record("a","issued"),record("b","dispensed","unpaid")];

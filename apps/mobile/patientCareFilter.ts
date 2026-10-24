@@ -3,6 +3,7 @@ import type { Care } from "@smart-skin/shared";
 export const careFilterLabels = {
   all: "All records",
   dispensing: "Awaiting dispensing",
+  awaitingBill: "Awaiting bill",
   unpaid: "Unpaid bills",
   paid: "Paid bills · simulation",
 } as const;
@@ -34,6 +35,7 @@ export function filterCare(records: Care[], status: CareFilter, query = "", toke
     if (date && record.visit.clinic_date !== date) return false;
     if (search && !record.visit.doctor_name.toLowerCase().includes(search) && !(token?.(record.visit) ?? "").toLowerCase().includes(search)) return false;
     if (status === "dispensing") return record.prescription?.status === "issued";
+    if (status === "awaitingBill") return !!record.prescription && !record.invoice;
     if (status === "unpaid" || status === "paid") return record.invoice?.status === status;
     return true;
   });
