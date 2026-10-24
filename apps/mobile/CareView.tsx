@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import { Care, DemoApi, DemoPatient, medicineLabel, money, queueToken, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
+import { CareFilter, careFilterLabels, filterCare } from "./patientCareFilter";
 export default function CareView({ patient }: { patient: DemoPatient }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [records, setRecords] = useState<Care[]>([]);
@@ -11,6 +12,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<CareFilter>("all");
   useEffect(() => {
     let active = true, fetching = false;
     async function load() {
@@ -32,14 +34,26 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
     catch (e) { setError(e instanceof Error ? e.message : "Unable to record simulation."); }
     finally { setBusy(false); }
   }
-  const visible = records.filter(r => r.prescription || r.invoice);
+  const all = filterCare(records, "all");
+  const visible = filterCare(records, status);
+  function changeStatus(value: CareFilter) {
+    if (busy) return;
+    setStatus(value); setConfirm(""); setNotice("");
+  }
   return <View>
     <View style={styles.heading}><Text style={styles.title}>Prescriptions & bills</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Refresh care</Text></Pressable></View>
     <Text style={styles.muted}>Saved records from your doctor and staff. Placeholder items and payments are for demonstration only.</Text>
+    <View style={styles.card}>
+      <Text style={styles.subtitle}>Find care records</Text>
+      <View accessibilityRole="radiogroup" accessibilityLabel="Care record status" style={styles.filters}>{(Object.keys(careFilterLabels) as CareFilter[]).map(key => <Pressable key={key} accessibilityRole="radio" aria-checked={status === key} accessibilityState={{checked: status === key, disabled: busy}} disabled={busy} onPress={() => changeStatus(key)} style={[styles.choice, status === key && styles.active, busy && {opacity: .45}]}><Text style={styles.link}>{careFilterLabels[key]}</Text></Pressable>)}</View>
+      <Text style={styles.muted}>Unpaid bills shows generated bills only. Records awaiting a bill remain under All records.</Text>
+      <Pressable accessibilityRole="button" disabled={busy || status === "all"} onPress={() => changeStatus("all")} style={(busy || status === "all") && {opacity: .45}}><Text style={styles.link}>Reset care filter</Text></Pressable>
+      {!loading ? <Text style={styles.muted}>Showing {visible.length} of {all.length} care records</Text> : null}
+    </View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Retry care connection</Text></Pressable></View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
     {loading ? <ActivityIndicator color="#176f5e" /> : null}
-    {!loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No prescriptions or bills yet</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : null}
+    {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No prescriptions or bills yet</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Choose another status or reset the care filter to see all your prescriptions and bills.</Text></View> : null}
     {visible.map(({ visit, prescription, invoice }) => <View key={visit.id} style={styles.card}>
       <Text style={styles.subtitle}>{queueToken(visit)} · {visit.doctor_name}</Text><Text style={styles.muted}>{visitTime(visit.starts_at)}</Text>
       <Text style={styles.section}>Prescription</Text>
@@ -54,6 +68,9 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
 
 const styles = StyleSheet.create({
   heading: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
+  filters: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
+  choice: { paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: "#dce6e0", backgroundColor: "#e7efeb" },
+  active: { borderWidth: 2, borderColor: "#176f5e" },
   title: { fontSize: 23, fontWeight: "700", color: "#19352e" }, subtitle: { fontSize: 17, fontWeight: "600", color: "#19352e", marginBottom: 8 },
   muted: { fontSize: 13, color: "#637970", lineHeight: 20 }, link: { color: "#176f5e", fontWeight: "600", paddingVertical: 10 },
   card: { backgroundColor: "white", padding: 20, borderWidth: 1, borderColor: "#dce6e0", borderRadius: 16, marginTop: 16 },
