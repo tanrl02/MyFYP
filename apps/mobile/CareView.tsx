@@ -5,8 +5,9 @@ import { Care, DemoApi, DemoPatient, medicineLabel, money, queueToken, visitTime
 import { apiBase as base } from "./apiConfig";
 import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare, summarizeCare } from "./patientCareFilter";
 import BookingDateFilter from "./BookingDateFilter";
+import VisitDetailsView from "./VisitDetailsView";
 const prescriptionTime = (value: string) => new Date(value).toLocaleString("en-GB", { timeZone: "Asia/Kuala_Lumpur", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
-export default function CareView({ patient, visitId, onBack, onBusy }: { patient: DemoPatient; visitId?: string; onBack?: () => void; onBusy?: (value: boolean) => void }) {
+export default function CareView({ patient, visitId, onBack, onBusy, onNavigate }: { patient: DemoPatient; visitId?: string; onBack?: () => void; onBusy?: (value: boolean) => void; onNavigate?: () => void }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [records, setRecords] = useState<Care[]>([]);
   const [error, setError] = useState("");
@@ -19,6 +20,7 @@ export default function CareView({ patient, visitId, onBack, onBusy }: { patient
   const [date, setDate] = useState<string | null>(null);
   const [order, setOrder] = useState<CareOrder>("newest");
   const [expandedId, setExpandedId] = useState(visitId || "");
+  const [consultationId, setConsultationId] = useState<string | null>(null);
   useEffect(() => { onBusy?.(busy); }, [busy, onBusy]);
   useEffect(() => () => { onBusy?.(false); }, [onBusy]);
   useEffect(() => {
@@ -50,6 +52,11 @@ export default function CareView({ patient, visitId, onBack, onBusy }: { patient
     if (busy) return;
     setStatus(value); setConfirm(""); setNotice("");
   }
+  function openConsultation(id: string | null) {
+    if (busy) return;
+    setConfirm(""); setNotice(""); setConsultationId(id); onNavigate?.();
+  }
+  if (consultationId) return <VisitDetailsView key={`${patient}-${consultationId}`} api={api} id={consultationId} onBack={() => openConsultation(null)} backLabel="← Back to Care & bills" onOpen={openConsultation} onBusy={setBusy}/>;
   return <View>
     {onBack ? <Pressable accessibilityRole="button" disabled={busy} onPress={onBack}><Text style={styles.link}>← Back to Visit details</Text></Pressable> : null}
     <View style={styles.heading}><Text style={styles.title}>Prescriptions & bills</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Refresh care</Text></Pressable></View>
@@ -87,6 +94,7 @@ export default function CareView({ patient, visitId, onBack, onBusy }: { patient
       <Text style={styles.muted}>{invoice ? `Bill: ${money(invoice.total_cents)} · ${invoice.status === "paid" ? "Paid · simulation" : "Unpaid"}` : "Bill: Not generated yet"}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={`${expandedId === visit.id ? "Hide" : "View"} details for ${queueToken(visit)}, ${visit.doctor_name}, ${visitTime(visit.starts_at)}`} aria-expanded={expandedId === visit.id} accessibilityState={{expanded: expandedId === visit.id, disabled: busy}} disabled={busy} onPress={() => { if (!busy) { setExpandedId(expandedId === visit.id ? "" : visit.id); setConfirm(""); } }} style={busy && {opacity: .45}}><Text style={styles.link}>{expandedId === visit.id ? "Hide details" : "View details"}</Text></Pressable>
       {expandedId === visit.id ? <>
+      <Pressable accessibilityRole="button" disabled={busy} onPress={() => openConsultation(visit.id)}><Text style={styles.link}>View visit details →</Text></Pressable>
       <Text style={styles.section}>Prescription</Text>
       {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>
         <View style={styles.prescriptionDates}>
