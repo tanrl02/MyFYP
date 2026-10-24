@@ -17,6 +17,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<string | null>(null);
   const [order, setOrder] = useState<CareOrder>("newest");
+  const [expandedId, setExpandedId] = useState("");
   useEffect(() => {
     let active = true, fetching = false;
     async function load() {
@@ -77,18 +78,24 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
     {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No prescriptions or bills yet</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Change your search, status or appointment date, or reset care filters to see all your prescriptions and bills.</Text></View> : null}
     {visible.map(({ visit, prescription, invoice }) => <View key={visit.id} style={styles.card}>
       <Text style={styles.subtitle}>{queueToken(visit)} · {visit.doctor_name}</Text><Text style={styles.muted}>{visitTime(visit.starts_at)}</Text>
+      <Text style={styles.compactStatus}>Prescription: {prescription ? prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing" : "Not issued"}</Text>
+      <Text style={styles.muted}>{invoice ? `Bill: ${money(invoice.total_cents)} · ${invoice.status === "paid" ? "Paid · simulation" : "Unpaid"}` : "Bill: Not generated yet"}</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={`${expandedId === visit.id ? "Hide" : "View"} details for ${queueToken(visit)}, ${visit.doctor_name}, ${visitTime(visit.starts_at)}`} aria-expanded={expandedId === visit.id} accessibilityState={{expanded: expandedId === visit.id, disabled: busy}} disabled={busy} onPress={() => { if (!busy) { setExpandedId(expandedId === visit.id ? "" : visit.id); setConfirm(""); } }} style={busy && {opacity: .45}}><Text style={styles.link}>{expandedId === visit.id ? "Hide details" : "View details"}</Text></Pressable>
+      {expandedId === visit.id ? <>
       <Text style={styles.section}>Prescription</Text>
       {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>{prescription.items.map(item => <View key={item.medicine_id} style={styles.item}><Text style={styles.bold}>{medicineLabel(item)} × {item.quantity}</Text><Text style={styles.muted}>{item.directions}</Text></View>)}</> : <Text style={styles.muted}>No prescription issued.</Text>}
       <Text style={styles.section}>Bill · simulation</Text>
       {invoice ? <>{invoice.lines.map((line, i) => <View key={i} style={styles.line}><Text style={styles.lineName}>{line.description} × {line.quantity}</Text><Text style={styles.bold}>{money(line.quantity * line.unit_price_cents)}</Text></View>)}<Text style={styles.total}>Total {money(invoice.total_cents)}</Text><Text style={styles.status}>{invoice.status === "paid" ? "Paid · simulation" : "Unpaid"}</Text>
         {invoice.status === "paid" ? <Text style={styles.muted}>Demo receipt {invoice.id.slice(0, 8)}{invoice.paid_at ? ` · ${visitTime(invoice.paid_at)}` : ""}</Text> : prescription?.status === "issued" ? <Text style={styles.muted}>Staff must dispense the items before simulated payment.</Text> : confirm === invoice.id ? <><Text style={styles.muted}>Confirm simulated payment of {money(invoice.total_cents)}? No bank or payment service is involved.</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => pay(invoice.id)}><Text style={styles.buttonText}>{busy ? "Saving…" : "Confirm simulated payment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => setConfirm("")}><Text style={styles.link}>Keep unpaid</Text></Pressable></> : <Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => setConfirm(invoice.id)}><Text style={styles.buttonText}>Simulate payment</Text></Pressable>}
       </> : <Text style={styles.muted}>Staff has not generated your bill yet.</Text>}
+      </> : null}
     </View>)}
   </View>;
 }
 
 const styles = StyleSheet.create({
   heading: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
+  compactStatus: { color: "#176f5e", fontWeight: "600", marginTop: 12, marginBottom: 6 },
   summaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 14 },
   summaryItem: { flexGrow: 1, flexBasis: 140, backgroundColor: "#edf5f0", borderRadius: 10, padding: 14 },
   summaryValue: { fontSize: 21, fontWeight: "700", color: "#19352e", marginTop: 8 },
