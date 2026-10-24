@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, AppState, Pressable, StyleSheet, Text, View } from "react-native";
 import { DemoApi, NotificationInbox, PatientNotification, visitTime } from "@smart-skin/shared";
 import { filterNotifications, NotificationFilter, NotificationType, notificationFilterLabels, notificationTypeLabels } from "./patientNotificationFilter";
-export default function NotificationsView({api,onOpen,onBusy}:{api:DemoApi;onOpen:(item:PatientNotification)=>void;onBusy:(value:boolean)=>void}){
+export default function NotificationsView({api,onOpen,onBusy,status,setStatus,type,setType}:{api:DemoApi;onOpen:(item:PatientNotification)=>void;onBusy:(value:boolean)=>void;status:NotificationFilter;setStatus:(value:NotificationFilter)=>void;type:NotificationType;setType:(value:NotificationType)=>void}){
   const [data,setData]=useState<NotificationInbox|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const [retry,setRetry]=useState(0);
-  const [status,setStatus]=useState<NotificationFilter>("all");
-  const [type,setType]=useState<NotificationType>("all");
   const visible=filterNotifications(data?.items||[],status,type);
   useEffect(()=>{let active=true,fetching=false;async function load(){if(fetching)return;fetching=true;try{const saved=await api.notifications();if(active){setData(saved);setError("");}}catch(e){if(active){setData(null);setError(e instanceof Error?e.message:"Cannot load notifications.");}}finally{fetching=false;if(active)setLoading(false);}}void load();const timer=setInterval(load,5000),subscription=AppState.addEventListener("change",state=>{if(state==="active")void load();});return()=>{active=false;clearInterval(timer);subscription.remove();};},[api,retry]);
   async function read(item:PatientNotification,open:boolean){if(busy)return;setBusy(true);onBusy(true);setError("");try{const saved=await api.readNotification(item.id);setData(current=>current?{...current,items:current.items.map(n=>n.id===saved.id?saved:n),unread_count:Math.max(0,current.unread_count-(current.items.some(n=>n.id===saved.id&&!n.read_at)?1:0))}:null);setRetry(r=>r+1);if(open)onOpen(item);}catch(e){setError(e instanceof Error?e.message:"Cannot mark notification as read.");}finally{setBusy(false);onBusy(false);}}
