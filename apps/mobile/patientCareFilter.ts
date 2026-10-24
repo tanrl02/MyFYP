@@ -7,6 +7,16 @@ export const careFilterLabels = {
   paid: "Paid bills · simulation",
 } as const;
 export type CareFilter = keyof typeof careFilterLabels;
+export const careOrderLabels = { newest: "Newest first", oldest: "Oldest first" } as const;
+export type CareOrder = keyof typeof careOrderLabels;
+
+export function sortCare(records: Care[], order: CareOrder): Care[] {
+  return [...records].sort((a, b) => {
+    const difference = Date.parse(a.visit.starts_at) - Date.parse(b.visit.starts_at);
+    if (Number.isFinite(difference) && difference !== 0) return order === "oldest" ? difference : -difference;
+    return a.visit.queue_number - b.visit.queue_number || (a.visit.id < b.visit.id ? -1 : a.visit.id > b.visit.id ? 1 : 0);
+  });
+}
 
 export function filterCare(records: Care[], status: CareFilter, query = "", token?: (visit: Care["visit"]) => string, date: string | null = null): Care[] {
   const search = query.trim().toLowerCase();

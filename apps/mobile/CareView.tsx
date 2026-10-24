@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { Care, DemoApi, DemoPatient, medicineLabel, money, queueToken, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
-import { CareFilter, careFilterLabels, filterCare } from "./patientCareFilter";
+import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare } from "./patientCareFilter";
 import BookingDateFilter from "./BookingDateFilter";
 export default function CareView({ patient }: { patient: DemoPatient }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
@@ -16,6 +16,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
   const [status, setStatus] = useState<CareFilter>("all");
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<string | null>(null);
+  const [order, setOrder] = useState<CareOrder>("newest");
   useEffect(() => {
     let active = true, fetching = false;
     async function load() {
@@ -38,7 +39,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
     finally { setBusy(false); }
   }
   const all = filterCare(records, "all");
-  const visible = filterCare(records, status, query, queueToken, date);
+  const visible = sortCare(filterCare(records, status, query, queueToken, date), order);
   function changeStatus(value: CareFilter) {
     if (busy) return;
     setStatus(value); setConfirm(""); setNotice("");
@@ -54,6 +55,9 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
       <Text style={styles.muted}>Filter by your visit date in Malaysia time, rather than when the bill was issued or paid.</Text>
       <View accessibilityRole="radiogroup" accessibilityLabel="Care record status" style={styles.filters}>{(Object.keys(careFilterLabels) as CareFilter[]).map(key => <Pressable key={key} accessibilityRole="radio" aria-checked={status === key} accessibilityState={{checked: status === key, disabled: busy}} disabled={busy} onPress={() => changeStatus(key)} style={[styles.choice, status === key && styles.active, busy && {opacity: .45}]}><Text style={styles.link}>{careFilterLabels[key]}</Text></Pressable>)}</View>
       <Text style={styles.muted}>Unpaid bills shows generated bills only. Records awaiting a bill remain under All records.</Text>
+      <Text style={styles.section}>Care record order</Text>
+      <View accessibilityRole="radiogroup" accessibilityLabel="Care record order" style={styles.filters}>{(Object.keys(careOrderLabels) as CareOrder[]).map(key => <Pressable key={key} accessibilityRole="radio" aria-checked={order === key} accessibilityState={{checked: order === key, disabled: busy}} disabled={busy} onPress={() => { if (!busy) { setOrder(key); setConfirm(""); setNotice(""); } }} style={[styles.choice, order === key && styles.active, busy && {opacity: .45}]}><Text style={styles.link}>{careOrderLabels[key]}</Text></Pressable>)}</View>
+      <Text style={styles.muted}>Sorted by appointment time. Reset care filters keeps your chosen order.</Text>
       <Pressable accessibilityRole="button" disabled={busy || (status === "all" && !query && !date)} onPress={() => { if (!busy) { setQuery(""); setDate(null); changeStatus("all"); } }} style={(busy || (status === "all" && !query && !date)) && {opacity: .45}}><Text style={styles.link}>Reset care filters</Text></Pressable>
       {!loading ? <Text style={styles.muted}>Showing {visible.length} of {all.length} care records</Text> : null}
     </View>
