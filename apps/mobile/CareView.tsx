@@ -5,6 +5,7 @@ import { Care, DemoApi, DemoPatient, medicineLabel, money, queueToken, visitTime
 import { apiBase as base } from "./apiConfig";
 import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare, summarizeCare } from "./patientCareFilter";
 import BookingDateFilter from "./BookingDateFilter";
+const prescriptionTime = (value: string) => new Date(value).toLocaleString("en-GB", { timeZone: "Asia/Kuala_Lumpur", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
 export default function CareView({ patient }: { patient: DemoPatient }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [records, setRecords] = useState<Care[]>([]);
@@ -83,7 +84,13 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
       <Pressable accessibilityRole="button" accessibilityLabel={`${expandedId === visit.id ? "Hide" : "View"} details for ${queueToken(visit)}, ${visit.doctor_name}, ${visitTime(visit.starts_at)}`} aria-expanded={expandedId === visit.id} accessibilityState={{expanded: expandedId === visit.id, disabled: busy}} disabled={busy} onPress={() => { if (!busy) { setExpandedId(expandedId === visit.id ? "" : visit.id); setConfirm(""); } }} style={busy && {opacity: .45}}><Text style={styles.link}>{expandedId === visit.id ? "Hide details" : "View details"}</Text></Pressable>
       {expandedId === visit.id ? <>
       <Text style={styles.section}>Prescription</Text>
-      {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>{prescription.items.map(item => <View key={item.medicine_id} style={styles.item}><Text style={styles.bold}>{medicineLabel(item)} × {item.quantity}</Text><Text style={styles.muted}>{item.directions}</Text></View>)}</> : <Text style={styles.muted}>No prescription issued.</Text>}
+      {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>
+        <View style={styles.prescriptionDates}>
+          <Text style={styles.bold}>Prescription dates · Malaysia time</Text>
+          <Text style={styles.muted}>Issued: {prescriptionTime(prescription.created_at)}</Text>
+          <Text style={styles.muted}>{prescription.status === "dispensed" ? prescription.dispensed_at ? `Dispensed: ${prescriptionTime(prescription.dispensed_at)}` : "Dispensed · date not recorded" : "Dispensing: Pending"}</Text>
+        </View>
+        {prescription.items.map(item => <View key={item.medicine_id} style={styles.item}><Text style={styles.bold}>{medicineLabel(item)} × {item.quantity}</Text><Text style={styles.muted}>{item.directions}</Text></View>)}</> : <Text style={styles.muted}>No prescription issued.</Text>}
       <Text style={styles.section}>Bill · simulation</Text>
       {invoice ? <>{invoice.lines.map((line, i) => <View key={i} style={styles.line}><Text style={styles.lineName}>{line.description} × {line.quantity}</Text><Text style={styles.bold}>{money(line.quantity * line.unit_price_cents)}</Text></View>)}<Text style={styles.total}>Total {money(invoice.total_cents)}</Text><Text style={styles.status}>{invoice.status === "paid" ? "Paid · simulation" : "Unpaid"}</Text>
         {invoice.status === "paid" ? <Text style={styles.muted}>Demo receipt {invoice.id.slice(0, 8)}{invoice.paid_at ? ` · ${visitTime(invoice.paid_at)}` : ""}</Text> : prescription?.status === "issued" ? <Text style={styles.muted}>Staff must dispense the items before simulated payment.</Text> : confirm === invoice.id ? <><Text style={styles.muted}>Confirm simulated payment of {money(invoice.total_cents)}? No bank or payment service is involved.</Text><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => pay(invoice.id)}><Text style={styles.buttonText}>{busy ? "Saving…" : "Confirm simulated payment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => setConfirm("")}><Text style={styles.link}>Keep unpaid</Text></Pressable></> : <Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => setConfirm(invoice.id)}><Text style={styles.buttonText}>Simulate payment</Text></Pressable>}
@@ -96,6 +103,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
 const styles = StyleSheet.create({
   heading: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
   compactStatus: { color: "#176f5e", fontWeight: "600", marginTop: 12, marginBottom: 6 },
+  prescriptionDates: { backgroundColor: "#edf5f0", borderRadius: 10, padding: 12, gap: 5, marginBottom: 10 },
   summaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 14 },
   summaryItem: { flexGrow: 1, flexBasis: 140, backgroundColor: "#edf5f0", borderRadius: 10, padding: 14 },
   summaryValue: { fontSize: 21, fontWeight: "700", color: "#19352e", marginTop: 8 },
