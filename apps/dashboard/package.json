@@ -1,6 +1,6 @@
 {
   "name": "@smart-skin/dashboard", "private": true, "version": "0.1.0",
   "scripts": { "dev": "next dev --hostname 127.0.0.1", "build": "next build", "start": "next start --hostname 127.0.0.1", "typecheck": "tsc --noEmit" },
-  "dependencies": { "@smart-skin/shared": "workspace:*", "next": "16.4.0", "react": "19.2.3", "react-dom": "19.2.3" },
+  "dependencies": { "@smart-skin/shared": "workspace:*", "next": "16.4.3", "react": "19.2.3", "react-dom": "19.2.3" },
   "devDependencies": { "typescript": "~5.9.3", "@types/react": "^19.2.0", "@types/react-dom": "^19.2.0", "@types/node": "^24.0.0", "tailwindcss": "^4.1.0", "@tailwindcss/postcss": "^4.1.0" }
 }
