@@ -11,6 +11,7 @@ export const notificationTypeLabels = {
 } as const;
 export type NotificationType = keyof typeof notificationTypeLabels;
 
-export function filterNotifications(items: PatientNotification[], status: NotificationFilter, type: NotificationType = "all"): PatientNotification[] {
-  return items.filter(item => (type === "all" || item.kind === type) && (status === "all" || (status === "unread" ? !item.read_at : !!item.read_at)));
+export function filterNotifications(items: PatientNotification[], status: NotificationFilter, type: NotificationType = "all", query = ""): PatientNotification[] {
+  const search = query.trim().toLowerCase();
+  return items.filter(item => (type === "all" || item.kind === type) && (status === "all" || (status === "unread" ? !item.read_at : !!item.read_at)) && (!search || item.title.toLowerCase().includes(search) || item.message.toLowerCase().includes(search)));
 }
