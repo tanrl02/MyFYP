@@ -16,7 +16,8 @@
           "cameraPermission": "Allow Smart Skin to take a demonstration photo.",
           "photosPermission": "Allow Smart Skin to select a demonstration photo."
         }
-      ]
+      ],
+      "expo-status-bar"
     ]
   }
 }

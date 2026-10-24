@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import type {ScrollViewInstance} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import CareView from "./CareView";
 import SkinView from "./SkinView";
@@ -35,7 +36,7 @@ export default function App() {
   const [visitStatus,setVisitStatus]=useState<VisitFilter>("all");
   const visibleVisits=filterVisits(bookings,visitQuery,visitStatus,queueToken);
   const [matchSource,setMatchSource]=useState<DoctorMatchSource>({concern:"general"});
-  const scrollRef=useRef<ScrollView>(null);
+  const scrollRef=useRef<ScrollViewInstance>(null);
   useEffect(()=>{scrollRef.current?.scrollTo({y:0,animated:false});},[detailId,tab,patient,selected?.id]);
   const refresh=useCallback(async()=>{ const [s,b]=await Promise.all([api.slots(),api.bookings()]);setSlots(s);setBookings(b);setError(""); },[api]);
   useEffect(()=>{
