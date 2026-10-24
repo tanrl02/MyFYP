@@ -8,9 +8,11 @@ export const careFilterLabels = {
 } as const;
 export type CareFilter = keyof typeof careFilterLabels;
 
-export function filterCare(records: Care[], status: CareFilter): Care[] {
+export function filterCare(records: Care[], status: CareFilter, query = "", token?: (visit: Care["visit"]) => string): Care[] {
+  const search = query.trim().toLowerCase();
   return records.filter(record => {
     if (!record.prescription && !record.invoice) return false;
+    if (search && !record.visit.doctor_name.toLowerCase().includes(search) && !(token?.(record.visit) ?? "").toLowerCase().includes(search)) return false;
     if (status === "dispensing") return record.prescription?.status === "issued";
     if (status === "unpaid" || status === "paid") return record.invoice?.status === status;
     return true;
