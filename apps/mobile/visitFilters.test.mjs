@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {filterVisits} from "./patientVisitFilter.ts";
+import {filterVisits,sortVisits} from "./patientVisitFilter.ts";
 
 const now=Date.parse("2032-10-23T01:00:00Z");
 const token=visit=>`${visit.doctor_id==="doctor-lim"?"L":"A"}${String(visit.queue_number).padStart(3,"0")}`;
@@ -55,4 +55,28 @@ test("date combines with query/status and follows a refreshed appointment date",
   assert.deepEqual(filterVisits(visits,"lim","completed",token,"2032-10-24",now).map(v=>v.id),["completed"]);
   const updated=visits.map(v=>v.id==="future"?{...v,clinic_date:"2032-10-25"}:v);
   assert.deepEqual(filterVisits(updated,"L001","upcoming",token,"2032-10-24",now),[]);
+});
+
+test("appointment sorting normalises timezone offsets and resolves ties consistently without mutation",()=>{
+  const template=fixture()[0];
+  const visits=[
+    {...template,id:"late",starts_at:"2032-10-24T10:00:00+08:00"},
+    {...template,id:"b",queue_number:2,starts_at:"2032-10-24T01:00:00Z"},
+    {...template,id:"early",starts_at:"2032-10-23T23:59:59Z"},
+    {...template,id:"a",queue_number:2,starts_at:"2032-10-24T09:00:00+08:00"},
+    {...template,id:"first-tie",queue_number:1,starts_at:"2032-10-24T01:00:00Z"}
+  ];
+  const before=JSON.stringify(visits);
+  assert.deepEqual(sortVisits(visits,"oldest").map(v=>v.id),["early","first-tie","a","b","late"]);
+  assert.deepEqual(sortVisits(visits,"newest").map(v=>v.id),["late","first-tie","a","b","early"]);
+  assert.equal(JSON.stringify(visits),before);assert.deepEqual(sortVisits([],"newest"),[]);
+});
+
+test("sorting preserves combined date/query/status filters and follows refreshed times",()=>{
+  const visits=fixture().map(v=>({...v,clinic_date:"2032-10-24"}));
+  const selected=filterVisits(visits,"lim","all",token,"2032-10-24",now);
+  for(const order of ["newest","oldest"])assert.deepEqual(sortVisits(selected,order).map(v=>v.id).sort(),selected.map(v=>v.id).sort());
+  const updated=[{...visits[0],starts_at:"2032-10-26T09:00:00+08:00"},{...visits[1],starts_at:"2032-10-27T09:00:00+08:00"}];
+  assert.deepEqual(sortVisits(updated,"newest").map(v=>v.id),["called","future"]);
+  assert.deepEqual(sortVisits(updated,"oldest").map(v=>v.id),["future","called"]);
 });
