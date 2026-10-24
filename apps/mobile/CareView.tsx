@@ -6,7 +6,7 @@ import { apiBase as base } from "./apiConfig";
 import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare, summarizeCare } from "./patientCareFilter";
 import BookingDateFilter from "./BookingDateFilter";
 const prescriptionTime = (value: string) => new Date(value).toLocaleString("en-GB", { timeZone: "Asia/Kuala_Lumpur", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
-export default function CareView({ patient }: { patient: DemoPatient }) {
+export default function CareView({ patient, visitId, onBack, onBusy }: { patient: DemoPatient; visitId?: string; onBack?: () => void; onBusy?: (value: boolean) => void }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [records, setRecords] = useState<Care[]>([]);
   const [error, setError] = useState("");
@@ -18,7 +18,9 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
   const [query, setQuery] = useState("");
   const [date, setDate] = useState<string | null>(null);
   const [order, setOrder] = useState<CareOrder>("newest");
-  const [expandedId, setExpandedId] = useState("");
+  const [expandedId, setExpandedId] = useState(visitId || "");
+  useEffect(() => { onBusy?.(busy); }, [busy, onBusy]);
+  useEffect(() => () => { onBusy?.(false); }, [onBusy]);
   useEffect(() => {
     let active = true, fetching = false;
     async function load() {
@@ -40,17 +42,19 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
     catch (e) { setError(e instanceof Error ? e.message : "Unable to record simulation."); }
     finally { setBusy(false); }
   }
-  const all = filterCare(records, "all");
-  const visible = sortCare(filterCare(records, status, query, queueToken, date), order);
+  const scopedRecords = visitId ? records.filter(record => record.visit.id === visitId) : records;
+  const all = filterCare(scopedRecords, "all");
+  const visible = sortCare(filterCare(scopedRecords, status, query, queueToken, date), order);
   const summary = summarizeCare(visible);
   function changeStatus(value: CareFilter) {
     if (busy) return;
     setStatus(value); setConfirm(""); setNotice("");
   }
   return <View>
+    {onBack ? <Pressable accessibilityRole="button" disabled={busy} onPress={onBack}><Text style={styles.link}>← Back to Visit details</Text></Pressable> : null}
     <View style={styles.heading}><Text style={styles.title}>Prescriptions & bills</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Refresh care</Text></Pressable></View>
     <Text style={styles.muted}>Saved records from your doctor and staff. Placeholder items and payments are for demonstration only.</Text>
-    <View style={styles.card}>
+    {visitId ? <Text style={styles.muted}>Showing only the care record for the visit you opened.</Text> : <View style={styles.card}>
       <Text style={styles.subtitle}>Find care records</Text>
       <Text style={styles.muted}>Search by doctor or queue number.</Text>
       <TextInput accessibilityLabel="Search care records by doctor or queue number" placeholder="Doctor or queue number, e.g. L001" value={query} onChangeText={value => { if (!busy) { setQuery(value); setConfirm(""); setNotice(""); } }} editable={!busy} autoCapitalize="none" autoCorrect={false} maxLength={100} style={styles.input}/>
@@ -63,11 +67,11 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
       <Text style={styles.muted}>Sorted by appointment time. Reset care filters keeps your chosen order.</Text>
       <Pressable accessibilityRole="button" disabled={busy || (status === "all" && !query && !date)} onPress={() => { if (!busy) { setQuery(""); setDate(null); changeStatus("all"); } }} style={(busy || (status === "all" && !query && !date)) && {opacity: .45}}><Text style={styles.link}>Reset care filters</Text></Pressable>
       {!loading ? <Text style={styles.muted}>Showing {visible.length} of {all.length} care records</Text> : null}
-    </View>
+    </View>}
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Retry care connection</Text></Pressable></View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
     {loading ? <ActivityIndicator color="#176f5e" /> : null}
-    {!loading && !error ? <View style={styles.card}>
+    {!loading && !error && !visitId ? <View style={styles.card}>
       <Text style={styles.subtitle}>Summary of shown care records</Text>
       <Text style={styles.muted}>Follows your search, status and appointment-date filters. Amounts include generated bills only; no real money is transferred.</Text>
       <View style={styles.summaryRow}>
@@ -76,7 +80,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
         <View style={styles.summaryItem}><Text style={styles.muted}>Prescriptions awaiting dispensing</Text><Text style={styles.summaryValue}>{summary.awaitingDispensing}</Text></View>
       </View>
     </View> : null}
-    {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No prescriptions or bills yet</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Change your search, status or appointment date, or reset care filters to see all your prescriptions and bills.</Text></View> : null}
+    {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>{visitId ? "No prescriptions or bills for this visit yet" : "No prescriptions or bills yet"}</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Change your search, status or appointment date, or reset care filters to see all your prescriptions and bills.</Text></View> : null}
     {visible.map(({ visit, prescription, invoice }) => <View key={visit.id} style={styles.card}>
       <Text style={styles.subtitle}>{queueToken(visit)} · {visit.doctor_name}</Text><Text style={styles.muted}>{visitTime(visit.starts_at)}</Text>
       <Text style={styles.compactStatus}>Prescription: {prescription ? prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing" : "Not issued"}</Text>
