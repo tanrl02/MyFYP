@@ -10,6 +10,15 @@ export type CareFilter = keyof typeof careFilterLabels;
 export const careOrderLabels = { newest: "Newest first", oldest: "Oldest first" } as const;
 export type CareOrder = keyof typeof careOrderLabels;
 
+export function summarizeCare(records: Care[]) {
+  return records.reduce((summary, record) => {
+    if (record.prescription?.status === "issued") summary.awaitingDispensing += 1;
+    if (record.invoice?.status === "unpaid") summary.unpaidCents += record.invoice.total_cents;
+    if (record.invoice?.status === "paid") summary.paidCents += record.invoice.total_cents;
+    return summary;
+  }, { unpaidCents: 0, paidCents: 0, awaitingDispensing: 0 });
+}
+
 export function sortCare(records: Care[], order: CareOrder): Care[] {
   return [...records].sort((a, b) => {
     const difference = Date.parse(a.visit.starts_at) - Date.parse(b.visit.starts_at);

@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { Care, DemoApi, DemoPatient, medicineLabel, money, queueToken, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
-import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare } from "./patientCareFilter";
+import { CareFilter, CareOrder, careFilterLabels, careOrderLabels, filterCare, sortCare, summarizeCare } from "./patientCareFilter";
 import BookingDateFilter from "./BookingDateFilter";
 export default function CareView({ patient }: { patient: DemoPatient }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
@@ -40,6 +40,7 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
   }
   const all = filterCare(records, "all");
   const visible = sortCare(filterCare(records, status, query, queueToken, date), order);
+  const summary = summarizeCare(visible);
   function changeStatus(value: CareFilter) {
     if (busy) return;
     setStatus(value); setConfirm(""); setNotice("");
@@ -64,6 +65,15 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text><Pressable accessibilityRole="button" onPress={refresh}><Text style={styles.link}>Retry care connection</Text></Pressable></View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
     {loading ? <ActivityIndicator color="#176f5e" /> : null}
+    {!loading && !error ? <View style={styles.card}>
+      <Text style={styles.subtitle}>Summary of shown care records</Text>
+      <Text style={styles.muted}>Follows your search, status and appointment-date filters. Amounts include generated bills only; no real money is transferred.</Text>
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryItem}><Text style={styles.muted}>Total unpaid</Text><Text style={styles.summaryValue}>{money(summary.unpaidCents)}</Text></View>
+        <View style={styles.summaryItem}><Text style={styles.muted}>Total paid · simulation</Text><Text style={styles.summaryValue}>{money(summary.paidCents)}</Text></View>
+        <View style={styles.summaryItem}><Text style={styles.muted}>Prescriptions awaiting dispensing</Text><Text style={styles.summaryValue}>{summary.awaitingDispensing}</Text></View>
+      </View>
+    </View> : null}
     {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No prescriptions or bills yet</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Change your search, status or appointment date, or reset care filters to see all your prescriptions and bills.</Text></View> : null}
     {visible.map(({ visit, prescription, invoice }) => <View key={visit.id} style={styles.card}>
       <Text style={styles.subtitle}>{queueToken(visit)} · {visit.doctor_name}</Text><Text style={styles.muted}>{visitTime(visit.starts_at)}</Text>
@@ -79,6 +89,9 @@ export default function CareView({ patient }: { patient: DemoPatient }) {
 
 const styles = StyleSheet.create({
   heading: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
+  summaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 14 },
+  summaryItem: { flexGrow: 1, flexBasis: 140, backgroundColor: "#edf5f0", borderRadius: 10, padding: 14 },
+  summaryValue: { fontSize: 21, fontWeight: "700", color: "#19352e", marginTop: 8 },
   input: { padding: 12, borderWidth: 1, borderColor: "#ccdcd4", borderRadius: 10, color: "#19352e", marginTop: 8, marginBottom: 12 },
   filters: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
   choice: { paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: "#dce6e0", backgroundColor: "#e7efeb" },

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {filterCare,sortCare} from "./patientCareFilter.ts";
+import {filterCare,sortCare,summarizeCare} from "./patientCareFilter.ts";
 
 const record=(id,prescription=null,invoice=null)=>({visit:{id},prescription:prescription?{status:prescription}:null,invoice:invoice?{status:invoice}:null});
 test("care statuses distinguish issued prescriptions and actual invoice states",()=>{
@@ -79,4 +79,27 @@ test("care sorting combines with all filters and follows refreshed appointment t
   assert.deepEqual(sortCare(filtered,"newest").map(r=>r.visit.id),["a","b"]);
   const refreshed=filtered.map(r=>r.visit.id==="a"?{...r,visit:{...r.visit,starts_at:"2032-10-24T08:00:00+08:00"}}:r);
   assert.deepEqual(sortCare(refreshed,"oldest").map(r=>r.visit.id),["a","b"]);
+});
+
+test("summary totals exact invoice cents, counts prescriptions once and excludes absent bills",()=>{
+  const records=[record("a","issued"),record("b","issued","unpaid"),record("c","dispensed","paid"),record("d",null,"paid"),record("e","dispensed"),record("empty")];
+  records[1].invoice.total_cents=1001;
+  records[2].invoice.total_cents=2055;
+  records[3].invoice.total_cents=0;
+  records[0].prescription.items=[{},{}];
+  const before=JSON.stringify(records);
+  assert.deepEqual(summarizeCare(records),{unpaidCents:1001,paidCents:2055,awaitingDispensing:2});
+  assert.equal(JSON.stringify(records),before);
+  assert.deepEqual(summarizeCare([]),{unpaidCents:0,paidCents:0,awaitingDispensing:0});
+  const refreshed=records.map(r=>r.visit.id==="b"?{...r,prescription:{status:"dispensed"},invoice:{...r.invoice,status:"paid"}}:r);
+  assert.deepEqual(summarizeCare(refreshed),{unpaidCents:0,paidCents:3056,awaitingDispensing:1});
+});
+
+test("summary follows combined filters and is unaffected by sort order",()=>{
+  const records=[record("a","issued"),record("b","dispensed","paid"),record("c",null,"unpaid")].map((r,i)=>({...r,visit:{...r.visit,doctor_name:i===2?"Dr. Anita":"Dr. Lim",token:i===2?"A001":"L001",clinic_date:i===0?"2032-10-23":"2032-10-24",queue_number:1,starts_at:`2032-10-${i===0?"23":"24"}T09:00:00+08:00`},invoice:r.invoice?{...r.invoice,total_cents:i===1?1234:567}:null}));
+  const shown=filterCare(records,"paid","lim",v=>v.token,"2032-10-24");
+  const expected={unpaidCents:0,paidCents:1234,awaitingDispensing:0};
+  assert.deepEqual(summarizeCare(shown),expected);
+  for(const order of ["newest","oldest"])assert.deepEqual(summarizeCare(sortCare(shown,order)),expected);
+  assert.deepEqual(summarizeCare(filterCare(records,"all","missing",v=>v.token)),{unpaidCents:0,paidCents:0,awaitingDispensing:0});
 });
