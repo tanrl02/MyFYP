@@ -635,6 +635,30 @@ class Store:
                 db.execute('UPDATE patient_notifications SET read_at=? WHERE id=?',(datetime.now(timezone.utc).isoformat(),notification_id))
             return dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
 
+    def read_notifications(self, notification_ids, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        if not notification_ids or len(notification_ids)>100:
+            raise RuleError('Review between 1 and 100 displayed notifications.',400)
+        ids=list(dict.fromkeys(notification_ids))
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            now=datetime.now(timezone.utc)
+            window=(now.isoformat(),(now+timedelta(hours=24)).isoformat())
+            placeholders=','.join('?' for _ in ids)
+            rows=db.execute(f'''SELECT n.* FROM patient_notifications n
+                WHERE n.id IN ({placeholders}) AND n.patient_id=? AND {NOTIFICATION_VISIBLE}''',
+                (*ids,patient,*window)).fetchall()
+            if len(rows)!=len(ids):
+                raise RuleError('Some reviewed notifications are unavailable. Refresh the inbox and review again.',404)
+            marked=sum(row['read_at'] is None for row in rows)
+            db.execute(f'''UPDATE patient_notifications SET read_at=?
+                WHERE id IN ({placeholders}) AND patient_id=? AND read_at IS NULL''',(now.isoformat(),*ids,patient))
+            saved={row['id']:dict(row) for row in db.execute(f'SELECT * FROM patient_notifications WHERE id IN ({placeholders})',ids)}
+            unread=db.execute(f'''SELECT COUNT(*) FROM patient_notifications n
+                WHERE n.patient_id=? AND n.read_at IS NULL AND {NOTIFICATION_VISIBLE}''',(patient,*window)).fetchone()[0]
+            return {'items':[saved[id] for id in ids],'marked_count':marked,'unread_count':unread}
+
     def record(self, db, booking_id):
         r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date,s.duration_minutes FROM bookings b
                           JOIN slots s ON s.id=b.slot_id WHERE b.id=?''', (booking_id,)).fetchone()

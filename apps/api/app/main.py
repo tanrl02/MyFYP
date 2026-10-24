@@ -15,6 +15,10 @@ class RestoreWaitingInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
     missed_event_id: str = Field(min_length=1,max_length=100)
 
+class NotificationBatchReadInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    notification_ids: list[Annotated[str,Field(min_length=1,max_length=100)]] = Field(min_length=1,max_length=100)
+
 class BackgroundInput(BaseModel):
     allergies: str = Field(max_length=1000)
     medicines: str = Field(max_length=1000)
@@ -329,6 +333,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/notifications/{notification_id}/read')
     def read_notification(notification_id: str,who=Depends(patient)):
         return run(lambda: store.read_notification(notification_id,who))
+
+    @api.post('/notifications/read-displayed')
+    def read_displayed_notifications(payload: NotificationBatchReadInput,who=Depends(patient)):
+        return run(lambda: store.read_notifications(payload.notification_ids,who))
 
     @api.get('/bookings/{booking_id}/details')
     def visit_details(booking_id: str,who=Depends(patient)):
