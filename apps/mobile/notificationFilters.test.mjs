@@ -21,3 +21,29 @@ test("refreshed read status and incoming notifications update membership without
   assert.deepEqual(filterNotifications([items[0]],"read"),[]);
   for(const status of ["all","unread","read"])assert.deepEqual(filterNotifications([],status),[]);
 });
+
+
+test("each notification type combines with read status without changing order or data",()=>{
+  const kinds=["appointment_reminder","queue_called","review_published","follow_up_recommended"];
+  const items=kinds.flatMap(kind=>[{id:kind+"-read",kind,read_at:"2032-10-25T01:00:00Z"},{id:kind+"-unread",kind,read_at:null}]);
+  const before=JSON.stringify(items);
+  for(const kind of kinds){
+    assert.deepEqual(filterNotifications(items,"all",kind).map(n=>n.id),[kind+"-read",kind+"-unread"]);
+    assert.deepEqual(filterNotifications(items,"unread",kind).map(n=>n.id),[kind+"-unread"]);
+    assert.deepEqual(filterNotifications(items,"read",kind).map(n=>n.id),[kind+"-read"]);
+  }
+  assert.equal(filterNotifications(items,"all","all").length,8);
+  assert.equal(filterNotifications(items,"unread","all").length,4);
+  assert.equal(JSON.stringify(items),before);
+});
+
+test("combined type filter handles absent types and refreshed read status",()=>{
+  const items=[{id:"review",kind:"review_published",read_at:null},{id:"queue",kind:"queue_called",read_at:null}];
+  assert.deepEqual(filterNotifications(items,"all","appointment_reminder"),[]);
+  assert.deepEqual(filterNotifications(items,"read","review_published"),[]);
+  const refreshed=[{id:"new",kind:"review_published",read_at:null},...items.map(n=>n.id==="review"?{...n,read_at:"2032-10-25T01:00:00Z"}:n)];
+  assert.deepEqual(filterNotifications(refreshed,"unread","review_published").map(n=>n.id),["new"]);
+  assert.deepEqual(filterNotifications(refreshed,"read","review_published").map(n=>n.id),["review"]);
+  assert.deepEqual(filterNotifications(refreshed,"unread","queue_called").map(n=>n.id),["queue"]);
+  assert.deepEqual(filterNotifications([],"all","follow_up_recommended"),[]);
+});
