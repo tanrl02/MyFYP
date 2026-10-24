@@ -33,7 +33,7 @@ export function filterCare(records: Care[], status: CareFilter, query = "", toke
   return records.filter(record => {
     if (!record.prescription && !record.invoice) return false;
     if (date && record.visit.clinic_date !== date) return false;
-    if (search && !record.visit.doctor_name.toLowerCase().includes(search) && !(token?.(record.visit) ?? "").toLowerCase().includes(search)) return false;
+    if (search && !record.visit.doctor_name.toLowerCase().includes(search) && !(token?.(record.visit) ?? "").toLowerCase().includes(search) && !record.prescription?.items.some(item => item.name.toLowerCase().includes(search))) return false;
     if (status === "dispensing") return record.prescription?.status === "issued";
     if (status === "awaitingBill") return !!record.prescription && !record.invoice;
     if (status === "unpaid" || status === "paid") return record.invoice?.status === status;

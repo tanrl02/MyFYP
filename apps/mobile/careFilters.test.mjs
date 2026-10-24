@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {filterCare,sortCare,summarizeCare} from "./patientCareFilter.ts";
 
-const record=(id,prescription=null,invoice=null)=>({visit:{id},prescription:prescription?{status:prescription}:null,invoice:invoice?{status:invoice}:null});
+const record=(id,prescription=null,invoice=null)=>({visit:{id},prescription:prescription?{status:prescription,items:[]}:null,invoice:invoice?{status:invoice}:null});
 test("care statuses distinguish issued prescriptions and actual invoice states",()=>{
   const records=[record("empty"),record("issued","issued"),record("issued-bill","issued","unpaid"),record("dispensed","dispensed"),record("unpaid","dispensed","unpaid"),record("paid","dispensed","paid"),record("bill-only",null,"unpaid")];
   const ids=status=>filterCare(records,status).map(r=>r.visit.id);
@@ -118,4 +118,34 @@ test("summary follows combined filters and is unaffected by sort order",()=>{
   assert.deepEqual(summarizeCare(shown),expected);
   for(const order of ["newest","oldest"])assert.deepEqual(summarizeCare(sortCare(shown,order)),expected);
   assert.deepEqual(summarizeCare(filterCare(records,"all","missing",v=>v.token)),{unpaidCents:0,paidCents:0,awaitingDispensing:0});
+});
+
+
+test("medicine search matches saved prescription names once per record without searching bill descriptions or directions",()=>{
+  const records=[record("paid","dispensed","paid"),record("issued","issued"),record("bill-only",null,"unpaid"),record("empty")].map(r=>({...r,visit:{...r.visit,doctor_name:"Dr. Lim",token:"L001",clinic_date:"2032-10-24"}}));
+  records[0].prescription.items=[{name:"Fictional catalogue cream",directions:"Use daily",strength:"1%",form:"Cream"},{name:"Other cream",directions:"Demo"}];
+  records[1].prescription.items=[{name:"Fictional edited cream",directions:"Special directions"}];
+  records[2].invoice.lines=[{description:"Fictional catalogue cream"}];
+  const token=v=>v.token, before=JSON.stringify(records);
+  const ids=query=>filterCare(records,"all",query,token).map(r=>r.visit.id);
+  assert.deepEqual(ids("  CATALOGUE  "),["paid"]);
+  assert.deepEqual(ids("cream"),["paid","issued"]);
+  assert.deepEqual(ids("Special directions"),[]);
+  assert.deepEqual(ids("1%"),[]);
+  assert.deepEqual(ids("unrelated"),[]);
+  assert.deepEqual(ids("lim"),["paid","issued","bill-only"]);
+  assert.deepEqual(ids("l001"),["paid","issued","bill-only"]);
+  assert.equal(JSON.stringify(records),before);
+});
+
+test("medicine search combines with status/date and refreshes from saved prescription data",()=>{
+  const records=[record("a","dispensed","paid"),record("b","issued")].map((r,i)=>({...r,visit:{...r.visit,doctor_name:"Dr. Lim",token:"L001",clinic_date:i===0?"2032-10-24":"2032-10-23"},prescription:{...r.prescription,items:[{name:"Saved cream"}]},invoice:r.invoice?{...r.invoice,total_cents:5500}:null}));
+  const token=v=>v.token;
+  assert.deepEqual(filterCare(records,"paid","CREAM",token,"2032-10-24").map(r=>r.visit.id),["a"]);
+  assert.deepEqual(filterCare(records,"awaitingBill","cream",token,"2032-10-23").map(r=>r.visit.id),["b"]);
+  assert.deepEqual(filterCare(records,"paid","cream",token,"2032-10-23"),[]);
+  assert.deepEqual(summarizeCare(filterCare(records,"paid","cream",token)),{unpaidCents:0,paidCents:5500,awaitingDispensing:0});
+  const refreshed=records.map(r=>r.visit.id==="b"?{...r,prescription:{...r.prescription,items:[{name:"Other item"}]}}:r);
+  assert.deepEqual(filterCare(refreshed,"all","cream",token).map(r=>r.visit.id),["a"]);
+  assert.deepEqual(filterCare([],"all","cream",token),[]);
 });
