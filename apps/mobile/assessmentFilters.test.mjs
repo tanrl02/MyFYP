@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {filterAssessmentHistory} from "./patientAssessmentFilter.ts";
+import {filterAssessmentHistory,sortAssessmentHistory} from "./patientAssessmentFilter.ts";
 
 test("assessment dates use Malaysia midnight, including month/year boundaries and explicit offsets",()=>{
   const items=[
@@ -63,4 +63,35 @@ test("assessment search combines with Malaysia saved date and follows refreshed 
   assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm").map(n=>n.id),["match","other"]);
   assert.deepEqual(filterAssessmentHistory([],null,"arm"),[]);
   assert.equal(JSON.stringify(items),before);
+});
+
+
+test("assessment sorting normalises offsets, breaks ties by ID and puts invalid dates last without mutation",()=>{
+  const items=[
+    {id:"z",created_at:"2026-10-18T01:00:00Z"},
+    {id:"a",created_at:"2026-10-18T09:00:00+08:00"},
+    {id:"new",created_at:"2026-10-18T02:00:00Z"},
+    {id:"old",created_at:"2026-10-17T01:00:00Z"},
+    {id:"invalid",created_at:"invalid"}
+  ];
+  const before=JSON.stringify(items);
+  assert.deepEqual(sortAssessmentHistory(items,"newest").map(n=>n.id),["new","a","z","old","invalid"]);
+  assert.deepEqual(sortAssessmentHistory(items,"oldest").map(n=>n.id),["old","a","z","new","invalid"]);
+  assert.deepEqual(sortAssessmentHistory([],"oldest"),[]);
+  assert.equal(JSON.stringify(items),before);
+});
+
+test("assessment ordering respects combined search/date and refreshed saved times",()=>{
+  const items=[
+    {id:"new",created_at:"2026-10-18T04:00:00Z",symptoms:{body_area:"Arm",description:""}},
+    {id:"old",created_at:"2026-10-17T16:00:00Z",symptoms:{body_area:"Arm",description:""}},
+    {id:"other",created_at:"2026-10-18T03:00:00Z",symptoms:{body_area:"Leg",description:""}},
+    {id:"previous",created_at:"2026-10-17T15:59:59Z",symptoms:{body_area:"Arm",description:""}}
+  ];
+  const filtered=filterAssessmentHistory(items,"2026-10-18","arm");
+  assert.deepEqual(sortAssessmentHistory(filtered,"oldest").map(n=>n.id),["old","new"]);
+  assert.deepEqual(sortAssessmentHistory(filtered,"newest").map(n=>n.id),["new","old"]);
+  const refreshed=items.map(n=>n.id==="old"?{...n,created_at:"2026-10-18T05:00:00Z"}:n);
+  assert.deepEqual(sortAssessmentHistory(filterAssessmentHistory(refreshed,"2026-10-18","arm"),"oldest").map(n=>n.id),["new","old"]);
+  assert.deepEqual(filtered.map(n=>n.id),["new","old"]);
 });

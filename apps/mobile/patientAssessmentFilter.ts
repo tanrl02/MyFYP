@@ -1,5 +1,17 @@
 import type {Assessment} from "@smart-skin/shared";
 
+export const assessmentOrderLabels={newest:"Newest first",oldest:"Oldest first"} as const;
+export type AssessmentOrder=keyof typeof assessmentOrderLabels;
+
+export function sortAssessmentHistory(items:Assessment[],order:AssessmentOrder):Assessment[]{
+  return [...items].sort((a,b)=>{
+    const left=Date.parse(a.created_at),right=Date.parse(b.created_at);
+    if(Number.isFinite(left)!==Number.isFinite(right))return Number.isFinite(left)?-1:1;
+    if(Number.isFinite(left)&&left!==right)return order==="oldest"?left-right:right-left;
+    return a.id<b.id?-1:a.id>b.id?1:0;
+  });
+}
+
 export function filterAssessmentHistory(items:Assessment[],date:string|null,query=""):Assessment[]{
   const search=query.trim().toLowerCase();
   return items.filter(item=>{
