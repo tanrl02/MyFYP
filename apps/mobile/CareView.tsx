@@ -90,18 +90,19 @@ export default function CareView({ patient, visitId, onBack, onBusy, onNavigate 
     {!loading && all.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>{visitId ? "No prescriptions or bills for this visit yet" : "No prescriptions or bills yet"}</Text><Text style={styles.muted}>Your issued prescription and bill will appear here after your visit is processed.</Text></View> : !loading && visible.length === 0 ? <View style={styles.card}><Text style={styles.subtitle}>No matching care records</Text><Text style={styles.muted}>Change your search, status or appointment date, or reset care filters to see all your prescriptions and bills.</Text></View> : null}
     {visible.map(({ visit, prescription, invoice }) => <View key={visit.id} style={styles.card}>
       <Text style={styles.subtitle}>{queueToken(visit)} · {visit.doctor_name}</Text><Text style={styles.muted}>{visitTime(visit.starts_at)}</Text>
-      <Text style={styles.compactStatus}>Prescription: {prescription ? prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing" : "Not issued"}</Text>
+      <Text style={styles.compactStatus}>Prescription: {prescription ? prescription.status === "cancelled" ? "Cancelled · historical items only" : prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing" : "Not issued"}</Text>
       <Text style={styles.muted}>{invoice ? `Bill: ${money(invoice.total_cents)} · ${invoice.status === "paid" ? "Paid · simulation" : "Unpaid"}` : "Bill: Not generated yet"}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={`${expandedId === visit.id ? "Hide" : "View"} details for ${queueToken(visit)}, ${visit.doctor_name}, ${visitTime(visit.starts_at)}`} aria-expanded={expandedId === visit.id} accessibilityState={{expanded: expandedId === visit.id, disabled: busy}} disabled={busy} onPress={() => { if (!busy) { setExpandedId(expandedId === visit.id ? "" : visit.id); setConfirm(""); } }} style={busy && {opacity: .45}}><Text style={styles.link}>{expandedId === visit.id ? "Hide details" : "View details"}</Text></Pressable>
       {expandedId === visit.id ? <>
       <Pressable accessibilityRole="button" disabled={busy} onPress={() => openConsultation(visit.id)}><Text style={styles.link}>View visit details →</Text></Pressable>
       <Text style={styles.section}>Prescription</Text>
-      {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>
+      {prescription ? <><Text style={styles.status}>{prescription.status === "cancelled" ? "Cancelled · historical items only" : prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>
+        {prescription.status==="cancelled"?<Text style={styles.status}>Cancelled{prescription.cancelled_at?` · ${prescriptionTime(prescription.cancelled_at)}`:""}. These items are not an active prescription.</Text>:null}
         {(prescription.version??1)>1?<Text style={styles.status}>Directions corrected · revision {prescription.version}{prescription.directions_updated_at?` · ${prescriptionTime(prescription.directions_updated_at)}`:""}</Text>:null}
         <View style={styles.prescriptionDates}>
           <Text style={styles.bold}>Prescription dates · Malaysia time</Text>
           <Text style={styles.muted}>Issued: {prescriptionTime(prescription.created_at)}</Text>
-          <Text style={styles.muted}>{prescription.status === "dispensed" ? prescription.dispensed_at ? `Dispensed: ${prescriptionTime(prescription.dispensed_at)}` : "Dispensed · date not recorded" : "Dispensing: Pending"}</Text>
+          <Text style={styles.muted}>{prescription.status === "cancelled" ? "Dispensing: Cancelled" : prescription.status === "dispensed" ? prescription.dispensed_at ? `Dispensed: ${prescriptionTime(prescription.dispensed_at)}` : "Dispensed · date not recorded" : "Dispensing: Pending"}</Text>
         </View>
         {prescription.items.map(item => <View key={item.medicine_id} style={styles.item}><Text style={styles.bold}>{medicineLabel(item)} × {item.quantity}</Text><Text style={styles.muted}>{item.directions}</Text></View>)}</> : <Text style={styles.muted}>No prescription issued.</Text>}
       <Text style={styles.section}>Bill · simulation</Text>

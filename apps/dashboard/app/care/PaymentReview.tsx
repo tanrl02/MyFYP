@@ -3,7 +3,7 @@ import {Care,money,queueToken,visitTime} from "@smart-skin/shared";
 export default function PaymentReview({record,busy,onConfirm,onCancel}:{record:Care;busy:boolean;onConfirm:()=>void;onCancel:()=>void}){
   const {visit,invoice,prescription}=record;
   if(!invoice)return null;
-  const needsDispensing=!!prescription&&prescription.status!=="dispensed";
+  const needsDispensing=prescription?.status==="issued";
   return <section aria-label="Simulated payment review" className="mt-4 rounded-xl border border-[#ccdcd4] bg-[#f4f7f6] p-4">
     <h4 className="font-semibold">Review simulated payment</h4>
     <p className="my-3">{queueToken(visit)} · {visit.patient_name} · {visit.doctor_name} · {visitTime(visit.starts_at)}</p>

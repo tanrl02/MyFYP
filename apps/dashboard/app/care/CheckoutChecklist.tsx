@@ -5,11 +5,11 @@ export default function CheckoutChecklist({ record }: { record: Care }) {
   const { visit, prescription, invoice } = record;
   const completed = visit.status === "completed";
   const handedOver = !!visit.consultation_finished_at;
-  const needsDispensing = !!prescription && prescription.status !== "dispensed";
+  const needsDispensing = prescription?.status === "issued";
   const steps = [
     { label: "Doctor handover", status: handedOver ? "Finished" : completed ? "No handover recorded" : "Awaiting doctor handover", done: handedOver },
     { label: "Visit completion", status: completed ? "Completed" : "Awaiting staff completion", done: completed },
-    { label: "Medicines", status: prescription ? needsDispensing ? "Awaiting dispensing" : "Dispensed" : "No prescription issued", done: !!prescription && !needsDispensing },
+    { label: "Medicines", status: prescription?.status==="cancelled" ? "Cancelled · no dispensing" : prescription ? needsDispensing ? "Awaiting dispensing" : "Dispensed" : "No prescription issued", done: !!prescription && !needsDispensing },
     { label: "Bill", status: invoice ? "Generated" : "Not generated", done: !!invoice },
     { label: "Payment", status: invoice?.status === "paid" ? "Paid · simulation" : invoice ? "Unpaid · simulation" : "Awaiting bill", done: invoice?.status === "paid" },
   ];

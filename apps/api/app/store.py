@@ -95,6 +95,10 @@ class Store:
                   version INTEGER NOT NULL, doctor_id TEXT NOT NULL, reason TEXT NOT NULL,
                   previous_directions_json TEXT NOT NULL, directions_json TEXT NOT NULL,
                   created_at TEXT NOT NULL, UNIQUE(prescription_id,version));
+                CREATE TABLE IF NOT EXISTS prescription_cancellations (
+                  prescription_id TEXT PRIMARY KEY REFERENCES prescriptions(id),
+                  doctor_id TEXT NOT NULL, reason TEXT NOT NULL, version INTEGER NOT NULL,
+                  created_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS invoices (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   total_cents INTEGER NOT NULL CHECK(total_cents>=0), status TEXT NOT NULL CHECK(status IN ('unpaid','paid')),
@@ -1019,7 +1023,8 @@ class Store:
             note=db.execute('SELECT id FROM consultation_notes WHERE booking_id=? AND doctor_id=?',(booking_id,doctor)).fetchone()
             if not note:
                 raise RuleError('Publish the consultation note before finishing. A prescription is optional.')
-            prescription=db.execute('SELECT id FROM prescriptions WHERE booking_id=?',(booking_id,)).fetchone()
+            prescription=db.execute('''SELECT id FROM prescriptions WHERE booking_id=? AND NOT EXISTS
+                (SELECT 1 FROM prescription_cancellations c WHERE c.prescription_id=prescriptions.id)''',(booking_id,)).fetchone()
             db.execute('INSERT INTO consultation_handoffs VALUES(?,?,?,?,?)',
                        (booking_id,doctor,note['id'],prescription['id'] if prescription else None,datetime.now(timezone.utc).isoformat()))
             self.event(db,booking_id,doctor,'consultation-finished')
@@ -1864,16 +1869,18 @@ class Store:
     def prescription(self, db, booking_id):
         # One statement keeps the reviewed revision and its directions in the same read snapshot.
         rows=db.execute('''SELECT p.*,i.medicine_id,i.quantity,i.directions,i.name,i.price_cents,i.strength,i.form,
-            COALESCE(r.version,1) AS version,r.created_at AS directions_updated_at FROM prescriptions p
+            COALESCE(r.version,1) AS version,r.created_at AS directions_updated_at,
+            c.created_at AS cancelled_at FROM prescriptions p
             LEFT JOIN prescription_items i ON i.prescription_id=p.id
             LEFT JOIN prescription_direction_revisions r ON r.prescription_id=p.id
               AND r.version=(SELECT MAX(version) FROM prescription_direction_revisions WHERE prescription_id=p.id)
+            LEFT JOIN prescription_cancellations c ON c.prescription_id=p.id
             WHERE p.booking_id=? ORDER BY i.medicine_id''',(booking_id,)).fetchall()
         if not rows:
             return None
-        header=('id','booking_id','doctor_id','status','created_at','dispensed_at','version','directions_updated_at')
+        header=('id','booking_id','doctor_id','status','created_at','dispensed_at','version','directions_updated_at','cancelled_at')
         fields=('medicine_id','quantity','directions','name','price_cents','strength','form')
-        return {key:rows[0][key] for key in header} | {'items':[
+        return {key:rows[0][key] for key in header} | {'status':'cancelled' if rows[0]['cancelled_at'] else rows[0]['status'],'items':[
             {key:row[key] for key in fields} for row in rows if row['medicine_id'] is not None]}
 
     def prescription_directions_history(self, booking_id, doctor):
@@ -1920,6 +1927,41 @@ class Store:
             db.executemany('UPDATE prescription_items SET directions=? WHERE prescription_id=? AND medicine_id=?',
                 [(item['directions'],prescription['id'],item['medicine_id']) for item in directions])
             self.event(db,booking_id,doctor,'prescription-directions-corrected')
+            return self.prescription(db,booking_id)
+
+    def prescription_cancellation(self, booking_id, doctor):
+        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        with self.connect() as db:
+            visit=self.record(db,booking_id)
+            if visit['doctor_id']!=doctor:raise RuleError('This visit belongs to another doctor.',403)
+            prescription=self.prescription(db,booking_id)
+            if not prescription:raise RuleError('Prescription not found.',404)
+            row=db.execute('SELECT * FROM prescription_cancellations WHERE prescription_id=?',(prescription['id'],)).fetchone()
+            return dict(row) if row else None
+
+    def cancel_prescription(self, booking_id, doctor, version, reason):
+        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        reason=reason.strip()
+        if type(version) is not int or version<1 or not 1<=len(reason)<=300:
+            raise RuleError('Enter a cancellation reason within 300 characters and the reviewed revision.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if visit['doctor_id']!=doctor:raise RuleError('This visit belongs to another doctor.',403)
+            prescription=self.prescription(db,booking_id)
+            if not prescription:raise RuleError('Prescription not found.',404)
+            saved=db.execute('SELECT * FROM prescription_cancellations WHERE prescription_id=?',(prescription['id'],)).fetchone()
+            if saved:
+                if saved['reason']==reason and saved['version']==version:return prescription
+                raise RuleError('This prescription is already cancelled. Its saved cancellation cannot be replaced.')
+            if version!=prescription['version']:raise RuleError('Prescription directions changed. Reload and review the latest revision.')
+            if visit['status']!='called' or visit['consultation_finished_at']:
+                raise RuleError('Cancel only while the consultation is open, before doctor handover.')
+            if prescription['status']!='issued' or self.invoice(db,booking_id):
+                raise RuleError('A prescription cannot be cancelled after dispensing or bill generation.')
+            db.execute('INSERT INTO prescription_cancellations VALUES(?,?,?,?,?)',
+                (prescription['id'],doctor,reason,version,datetime.now(timezone.utc).isoformat()))
+            self.event(db,booking_id,doctor,'prescription-cancelled')
             return self.prescription(db,booking_id)
 
     def invoice(self, db, booking_id):
@@ -2012,6 +2054,7 @@ class Store:
                     saved=sorted((part['medicine_id'],part['receipt_id'] or '',part['quantity']) for part in original)
                     if wanted!=saved:raise RuleError('This prescription was already dispensed with different stock sources. Check saved allocations.')
                 return prescription
+            if prescription['status']=='cancelled':raise RuleError('This prescription is cancelled. Nothing was dispensed.')
             allocate(db,prescription,allocations,staff,RuleError)
             for item in prescription['items']:
                 result = db.execute('UPDATE medicines SET stock=stock-? WHERE id=? AND stock>=?',
@@ -2030,14 +2073,15 @@ class Store:
             if visit['status'] != 'completed':
                 raise RuleError('Complete the visit before generating a bill.')
             prescription = self.prescription(db, booking_id)
-            if reviewed is not None and reviewed['prescription_id']!=(prescription['id'] if prescription else None):
+            active_prescription=prescription if prescription and prescription['status']!='cancelled' else None
+            if reviewed is not None and reviewed['prescription_id']!=(active_prescription['id'] if active_prescription else None):
                 raise RuleError('The prescription changed since review. Cancel and review the bill again. No new bill was created.')
             existing = self.invoice(db, booking_id)
             if existing:
                 return existing
             lines = [('Demo consultation', 1, 3000)]
-            if prescription:
-                lines.extend((' · '.join(v for v in (i['name'],i['strength'],i['form']) if v), i['quantity'], i['price_cents']) for i in prescription['items'])
+            if active_prescription:
+                lines.extend((' · '.join(v for v in (i['name'],i['strength'],i['form']) if v), i['quantity'], i['price_cents']) for i in active_prescription['items'])
             invoice_id = str(uuid4())
             total = sum(quantity * price for _, quantity, price in lines)
             db.execute('INSERT INTO invoices VALUES(?,?,?,?,?,NULL,NULL)',
@@ -2064,7 +2108,7 @@ class Store:
             if invoice['status'] == 'paid':
                 return invoice
             prescription = self.prescription(db, row['booking_id'])
-            if prescription and prescription['status'] != 'dispensed':
+            if prescription and prescription['status'] == 'issued':
                 raise RuleError('Dispense the prescription before recording simulated payment.')
             db.execute("UPDATE invoices SET status='paid',paid_at=?,payment_mode='simulation' WHERE id=?",
                        (datetime.now(timezone.utc).isoformat(), invoice_id))

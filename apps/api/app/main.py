@@ -111,6 +111,11 @@ class PrescriptionDirectionsInput(BaseModel):
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
     items: list[PrescriptionDirectionItemInput] = Field(min_length=1,max_length=10)
 
+class PrescriptionCancellationInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    version: int = Field(strict=True,ge=1)
+    reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+
 class ShareInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
     patient_message: str = Field(max_length=1000)
@@ -581,6 +586,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/visits/{booking_id}/prescription/directions')
     def correct_prescription_directions(booking_id: str, payload: PrescriptionDirectionsInput, who=Depends(doctor)):
         return run(lambda: store.correct_prescription_directions(booking_id,who,payload.version,payload.reason,[item.model_dump() for item in payload.items]))
+
+    @api.get('/visits/{booking_id}/prescription/cancellation')
+    def prescription_cancellation(booking_id: str,who=Depends(doctor)):
+        return run(lambda: store.prescription_cancellation(booking_id,who))
+
+    @api.post('/visits/{booking_id}/prescription/cancel')
+    def cancel_prescription(booking_id: str,payload: PrescriptionCancellationInput,who=Depends(doctor)):
+        return run(lambda: store.cancel_prescription(booking_id,who,payload.version,payload.reason))
 
     @api.get('/prescriptions/{prescription_id}/stock-sources')
     def dispensing_stock(prescription_id: str,who=Depends(staff)):

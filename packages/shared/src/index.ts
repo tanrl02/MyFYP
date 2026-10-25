@@ -14,7 +14,7 @@ export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => 
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
 export type DispensingAllocation={medicine_id:string;receipt_id:string|null;quantity:number};
 export type BatchHoldState={receipt_id:string;held:boolean;hold_reason:string|null;hold_version:number;hold_updated_at:string|null};
-export type DispensingStock={prescription_version?:number;status:"issued"|"dispensed";items:{medicine_id:string;stock:number;untracked_units:number;batches:({receipt_id:string;batch_number:string;expiry_date:string;remaining_units:number;expired:boolean} & BatchHoldState)[]}[];allocations:(DispensingAllocation & {batch_number:string|null;expiry_date:string|null;actor_id:string;created_at:string})[]};
+export type DispensingStock={prescription_version?:number;status:"issued"|"dispensed"|"cancelled";items:{medicine_id:string;stock:number;untracked_units:number;batches:({receipt_id:string;batch_number:string;expiry_date:string;remaining_units:number;expired:boolean} & BatchHoldState)[]}[];allocations:(DispensingAllocation & {batch_number:string|null;expiry_date:string|null;actor_id:string;created_at:string})[]};
 export type BatchMovementHistory={medicine_id:string;receipt_id:string;batch_number:string;expiry_date:string;remaining_units:number;totals:Record<"received"|"dispensed"|"damaged"|"lost",number>;calculated_remaining:number;reconciled:boolean;movements:{id:string;kind:"received"|"dispensed"|"damaged"|"lost";quantity:number;change:number;created_at:string;actor_id:string;reason:string|null;balance_after:number}[]};
 export type BatchStockOverview=DispensingStock["items"][number] & {medicine:Medicine;as_of:string};
 export type ReceiptBatch={receipt_id:string;batch_number:string;expiry_date:string;quantity:number;created_at:string;loss_units:number;loss_allowance:number;remaining_units:number|null};
@@ -51,7 +51,8 @@ export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDo
 export type ReviewDraft = {share_id:string;doctor_id:DemoDoctor;doctor_assessment:string;note:string;follow_up:string;version:number;updated_at:string|null};
 export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
-export type Prescription = { version?:number;directions_updated_at?:string|null; id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & Pick<Medicine,"name"|"strength"|"form"|"price_cents">)[] };
+export type Prescription = { version?:number;directions_updated_at?:string|null;cancelled_at?:string|null; id: string; booking_id: string; doctor_id: string; status: "issued" | "dispensed" | "cancelled"; created_at: string; dispensed_at: string | null; items: (PrescriptionItem & Pick<Medicine,"name"|"strength"|"form"|"price_cents">)[] };
+export type PrescriptionCancellation={prescription_id:string;doctor_id:string;reason:string;version:number;created_at:string};
 export type PrescriptionDirectionItem={medicine_id:string;directions:string};
 export type PrescriptionDirectionRevision={id:string;version:number;doctor_id:string;doctor_name:string;reason:string;created_at:string;previous_directions:PrescriptionDirectionItem[];directions:PrescriptionDirectionItem[]};
 export type PrescriptionDirectionsHistory={prescription_id:string;version:number;revisions:PrescriptionDirectionRevision[]};
@@ -185,6 +186,8 @@ export class DemoApi {
   stockExpiry() { return this.request<StockExpiry>("/stock/expiry"); }
   receiveStock(medicineId: string,quantity: number,reason: string,requestId: string,batch?:{batch_number:string;expiry_date:string}) { return this.request<StockReceipt>("/stock/receive",{medicine_id:medicineId,quantity,reason,request_id:requestId,...batch}); }
   prescribe(id: string, items: PrescriptionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription`, {items}); }
+  prescriptionCancellation(id:string) { return this.request<PrescriptionCancellation|null>(`/visits/${encodeURIComponent(id)}/prescription/cancellation`); }
+  cancelPrescription(id:string,version:number,reason:string) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription/cancel`,{version,reason}); }
   prescriptionDirectionsHistory(id:string) { return this.request<PrescriptionDirectionsHistory>(`/visits/${encodeURIComponent(id)}/prescription/directions-history`); }
   correctPrescriptionDirections(id:string,version:number,reason:string,items:PrescriptionDirectionItem[]) { return this.request<Prescription>(`/visits/${encodeURIComponent(id)}/prescription/directions`,{version,reason,items}); }
   dispensingStock(id:string) { return this.request<DispensingStock>(`/prescriptions/${encodeURIComponent(id)}/stock-sources`); }

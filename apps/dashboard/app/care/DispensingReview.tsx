@@ -11,7 +11,7 @@ export default function DispensingReview({api,record,catalog,busy,reviewedVersio
   useEffect(()=>{let active=true,fetching=false;async function load(){if(!prescription||fetching)return;fetching=true;try{const result=await api.dispensingStock(prescription.id);if(active){setStock(result);setError("");}}catch(e){if(active){setStock(null);setError(e instanceof Error?e.message:"Cannot load stock sources.");}}finally{fetching=false;}}void load();const timer=setInterval(load,3000);return()=>{active=false;clearInterval(timer);};},[api,prescription?.id]);
   if(!prescription)return null;
   const allocations:DispensingAllocation[]=[];
-  const changed=(prescription.version??1)!==reviewedVersion||!!stock&&(stock.prescription_version??1)!==reviewedVersion;
+  const changed=prescription.status!=="issued"||!!stock&&stock.status!=="issued"||(prescription.version??1)!==reviewedVersion||!!stock&&(stock.prescription_version??1)!==reviewedVersion;
   let valid=!!stock&&stock.status==="issued"&&!changed;
   const groups=prescription.items.map(item=>{
     const current=stock?.items.find(row=>row.medicine_id===item.medicine_id);
@@ -34,7 +34,7 @@ export default function DispensingReview({api,record,catalog,busy,reviewedVersio
     <p className="muted my-3 text-sm">Allocate each required quantity across one or more sources. Expired or held batches cannot be used. Untracked stock includes older stock whose batch balances could not be reconstructed; verify its physical expiry before dispensing.</p>
     <button className="btn secondary" disabled={busy||changed||!stock||stock.status!=="issued"} onClick={()=>{if(!stock)return;setQuantities(earliestExpiryQuantities(prescription.items,stock));setSubmitError("");setPrepared(true);}}>Use earliest-expiring stock</button><p className="muted my-2 text-sm">Replaces entered quantities using unexpired tracked batches that are not on hold, earliest expiry first. Leaves untracked stock at zero. Review shortages and confirm separately.</p>
     {prepared?<p role="status" className="my-3 text-sm">Tracked-batch quantities prepared. Review the allocations and any shortfalls below before confirming.</p>:null}
-    {changed?<p role="alert" className="my-3 text-red-800">Prescription directions changed. Cancel and review the latest revision before dispensing.</p>:null}
+    {changed?<p role="alert" className="my-3 text-red-800">Prescription changed or is no longer available for dispensing. Cancel and check its latest state.</p>:null}
     {submitError?<p role="alert" className="my-3 text-red-800">{submitError}</p>:null}
     {error?<p role="alert" className="my-3 text-red-800">{error} Retrying automatically.</p>:!stock?<p role="status">Loading stock sources…</p>:null}
     {groups.map(({item,rows,total})=><section className="my-4 rounded-lg border p-3" key={item.medicine_id}><h5 className="font-semibold">{medicineLabel(item)} × {item.quantity}</h5><p className="muted my-2 text-sm whitespace-pre-wrap break-words">{item.directions}</p><p className="my-2 text-sm">Allocated {total} of {item.quantity} required · Current total stock: {catalog.find(m=>m.id===item.medicine_id)?.stock??"Unavailable"}</p>{total<item.quantity?<p className="my-2 font-semibold text-amber-900">Short by {item.quantity-total} {item.quantity-total===1?"unit":"units"}. Choose another available source or receive more stock.</p>:null}
