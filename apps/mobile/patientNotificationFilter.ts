@@ -8,6 +8,7 @@ export const notificationTypeLabels = {
   queue_called: "Queue calls",
   review_published: "Doctor reviews",
   follow_up_recommended: "Follow-up recommendations",
+  bill_ready: "Bills",
 } as const;
 export type NotificationType = keyof typeof notificationTypeLabels;
 

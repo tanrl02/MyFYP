@@ -1982,6 +1982,10 @@ class Store:
             db.executemany('INSERT INTO invoice_lines VALUES(?,?,?,?,?)',
                 [(str(uuid4()), invoice_id, name, quantity, price) for name, quantity, price in lines])
             self.event(db, booking_id, staff, 'invoice-generated')
+            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
+            self.notify(db,visit['patient_id'],'bill_ready',invoice_id,booking_id,'Bill ready',
+                        f"{token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). A simulated bill of RM {total//100}.{total%100:02d} was generated. Open Care & bills to check the latest bill and payment status.")
             return self.invoice(db, booking_id)
 
     def pay_simulated(self, invoice_id, actor):
