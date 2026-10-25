@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
 import { Assessment, DemoApi, DemoPatient, PhotoCheck, assessmentCategory, assessmentOrigin, visitTime } from "@smart-skin/shared";
@@ -28,7 +28,8 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const [draft, setDraft] = useState<Draft | null>(null);
   const [history, setHistory] = useState<Assessment[]>([]);
   const [historyDate,setHistoryDate]=useState<string|null>(null);
-  const visibleHistory=filterAssessmentHistory(history,historyDate);
+  const [historyQuery,setHistoryQuery]=useState("");
+  const visibleHistory=filterAssessmentHistory(history,historyDate,historyQuery);
   const [result, setResult] = useState<Assessment | null>(null);
   const [busy, setBusy] = useState(false);
   const [checking,setChecking]=useState(false);
@@ -127,14 +128,19 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted||!symptomsComplete} style={[styles.button,(!photoCheck?.accepted||!symptomsComplete)&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
     {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Doctor suggestions use the saved result and staff-entered expertise. You can choose a different concern. Booking does not share the assessment; authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
     <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Your latest 100 saved assessments. Photos survive app/server restarts because they are saved in the shared database.</Text>
+    <Text style={[styles.subtitle,{marginTop:16}]}>Search symptom details</Text>
+    <Text style={styles.muted}>Search your saved body area or optional symptom description. Search and date filters apply to the loaded history list.</Text>
+    <TextInput accessibilityLabel="Search assessment history by body area or symptom description" placeholder="Body area or description, e.g. forearm" value={historyQuery} onChangeText={setHistoryQuery} editable={!busy} autoCapitalize="none" autoCorrect={false} maxLength={100} style={styles.search}/>
+    <Pressable accessibilityRole="button" disabled={busy||!historyQuery} style={(busy||!historyQuery)&&styles.disabled} onPress={()=>setHistoryQuery("")}><Text style={styles.link}>Clear assessment search</Text></Pressable>
     <BookingDateFilter key={historyDate||"all"} value={historyDate} onChange={setHistoryDate} busy={busy} allowPast title="Assessment saved date" monthContext="assessment" calendarHint="Choose the Malaysia date when the assessment was saved. This filters the history list only."/>
     <Text accessibilityLiveRegion="polite" style={styles.muted}>Showing {visibleHistory.length} of {history.length} loaded assessments</Text>
-    {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text><Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
-    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments saved on this Malaysia date. Choose another date or use Show all dates.</Text>:null}
+    {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text>{item.symptoms?<><Text style={styles.muted}>Body area: {item.symptoms.body_area}</Text>{item.symptoms.description?<Text numberOfLines={2} style={styles.muted}>{item.symptoms.description}</Text>:null}</>:<Text style={styles.muted}>No symptom details recorded.</Text>}<Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
+    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search and date. Clear assessment search or use Show all dates to see more records.</Text>:null}
     {!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
   </View>;
 }
 const styles = StyleSheet.create({
+  search:{padding:12,borderWidth:1,borderColor:"#ccdcd4",borderRadius:10,color:"#19352e",backgroundColor:"white",marginTop:10},
   title: { fontSize: 23, fontWeight: "700", color: "#19352e", marginBottom: 8 }, subtitle: { fontSize: 16, fontWeight: "600", color: "#19352e", marginBottom: 8 },
   muted: { color: "#637970", fontSize: 13, lineHeight: 20 }, warning: { backgroundColor: "#fff3db", padding: 14, borderRadius: 12, marginVertical: 16 }, warningText: { color: "#825b16", fontSize: 13, lineHeight: 20 },
   row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12 }, button: { backgroundColor: "#176f5e", padding: 14, borderRadius: 10, marginVertical: 8 }, buttonText: { color: "white", fontWeight: "600" },

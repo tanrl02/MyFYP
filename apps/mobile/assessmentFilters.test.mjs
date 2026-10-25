@@ -30,3 +30,37 @@ test("clear, no matches and refreshed saved records preserve source order and da
   assert.deepEqual(filterAssessmentHistory([],"2026-10-18"),[]);
   assert.equal(JSON.stringify(items),original);
 });
+
+
+test("assessment search matches body area or description with trimmed case-insensitive substrings",()=>{
+  const items=[
+    {id:"area",created_at:"2026-10-18T01:00:00Z",symptoms:{body_area:"Forearm",description:""}},
+    {id:"description",created_at:"2026-10-18T02:00:00Z",symptoms:{body_area:"Leg",description:"Dry PATCH near elbow"}},
+    {id:"legacy",created_at:"2026-10-18T03:00:00Z",symptoms:null,example_category:"forearm"},
+    {id:"missing",created_at:"2026-10-18T04:00:00Z"}
+  ];
+  const before=JSON.stringify(items);
+  assert.deepEqual(filterAssessmentHistory(items,null,"  FOREarm  ").map(n=>n.id),["area"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"patch").map(n=>n.id),["description"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"elbow").map(n=>n.id),["description"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"not present"),[]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"   "),items);
+  assert.deepEqual(filterAssessmentHistory(items,null,""),items);
+  assert.equal(JSON.stringify(items),before);
+});
+
+test("assessment search combines with Malaysia saved date and follows refreshed symptom details",()=>{
+  const items=[
+    {id:"earlier",created_at:"2026-10-17T15:59:59Z",symptoms:{body_area:"Arm",description:"Fictional red patch"}},
+    {id:"match",created_at:"2026-10-17T16:00:00Z",symptoms:{body_area:"Arm",description:"Fictional dry patch"}},
+    {id:"other",created_at:"2026-10-18T01:00:00Z",symptoms:{body_area:"Leg",description:"Other text"}}
+  ];
+  const before=JSON.stringify(items);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18","arm").map(n=>n.id),["match"]);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18",""),items.slice(1));
+  assert.deepEqual(filterAssessmentHistory(items,null,"patch"),items.slice(0,2));
+  const refreshed=items.map(n=>n.id==="other"?{...n,symptoms:{body_area:"Arm",description:"Changed fictional text"}}:n);
+  assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm").map(n=>n.id),["match","other"]);
+  assert.deepEqual(filterAssessmentHistory([],null,"arm"),[]);
+  assert.equal(JSON.stringify(items),before);
+});
