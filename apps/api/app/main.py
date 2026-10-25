@@ -618,6 +618,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def consultation_draft(booking_id: str,who=Depends(doctor)):
         return run(lambda: store.consultation_draft(booking_id,who))
 
+    @api.post('/visits/{booking_id}/consultation/finish')
+    def finish_consultation(booking_id: str,who=Depends(doctor)):
+        return run(lambda: store.finish_consultation(booking_id,who))
+
     @api.post('/visits/{booking_id}/consultation/draft')
     def save_consultation_draft(booking_id: str,payload: ConsultationDraftInput,who=Depends(doctor)):
         return run(lambda: store.save_consultation_draft(booking_id,who,payload.findings.strip(),payload.follow_up.strip(),payload.version))

@@ -120,6 +120,10 @@ class Store:
                   booking_id TEXT PRIMARY KEY REFERENCES bookings(id), doctor_id TEXT NOT NULL,
                   findings TEXT NOT NULL, follow_up TEXT NOT NULL, version INTEGER NOT NULL,
                   updated_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS consultation_handoffs (
+                  booking_id TEXT PRIMARY KEY REFERENCES bookings(id), doctor_id TEXT NOT NULL,
+                  note_id TEXT NOT NULL REFERENCES consultation_notes(id),
+                  prescription_id TEXT REFERENCES prescriptions(id), finished_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS visit_feedback (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   patient_id TEXT NOT NULL, rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
@@ -687,8 +691,10 @@ class Store:
             return {'items':[saved[id] for id in ids],'marked_count':marked,'unread_count':unread}
 
     def record(self, db, booking_id):
-        r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date,s.duration_minutes FROM bookings b
-                          JOIN slots s ON s.id=b.slot_id WHERE b.id=?''', (booking_id,)).fetchone()
+        r = db.execute('''SELECT b.*, s.doctor_id, s.starts_at, s.clinic_date,s.duration_minutes,
+                          h.finished_at AS consultation_finished_at FROM bookings b
+                          JOIN slots s ON s.id=b.slot_id LEFT JOIN consultation_handoffs h ON h.booking_id=b.id
+                          WHERE b.id=?''', (booking_id,)).fetchone()
         if r is None:
             raise RuleError('Booking not found.', 404)
         replacement = db.execute('SELECT new_booking_id FROM reschedules WHERE old_booking_id=?',(booking_id,)).fetchone()
@@ -991,6 +997,27 @@ class Store:
             event_id=self.event(db,booking_id,staff,'missed-restored')
             db.execute('INSERT INTO missed_restorations VALUES(?,?)',(missed_event_id,event_id))
             # Revoked assessment grants stay revoked; sharing requires patient consent.
+            return self.record(db,booking_id)
+
+    def finish_consultation(self, booking_id, doctor):
+        if doctor not in DOCTORS:
+            raise RuleError('Doctor identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if visit['doctor_id']!=doctor:
+                raise RuleError('This visit belongs to another doctor.',403)
+            if visit['consultation_finished_at']:
+                return visit
+            if visit['status']!='called':
+                raise RuleError('Only a called visit can be handed over to checkout.')
+            note=db.execute('SELECT id FROM consultation_notes WHERE booking_id=? AND doctor_id=?',(booking_id,doctor)).fetchone()
+            if not note:
+                raise RuleError('Publish the consultation note before finishing. A prescription is optional.')
+            prescription=db.execute('SELECT id FROM prescriptions WHERE booking_id=?',(booking_id,)).fetchone()
+            db.execute('INSERT INTO consultation_handoffs VALUES(?,?,?,?,?)',
+                       (booking_id,doctor,note['id'],prescription['id'] if prescription else None,datetime.now(timezone.utc).isoformat()))
+            self.event(db,booking_id,doctor,'consultation-finished')
             return self.record(db,booking_id)
 
     def complete(self, booking_id, staff):
@@ -1876,6 +1903,8 @@ class Store:
                 if saved != normalised:
                     raise RuleError('A prescription is already issued. Saved items cannot be replaced in this demo.')
                 return existing
+            if visit['consultation_finished_at']:
+                raise RuleError('The consultation is finished. A new prescription cannot be added after handover.')
             if self.invoice(db, booking_id):
                 raise RuleError('This visit has been billed. A prescription cannot be added afterwards.')
             for item in normalised:

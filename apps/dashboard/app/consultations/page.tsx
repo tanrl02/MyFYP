@@ -19,6 +19,7 @@ function Workspace({doctor,busy,onBusy}:{doctor:DemoDoctor;busy:boolean;onBusy:(
   const api=useMemo(()=>new DemoApi(base,doctor),[doctor]);
   const [records,setRecords]=useState<Consultation[]>([]),[detail,setDetail]=useState<Consultation|null>(null),[selected,setSelected]=useState("");
   const [error,setError]=useState(""),[notice,setNotice]=useState("");
+  const [finishConfirm,setFinishConfirm]=useState(false);
   useEffect(()=>{
     if(busy)return;
     let active=true,fetching=false;
@@ -32,13 +33,30 @@ function Workspace({doctor,busy,onBusy}:{doctor:DemoDoctor;busy:boolean;onBusy:(
     void load();const timer=setInterval(load,3000);return()=>{active=false;clearInterval(timer);};
   },[api,selected,busy]);
   async function open(id:string){
-    if(busy)return;onBusy(true);setError("");setNotice("");setDetail(null);
+    if(busy)return;onBusy(true);setError("");setNotice("");setDetail(null);setFinishConfirm(false);
     try{setDetail(await api.consultation(id));setSelected(id);}
     catch(e){setSelected("");setError(e instanceof Error?e.message:"Visit unavailable.");}finally{onBusy(false);}
   }
+  async function finish(){
+    if(!detail||busy)return;onBusy(true);setError("");
+    try{
+      const visit=await api.finishConsultation(detail.visit.id);
+      setDetail(current=>current?.visit.id===visit.id?{...current,visit}:current);
+      setRecords(current=>current.map(record=>record.visit.id===visit.id?{...record,visit}:record));
+      setFinishConfirm(false);setNotice("Consultation finished. Staff can see Ready for checkout and complete the visit.");
+    }catch(e){setError(e instanceof Error?e.message:"Cannot finish this consultation. Reopen the visit and try again.");}
+    finally{onBusy(false);}
+  }
   return <>{error?<div role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-800">{error}</div>:null}{notice?<p role="status" className="mb-5 rounded-xl bg-emerald-50 p-4 text-emerald-800">{notice}</p>:null}
-    <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]"><section className="panel"><h2 className="mb-4 font-semibold">Assigned visits</h2>{records.map(r=><button key={r.visit.id} aria-label={`Open consultation ${queueToken(r.visit)} · ${visitTime(r.visit.starts_at)}`} disabled={busy} className="mb-3 block w-full rounded-xl border border-[#dce6e0] p-4 text-left" onClick={()=>open(r.visit.id)}><strong>{queueToken(r.visit)} · {r.visit.patient_name}</strong><span className="muted my-2 block text-xs">{visitTime(r.visit.starts_at)} · {r.visit.status}</span><span className="badge">{r.note?"Published":r.visit.status==="called"?"Ready for note":"No published note"}</span></button>)}{!records.length?<p className="muted">No called or completed visits for this doctor.</p>:null}</section>
+    <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]"><section className="panel"><h2 className="mb-4 font-semibold">Assigned visits</h2>{records.map(r=><button key={r.visit.id} aria-label={`Open consultation ${queueToken(r.visit)} · ${visitTime(r.visit.starts_at)}`} disabled={busy} className="mb-3 block w-full rounded-xl border border-[#dce6e0] p-4 text-left" onClick={()=>open(r.visit.id)}><strong>{queueToken(r.visit)} · {r.visit.patient_name}</strong><span className="muted my-2 block text-xs">{visitTime(r.visit.starts_at)} · {r.visit.status}</span><span className="badge">{r.visit.status==="called"&&r.visit.consultation_finished_at?"Ready for checkout":r.note?"Published":r.visit.status==="called"?"Ready for note":"No published note"}</span></button>)}{!records.length?<p className="muted">No called or completed visits for this doctor.</p>:null}</section>
     <section className="panel">{detail?<><h2 className="text-xl font-semibold">{queueToken(detail.visit)} · {detail.visit.patient_name}</h2><p className="muted mt-2 text-sm">{detail.visit.doctor_name} · {visitTime(detail.visit.starts_at)} · {detail.visit.status}</p>
+      <section className="my-5 rounded-xl border border-[#dce6e0] p-4" aria-label="Consultation handover">
+        <h3 className="font-semibold">Consultation handover</h3>
+        {detail.visit.consultation_finished_at?<p className="mt-2 text-sm text-[#176f5e]">{detail.visit.status==="called"?"Ready for checkout":"Consultation finished"} · {visitTime(detail.visit.consultation_finished_at)}. Staff handle visit completion, dispensing and billing.</p>:detail.visit.status==="called"?<>
+          <p className="muted my-3 text-sm">Publish the consultation note and issue any needed prescription before finishing. Prescriptions are optional. A new prescription cannot be added after handover.</p>
+          {finishConfirm?<><p className="mb-3 text-sm">Finish this consultation and tell staff it is ready for checkout?</p><button type="button" className="btn" disabled={busy} onClick={finish}>{busy?"Finishing…":"Confirm finish consultation"}</button><button type="button" className="btn secondary ml-3" disabled={busy} onClick={()=>setFinishConfirm(false)}>Keep consultation open</button></>:<button type="button" className="btn" disabled={busy||!detail.note} onClick={()=>setFinishConfirm(true)}>Finish consultation</button>}
+        </>:<p className="muted mt-2 text-sm">This visit has already been completed by staff.</p>}
+      </section>
       <section className="mt-5 rounded-xl bg-[#f4f7f6] p-4" aria-label="Patient background"><h3 className="font-semibold">Patient background</h3><p className="muted my-2 text-xs">Latest patient-provided information, not a historical snapshot of this visit. Blank fields mean not provided.</p>{detail.background?<><dl className="space-y-3">{([["allergies","Allergies"],["medicines","Current medicines"],["conditions","Existing conditions"]] as const).map(([key,label])=><div key={key}><dt className="text-sm font-semibold">{label}</dt><dd className="muted whitespace-pre-wrap break-words text-sm">{detail.background?.[key]||"Not provided"}</dd></div>)}</dl><p className="muted mt-3 text-xs">{detail.background.updated_at?`Last saved ${visitTime(detail.background.updated_at)}`:"No medical background saved yet."}</p></>:<p className="muted">Background unavailable. Reopen this visit to retry.</p>}</section>
       <FollowUpRecommendation key={`follow-up-${detail.visit.id}`} api={api} visit={detail.visit} recommendation={detail.follow_up||null}/>
       <ConsultationHistory key={`history-${detail.visit.id}`} api={api} bookingId={detail.visit.id}/>

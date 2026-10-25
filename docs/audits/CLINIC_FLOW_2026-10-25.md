@@ -53,3 +53,12 @@ The exact prerequisite for finishing (published note, optional prescription, or 
 `tmp/check_clinic_flow_audit_data.py` confirms all 34 normal database tables remain unchanged. The unrelated `docs/ai/BASELINE_SETUP.md` modification retains SHA256 `9B298809528CE974274662E63C7C67C88939ED1B8E00AEBD063AD4A63DE19AEA` and is excluded from the audit commit.
 
 This does not replace the user’s deferred physical Android checks. The prior 313 API tests, 35 mobile helper tests, dashboard build/type checks and CSV checks were not rerun because this task changes no application code. No push, deployment, merge, Word report edit or real-authentication work.
+
+
+## F1 resolution: approved consultation handover (25 October 2026)
+
+The follow-up implementation adds assigned-doctor **Finish consultation** after a published consultation note. A prescription is optional and must be issued before finishing if needed. The staff queue shows **Ready for checkout** using a saved timestamp, without clinical findings. Staff still complete the visit and handle dispensing/billing; legacy completion stays available. Finishing blocks a new prescription but preserves retries of an already issued prescription.
+
+The isolated full-flow rehearsal was repeated with the new handover before staff completion. All nine stages passed: saved assessment, booking/link, staff call, doctor review/note/prescription, explicit handover, staff completion, single dispensing/bill/simulated payment, feedback/reopening/isolation and report reconciliation. Stock changed 21 to 19 once and the RM40 bill/payment was recorded once. Raw evidence: `tmp/clinic-flow-handover-recheck-result.json`. F1 is resolved by this implementation; the earlier audit evidence above describes the pre-change behaviour.
+
+All 318 API tests, final dashboard build and workspace type checks passed. Browser QA on a separate copy also confirmed a consultation-only handover and staff completion. All 34 existing normal database tables remain unchanged; the migration adds only an empty `consultation_handoffs` table. Physical Android checks remain deferred. No push, deploy or merge.
