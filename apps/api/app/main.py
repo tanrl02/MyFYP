@@ -338,6 +338,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def read_displayed_notifications(payload: NotificationBatchReadInput,who=Depends(patient)):
         return run(lambda: store.read_notifications(payload.notification_ids,who))
 
+    @api.post('/notifications/{notification_id}/unread')
+    def unread_notification(notification_id: str,who=Depends(patient)):
+        return run(lambda: store.unread_notification(notification_id,who))
+
     @api.get('/bookings/{booking_id}/details')
     def visit_details(booking_id: str,who=Depends(patient)):
         return run(lambda: store.visit_details(booking_id,who))

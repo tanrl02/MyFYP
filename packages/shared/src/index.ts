@@ -118,6 +118,7 @@ export class DemoApi {
   bookings() { return this.request<Booking[]>("/bookings"); }
   notifications(cursor?:string) { return this.request<NotificationInbox>(`/notifications${cursor?`?cursor=${encodeURIComponent(cursor)}`:""}`); }
   readNotification(id:string) { return this.request<PatientNotification>(`/notifications/${encodeURIComponent(id)}/read`,{}); }
+  unreadNotification(id:string) { return this.request<{item:PatientNotification;unread_count:number}>(`/notifications/${encodeURIComponent(id)}/unread`,{}); }
   readDisplayedNotifications(ids:string[]) { return this.request<{items:PatientNotification[];marked_count:number;unread_count:number}>("/notifications/read-displayed",{notification_ids:ids}); }
   visitDetails(id: string) { return this.request<VisitDetails>(`/bookings/${encodeURIComponent(id)}/details`); }
   book(slotId: string, requestId: string) { return this.request<Booking>("/bookings", { slot_id: slotId, request_id: requestId }); }

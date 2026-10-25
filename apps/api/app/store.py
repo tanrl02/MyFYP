@@ -644,6 +644,24 @@ class Store:
                 db.execute('UPDATE patient_notifications SET read_at=? WHERE id=?',(datetime.now(timezone.utc).isoformat(),notification_id))
             return dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
 
+    def unread_notification(self, notification_id, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            now=datetime.now(timezone.utc)
+            window=(now.isoformat(),(now+timedelta(hours=24)).isoformat())
+            row=db.execute(f'''SELECT n.* FROM patient_notifications n
+                WHERE n.id=? AND n.patient_id=? AND {NOTIFICATION_VISIBLE}''',(notification_id,patient,*window)).fetchone()
+            if not row:
+                raise RuleError('Notification unavailable for this patient.',404)
+            if row['read_at']:
+                db.execute('UPDATE patient_notifications SET read_at=NULL WHERE id=?',(notification_id,))
+            saved=dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
+            unread=db.execute(f'''SELECT COUNT(*) FROM patient_notifications n
+                WHERE n.patient_id=? AND n.read_at IS NULL AND {NOTIFICATION_VISIBLE}''',(patient,*window)).fetchone()[0]
+            return {'item':saved,'unread_count':unread}
+
     def read_notifications(self, notification_ids, patient):
         if patient not in PATIENTS:
             raise RuleError('Patient identity required.',403)
