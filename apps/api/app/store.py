@@ -2006,4 +2006,9 @@ class Store:
             db.execute("UPDATE invoices SET status='paid',paid_at=?,payment_mode='simulation' WHERE id=?",
                        (datetime.now(timezone.utc).isoformat(), invoice_id))
             self.event(db, row['booking_id'], actor, 'payment-simulated')
+            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
+            total=invoice['total_cents']
+            self.notify(db,visit['patient_id'],'payment_recorded',invoice_id,row['booking_id'],'Payment recorded · simulation',
+                        f"A simulated payment of RM {total//100}.{total%100:02d} was recorded for {token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Receipt {invoice_id[:8]}. Open Care & bills to view the paid bill and receipt details. No money was transferred.")
             return self.invoice(db, row['booking_id'])
