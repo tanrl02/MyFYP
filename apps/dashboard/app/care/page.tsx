@@ -7,10 +7,13 @@ import PaymentReview from "./PaymentReview";
 import BillReview from "./BillReview";
 import DispensingReview from "./DispensingReview";
 import DispensingHistory from "./DispensingHistory";
+import { CheckoutTarget, readCheckoutTarget } from "../checkoutNavigation";
 import CheckoutChecklist from "./CheckoutChecklist";
 
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function CarePage() {
+  const [checkoutTarget,setCheckoutTarget]=useState<CheckoutTarget|null>(null);
+  useEffect(()=>{if(readCheckoutTarget(window.location.search))setActor("staff-demo");},[]);
   const [actor, setActor] = useState<DemoActor>("doctor-lim");
   const api = useMemo(() => new DemoApi(base, actor), [actor]);
   const [records, setRecords] = useState<Care[]>([]);
@@ -43,7 +46,9 @@ export default function CarePage() {
   const staff = actor === "staff-demo";
   useEffect(() => {
     let active = true, fetching = false;
-    setRecords([]); setCatalog([]); setCareSort("newest"); setCareFilter("all"); setCareDoctor("all"); setCareDate(""); setCareSearch(""); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
+    const target=actor==="staff-demo"?readCheckoutTarget(window.location.search):null;
+    setCheckoutTarget(target);
+    setRecords([]); setCatalog([]); setCareSort("newest"); setCareFilter("all"); setCareDoctor((target?.doctor as "doctor-lim"|"doctor-anita")||"all"); setCareDate(target?.date||""); setCareSearch(""); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
     async function load() {
       if (fetching) return; fetching = true;
       try {
@@ -138,11 +143,12 @@ export default function CarePage() {
       <p className="muted mt-2 text-sm">Counts follow the patient search, doctor and date above, across all work statuses. Ready for checkout means the doctor has finished and staff have not completed the visit. A visit can need more than one step. Choose a count to filter the care list.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{workload.map(({filter,label})=><button key={filter} className={`btn ${careFilter===filter?"":"secondary"} flex flex-col gap-2`} disabled={busy} aria-label={`${label}: ${scopedVisits.filter(record=>matchesWork(record,filter)).length} visits`} aria-pressed={careFilter===filter} onClick={()=>selectCareFilter(filter)}><span>{label}</span><strong className="text-2xl">{scopedVisits.filter(record=>matchesWork(record,filter)).length}</strong></button>)}</div>
     </section>:null}
+    {staff&&!loading&&checkoutTarget?<section aria-label="Returned checkout visit" className="panel mb-6"><h2 className="font-semibold">Returned from patient queue</h2><p className="mt-2 text-sm">{visits.some(r=>r.visit.id===checkoutTarget.visit)?"The checkout visit is highlighted below. Continue with its dispensing and billing actions.":"The linked visit is not in the current care list. Reset filters to view other visits, or return to the patient queue to check its status."}</p></section>:null}
     {error && <div role="alert" className="mb-5 rounded-xl bg-red-50 p-4 text-red-800">{error}</div>}
     {notice && <div role="status" className="mb-5 rounded-xl bg-emerald-50 p-4 text-emerald-800">{notice}</div>}
     {loading && <p className="muted">Loading saved visits…</p>}
     {!loading&&visits.length===0&&<div className="panel"><h2 className="font-semibold">{staff&&consultationVisits.length>0?(careDoctor!=="all"?"No visits match the selected doctor and care filters.":careDate?"No visits match the selected date and care filters.":careSearchTerm?"No visits match your search and care-list filter.":careFilter==="checkout"?"No visits ready for checkout.":careFilter==="dispensing"?"No prescriptions awaiting dispensing.":careFilter==="billing"?"No completed visits awaiting a bill.":"No unpaid bills."):"No consultation visits yet"}</h2><p className="muted mt-2">{staff&&consultationVisits.length>0?(careDoctor!=="all"?"Choose All doctors or adjust the date, search and care-list filter.":careDate?"Choose All dates, clear search or change the care-list filter.":careSearchTerm?"Clear search or choose a different care-list filter.":"Choose All to view the other consultation visits."):"Book and call a patient from the queue, then choose the assigned doctor here."}</p></div>}
-    <div className="grid gap-6">{visits.map(({ visit, prescription, invoice }) => <section key={visit.id} className="panel">
+    <div className="grid gap-6">{visits.map(({ visit, prescription, invoice }) => <section key={visit.id} className={`panel ${staff&&checkoutTarget?.visit===visit.id?"outline outline-2 outline-[#176f5e]":""}`}>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-semibold">{queueToken(visit)} · {visit.patient_name}</h2><p className="muted mt-1 text-sm">{visit.doctor_name} · {visitTime(visit.starts_at)}</p></div><span className="badge">{visit.status}</span></div>
       {staff ? <CheckoutChecklist record={{visit,prescription,invoice}} /> : null}
       <div className="grid gap-6 md:grid-cols-2"><div><h3 className="mb-3 font-semibold">Prescription</h3>

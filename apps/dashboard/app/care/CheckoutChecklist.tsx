@@ -1,4 +1,5 @@
 import { Care } from "@smart-skin/shared";
+import { checkoutLink, visitCheckoutTarget } from "../checkoutNavigation";
 
 export default function CheckoutChecklist({ record }: { record: Care }) {
   const { visit, prescription, invoice } = record;
@@ -31,7 +32,7 @@ export default function CheckoutChecklist({ record }: { record: Care }) {
       <dd className={`mt-1 text-sm ${step.done ? "text-[#176f5e]" : "muted"}`}>{step.status}</dd>
     </div>)}</dl>
     <p className="text-sm"><strong>{completed && !needsDispensing && invoice?.status === "paid" ? "Checkout: " : "Next: "}</strong>{next}</p>
-    {!completed ? <a className="mt-2 inline-block text-sm font-semibold underline" href="/">Open patient queue</a> : null}
+    {!completed ? <a className="mt-2 inline-block text-sm font-semibold underline" href={checkoutLink("/", visitCheckoutTarget(visit))}>Open patient queue</a> : null}
     {!handedOver && completed ? <p className="muted mt-2 text-xs">Staff completed this visit without a recorded doctor handover. Its saved dispensing, bill and payment remain valid.</p> : null}
   </section>;
 }
