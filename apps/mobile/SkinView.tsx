@@ -9,7 +9,7 @@ import SharingView from "./SharingView";
 import AssessmentResult from "./AssessmentResult";
 import SymptomsForm,{emptySymptoms} from "./SymptomsForm";
 import BookingDateFilter from "./BookingDateFilter";
-import {filterAssessmentHistory,sortAssessmentHistory,assessmentOrderLabels,AssessmentOrder} from "./patientAssessmentFilter";
+import {filterAssessmentHistory,sortAssessmentHistory,assessmentOrderLabels,AssessmentOrder,assessmentSourceLabels,AssessmentSource} from "./patientAssessmentFilter";
 type Draft = { uri: string; mime: string; file?: globalThis.File; request: string; local?: File };
 function photoForm(photo:Draft) {
   const form=new FormData();
@@ -30,7 +30,8 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const [historyDate,setHistoryDate]=useState<string|null>(null);
   const [historyQuery,setHistoryQuery]=useState("");
   const [historyOrder,setHistoryOrder]=useState<AssessmentOrder>("newest");
-  const visibleHistory=sortAssessmentHistory(filterAssessmentHistory(history,historyDate,historyQuery),historyOrder);
+  const [historySource,setHistorySource]=useState<AssessmentSource>("all");
+  const visibleHistory=sortAssessmentHistory(filterAssessmentHistory(history,historyDate,historyQuery,historySource),historyOrder);
   const [result, setResult] = useState<Assessment | null>(null);
   const [busy, setBusy] = useState(false);
   const [checking,setChecking]=useState(false);
@@ -134,12 +135,15 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
     <TextInput accessibilityLabel="Search assessment history by body area or symptom description" placeholder="Body area or description, e.g. forearm" value={historyQuery} onChangeText={setHistoryQuery} editable={!busy} autoCapitalize="none" autoCorrect={false} maxLength={100} style={styles.search}/>
     <Pressable accessibilityRole="button" disabled={busy||!historyQuery} style={(busy||!historyQuery)&&styles.disabled} onPress={()=>setHistoryQuery("")}><Text style={styles.link}>Clear assessment search</Text></Pressable>
     <BookingDateFilter key={historyDate||"all"} value={historyDate} onChange={setHistoryDate} busy={busy} allowPast title="Assessment saved date" monthContext="assessment" calendarHint="Choose the Malaysia date when the assessment was saved. This filters the history list only."/>
+    <Text style={styles.subtitle}>Assessment source</Text>
+    <View accessibilityRole="radiogroup" accessibilityLabel="Assessment history source" style={styles.row}>{(Object.keys(assessmentSourceLabels) as AssessmentSource[]).map(source=><Pressable key={source} accessibilityRole="radio" aria-checked={historySource===source} accessibilityState={{checked:historySource===source,disabled:busy}} disabled={busy} onPress={()=>setHistorySource(source)} style={[styles.orderChoice,historySource===source&&styles.activeOrder,busy&&styles.disabled]}><Text style={styles.link}>{assessmentSourceLabels[source]}</Text></Pressable>)}</View>
+    <Text style={styles.muted}>Filter loaded history by how each assessment was created.</Text>
     <Text style={styles.subtitle}>Assessment order</Text>
     <View accessibilityRole="radiogroup" accessibilityLabel="Assessment history order" style={styles.row}>{(Object.keys(assessmentOrderLabels) as AssessmentOrder[]).map(order=><Pressable key={order} accessibilityRole="radio" aria-checked={historyOrder===order} accessibilityState={{checked:historyOrder===order,disabled:busy}} disabled={busy} onPress={()=>setHistoryOrder(order)} style={[styles.orderChoice,historyOrder===order&&styles.activeOrder,busy&&styles.disabled]}><Text style={styles.link}>{assessmentOrderLabels[order]}</Text></Pressable>)}</View>
     <Text style={styles.muted}>Sorted by saved time within the latest 100 loaded assessments. Clearing search or date keeps your chosen order.</Text>
     <Text accessibilityLiveRegion="polite" style={styles.muted}>Showing {visibleHistory.length} of {history.length} loaded assessments</Text>
     {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text>{item.symptoms?<><Text style={styles.muted}>Body area: {item.symptoms.body_area}</Text>{item.symptoms.description?<Text numberOfLines={2} style={styles.muted}>{item.symptoms.description}</Text>:null}</>:<Text style={styles.muted}>No symptom details recorded.</Text>}<Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
-    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search and date. Clear assessment search or use Show all dates to see more records.</Text>:null}
+    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search, date and source. Clear assessment search, use Show all dates or choose All sources to see more records.</Text>:null}
     {!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
   </View>;
 }

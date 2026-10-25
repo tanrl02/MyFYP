@@ -2,6 +2,8 @@ import type {Assessment} from "@smart-skin/shared";
 
 export const assessmentOrderLabels={newest:"Newest first",oldest:"Oldest first"} as const;
 export type AssessmentOrder=keyof typeof assessmentOrderLabels;
+export const assessmentSourceLabels={all:"All sources",experimental_ai:"Experimental AI",simulation:"Simulation"} as const;
+export type AssessmentSource=keyof typeof assessmentSourceLabels;
 
 export function sortAssessmentHistory(items:Assessment[],order:AssessmentOrder):Assessment[]{
   return [...items].sort((a,b)=>{
@@ -12,9 +14,10 @@ export function sortAssessmentHistory(items:Assessment[],order:AssessmentOrder):
   });
 }
 
-export function filterAssessmentHistory(items:Assessment[],date:string|null,query=""):Assessment[]{
+export function filterAssessmentHistory(items:Assessment[],date:string|null,query="",source:AssessmentSource="all"):Assessment[]{
   const search=query.trim().toLowerCase();
   return items.filter(item=>{
+    if(source!=="all"&&item.origin!==source)return false;
     if(search&&!item.symptoms?.body_area.toLowerCase().includes(search)&&!item.symptoms?.description?.toLowerCase().includes(search))return false;
     if(!date)return true;
     const saved=Date.parse(item.created_at);

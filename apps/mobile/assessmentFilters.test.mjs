@@ -95,3 +95,37 @@ test("assessment ordering respects combined search/date and refreshed saved time
   assert.deepEqual(sortAssessmentHistory(filterAssessmentHistory(refreshed,"2026-10-18","arm"),"oldest").map(n=>n.id),["new","old"]);
   assert.deepEqual(filtered.map(n=>n.id),["new","old"]);
 });
+
+
+test("assessment source filters use saved origin metadata and preserve all-source records",()=>{
+  const items=[
+    {id:"ai",origin:"experimental_ai",created_at:"2026-10-18T01:00:00Z"},
+    {id:"sim",origin:"simulation",created_at:"2026-10-18T02:00:00Z"},
+    {id:"unknown",origin:"future_source",created_at:"2026-10-18T03:00:00Z"}
+  ];
+  const before=JSON.stringify(items);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","experimental_ai").map(n=>n.id),["ai"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","simulation").map(n=>n.id),["sim"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","all"),items);
+  assert.deepEqual(filterAssessmentHistory(items,null),items);
+  assert.deepEqual(filterAssessmentHistory([],null,"","simulation"),[]);
+  assert.equal(JSON.stringify(items),before);
+});
+
+test("assessment source combines with search, Malaysia date, order and refreshed origin",()=>{
+  const items=[
+    {id:"new",origin:"experimental_ai",created_at:"2026-10-18T04:00:00Z",symptoms:{body_area:"Arm",description:""}},
+    {id:"sim",origin:"simulation",created_at:"2026-10-18T03:00:00Z",symptoms:{body_area:"Arm",description:""}},
+    {id:"old",origin:"experimental_ai",created_at:"2026-10-17T16:00:00Z",symptoms:{body_area:"Leg",description:"Arm test"}},
+    {id:"previous",origin:"experimental_ai",created_at:"2026-10-17T15:59:59Z",symptoms:{body_area:"Arm",description:""}}
+  ];
+  const before=JSON.stringify(items);
+  const filtered=filterAssessmentHistory(items,"2026-10-18","  ARM  ","experimental_ai");
+  assert.deepEqual(sortAssessmentHistory(filtered,"oldest").map(n=>n.id),["old","new"]);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18","arm","simulation").map(n=>n.id),["sim"]);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18","missing","simulation"),[]);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18","arm","all").map(n=>n.id),["new","sim","old"]);
+  const refreshed=items.map(n=>n.id==="sim"?{...n,origin:"experimental_ai"}:n);
+  assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm","simulation"),[]);
+  assert.equal(JSON.stringify(items),before);
+});
