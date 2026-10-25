@@ -97,6 +97,7 @@ export default function CareView({ patient, visitId, onBack, onBusy, onNavigate 
       <Pressable accessibilityRole="button" disabled={busy} onPress={() => openConsultation(visit.id)}><Text style={styles.link}>View visit details →</Text></Pressable>
       <Text style={styles.section}>Prescription</Text>
       {prescription ? <><Text style={styles.status}>{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</Text>
+        {(prescription.version??1)>1?<Text style={styles.status}>Directions corrected · revision {prescription.version}{prescription.directions_updated_at?` · ${prescriptionTime(prescription.directions_updated_at)}`:""}</Text>:null}
         <View style={styles.prescriptionDates}>
           <Text style={styles.bold}>Prescription dates · Malaysia time</Text>
           <Text style={styles.muted}>Issued: {prescriptionTime(prescription.created_at)}</Text>

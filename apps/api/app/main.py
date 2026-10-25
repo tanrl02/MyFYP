@@ -100,6 +100,17 @@ class PrescriptionItemInput(BaseModel):
 class PrescriptionInput(BaseModel):
     items: list[PrescriptionItemInput] = Field(min_length=1, max_length=10)
 
+class PrescriptionDirectionItemInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    medicine_id: str = Field(min_length=1,max_length=100)
+    directions: str = Field(min_length=1,max_length=300,pattern=r'\S')
+
+class PrescriptionDirectionsInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    version: int = Field(strict=True,ge=1)
+    reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+    items: list[PrescriptionDirectionItemInput] = Field(min_length=1,max_length=10)
+
 class ShareInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
     patient_message: str = Field(max_length=1000)
@@ -199,6 +210,7 @@ class DispensingAllocation(BaseModel):
 class DispensingInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     allocations: list[DispensingAllocation] | None = Field(default=None,min_length=1,max_length=100)
+    prescription_version: int | None = Field(default=None,strict=True,ge=1)
 
 class BatchHoldInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
@@ -562,13 +574,21 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def prescribe(booking_id: str, payload: PrescriptionInput, who=Depends(doctor)):
         return run(lambda: store.issue_prescription(booking_id, who, [i.model_dump() for i in payload.items]))
 
+    @api.get('/visits/{booking_id}/prescription/directions-history')
+    def prescription_directions_history(booking_id: str, who=Depends(doctor)):
+        return run(lambda: store.prescription_directions_history(booking_id,who))
+
+    @api.post('/visits/{booking_id}/prescription/directions')
+    def correct_prescription_directions(booking_id: str, payload: PrescriptionDirectionsInput, who=Depends(doctor)):
+        return run(lambda: store.correct_prescription_directions(booking_id,who,payload.version,payload.reason,[item.model_dump() for item in payload.items]))
+
     @api.get('/prescriptions/{prescription_id}/stock-sources')
     def dispensing_stock(prescription_id: str,who=Depends(staff)):
         return run(lambda: store.dispensing_stock(prescription_id))
 
     @api.post('/prescriptions/{prescription_id}/dispense')
     def dispense(prescription_id: str, payload: DispensingInput=DispensingInput(), who=Depends(staff)):
-        return run(lambda: store.dispense(prescription_id, who,[part.model_dump() for part in payload.allocations] if payload.allocations is not None else None))
+        return run(lambda: store.dispense(prescription_id, who,[part.model_dump() for part in payload.allocations] if payload.allocations is not None else None,payload.prescription_version))
 
     @api.get('/patient-background')
     def background(who=Depends(patient)):

@@ -90,6 +90,11 @@ class Store:
                   prescription_id TEXT NOT NULL REFERENCES prescriptions(id), medicine_id TEXT NOT NULL REFERENCES medicines(id),
                   quantity INTEGER NOT NULL CHECK(quantity>0), directions TEXT NOT NULL,
                   PRIMARY KEY(prescription_id,medicine_id));
+                CREATE TABLE IF NOT EXISTS prescription_direction_revisions (
+                  id TEXT PRIMARY KEY, prescription_id TEXT NOT NULL REFERENCES prescriptions(id),
+                  version INTEGER NOT NULL, doctor_id TEXT NOT NULL, reason TEXT NOT NULL,
+                  previous_directions_json TEXT NOT NULL, directions_json TEXT NOT NULL,
+                  created_at TEXT NOT NULL, UNIQUE(prescription_id,version));
                 CREATE TABLE IF NOT EXISTS invoices (
                   id TEXT PRIMARY KEY, booking_id TEXT NOT NULL UNIQUE REFERENCES bookings(id),
                   total_cents INTEGER NOT NULL CHECK(total_cents>=0), status TEXT NOT NULL CHECK(status IN ('unpaid','paid')),
@@ -1857,13 +1862,65 @@ class Store:
             return self.consultation_record(db,booking_id,doctor)
 
     def prescription(self, db, booking_id):
-        row = db.execute('SELECT * FROM prescriptions WHERE booking_id=?', (booking_id,)).fetchone()
-        if not row:
+        # One statement keeps the reviewed revision and its directions in the same read snapshot.
+        rows=db.execute('''SELECT p.*,i.medicine_id,i.quantity,i.directions,i.name,i.price_cents,i.strength,i.form,
+            COALESCE(r.version,1) AS version,r.created_at AS directions_updated_at FROM prescriptions p
+            LEFT JOIN prescription_items i ON i.prescription_id=p.id
+            LEFT JOIN prescription_direction_revisions r ON r.prescription_id=p.id
+              AND r.version=(SELECT MAX(version) FROM prescription_direction_revisions WHERE prescription_id=p.id)
+            WHERE p.booking_id=? ORDER BY i.medicine_id''',(booking_id,)).fetchall()
+        if not rows:
             return None
-        items = db.execute('''SELECT i.medicine_id,i.quantity,i.directions,i.name,i.price_cents,i.strength,i.form
-            FROM prescription_items i
-            WHERE i.prescription_id=? ORDER BY i.medicine_id''', (row['id'],)).fetchall()
-        return dict(row, items=[dict(i) for i in items])
+        header=('id','booking_id','doctor_id','status','created_at','dispensed_at','version','directions_updated_at')
+        fields=('medicine_id','quantity','directions','name','price_cents','strength','form')
+        return {key:rows[0][key] for key in header} | {'items':[
+            {key:row[key] for key in fields} for row in rows if row['medicine_id'] is not None]}
+
+    def prescription_directions_history(self, booking_id, doctor):
+        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            visit=self.record(db,booking_id)
+            if visit['doctor_id']!=doctor:raise RuleError('This visit belongs to another doctor.',403)
+            prescription=self.prescription(db,booking_id)
+            if not prescription:raise RuleError('Prescription not found.',404)
+            rows=db.execute('SELECT * FROM prescription_direction_revisions WHERE prescription_id=? ORDER BY version DESC',(prescription['id'],)).fetchall()
+            return {'prescription_id':prescription['id'],'version':prescription['version'],'revisions':[
+                {key:row[key] for key in ('id','version','doctor_id','reason','created_at')} |
+                {'doctor_name':DOCTORS[row['doctor_id']],'previous_directions':json.loads(row['previous_directions_json']),
+                 'directions':json.loads(row['directions_json'])} for row in rows]}
+
+    def correct_prescription_directions(self, booking_id, doctor, version, reason, items):
+        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        reason=reason.strip()
+        directions=sorted([{'medicine_id':item['medicine_id'],'directions':item['directions'].strip()} for item in items],key=lambda item:item['medicine_id'])
+        if not 1<=len(reason)<=300 or not directions or any(not 1<=len(item['directions'])<=300 for item in directions):
+            raise RuleError('Enter a correction reason and nonblank directions within 300 characters.',422)
+        if len({item['medicine_id'] for item in directions})!=len(directions):raise RuleError('Choose each prescription item only once.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            visit=self.record(db,booking_id)
+            if visit['doctor_id']!=doctor:raise RuleError('This visit belongs to another doctor.',403)
+            prescription=self.prescription(db,booking_id)
+            if not prescription:raise RuleError('Prescription not found.',404)
+            latest=db.execute('SELECT * FROM prescription_direction_revisions WHERE prescription_id=? ORDER BY version DESC LIMIT 1',(prescription['id'],)).fetchone()
+            if latest and version==prescription['version']-1 and latest['reason']==reason and json.loads(latest['directions_json'])==directions:
+                return prescription
+            if version!=prescription['version']:raise RuleError('Prescription directions changed. Reload and review the latest revision.')
+            if visit['status']!='called' or visit['consultation_finished_at']:
+                raise RuleError('Correct directions only while the consultation is open, before doctor handover.')
+            if prescription['status']!='issued' or self.invoice(db,booking_id):
+                raise RuleError('Directions cannot be corrected after dispensing or bill generation.')
+            previous=[{'medicine_id':item['medicine_id'],'directions':item['directions']} for item in prescription['items']]
+            if [item['medicine_id'] for item in previous]!=[item['medicine_id'] for item in directions]:
+                raise RuleError('Correct directions for the existing items only. Medicines and quantities cannot be changed.',422)
+            if previous==directions:raise RuleError('Change at least one direction before confirming.')
+            db.execute('INSERT INTO prescription_direction_revisions VALUES(?,?,?,?,?,?,?,?)',
+                (str(uuid4()),prescription['id'],version+1,doctor,reason,json.dumps(previous),json.dumps(directions),datetime.now(timezone.utc).isoformat()))
+            db.executemany('UPDATE prescription_items SET directions=? WHERE prescription_id=? AND medicine_id=?',
+                [(item['directions'],prescription['id'],item['medicine_id']) for item in directions])
+            self.event(db,booking_id,doctor,'prescription-directions-corrected')
+            return self.prescription(db,booking_id)
 
     def invoice(self, db, booking_id):
         row = db.execute('SELECT * FROM invoices WHERE booking_id=?', (booking_id,)).fetchone()
@@ -1934,10 +1991,10 @@ class Store:
             row=db.execute('SELECT booking_id FROM prescriptions WHERE id=?',(prescription_id,)).fetchone()
             if not row:raise RuleError('Prescription not found.',404)
             prescription=self.prescription(db,row['booking_id'])
-            return {'items':[sources(db,item['medicine_id']) for item in prescription['items']],
+            return {'prescription_version':prescription['version'],'items':[sources(db,item['medicine_id']) for item in prescription['items']],
                     'allocations':saved_allocations(db,prescription_id),'status':prescription['status']}
 
-    def dispense(self, prescription_id, staff, allocations=None):
+    def dispense(self, prescription_id, staff, allocations=None, prescription_version=None):
         if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
         from .batch_inventory import allocate,saved_allocations
         with self.connect() as db:
@@ -1946,6 +2003,8 @@ class Store:
             if not row:
                 raise RuleError('Prescription not found.', 404)
             prescription = self.prescription(db, row['booking_id'])
+            if (prescription_version is not None and prescription_version!=prescription['version']) or (prescription_version is None and prescription['version']>1):
+                raise RuleError('Prescription directions changed. Reload and review the latest revision before dispensing.')
             if prescription['status'] == 'dispensed':
                 if allocations is not None:
                     original=saved_allocations(db,prescription_id)

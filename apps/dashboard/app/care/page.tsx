@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Care, Invoice, DispensingAllocation, DemoActor, DemoApi, Medicine, PrescriptionItem, medicineLabel, money, queueToken, visitTime } from "@smart-skin/shared";
 
 import SimulatedReceipt from "./SimulatedReceipt";
@@ -8,6 +8,7 @@ import BillReview from "./BillReview";
 import DispensingReview from "./DispensingReview";
 import DispensingHistory from "./DispensingHistory";
 import { CheckoutTarget, readCheckoutTarget } from "../checkoutNavigation";
+import PrescriptionDirections from "./PrescriptionDirections";
 import PrescribingBackground from "./PrescribingBackground";
 import CheckoutChecklist from "./CheckoutChecklist";
 
@@ -17,6 +18,7 @@ export default function CarePage() {
   useEffect(()=>{if(readCheckoutTarget(window.location.search))setActor("staff-demo");},[]);
   const [actor, setActor] = useState<DemoActor>("doctor-lim");
   const api = useMemo(() => new DemoApi(base, actor), [actor]);
+  const careRevision=useRef(0);
   const [records, setRecords] = useState<Care[]>([]);
   const [catalog, setCatalog] = useState<Medicine[]>([]);
   const [careDoctor,setCareDoctor]=useState<"all"|"doctor-lim"|"doctor-anita">("all");
@@ -32,6 +34,7 @@ export default function CarePage() {
   const reviewedVisit=records.find(record=>record.visit.id===billReview?.visitId);
   const billReviewChanged=!!billReview&&(!reviewedVisit||reviewedVisit.visit.status!=="completed"||(reviewedVisit.prescription?.id??null)!==billReview.prescriptionId);
   const [dispensing,setDispensing]=useState("");
+  const [dispensingVersion,setDispensingVersion]=useState(1);
   const [medicineSearch,setMedicineSearch]=useState("");
   const searchTerm=medicineSearch.trim().toLowerCase();
   const visibleCatalog=catalog.filter(m=>!searchTerm||[m.name,m.strength,m.form].some(value=>value.toLowerCase().includes(searchTerm)));
@@ -51,11 +54,11 @@ export default function CarePage() {
     setCheckoutTarget(target);
     setRecords([]); setCatalog([]); setCareSort("newest"); setCareFilter("all"); setCareDoctor((target?.doctor as "doctor-lim"|"doctor-anita")||"all"); setCareDate(target?.date||""); setCareSearch(""); setReceipt(null); setDispensing(""); setPaymentReview(""); setBillReview(null); setSelected(""); setReview(null); setQuantities({}); setMedicineSearch(""); setNotice(""); setError(""); setLoading(true);
     async function load() {
-      if (fetching) return; fetching = true;
+      if (fetching) return; fetching = true; const revision=careRevision.current;
       try {
         const [care, medicines] = await Promise.all([api.care(), api.medicines()]);
-        if (active) { setRecords(care); setCatalog(medicines); setError(""); }
-      } catch (e) { if (active) setError(e instanceof Error ? e.message : "Cannot load visits."); }
+        if (active&&revision===careRevision.current) { setRecords(care); setCatalog(medicines); setError(""); }
+      } catch (e) { if (active&&revision===careRevision.current) setError(e instanceof Error ? e.message : "Cannot load visits."); }
       finally { fetching = false; if (active) setLoading(false); }
     }
     void load(); const timer = setInterval(load, 3000);
@@ -87,12 +90,13 @@ export default function CarePage() {
   async function confirmDispensing(record:Care,allocations:DispensingAllocation[]){
     const prescription=record.prescription;
     if(!staff||busy||!prescription||prescription.status!=="issued"||dispensing!==prescription.id)return;
+    if((prescription.version??1)!==dispensingVersion)throw new Error("Prescription directions changed. Cancel and review the latest revision.");
     if(prescription.items.some(item=>{const medicine=catalog.find(m=>m.id===item.medicine_id);return !medicine||medicine.stock<item.quantity;})){
       throw new Error("Insufficient or unavailable stock. Nothing was dispensed. Review the latest stock.");
     }
     setBusy(true);setError("");setNotice("");
     try{
-      await api.dispense(prescription.id,allocations);setDispensing("");setNotice("Dispensing saved. Stock and allocations deducted once.");
+      await api.dispense(prescription.id,allocations,dispensingVersion);setDispensing("");setNotice("Dispensing saved. Stock and allocations deducted once.");
       try{const [care,medicines]=await Promise.all([api.care(),api.medicines()]);setRecords(care);setCatalog(medicines);}catch{setError("Dispensing saved. Current stock refresh failed; retrying automatically.");}
     }finally{setBusy(false);}
   }
@@ -153,7 +157,7 @@ export default function CarePage() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-semibold">{queueToken(visit)} · {visit.patient_name}</h2><p className="muted mt-1 text-sm">{visit.doctor_name} · {visitTime(visit.starts_at)}</p></div><span className="badge">{visit.status}</span></div>
       {staff ? <CheckoutChecklist record={{visit,prescription,invoice}} /> : null}
       <div className="grid gap-6 md:grid-cols-2"><div><h3 className="mb-3 font-semibold">Prescription</h3>
-        {prescription ? <><span className="badge">{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</span><ul className="my-4 space-y-3">{prescription.items.map(item => <li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="muted text-sm">{item.directions}</p></li>)}</ul>{staff&&prescription.status==="dispensed"?<DispensingHistory api={api} prescription={prescription}/>:null}{staff && prescription.status === "issued" && (dispensing===prescription.id?<DispensingReview api={api} record={{visit,prescription,invoice}} catalog={catalog} busy={busy} onConfirm={allocations=>confirmDispensing({visit,prescription,invoice},allocations)} onCancel={()=>{setDispensing("");setError("");}}/>:<button className="btn" disabled={busy} onClick={()=>{setDispensing(prescription.id);setError("");}}>Review dispensing</button>)}</> : <>
+        {prescription ? <><span className="badge">{prescription.status === "dispensed" ? "Dispensed" : "Issued — awaiting dispensing"}</span>{(prescription.version??1)>1?<p className="my-3 text-sm text-[#176f5e]">Directions corrected · revision {prescription.version}{prescription.directions_updated_at?` · ${visitTime(prescription.directions_updated_at)}`:""}</p>:null}<ul className="my-4 space-y-3">{prescription.items.map(item => <li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="muted text-sm">{item.directions}</p></li>)}</ul>{!staff&&actor===visit.doctor_id?<PrescriptionDirections api={api} actor={actor} record={{visit,prescription,invoice}} busy={busy} onBusy={value=>{careRevision.current++;setBusy(value);}} onSaved={saved=>{setRecords(current=>current.map(row=>row.visit.id===visit.id?{...row,prescription:saved}:row));setNotice(`Directions correction saved · revision ${saved.version}. Staff must review the latest directions before dispensing.`);}}/>:null}{staff&&prescription.status==="dispensed"?<DispensingHistory api={api} prescription={prescription}/>:null}{staff && prescription.status === "issued" && (dispensing===prescription.id?<DispensingReview api={api} record={{visit,prescription,invoice}} catalog={catalog} busy={busy} reviewedVersion={dispensingVersion} onConfirm={allocations=>confirmDispensing({visit,prescription,invoice},allocations)} onCancel={()=>{setDispensing("");setError("");}}/>:<button className="btn" disabled={busy} onClick={()=>{setDispensingVersion(prescription.version??1);setDispensing(prescription.id);setError("");}}>Review dispensing</button>)}</> : <>
           <p className="muted mb-3 text-sm">No prescription issued.{visit.consultation_finished_at ? " The doctor has finished this consultation; a new prescription cannot be added." : invoice ? " This visit has been billed; new items cannot be added." : " Issue before generating a bill if items are needed."}</p>
           {!staff && !invoice && !visit.consultation_finished_at && selected !== visit.id && <button className="btn" disabled={busy} onClick={() => { setSelected(visit.id); setReview(null); setQuantities({}); setMedicineSearch(""); setDirections("Demo instructions only — not medical advice."); setError(""); }}>Create prescription</button>}
           {!staff && !visit.consultation_finished_at && selected === visit.id && <div className="rounded-xl bg-[#f4f7f6] p-4">{!staff&&visit.doctor_id===actor?<PrescribingBackground key={visit.id} api={api} actor={actor} visit={visit} busy={busy}/>:null}<fieldset disabled={busy||!!review}><p className="muted mb-3 text-sm">Issued items are fixed for this demo. Check quantities before saving.</p><label className="mb-3 block text-sm">Search prescription medicines<input type="search" disabled={busy} maxLength={100} value={medicineSearch} onChange={e=>setMedicineSearch(e.target.value)} placeholder="Name, strength or form" className="mt-2 w-full rounded-lg border border-[#ccdcd4] bg-white p-2"/></label><button className="btn secondary mb-3" disabled={busy||!medicineSearch} onClick={()=>setMedicineSearch("")}>Clear medicine search</button><p role="status" className="muted mb-3 text-sm">Showing {visibleCatalog.length} of {catalog.length} active medicines. Search keeps selected quantities.</p>{chosenItems.length?<div className="mb-3 rounded-lg border border-[#ccdcd4] bg-white p-3"><h4 className="font-semibold">Selected medicines ({chosenItems.length})</h4><ul className="mt-2 space-y-2">{chosenItems.map(([id,quantity])=>{const medicine=catalog.find(m=>m.id===id);return <li key={id}>{medicine?medicineLabel(medicine):"Unavailable medicine — cancel and reopen to review"} × {quantity}</li>;})}</ul></div>:<p className="muted mb-3 text-sm">No medicines selected yet.</p>}{visibleCatalog.length===0?<p className="mb-3 text-sm">{searchTerm?"No active medicines match your search. Clear search to view all choices.":"No active medicines available."}</p>:null}{visibleCatalog.map(m => <label key={m.id} className="mb-3 block text-sm">{medicineLabel(m)} · {money(m.price_cents)} · {m.stock} in stock<input aria-label={`Quantity ${m.id}`} className="mt-2 block w-full rounded-lg border border-[#ccdcd4] bg-white p-2" type="number" min="0" max="20" step="1" disabled={busy} value={quantities[m.id] || "0"} onChange={e => setQuantities(q => ({ ...q, [m.id]: e.target.value }))} /></label>)}<label className="block text-sm">Demo directions<textarea className="mt-2 w-full rounded-lg border border-[#ccdcd4] p-2" maxLength={300} disabled={busy} value={directions} onChange={e => setDirections(e.target.value)} /></label></fieldset>{review&&review.visitId===visit.id?<section aria-label="Prescription review" className="mt-4 rounded-lg border border-[#ccdcd4] bg-white p-4"><h4 className="font-semibold">Review prescription</h4><p className="my-3">{queueToken(visit)} · {visit.patient_name} · {visit.doctor_name} · {visitTime(visit.starts_at)}</p><ul className="my-3 space-y-3">{review.items.map(item=><li key={item.medicine_id}><strong>{medicineLabel(item)} × {item.quantity}</strong><p className="whitespace-pre-wrap break-words text-sm">{item.directions}</p></li>)}</ul><p className="muted my-3 text-sm">Confirming saves these quantities and directions as a fixed prescription. Staff will check stock when dispensing.</p>{reviewChanged?<p role="alert" className="my-3 text-red-800">Medicine details changed. Keep editing and review the current choices again.</p>:null}<div className="flex flex-wrap gap-3"><button className="btn" disabled={busy||reviewChanged} onClick={()=>confirmPrescription(visit.id)}>{busy?"Saving…":"Confirm issue prescription"}</button><button className="btn secondary" disabled={busy} onClick={()=>{setReview(null);setError("");}}>Keep editing prescription</button><button className="btn secondary" disabled={busy} onClick={()=>{setReview(null);setSelected("");setError("");}}>Cancel prescription</button></div></section>:<div className="mt-4 flex flex-wrap gap-3"><button className="btn" disabled={busy} onClick={() => reviewPrescription(visit.id)}>Review prescription</button><button className="btn secondary" disabled={busy} onClick={() => setSelected("")}>Cancel</button></div>}</div>}
