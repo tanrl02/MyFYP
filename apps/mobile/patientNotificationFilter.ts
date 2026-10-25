@@ -9,6 +9,7 @@ export const notificationTypeLabels = {
   review_published: "Doctor reviews",
   follow_up_recommended: "Follow-up recommendations",
   prescription_issued: "Prescriptions",
+  prescription_cancelled: "Prescription cancellations",
   bill_ready: "Bills",
   payment_recorded: "Payments",
 } as const;

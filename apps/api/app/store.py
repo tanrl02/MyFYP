@@ -1962,6 +1962,10 @@ class Store:
             db.execute('INSERT INTO prescription_cancellations VALUES(?,?,?,?,?)',
                 (prescription['id'],doctor,reason,version,datetime.now(timezone.utc).isoformat()))
             self.event(db,booking_id,doctor,'prescription-cancelled')
+            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
+            self.notify(db,visit['patient_id'],'prescription_cancelled',prescription['id'],booking_id,'Prescription cancelled',
+                        f"The prescription for {token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time) was cancelled. Open Care & bills to check its latest status. Cancelled items are retained for history and are not an active prescription.")
             return self.prescription(db,booking_id)
 
     def invoice(self, db, booking_id):
