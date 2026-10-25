@@ -125,7 +125,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   async function open(id: string) {
     if (busy) return; setBusy(true); setError("");
-    try { setResult(await api.assessment(id)); }
+    try { const saved=await api.assessment(id);setResult(saved);setHistory(current=>current.map(item=>item.id===id?{...item,review_summary:saved.review_summary}:item)); }
     catch (e) { setError(e instanceof Error ? e.message : "Cannot open assessment."); }
     finally { setBusy(false); }
   }
@@ -161,12 +161,14 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
     <Text accessibilityLiveRegion="polite" style={styles.muted}>Showing {visibleHistory.length} of {history.length} loaded assessments</Text>
     {olderError?<Text accessibilityRole="alert" style={styles.error}>{olderError}</Text>:null}
     {historyLoading?<Text style={styles.muted}>Loading assessment history…</Text>:nextCursor?<Pressable accessibilityRole="button" disabled={busy} onPress={loadOlder}><Text style={styles.link}>{olderError?"Retry older assessments":"Load older assessments"}</Text></Pressable>:historyLoaded?<Text style={styles.muted}>All available assessments loaded.</Text>:null}
-    {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text>{item.symptoms?<><Text style={styles.muted}>Body area: {item.symptoms.body_area}</Text>{item.symptoms.description?<Text numberOfLines={2} style={styles.muted}>{item.symptoms.description}</Text>:null}</>:<Text style={styles.muted}>No symptom details recorded.</Text>}<Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
+    <Text style={styles.muted}>Refresh history or reopen an assessment for the latest review counts.</Text>
+    {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text>{item.symptoms?<><Text style={styles.muted}>Body area: {item.symptoms.body_area}</Text>{item.symptoms.description?<Text numberOfLines={2} style={styles.muted}>{item.symptoms.description}</Text>:null}</>:<Text style={styles.muted}>No symptom details recorded.</Text>}{item.review_summary?<Text style={styles.reviewSummary}>{item.review_summary.published_reviews} published review{item.review_summary.published_reviews===1?"":"s"} · {item.review_summary.awaiting_reviews} share{item.review_summary.awaiting_reviews===1?"":"s"} awaiting review</Text>:<Text style={styles.muted}>Refresh history for review counts.</Text>}<Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
     {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search, date and source. Use Reset assessment filters to restore the full loaded history, or load older assessments to look further back.</Text>:null}
     {historyLoaded&&!historyLoading&&!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
   </View>;
 }
 const styles = StyleSheet.create({
+  reviewSummary:{color:"#176f5e",fontSize:13,fontWeight:"600",lineHeight:21,marginTop:8},
   orderChoice:{paddingHorizontal:14,borderWidth:1,borderColor:"#dce6e0",borderRadius:10,backgroundColor:"#e7efeb",marginBottom:10},activeOrder:{borderWidth:2,borderColor:"#176f5e"},
   search:{padding:12,borderWidth:1,borderColor:"#ccdcd4",borderRadius:10,color:"#19352e",backgroundColor:"white",marginTop:10},
   title: { fontSize: 23, fontWeight: "700", color: "#19352e", marginBottom: 8 }, subtitle: { fontSize: 16, fontWeight: "600", color: "#19352e", marginBottom: 8 },

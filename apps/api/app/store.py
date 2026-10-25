@@ -1434,6 +1434,19 @@ class Store:
             'origin': 'simulation', 'example_category': 'Acne (example only)',
             'message': 'No disease prediction was performed. Photo checks do not diagnose a condition.'}
 
+    def assessment_review_summaries(self, db, assessment_ids, patient):
+        if not assessment_ids:
+            return {}
+        placeholders=','.join('?' for _ in assessment_ids)
+        rows=db.execute(f'''SELECT s.assessment_id,COUNT(r.id) AS published_reviews,
+            SUM(CASE WHEN r.id IS NULL AND s.revoked_at IS NULL AND (s.booking_id IS NULL OR EXISTS (
+                SELECT 1 FROM bookings b JOIN slots sl ON sl.id=b.slot_id
+                WHERE b.id=s.booking_id AND b.patient_id=s.patient_id AND sl.doctor_id=s.doctor_id
+                    AND b.status NOT IN ('cancelled','missed'))) THEN 1 ELSE 0 END) AS awaiting_reviews
+            FROM assessment_shares s LEFT JOIN assessment_reviews r ON r.share_id=s.id
+            WHERE s.patient_id=? AND s.assessment_id IN ({placeholders}) GROUP BY s.assessment_id''',(patient,*assessment_ids)).fetchall()
+        return {row['assessment_id']:{'published_reviews':row['published_reviews'],'awaiting_reviews':row['awaiting_reviews']} for row in rows}
+
     def assessments(self, patient):
         return self.assessment_history(patient)['items']
 
@@ -1451,7 +1464,8 @@ class Store:
                 args+=(anchor['created_at'],anchor['created_at'],anchor['id'])
             rows=db.execute(f'''SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json
                 FROM assessments WHERE patient_id=?{boundary} ORDER BY created_at DESC,id DESC LIMIT 101''',args).fetchall()
-            return {'items':[self.assessment_metadata(row) for row in rows[:100]],
+            summaries=self.assessment_review_summaries(db,[row['id'] for row in rows[:100]],patient)
+            return {'items':[self.assessment_metadata(row) | {'review_summary':summaries.get(row['id'],{'published_reviews':0,'awaiting_reviews':0})} for row in rows[:100]],
                     'next_cursor':rows[99]['id'] if len(rows)>100 else None}
 
     def assessment(self, assessment_id, patient):
@@ -1460,7 +1474,8 @@ class Store:
             row = db.execute('SELECT * FROM assessments WHERE id=? AND patient_id=?', (assessment_id, patient)).fetchone()
             if row is None:
                 raise RuleError('Assessment not found for this patient.', 404)
-            return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii')}
+            summary=self.assessment_review_summaries(db,[assessment_id],patient).get(assessment_id,{'published_reviews':0,'awaiting_reviews':0})
+            return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii'),'review_summary':summary}
 
     def assessment_retry(self,patient,request_id,source_hash,symptoms=None):
         with self.connect() as db:
