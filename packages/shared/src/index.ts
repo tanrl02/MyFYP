@@ -7,7 +7,7 @@ export type Consultation = { visit: Booking; note: ConsultationNote | null; link
 export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; version:number; edited_at:string|null;edit_deadline:string;visit: Booking };
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
-export type NotificationInbox = {items:PatientNotification[];unread_count:number};
+export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
@@ -116,7 +116,7 @@ export class DemoApi {
   addSlot(body:{doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;request_id:string;duration_minutes?:number}) { return this.request<ManagedSlot>("/staff/slots",body); }
   closeSlot(id:string) { return this.request<ManagedSlot>(`/staff/slots/${encodeURIComponent(id)}/close`,{}); }
   bookings() { return this.request<Booking[]>("/bookings"); }
-  notifications() { return this.request<NotificationInbox>("/notifications"); }
+  notifications(cursor?:string) { return this.request<NotificationInbox>(`/notifications${cursor?`?cursor=${encodeURIComponent(cursor)}`:""}`); }
   readNotification(id:string) { return this.request<PatientNotification>(`/notifications/${encodeURIComponent(id)}/read`,{}); }
   readDisplayedNotifications(ids:string[]) { return this.request<{items:PatientNotification[];marked_count:number;unread_count:number}>("/notifications/read-displayed",{notification_ids:ids}); }
   visitDetails(id: string) { return this.request<VisitDetails>(`/bookings/${encodeURIComponent(id)}/details`); }

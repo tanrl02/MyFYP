@@ -81,7 +81,7 @@ class ReminderTests(unittest.TestCase):
         self.assertTrue(all(s==snapshots[0] for s in snapshots))
         item=snapshots[0]['items'][0]
         self.assertEqual(len(snapshots[0]['items']),1)
-        self.assertEqual(self.client.get('/notifications',headers=self.other).json(),{'items':[],'unread_count':0})
+        self.assertEqual(self.client.get('/notifications',headers=self.other).json(),{'items':[],'unread_count':0,'next_cursor':None})
         self.assertEqual(self.client.post(f"/notifications/{item['id']}/read",headers=self.other).status_code,404)
         for actor in (self.staff,{'X-Demo-Actor':'doctor-lim'}):
             self.assertEqual(self.client.get('/notifications',headers=actor).status_code,403)

@@ -327,8 +327,8 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return store.mine(who)
 
     @api.get('/notifications')
-    def notifications(who=Depends(patient)):
-        return store.notifications(who)
+    def notifications(cursor: Annotated[str | None,Query(min_length=1,max_length=100)]=None,who=Depends(patient)):
+        return run(lambda: store.notifications(who,cursor))
 
     @api.post('/notifications/{notification_id}/read')
     def read_notification(notification_id: str,who=Depends(patient)):

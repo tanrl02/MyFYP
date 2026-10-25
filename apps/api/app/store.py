@@ -599,7 +599,7 @@ class Store:
         db.execute('INSERT OR IGNORE INTO patient_notifications VALUES(?,?,?,?,?,?,?,?,NULL)',
                    (str(uuid4()),patient,kind,source_id,target_id,title,message,datetime.now(timezone.utc).isoformat()))
 
-    def notifications(self, patient):
+    def notifications(self, patient, cursor=None):
         if patient not in PATIENTS:
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
@@ -615,11 +615,20 @@ class Store:
                 local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
                 self.notify(db,patient,'appointment_reminder',visit['id'],visit['id'],'Upcoming appointment',
                             f"{token} with {DOCTORS[visit['doctor_id']]} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open the visit to check its latest details.")
-            rows=db.execute(f'''SELECT n.* FROM patient_notifications n WHERE n.patient_id=? AND {NOTIFICATION_VISIBLE}
-                ORDER BY n.created_at DESC,n.id DESC LIMIT 100''',(patient,*window)).fetchall()
+            boundary=''
+            args=(patient,*window)
+            if cursor is not None:
+                anchor=db.execute('SELECT created_at,id FROM patient_notifications WHERE id=? AND patient_id=?',(cursor,patient)).fetchone()
+                if not anchor:
+                    raise RuleError('Invalid notification cursor. Refresh newest notifications.',422)
+                boundary=' AND (n.created_at<? OR (n.created_at=? AND n.id<?))'
+                args+= (anchor['created_at'],anchor['created_at'],anchor['id'])
+            rows=db.execute(f'''SELECT n.* FROM patient_notifications n WHERE n.patient_id=? AND {NOTIFICATION_VISIBLE}{boundary}
+                ORDER BY n.created_at DESC,n.id DESC LIMIT 101''',args).fetchall()
             unread=db.execute(f'''SELECT COUNT(*) FROM patient_notifications n
                 WHERE n.patient_id=? AND n.read_at IS NULL AND {NOTIFICATION_VISIBLE}''',(patient,*window)).fetchone()[0]
-            return {'items':[dict(row) for row in rows],'unread_count':unread}
+            return {'items':[dict(row) for row in rows[:100]],'unread_count':unread,
+                    'next_cursor':rows[99]['id'] if len(rows)>100 else None}
 
     def read_notification(self, notification_id, patient):
         if patient not in PATIENTS:

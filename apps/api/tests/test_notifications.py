@@ -21,7 +21,7 @@ class NotificationTests(unittest.TestCase):
     def inbox(self,actor=None):return self.client.get('/notifications',headers=actor or self.patient)
 
     def test_queue_call_and_review_notifications_retry_and_reopen(self):
-        self.assertEqual(self.inbox().json(),{'items':[],'unread_count':0})
+        self.assertEqual(self.inbox().json(),{'items':[],'unread_count':0,'next_cursor':None})
         visit,slot=self.book();payload={'doctor_id':slot['doctor_id'],'clinic_date':slot['clinic_date']}
         self.assertEqual(self.client.post('/queue/call-next',headers=self.staff,json=payload).status_code,200)
         self.assertEqual(self.client.post('/queue/call-next',headers=self.staff,json=payload).status_code,409)
