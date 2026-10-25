@@ -1921,6 +1921,10 @@ class Store:
                 db.execute('INSERT INTO prescription_items(prescription_id,medicine_id,quantity,directions,name,price_cents,strength,form) VALUES(?,?,?,?,?,?,?,?)',
                            (prescription_id,item['medicine_id'],item['quantity'],item['directions'],medicine['name'],medicine['price_cents'],medicine['strength'],medicine['form']))
             self.event(db, booking_id, doctor, 'prescription-issued')
+            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
+            self.notify(db,visit['patient_id'],'prescription_issued',prescription_id,booking_id,'Prescription issued',
+                        f"A prescription was issued for {token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open Care & bills to view the saved medicines, directions and latest dispensing status.")
             return self.prescription(db, booking_id)
 
     def dispensing_stock(self, prescription_id):
