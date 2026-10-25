@@ -147,6 +147,7 @@ export class DemoApi {
   saveConsultationDraft(id:string,findings:string,followUp:string,version:number) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`,{findings,follow_up:followUp,version}); }
   publishConsultation(id: string, findings: string, followUp: string,draftVersion?:number) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp,draft_version:draftVersion }); }
   assessments() { return this.request<Assessment[]>("/assessments"); }
+  assessmentHistory(cursor?:string) { return this.request<{items:Assessment[];next_cursor:string|null}>(`/assessments/history${cursor?`?cursor=${encodeURIComponent(cursor)}`:""}`); }
   assessment(id: string) { return this.request<Assessment>(`/assessments/${encodeURIComponent(id)}`); }
   checkPhoto(body: FormData) { return this.request<PhotoCheck>("/photo-check", body,60000); }
   saveAssessment(body: FormData) { return this.request<Assessment>("/assessments", body,60000); }

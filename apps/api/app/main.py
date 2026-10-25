@@ -392,6 +392,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def assessments(who=Depends(patient)):
         return store.assessments(who)
 
+    @api.get('/assessments/history')
+    def assessment_history(cursor: Annotated[str | None,Query(min_length=1,max_length=100)]=None,who=Depends(patient)):
+        return run(lambda: store.assessment_history(who,cursor))
+
     @api.get('/assessments/{assessment_id}')
     def assessment(assessment_id: str, who=Depends(patient)):
         return run(lambda: store.assessment(assessment_id, who))

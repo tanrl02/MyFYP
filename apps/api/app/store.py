@@ -1435,9 +1435,24 @@ class Store:
             'message': 'No disease prediction was performed. Photo checks do not diagnose a condition.'}
 
     def assessments(self, patient):
+        return self.assessment_history(patient)['items']
+
+    def assessment_history(self, patient, cursor=None):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
         with self.connect() as db:
-            rows = db.execute('SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json FROM assessments WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (patient,)).fetchall()
-            return [self.assessment_metadata(row) for row in rows]
+            boundary=''
+            args=(patient,)
+            if cursor is not None:
+                anchor=db.execute('SELECT created_at,id FROM assessments WHERE id=? AND patient_id=?',(cursor,patient)).fetchone()
+                if not anchor:
+                    raise RuleError('Invalid assessment cursor. Refresh history and try again.',422)
+                boundary=' AND (created_at<? OR (created_at=? AND id<?))'
+                args+=(anchor['created_at'],anchor['created_at'],anchor['id'])
+            rows=db.execute(f'''SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json
+                FROM assessments WHERE patient_id=?{boundary} ORDER BY created_at DESC,id DESC LIMIT 101''',args).fetchall()
+            return {'items':[self.assessment_metadata(row) for row in rows[:100]],
+                    'next_cursor':rows[99]['id'] if len(rows)>100 else None}
 
     def assessment(self, assessment_id, patient):
         import base64

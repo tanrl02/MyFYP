@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
@@ -27,6 +27,8 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [history, setHistory] = useState<Assessment[]>([]);
+  const [nextCursor,setNextCursor]=useState<string|null>(null),[historyLoading,setHistoryLoading]=useState(true),[historyLoaded,setHistoryLoaded]=useState(false),[olderError,setOlderError]=useState("");
+  const historyRequest=useRef(false);
   const [historyDate,setHistoryDate]=useState<string|null>(null);
   const [historyQuery,setHistoryQuery]=useState("");
   const [historyOrder,setHistoryOrder]=useState<AssessmentOrder>("newest");
@@ -43,11 +45,24 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const [notice, setNotice] = useState("");
   const [denied, setDenied] = useState(false);
   useEffect(() => () => { if (draft?.local?.exists) draft.local.delete(); }, [draft]);
-  useEffect(() => { let active = true; api.assessments().then(data => { if (active) setHistory(data); }).catch(e => { if (active) setError(e.message); }); return () => { active = false; }; }, [api]);
+  useEffect(() => { let active = true; historyRequest.current=true; api.assessmentHistory().then(page => { if (active){setHistory(page.items);setNextCursor(page.next_cursor);setHistoryLoaded(true);} }).catch(e => { if (active) setError(e.message); }).finally(()=>{if(active){historyRequest.current=false;setHistoryLoading(false);}}); return () => { active = false; }; }, [api]);
   useEffect(()=>{if(!initialAssessmentId)return;let active=true;setBusy(true);setResult(null);api.assessment(initialAssessmentId).then(data=>{if(active)setResult(data);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setBusy(false);});return()=>{active=false;};},[api,initialAssessmentId]);
   async function refresh() {
-    try { setHistory(await api.assessments()); setError(""); }
+    if(busy||historyRequest.current)return;
+    historyRequest.current=true;setBusy(true);setHistoryLoading(true);setOlderError("");
+    try { const page=await api.assessmentHistory();setHistory(page.items);setNextCursor(page.next_cursor);setHistoryLoaded(true);setError(""); }
     catch (e) { setError(e instanceof Error ? e.message : "Cannot load history."); }
+    finally{historyRequest.current=false;setBusy(false);setHistoryLoading(false);}
+  }
+  async function loadOlder(){
+    if(busy||historyRequest.current||!nextCursor)return;
+    historyRequest.current=true;setBusy(true);setHistoryLoading(true);setOlderError("");
+    try{
+      const page=await api.assessmentHistory(nextCursor);
+      setHistory(current=>[...current,...page.items.filter(item=>!current.some(existing=>existing.id===item.id))]);
+      setNextCursor(page.next_cursor);
+    }catch(e){setOlderError(e instanceof Error?e.message:"Cannot load older assessments. Try again.");}
+    finally{historyRequest.current=false;setBusy(false);setHistoryLoading(false);}
   }
   function discard() {
     if (draft?.local?.exists) draft.local.delete();
@@ -129,7 +144,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       {photoCheck&&!photoCheck.accepted?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>pick(true)}><Text style={styles.link}>Retake photo</Text></Pressable>:null}
       <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted||!symptomsComplete} style={[styles.button,(!photoCheck?.accepted||!symptomsComplete)&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
     {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Doctor suggestions use the saved result and staff-entered expertise. You can choose a different concern. Booking does not share the assessment; authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}
-    <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Your latest 100 saved assessments. Photos survive app/server restarts because they are saved in the shared database.</Text>
+    <View style={[styles.row, { marginTop: 24 }]}><Text style={styles.title}>Assessment history</Text><Pressable accessibilityRole="button" disabled={busy||historyLoading} onPress={refresh}><Text style={styles.link}>Refresh history</Text></Pressable></View><Text style={styles.muted}>Saved assessments load 100 at a time. Search, date, source and ordering apply to the loaded list. Refresh history returns to the latest 100 and keeps your filters and order.</Text>
     <Text style={[styles.subtitle,{marginTop:16}]}>Search symptom details</Text>
     <Text style={styles.muted}>Search your saved body area or optional symptom description. Search and date filters apply to the loaded history list.</Text>
     <TextInput accessibilityLabel="Search assessment history by body area or symptom description" placeholder="Body area or description, e.g. forearm" value={historyQuery} onChangeText={setHistoryQuery} editable={!busy} autoCapitalize="none" autoCorrect={false} maxLength={100} style={styles.search}/>
@@ -140,13 +155,15 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
     <Text style={styles.muted}>Filter loaded history by how each assessment was created.</Text>
     <Text style={styles.subtitle}>Assessment order</Text>
     <View accessibilityRole="radiogroup" accessibilityLabel="Assessment history order" style={styles.row}>{(Object.keys(assessmentOrderLabels) as AssessmentOrder[]).map(order=><Pressable key={order} accessibilityRole="radio" aria-checked={historyOrder===order} accessibilityState={{checked:historyOrder===order,disabled:busy}} disabled={busy} onPress={()=>setHistoryOrder(order)} style={[styles.orderChoice,historyOrder===order&&styles.activeOrder,busy&&styles.disabled]}><Text style={styles.link}>{assessmentOrderLabels[order]}</Text></Pressable>)}</View>
-    <Text style={styles.muted}>Sorted by saved time within the latest 100 loaded assessments. Clearing search or date keeps your chosen order.</Text>
+    <Text style={styles.muted}>Sorted by saved time within the loaded assessments. Clearing search or date keeps your chosen order.</Text>
     <Pressable accessibilityRole="button" disabled={busy||(!historyQuery&&!historyDate&&historySource==="all")} style={(busy||(!historyQuery&&!historyDate&&historySource==="all"))&&styles.disabled} onPress={()=>{if(busy)return;setHistoryQuery("");setHistoryDate(null);setHistorySource("all");}}><Text style={styles.link}>Reset assessment filters</Text></Pressable>
     <Text style={styles.muted}>Clear search, show all dates and restore All sources. Keeps your chosen order.</Text>
     <Text accessibilityLiveRegion="polite" style={styles.muted}>Showing {visibleHistory.length} of {history.length} loaded assessments</Text>
+    {olderError?<Text accessibilityRole="alert" style={styles.error}>{olderError}</Text>:null}
+    {historyLoading?<Text style={styles.muted}>Loading assessment history…</Text>:nextCursor?<Pressable accessibilityRole="button" disabled={busy} onPress={loadOlder}><Text style={styles.link}>{olderError?"Retry older assessments":"Load older assessments"}</Text></Pressable>:historyLoaded?<Text style={styles.muted}>All available assessments loaded.</Text>:null}
     {visibleHistory.map(item => <Pressable accessibilityRole="button" accessibilityLabel={`Open assessment ${item.id.slice(0, 8)}`} key={item.id} disabled={busy} style={styles.card} onPress={() => open(item.id)}><Text style={styles.subtitle}>{visitTime(item.created_at)}</Text><Text style={styles.muted}>{assessmentOrigin(item)} · {assessmentCategory(item)}</Text>{item.symptoms?<><Text style={styles.muted}>Body area: {item.symptoms.body_area}</Text>{item.symptoms.description?<Text numberOfLines={2} style={styles.muted}>{item.symptoms.description}</Text>:null}</>:<Text style={styles.muted}>No symptom details recorded.</Text>}<Text style={styles.link}>View saved photo & suggestions →</Text></Pressable>)}
-    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search, date and source. Use Reset assessment filters to restore the full loaded history.</Text>:null}
-    {!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
+    {history.length&&!visibleHistory.length?<Text style={[styles.muted,{marginTop:15}]}>No loaded assessments match your search, date and source. Use Reset assessment filters to restore the full loaded history, or load older assessments to look further back.</Text>:null}
+    {historyLoaded&&!historyLoading&&!history.length ? <Text style={[styles.muted, { marginTop: 15 }]}>No saved assessments yet.</Text> : null}
   </View>;
 }
 const styles = StyleSheet.create({

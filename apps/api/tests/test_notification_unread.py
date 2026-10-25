@@ -53,6 +53,9 @@ class NotificationUnreadTests(unittest.TestCase):
 
     def test_unread_count_includes_older_pages(self):
         ids=self.seed(103);store=Store(self.path)
+        # Windows clock resolution can give seeded rows identical timestamps.
+        with store.connect() as db:
+            db.execute("UPDATE patient_notifications SET created_at='2000-01-01T00:00:00+00:00' WHERE id=?",(ids[0],))
         store.read_notification(ids[0],'patient-ava')
         inbox=self.client.get('/notifications',headers=self.patient).json()
         self.assertEqual(len(inbox['items']),100)
