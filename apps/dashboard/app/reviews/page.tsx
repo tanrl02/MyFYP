@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AssessmentShare, DemoApi, DemoDoctor, ReviewDraft, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
 
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const reviewFilters={all:"All",awaiting:"Awaiting review",reviewed:"Reviewed"} as const;
+type ReviewFilter=keyof typeof reviewFilters;
 export default function ReviewsPage() {
   const [doctor, setDoctor] = useState<DemoDoctor>("doctor-lim");
   const [busy,setBusy]=useState(false);
@@ -24,6 +26,8 @@ function ReviewInbox({ doctor,onBusy }: { doctor: DemoDoctor;onBusy:(busy:boolea
   const [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [selected, setSelected] = useState("");
   const [savedDraft,setSavedDraft]=useState<ReviewDraft|null>(null);
+  const [filter,setFilter]=useState<ReviewFilter>("all");
+  const visibleShares=shares.filter(share=>filter==="all"||(filter==="reviewed"?!!share.review:!share.review));
   useEffect(()=>{onBusy(busy);return()=>onBusy(false);},[busy,onBusy]);
   useEffect(() => {
     let active = true, fetching = false;
@@ -65,9 +69,13 @@ function ReviewInbox({ doctor,onBusy }: { doctor: DemoDoctor;onBusy:(busy:boolea
     {notice ? <p role="status" className="mb-5 rounded-xl bg-emerald-50 p-4 text-emerald-800">{notice}</p> : null}
     {loading ? <p className="muted">Loading shared assessments…</p> : null}
     <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]">
-      <section className="panel"><h2 className="mb-4 text-lg font-semibold">Your inbox · {shares.length}</h2><p className="muted mb-4 text-xs">Latest 100 active shares. Refreshes every five seconds.</p>
-        {shares.map(share => <button key={share.id} disabled={busy} aria-label={`Open shared assessment ${share.id.slice(0,8)}`} onClick={() => open(share.id)} className={`mb-3 block w-full rounded-xl border p-4 text-left ${selected === share.id ? "border-[#176f5e] bg-[#edf4f1]" : "border-[#dce6e0]"}`}><strong className="block">{share.patient_name}</strong><span className="muted mt-2 block text-xs">Shared {visitTime(share.created_at)}</span><span className="muted mt-2 block text-xs">{share.visit ? `Appointment ${queueToken(share.visit)} · ${visitTime(share.visit.starts_at)}` : "Direct doctor share"}</span><span className="badge mt-3 inline-block">{share.review ? "Reviewed" : "Awaiting review"}</span></button>)}
+      <section className="panel"><h2 className="mb-4 text-lg font-semibold">Your inbox · {shares.length}</h2><p className="muted mb-4 text-xs">Latest 100 active shares. Refreshes every five seconds. Filters apply to this loaded list.</p>
+        <fieldset className="mb-4"><legend className="mb-2 text-sm font-semibold">Review status</legend><div className="flex flex-wrap gap-2">{(Object.keys(reviewFilters) as ReviewFilter[]).map(value=><button type="button" key={value} aria-pressed={filter===value} disabled={busy} className={`btn ${filter===value?"":"secondary"}`} onClick={()=>setFilter(value)}>{reviewFilters[value]}</button>)}</div></fieldset>
+        <p className="muted mb-3 text-xs">Filters only change the inbox list. Your open assessment and unsaved text stay open.</p>
+        {!loading?<p role="status" className="muted mb-4 text-sm">Showing {visibleShares.length} of {shares.length} loaded shares</p>:null}
+        {visibleShares.map(share => <button key={share.id} disabled={busy} aria-label={`Open shared assessment ${share.id.slice(0,8)}`} onClick={() => open(share.id)} className={`mb-3 block w-full rounded-xl border p-4 text-left ${selected === share.id ? "border-[#176f5e] bg-[#edf4f1]" : "border-[#dce6e0]"}`}><strong className="block">{share.patient_name}</strong><span className="muted mt-2 block text-xs">Shared {visitTime(share.created_at)}</span><span className="muted mt-2 block text-xs">{share.visit ? `Appointment ${queueToken(share.visit)} · ${visitTime(share.visit.starts_at)}` : "Direct doctor share"}</span><span className="badge mt-3 inline-block">{share.review ? "Reviewed" : "Awaiting review"}</span></button>)}
         {!loading && !shares.length ? <p className="muted">No active assessments shared with this doctor.</p> : null}
+        {!loading&&shares.length>0&&!visibleShares.length?<p className="muted">No matching shares in the loaded inbox. Choose All to see other active shares.</p>:null}
       </section>
       <section className="panel">{detail ? <>
         <h2 className="text-xl font-semibold">{detail.patient_name} · assessment</h2><p className="muted mt-2 text-sm">Saved {detail.assessment ? visitTime(detail.assessment.created_at) : ""}</p>
