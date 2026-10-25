@@ -129,3 +129,37 @@ test("assessment source combines with search, Malaysia date, order and refreshed
   assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm","simulation"),[]);
   assert.equal(JSON.stringify(items),before);
 });
+
+
+test("review filters include overlapping statuses and keep unknown counts only under All",()=>{
+  const items=[
+    {id:"published",review_summary:{published_reviews:2,awaiting_reviews:0}},
+    {id:"awaiting",review_summary:{published_reviews:0,awaiting_reviews:1}},
+    {id:"both",review_summary:{published_reviews:1,awaiting_reviews:2}},
+    {id:"zero",review_summary:{published_reviews:0,awaiting_reviews:0}},
+    {id:"unknown"}
+  ];
+  const before=JSON.stringify(items);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","all","published").map(n=>n.id),["published","both"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","all","awaiting").map(n=>n.id),["awaiting","both"]);
+  assert.deepEqual(filterAssessmentHistory(items,null,"","all","all"),items);
+  assert.deepEqual(filterAssessmentHistory([],null,"","all","awaiting"),[]);
+  assert.equal(JSON.stringify(items),before);
+});
+
+test("review status combines with search, date, source, ordering and refreshed counts",()=>{
+  const items=[
+    {id:"new",origin:"experimental_ai",created_at:"2026-10-18T04:00:00Z",symptoms:{body_area:"Arm",description:""},review_summary:{published_reviews:1,awaiting_reviews:0}},
+    {id:"old",origin:"experimental_ai",created_at:"2026-10-17T16:00:00Z",symptoms:{body_area:"Leg",description:"Arm test"},review_summary:{published_reviews:1,awaiting_reviews:1}},
+    {id:"sim",origin:"simulation",created_at:"2026-10-18T03:00:00Z",symptoms:{body_area:"Arm",description:""},review_summary:{published_reviews:1,awaiting_reviews:0}},
+    {id:"previous",origin:"experimental_ai",created_at:"2026-10-17T15:59:59Z",symptoms:{body_area:"Arm",description:""},review_summary:{published_reviews:1,awaiting_reviews:0}}
+  ];
+  const before=JSON.stringify(items);
+  const filtered=filterAssessmentHistory(items,"2026-10-18","  ARM  ","experimental_ai","published");
+  assert.deepEqual(sortAssessmentHistory(filtered,"oldest").map(n=>n.id),["old","new"]);
+  assert.deepEqual(filterAssessmentHistory(items,"2026-10-18","arm","experimental_ai","awaiting").map(n=>n.id),["old"]);
+  const refreshed=items.map(n=>n.id==="old"?{...n,review_summary:{published_reviews:2,awaiting_reviews:0}}:n);
+  assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm","experimental_ai","awaiting"),[]);
+  assert.deepEqual(filterAssessmentHistory(refreshed,"2026-10-18","arm","experimental_ai","published").map(n=>n.id),["new","old"]);
+  assert.equal(JSON.stringify(items),before);
+});
