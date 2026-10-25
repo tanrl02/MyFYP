@@ -11,6 +11,7 @@ from .scheduling import MALAYSIA, pattern_values, week_slots, preview_hash
 
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
 DOCTORS = {'doctor-lim': 'Dr. Lim (demo)', 'doctor-anita': 'Dr. Anita (demo)'}
+USER_ROLES = {**dict.fromkeys(PATIENTS,'patient'), **dict.fromkeys(DOCTORS,'doctor'), 'staff-demo':'staff', 'admin-demo':'admin'}
 DOCTOR_CONCERNS = {'general', 'acne', 'eczema', 'psoriasis'}
 # Reminder rows are retained, but only currently upcoming waiting visits are visible.
 NOTIFICATION_VISIBLE = """(n.kind!='appointment_reminder' OR EXISTS (
@@ -28,6 +29,10 @@ class Store:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript('''
+                CREATE TABLE IF NOT EXISTS user_profiles (
+                  id TEXT PRIMARY KEY, role TEXT NOT NULL CHECK(role IN ('patient','doctor','staff','admin')),
+                  name TEXT NOT NULL, phone TEXT NOT NULL, email TEXT NOT NULL,
+                  version INTEGER NOT NULL, updated_at TEXT, updated_by TEXT);
                 CREATE TABLE IF NOT EXISTS doctor_profiles (
                   doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT);
@@ -238,18 +243,57 @@ class Store:
                 price_cents=(SELECT price_cents FROM medicines WHERE id=medicine_id),
                 strength=(SELECT strength FROM medicines WHERE id=medicine_id),
                 form=(SELECT form FROM medicines WHERE id=medicine_id) WHERE name IS NULL''')
+            names={**PATIENTS,**DOCTORS,'staff-demo':'Staff Demo','admin-demo':'Admin Demo'}
+            for user_id,role in USER_ROLES.items():
+                db.execute('INSERT OR IGNORE INTO user_profiles VALUES(?,?,?,?,?,0,NULL,NULL)',(user_id,role,names[user_id],'',''))
             for doctor in DOCTORS:
                 db.execute('INSERT OR IGNORE INTO doctor_profiles VALUES(?,?,?,?,NULL)',
                            (doctor, 'Not specified', '[]', 0))
         self.seed()
 
-    @staticmethod
-    def doctor_profile(row):
-        return dict(row, doctor_name=DOCTORS[row['doctor_id']], expertise=json.loads(row['expertise']))
+    def user_name(self, db, user_id):
+        # Reuse the caller's connection: a nested reader can deadlock with a
+        # pending writer while the caller still owns a SQLite read cursor.
+        row=db.execute('SELECT name FROM user_profiles WHERE id=?',(user_id,)).fetchone()
+        return row['name'] if row else user_id
+
+    def user_profile(self, actor):
+        if actor not in USER_ROLES:raise RuleError('Recognised demo identity required.',403)
+        with self.connect() as db:
+            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(actor,)).fetchone())
+
+    def user_profiles(self, actor):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        with self.connect() as db:
+            return [dict(row) for row in db.execute('SELECT * FROM user_profiles ORDER BY role,name,id')]
+
+    def save_user_profile(self, user_id, actor, name, phone, email, version):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        name,phone,email=name.strip(),phone.strip(),email.strip()
+        if not 1<=len(name)<=100 or any(ord(c)<32 or ord(c)==127 for c in name):
+            raise RuleError('Enter a name within 100 characters on one line.',422)
+        if phone and (len(phone)>30 or not re.fullmatch(r'\+?[0-9 ()-]+',phone) or not 7<=len(re.sub(r'\D','',phone))<=15):
+            raise RuleError('Enter a phone number with 7-15 digits, or leave it blank.',422)
+        if email and (len(email)>254 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+',email)):
+            raise RuleError('Enter a valid email address, or leave it blank.',422)
+        if type(version) is not int or version<0:raise RuleError('A valid reviewed version is required.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone()
+            if not row:raise RuleError('User not found.',404)
+            same=(row['name'],row['phone'],row['email'])==(name,phone,email)
+            if same and version in (row['version'],row['version']-1):return dict(row)
+            if version!=row['version']:raise RuleError('This user information changed. Reload and review the latest version.')
+            db.execute('UPDATE user_profiles SET name=?,phone=?,email=?,version=version+1,updated_at=?,updated_by=? WHERE id=?',
+                (name,phone,email,datetime.now(timezone.utc).isoformat(),actor,user_id))
+            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
+
+    def doctor_profile(self, db, row):
+        return dict(row, doctor_name=self.user_name(db,row['doctor_id']), expertise=json.loads(row['expertise']))
 
     def doctor_profiles(self):
         with self.connect() as db:
-            return [self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
+            return [self.doctor_profile(db,row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
 
     def doctor_matches(self, patient, concern=None, assessment_id=None):
         if (concern is None) == (assessment_id is None):
@@ -275,7 +319,7 @@ class Store:
                              'Psoriasis (example only)':'psoriasis'}.get(metadata['example_category'],'general')
                 source=metadata['origin']
                 message=('EXPERIMENTAL AI: suggestions use an unverified model suggestion and staff-entered expertise. You can choose another concern. This is not a diagnosis.' if source=='experimental_ai' else 'SIMULATION: suggestions use a fixed example category, not image analysis or a diagnosis.')+' No assessment is shared by viewing suggestions or booking.'
-            profiles=[self.doctor_profile(row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
+            profiles=[self.doctor_profile(db,row) for row in db.execute('SELECT * FROM doctor_profiles ORDER BY doctor_id')]
         for profile in profiles:
             if concern in profile['expertise']:
                 level='concern'
@@ -299,7 +343,7 @@ class Store:
             row = db.execute('SELECT * FROM doctor_profiles WHERE doctor_id=?', (doctor,)).fetchone()
             if row is None:
                 raise RuleError('Doctor not found.', 404)
-            current = self.doctor_profile(row)
+            current = self.doctor_profile(db,row)
             expertise = sorted(expertise)
             # A retry after a lost response is harmless, including an old version.
             if (current['specialty'], sorted(current['expertise'])) == (specialty, expertise):
@@ -308,7 +352,7 @@ class Store:
                 raise RuleError('This profile changed. Reload profiles before editing again.')
             db.execute('UPDATE doctor_profiles SET specialty=?,expertise=?,version=version+1,updated_at=? WHERE doctor_id=?',
                        (specialty,json.dumps(expertise),datetime.now(timezone.utc).isoformat(),doctor))
-            return self.doctor_profile(db.execute('SELECT * FROM doctor_profiles WHERE doctor_id=?',(doctor,)).fetchone())
+            return self.doctor_profile(db,db.execute('SELECT * FROM doctor_profiles WHERE doctor_id=?',(doctor,)).fetchone())
 
     @contextmanager
     def connect(self):
@@ -354,12 +398,11 @@ class Store:
                     AND julianday(u.clinic_date||'T'||COALESCE(u.end_time,'24:00')||':00+08:00')>julianday(s.starts_at))
                 GROUP BY s.id ORDER BY s.starts_at, s.doctor_id''',
                 (datetime.now(timezone(timedelta(hours=8))).isoformat(),)).fetchall()
-        return [self.slot_metadata(r) for r in rows]
+            return [self.slot_metadata(db,r) for r in rows]
 
-    @staticmethod
-    def slot_metadata(row):
+    def slot_metadata(self, db, row):
         end=datetime.fromisoformat(row['starts_at'])+timedelta(minutes=row['duration_minutes'])
-        return dict(row,doctor_name=DOCTORS[row['doctor_id']],ends_at=end.isoformat())
+        return dict(row,doctor_name=self.user_name(db,row['doctor_id']),ends_at=end.isoformat())
 
     @staticmethod
     def slot_overlap(db, doctor, start, duration):
@@ -377,7 +420,7 @@ class Store:
             raise RuleError('Slot not found.',404)
         values={key:row[key] for key in ('id','doctor_id','starts_at','clinic_date','capacity','closed','booking_count','available','duration_minutes')}
         values['unavailable']=bool(self.unavailable_overlap(db,row['doctor_id'],datetime.fromisoformat(row['starts_at']),row['duration_minutes']))
-        return self.slot_metadata(values)
+        return self.slot_metadata(db,values)
 
     def managed_slots(self):
         with self.connect() as db:
@@ -427,7 +470,7 @@ class Store:
         if doctor not in DOCTORS:
             raise RuleError('Doctor not found.',404)
         row=db.execute('SELECT * FROM doctor_schedule_patterns WHERE doctor_id=?',(doctor,)).fetchone()
-        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],'day_sessions':[],'second_start_time':None,'second_end_time':None,
+        return {'doctor_id':doctor,'doctor_name':self.user_name(db,doctor),'day_sessions':[],'second_start_time':None,'second_end_time':None,
                 **(json.loads(row['pattern_json']) if row else {'weekdays':[],'start_time':'09:00','end_time':'12:00','duration_minutes':30,'capacity':2}),
                 'version':row['version'] if row else 0,'updated_at':row['updated_at'] if row else None}
 
@@ -539,7 +582,7 @@ class Store:
                 slot.update(status='conflict',reason='Overlaps an existing open slot for this doctor.')
             else:
                 slot.update(status='new',reason='New appointment slot.')
-        return {'doctor_id':doctor,'doctor_name':DOCTORS[doctor],'week_start':week_start,'pattern_version':version,'slots':planned,
+        return {'doctor_id':doctor,'doctor_name':self.user_name(db,doctor),'week_start':week_start,'pattern_version':version,'slots':planned,
                 'new_count':sum(slot['status']=='new' for slot in planned),
                 'existing_count':sum(slot['status']=='existing' for slot in planned),
                 'conflict_count':sum(slot['status']=='conflict' for slot in planned),
@@ -596,7 +639,7 @@ class Store:
                 slot=self.managed_slot(db,row['id'])
                 visits=db.execute('SELECT id,queue_number,status,patient_id FROM bookings WHERE slot_id=? ORDER BY queue_number',(row['id'],)).fetchall()
                 # Operational schedule only: no background, notes, photo, reason, prescription or bill.
-                slot['visits']=[{'id':visit['id'],'queue_number':visit['queue_number'],'status':visit['status'],'patient_name':PATIENTS[visit['patient_id']]} for visit in visits]
+                slot['visits']=[{'id':visit['id'],'queue_number':visit['queue_number'],'status':visit['status'],'patient_name':self.user_name(db,visit['patient_id'])} for visit in visits]
                 slots.append(slot)
             absences=db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time FROM doctor_unavailability WHERE doctor_id=? AND clinic_date>=? AND clinic_date<? ORDER BY clinic_date,created_at,id',
                                 (doctor,week_start,(monday+timedelta(days=7)).isoformat())).fetchall()
@@ -627,7 +670,7 @@ class Store:
                 token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
                 local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
                 self.notify(db,patient,'appointment_reminder',visit['id'],visit['id'],'Upcoming appointment',
-                            f"{token} with {DOCTORS[visit['doctor_id']]} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open the visit to check its latest details.")
+                            f"{token} with {self.user_name(db,visit['doctor_id'])} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open the visit to check its latest details.")
             boundary=''
             args=(patient,*window)
             if cursor is not None:
@@ -713,7 +756,7 @@ class Store:
         if r['status']=='missed':
             event=db.execute("SELECT id FROM events WHERE booking_id=? AND action='missed' ORDER BY rowid DESC LIMIT 1",(booking_id,)).fetchone()
             attendance={'missed_event_id':event['id'] if event else None}
-        return dict(r, **attendance, doctor_name=DOCTORS[r['doctor_id']], patient_name=PATIENTS[r['patient_id']],
+        return dict(r, **attendance, doctor_name=self.user_name(db,r['doctor_id']), patient_name=self.user_name(db,r['patient_id']),
                     ends_at=(datetime.fromisoformat(r['starts_at'])+timedelta(minutes=r['duration_minutes'])).isoformat(),
                     rescheduled_to_id=replacement['new_booking_id'] if replacement else None,
                     follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
@@ -962,7 +1005,7 @@ class Store:
             visit=self.record(db,row['id'])
             token=f"{'L' if doctor=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
             self.notify(db,visit['patient_id'],'queue_called',row['id'],row['id'],'Your queue number was called',
-                        f"{token} with {DOCTORS[doctor]} was called. Open the visit to check its current status.")
+                        f"{token} with {self.user_name(db,doctor)} was called. Open the visit to check its current status.")
             return self.record(db, row['id'])
 
     def mark_missed(self, booking_id, staff):
@@ -1550,7 +1593,7 @@ class Store:
         if actor in DOCTORS and visit and (visit['status'] in ('cancelled','missed') or visit['doctor_id'] != actor):
             raise RuleError('Appointment access is no longer available.', 404)
         review = db.execute('SELECT * FROM assessment_reviews WHERE share_id=?', (share_id,)).fetchone()
-        return dict(row, patient_name=PATIENTS[row['patient_id']], doctor_name=DOCTORS[row['doctor_id']],
+        return dict(row, patient_name=self.user_name(db,row['patient_id']), doctor_name=self.user_name(db,row['doctor_id']),
                     review=dict(review) if review else None, visit=visit)
 
     def assessment_sharing_history(self, assessment_id, patient):
@@ -1680,7 +1723,7 @@ class Store:
             db.execute('INSERT INTO assessment_reviews(id,share_id,doctor_id,note,follow_up,created_at,doctor_assessment) VALUES(?,?,?,?,?,?,?)',
                        (str(uuid4()),share_id,doctor,note,follow_up,datetime.now(timezone.utc).isoformat(),doctor_assessment))
             self.notify(db,share['patient_id'],'review_published',share_id,share['assessment_id'],'Doctor review is ready',
-                        f"{DOCTORS[doctor]} published a review. Open the assessment to read it.")
+                        f"{self.user_name(db,doctor)} published a review. Open the assessment to read it.")
             db.execute('DELETE FROM assessment_review_drafts WHERE share_id=?',(share_id,))
             return self.share_record(db, share_id, doctor)
 
@@ -1789,7 +1832,7 @@ class Store:
             visit_date=datetime.fromisoformat(source['starts_at']).astimezone(timezone(timedelta(hours=8)))
             earliest=date.fromisoformat(recommended_date)
             self.notify(db,source['patient_id'],'follow_up_recommended',booking_id,booking_id,'Follow-up visit recommended',
-                        f"{DOCTORS[doctor]} recommended a follow-up on or after {earliest:%d %b %Y} (Malaysia date) for {token}, your visit on {visit_date:%d %b %Y, %I:%M %p} (Malaysia time). Open the original visit to review the recommendation and latest booking status. No appointment is booked by this notification.")
+                        f"{self.user_name(db,doctor)} recommended a follow-up on or after {earliest:%d %b %Y} (Malaysia date) for {token}, your visit on {visit_date:%d %b %Y, %I:%M %p} (Malaysia time). Open the original visit to review the recommendation and latest booking status. No appointment is booked by this notification.")
             return self.follow_up_record(db,booking_id)
 
     def consultation_history(self, booking_id, doctor):
@@ -1894,7 +1937,7 @@ class Store:
             rows=db.execute('SELECT * FROM prescription_direction_revisions WHERE prescription_id=? ORDER BY version DESC',(prescription['id'],)).fetchall()
             return {'prescription_id':prescription['id'],'version':prescription['version'],'revisions':[
                 {key:row[key] for key in ('id','version','doctor_id','reason','created_at')} |
-                {'doctor_name':DOCTORS[row['doctor_id']],'previous_directions':json.loads(row['previous_directions_json']),
+                {'doctor_name':self.user_name(db,row['doctor_id']),'previous_directions':json.loads(row['previous_directions_json']),
                  'directions':json.loads(row['directions_json'])} for row in rows]}
 
     def correct_prescription_directions(self, booking_id, doctor, version, reason, items):
@@ -1976,6 +2019,7 @@ class Store:
         return dict(row, lines=[dict(line) for line in lines])
 
     def care(self, actor):
+        if actor not in {*PATIENTS,*DOCTORS,'staff-demo'}:raise RuleError('Patient, assigned doctor or staff identity required.',403)
         with self.connect() as db:
             records = []
             for row in db.execute('SELECT id FROM bookings ORDER BY created_at DESC').fetchall():

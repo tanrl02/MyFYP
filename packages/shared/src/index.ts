@@ -8,7 +8,7 @@ export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPa
 export type DemoPatient = "patient-ava" | "patient-noah";
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
-export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita";
+export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita" | "admin-demo";
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
@@ -84,7 +84,11 @@ export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
 };
 
 export type PhotoCheck = {accepted:boolean;version:string;skin_content:"likely_skin"|"not_skin"|"uncertain"|"not_checked";reasons:string[];message:string};
+export type UserProfile={id:string;role:"patient"|"doctor"|"staff"|"admin";name:string;phone:string;email:string;version:number;updated_at:string|null;updated_by:string|null};
 export class DemoApi {
+  me() { return this.request<UserProfile>("/me"); }
+  users() { return this.request<UserProfile[]>("/admin/users"); }
+  saveUser(id:string,body:Pick<UserProfile,"name"|"phone"|"email"|"version">) { return this.request<UserProfile>(`/admin/users/${encodeURIComponent(id)}`,body); }
   doctorMatches(source:DoctorMatchSource) { return this.request<DoctorMatches>(source.assessmentId?`/doctor-matches?assessment_id=${encodeURIComponent(source.assessmentId)}`:`/doctor-matches?concern=${encodeURIComponent(source.concern)}`); }
   doctors() { return this.request<DoctorProfile[]>("/doctors"); }
   saveDoctor(id:DemoDoctor,body:Pick<DoctorProfile,"specialty"|"expertise"|"version">) { return this.request<DoctorProfile>(`/staff/doctors/${encodeURIComponent(id)}`,body); }

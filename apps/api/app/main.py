@@ -9,7 +9,7 @@ from .photo_checks import check_photo
 from .disease_model import predict_disease
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
-from .store import DOCTORS, PATIENTS, RuleError, Store
+from .store import DOCTORS, PATIENTS, USER_ROLES, RuleError, Store
 
 class RestoreWaitingInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
@@ -115,6 +115,13 @@ class PrescriptionCancellationInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     version: int = Field(strict=True,ge=1)
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
+
+class UserProfileInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    name: str = Field(min_length=1,max_length=100,pattern=r'\S')
+    phone: str = Field(max_length=30)
+    email: str = Field(max_length=254)
+    version: int = Field(strict=True,ge=0)
 
 class ShareInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
@@ -248,6 +255,16 @@ def create_app(path=None,photo_checker=None,predictor=None):
             raise HTTPException(403, 'Patient demo identity required.')
         return who
 
+    # Admin is recognised only by the basic-information endpoints. Keeping it out
+    # of actor() prevents implicit access through existing clinical routes.
+    def user_actor(x_demo_actor: str = Header()):
+        if x_demo_actor not in USER_ROLES:raise HTTPException(401,'Choose a recognised demo identity.')
+        return x_demo_actor
+
+    def admin(who=Depends(user_actor)):
+        if who!='admin-demo':raise HTTPException(403,'Admin demo identity required.')
+        return who
+
     def staff(who=Depends(actor)):
         if who != 'staff-demo':
             raise HTTPException(403, 'Staff demo identity required.')
@@ -277,6 +294,18 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.get('/health')
     def health():
         return {'status':'ok', 'mode':'local-demo', 'authentication':'simulated'}
+
+    @api.get('/me')
+    def my_user_profile(who=Depends(user_actor)):
+        return run(lambda:store.user_profile(who))
+
+    @api.get('/admin/users')
+    def users(who=Depends(admin)):
+        return run(lambda:store.user_profiles(who))
+
+    @api.post('/admin/users/{user_id}')
+    def save_user_profile(user_id: str,payload: UserProfileInput,who=Depends(admin)):
+        return run(lambda:store.save_user_profile(user_id,who,payload.name,payload.phone,payload.email,payload.version))
 
     @api.get('/slots')
     def slots():
