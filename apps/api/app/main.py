@@ -522,6 +522,10 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def stock_loss(payload: StockLossInput,who=Depends(staff)):
         return run(lambda: store.record_stock_loss(payload.medicine_id,payload.quantity,payload.kind,payload.reason,payload.request_id,who,payload.receipt_id))
 
+    @api.get('/assessments/{assessment_id}/sharing-history')
+    def assessment_sharing_history(assessment_id: str,who=Depends(patient)):
+        return run(lambda: store.assessment_sharing_history(assessment_id,who))
+
     @api.get('/assessment-shares')
     def shares(who=Depends(actor)):
         return run(lambda: store.shares(who))

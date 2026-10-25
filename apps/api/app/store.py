@@ -1501,6 +1501,16 @@ class Store:
         return dict(row, patient_name=PATIENTS[row['patient_id']], doctor_name=DOCTORS[row['doctor_id']],
                     review=dict(review) if review else None, visit=visit)
 
+    def assessment_sharing_history(self, assessment_id, patient):
+        if patient not in PATIENTS:
+            raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?',(assessment_id,patient)).fetchone():
+                raise RuleError('Assessment not found for this patient.',404)
+            rows=db.execute('''SELECT id FROM assessment_shares WHERE assessment_id=? AND patient_id=?
+                ORDER BY created_at DESC,id DESC''',(assessment_id,patient)).fetchall()
+            return [self.share_record(db,row['id'],patient) for row in rows]
+
     def shares(self, actor):
         with self.connect() as db:
             if actor in PATIENTS:

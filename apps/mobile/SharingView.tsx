@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { AssessmentShare, Booking, DemoApi, DemoDoctor, DemoPatient, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
 import PublishedReview from "./PublishedReview";
@@ -15,25 +15,29 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
   const [request, setRequest] = useState(requestKey);
   const [confirm, setConfirm] = useState(false), [revoke, setRevoke] = useState("");
   const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState("");
+  const [ready,setReady]=useState(false),[refreshKey,setRefreshKey]=useState(0);
+  const saving=useRef(false),loadVersion=useRef(0);
   useEffect(() => {
     let active = true, fetching = false;
     async function load() {
-      if (fetching) return; fetching = true;
-      try { const [data, visits] = await Promise.all([api.shares(),api.bookings()]); if (active) { setShares(data.filter(s => s.assessment_id === assessmentId)); setBookings(visits); } }
-      catch (e) { if (active) setError(e instanceof Error ? e.message : "Cannot load sharing history."); }
+      if (fetching||saving.current) return; fetching = true;
+      const version=loadVersion.current;
+      try { const [data, visits] = await Promise.all([api.assessmentShares(assessmentId),api.bookings()]); if (active&&version===loadVersion.current) { setShares(data); setBookings(visits); setReady(true); setError(""); } }
+      catch (e) { if (active&&version===loadVersion.current) setError(e instanceof Error ? e.message : "Cannot load sharing history."); }
       finally { fetching = false; }
     }
     void load(); const timer = setInterval(load, 5000);
     return () => { active = false; clearInterval(timer); };
-  }, [api, assessmentId]);
+  }, [api, assessmentId,refreshKey]);
   async function act(action: () => Promise<AssessmentShare>, success: string) {
-    if (busy) return; setBusy(true); setError(""); setNotice("");
+    if (busy||saving.current||!ready) return; saving.current=true;loadVersion.current++;setBusy(true); setError(""); setNotice("");
     try {
       const saved = await action();
+      loadVersion.current++;
       setShares(current => [saved, ...current.filter(s => s.id !== saved.id)]);
       setConfirm(false); setRevoke(""); setRequest(requestKey()); setNotice(success);
     } catch (e) { setError(e instanceof Error ? e.message : "Cannot save. Refresh before retrying."); }
-    finally { setBusy(false); }
+    finally { saving.current=false;setBusy(false); }
   }
   const alreadyShared = shares.some(s => s.doctor_id === doctor && !s.booking_id && !s.revoked_at);
   const eligible = bookings.filter(b => b.status === "called" || (b.status === "waiting" && new Date(b.starts_at).getTime() > Date.now()));
@@ -44,6 +48,8 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
     <Text style={styles.body}>Choose who can open this photo, its saved result and your message. Other assessments stay private. Demo accounts only.</Text>
     {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
     {notice ? <Text style={styles.body}>{notice}</Text> : null}
+    <Pressable accessibilityRole="button" disabled={busy} onPress={()=>setRefreshKey(value=>value+1)}><Text style={styles.link}>Refresh sharing history</Text></Pressable>
+    {!ready&&!error?<Text style={styles.body}>Loading sharing history for this assessment…</Text>:null}
     <View style={styles.row}>{(["doctor","appointment"] as const).map(value => <Pressable accessibilityRole="button" key={value} disabled={busy || confirm} style={[styles.choice,mode===value&&styles.selected]} onPress={() => { setMode(value); setRequest(requestKey()); setNotice(""); }}><Text style={{color:mode===value?"white":"#176f5e"}}>{value==="doctor"?"Share with doctor":"Link to appointment"}</Text></Pressable>)}</View>
     {mode === "doctor" ? <><Text style={styles.label}>Choose a doctor</Text>
     <View style={styles.row}>{(Object.keys(doctorNames) as DemoDoctor[]).map(id => <Pressable accessibilityRole="button" key={id} disabled={busy || confirm} style={[styles.choice, doctor === id && styles.selected]} onPress={() => { setDoctor(id); setRequest(requestKey()); setNotice(""); }}><Text style={{ color: doctor === id ? "white" : "#176f5e" }}>{doctorNames[id]}</Text></Pressable>)}</View>
@@ -52,9 +58,9 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
     <TextInput accessibilityLabel="Message to doctor" multiline maxLength={1000} editable={!busy && !confirm} value={message} onChangeText={text => { setMessage(text); setRequest(requestKey()); }} placeholder="Use fictional symptoms for this demo." style={styles.input} />
     {confirm ? <View>
       <Text style={styles.body}>{mode === "appointment" ? `Link this assessment to ${selectedVisit ? queueToken(selectedVisit) + " · " + selectedVisit.doctor_name + " · " + visitTime(selectedVisit.starts_at) : "the selected appointment"}?` : `Share this assessment with ${doctorNames[doctor]}?`} They can view the photo and publish a review for you. You can revoke future access. Published reviews remain in your history; previously viewed information cannot be recalled.</Text>
-      <Pressable accessibilityRole="button" disabled={busy || (mode === "appointment" && !selectedVisit)} style={styles.button} onPress={() => act(() => mode === "appointment" ? api.linkAssessment(assessmentId, bookingId, message, request) : api.shareAssessment(assessmentId, doctor, message, request), mode === "appointment" ? "Assessment linked to the appointment's doctor." : "Assessment shared with the chosen doctor.")}><Text style={styles.white}>{busy ? "Saving…" : mode === "appointment" ? "Confirm appointment link" : "Confirm sharing"}</Text></Pressable>
+      <Pressable accessibilityRole="button" disabled={busy || !ready || !!error || (mode === "appointment" && !selectedVisit)} style={styles.button} onPress={() => act(() => mode === "appointment" ? api.linkAssessment(assessmentId, bookingId, message, request) : api.shareAssessment(assessmentId, doctor, message, request), mode === "appointment" ? "Assessment linked to the appointment's doctor." : "Assessment shared with the chosen doctor.")}><Text style={styles.white}>{busy ? "Saving…" : mode === "appointment" ? "Confirm appointment link" : "Confirm sharing"}</Text></Pressable>
       <Pressable accessibilityRole="button" disabled={busy} onPress={() => setConfirm(false)}><Text style={styles.link}>Cancel sharing</Text></Pressable>
-    </View> : <Pressable accessibilityRole="button" disabled={busy || (mode === "doctor" ? alreadyShared : !selectedVisit || linked)} style={styles.button} onPress={() => setConfirm(true)}><Text style={styles.white}>{mode === "appointment" ? linked ? "Already linked to this appointment" : "Link selected appointment" : alreadyShared ? "Already shared with this doctor" : "Share this assessment"}</Text></Pressable>}
+    </View> : <Pressable accessibilityRole="button" disabled={busy || !ready || !!error || (mode === "doctor" ? alreadyShared : !selectedVisit || linked)} style={styles.button} onPress={() => setConfirm(true)}><Text style={styles.white}>{mode === "appointment" ? linked ? "Already linked to this appointment" : "Link selected appointment" : alreadyShared ? "Already shared with this doctor" : "Share this assessment"}</Text></Pressable>}
     <Text style={styles.label}>Sharing history & published reviews</Text>
     {shares.map(share => <View key={share.id} style={styles.record}>
       <Text style={styles.title}>{share.doctor_name} · {share.revoked_at ? "Revoked" : share.review ? "Reviewed" : "Awaiting review"}</Text>
@@ -64,7 +70,7 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
       {share.review ? <PublishedReview review={share.review}/> : null}
       {!share.revoked_at ? revoke === share.id ? <View><Text style={styles.body}>Revoke this doctor's future access to this assessment? Published reviews remain visible to you.</Text><Pressable accessibilityRole="button" disabled={busy} onPress={() => act(() => api.revokeShare(share.id), "Doctor access revoked.")}><Text style={styles.link}>Confirm revoke</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => setRevoke("")}><Text style={styles.link}>Keep sharing</Text></Pressable></View> : <Pressable accessibilityRole="button" disabled={busy} onPress={() => setRevoke(share.id)}><Text style={styles.link}>Revoke access</Text></Pressable> : null}
     </View>)}
-    {!shares.length ? <Text style={styles.body}>No doctor has access to this assessment yet.</Text> : null}
+    {ready&&!error&&!shares.length ? <Text style={styles.body}>No sharing records for this assessment yet.</Text> : null}
   </View>;
 }
 const styles = StyleSheet.create({
