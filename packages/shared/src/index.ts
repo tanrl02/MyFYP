@@ -5,7 +5,7 @@ export type PatientBackground = { patient_id: DemoPatient; allergies: string; me
 export type FollowUp = {source_booking_id:string;doctor_id:DemoDoctor;recommended_date:string;reason:string;created_at:string;booked_visit:Booking|null};
 export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null; background?: PatientBackground;follow_up?:FollowUp|null };
 export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; version:number; edited_at:string|null;edit_deadline:string;visit: Booking };
-export type DemoPatient = "patient-ava" | "patient-noah";
+export type DemoPatient = `patient-${string}`;
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
 export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita" | "admin-demo";
@@ -85,7 +85,10 @@ export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
 
 export type PhotoCheck = {accepted:boolean;version:string;skin_content:"likely_skin"|"not_skin"|"uncertain"|"not_checked";reasons:string[];message:string};
 export type UserProfile={id:string;role:"patient"|"doctor"|"staff"|"admin";name:string;phone:string;email:string;version:number;updated_at:string|null;updated_by:string|null};
+export type DemoPatientIdentity={id:DemoPatient;name:string};
 export class DemoApi {
+  demoPatients() { return this.request<DemoPatientIdentity[]>("/demo/patients"); }
+  createPatient(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/patients",body); }
   me() { return this.request<UserProfile>("/me"); }
   users() { return this.request<UserProfile[]>("/admin/users"); }
   saveUser(id:string,body:Pick<UserProfile,"name"|"phone"|"email"|"version">) { return this.request<UserProfile>(`/admin/users/${encodeURIComponent(id)}`,body); }

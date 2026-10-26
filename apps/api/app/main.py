@@ -86,7 +86,7 @@ class BookingInput(BaseModel):
     request_id: str = Field(min_length=8, max_length=100)
 
 class CounterBookingInput(BookingInput):
-    patient_id: Literal['patient-ava','patient-noah']
+    patient_id: str = Field(min_length=1,max_length=100)
 
 class QueueInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
@@ -122,6 +122,13 @@ class UserProfileInput(BaseModel):
     phone: str = Field(max_length=30)
     email: str = Field(max_length=254)
     version: int = Field(strict=True,ge=0)
+
+class PatientCreateInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    name: str = Field(min_length=1,max_length=100,pattern=r'\S')
+    phone: str = Field(default='',max_length=30)
+    email: str = Field(default='',max_length=254)
+    request_id: str = Field(min_length=8,max_length=100,pattern=r'\S')
 
 class ShareInput(BaseModel):
     doctor_id: Literal['doctor-lim', 'doctor-anita']
@@ -246,19 +253,19 @@ def create_app(path=None,photo_checker=None,predictor=None):
         allow_methods=['GET','POST'], allow_headers=['Content-Type','X-Demo-Actor'])
 
     def actor(x_demo_actor: str = Header()):
-        if x_demo_actor not in {*PATIENTS, *DOCTORS, 'staff-demo'}:
+        if store.user_role(x_demo_actor) not in ('patient','doctor','staff'):
             raise HTTPException(401, 'Choose a recognised demo identity.')
         return x_demo_actor
 
     def patient(who=Depends(actor)):
-        if who not in PATIENTS:
+        if not store.is_patient(who):
             raise HTTPException(403, 'Patient demo identity required.')
         return who
 
     # Admin is recognised only by the basic-information endpoints. Keeping it out
     # of actor() prevents implicit access through existing clinical routes.
     def user_actor(x_demo_actor: str = Header()):
-        if x_demo_actor not in USER_ROLES:raise HTTPException(401,'Choose a recognised demo identity.')
+        if store.user_role(x_demo_actor) is None:raise HTTPException(401,'Choose a recognised demo identity.')
         return x_demo_actor
 
     def admin(who=Depends(user_actor)):
@@ -281,7 +288,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return who
 
     def payer(who=Depends(actor)):
-        if who not in {*PATIENTS, 'staff-demo'}:
+        if not store.is_patient(who) and who!='staff-demo':
             raise HTTPException(403, 'Patient or staff demo identity required.')
         return who
 
@@ -302,6 +309,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.get('/admin/users')
     def users(who=Depends(admin)):
         return run(lambda:store.user_profiles(who))
+
+    @api.post('/admin/patients',status_code=201)
+    def create_patient(payload: PatientCreateInput,who=Depends(admin)):
+        return run(lambda:store.create_patient(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.get('/demo/patients')
+    def demo_patients(who=Depends(user_actor)):
+        return store.demo_patients()
 
     @api.post('/admin/users/{user_id}')
     def save_user_profile(user_id: str,payload: UserProfileInput,who=Depends(admin)):
@@ -406,7 +421,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/bookings/{booking_id}/reschedule')
     def reschedule(booking_id: str, payload: BookingInput, who=Depends(actor)):
-        if who not in {*PATIENTS,'staff-demo'}:
+        if not store.is_patient(who) and who!='staff-demo':
             raise HTTPException(403,'Patient or staff demo identity required.')
         return run(lambda: store.reschedule(booking_id,who,payload.slot_id,payload.request_id))
 

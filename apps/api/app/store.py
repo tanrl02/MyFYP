@@ -33,6 +33,9 @@ class Store:
                   id TEXT PRIMARY KEY, role TEXT NOT NULL CHECK(role IN ('patient','doctor','staff','admin')),
                   name TEXT NOT NULL, phone TEXT NOT NULL, email TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT, updated_by TEXT);
+                CREATE TABLE IF NOT EXISTS patient_creations (
+                  request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
+                  payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS doctor_profiles (
                   doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT);
@@ -258,17 +261,31 @@ class Store:
         return row['name'] if row else user_id
 
     def user_profile(self, actor):
-        if actor not in USER_ROLES:raise RuleError('Recognised demo identity required.',403)
         with self.connect() as db:
-            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(actor,)).fetchone())
+            row=db.execute('SELECT * FROM user_profiles WHERE id=?',(actor,)).fetchone()
+            if not row:raise RuleError('Recognised demo identity required.',403)
+            return dict(row)
+
+    def user_role(self, actor, db=None):
+        if db is None:
+            with self.connect() as connection:return self.user_role(actor,connection)
+        row=db.execute('SELECT role FROM user_profiles WHERE id=?',(actor,)).fetchone()
+        return row['role'] if row else None
+
+    def is_patient(self, actor, db=None):
+        return self.user_role(actor,db)=='patient'
+
+    def demo_patients(self):
+        with self.connect() as db:
+            return [dict(row) for row in db.execute("SELECT id,name FROM user_profiles WHERE role='patient' ORDER BY rowid")]
 
     def user_profiles(self, actor):
         if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
         with self.connect() as db:
             return [dict(row) for row in db.execute('SELECT * FROM user_profiles ORDER BY role,name,id')]
 
-    def save_user_profile(self, user_id, actor, name, phone, email, version):
-        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+    @staticmethod
+    def normalise_user_information(name, phone, email):
         name,phone,email=name.strip(),phone.strip(),email.strip()
         if not 1<=len(name)<=100 or any(ord(c)<32 or ord(c)==127 for c in name):
             raise RuleError('Enter a name within 100 characters on one line.',422)
@@ -276,6 +293,27 @@ class Store:
             raise RuleError('Enter a phone number with 7-15 digits, or leave it blank.',422)
         if email and (len(email)>254 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+',email)):
             raise RuleError('Enter a valid email address, or leave it blank.',422)
+        return name,phone,email
+
+    def create_patient(self, actor, name, phone, email, request_id):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        name,phone,email=self.normalise_user_information(name,phone,email)
+        if not 8<=len(request_id)<=100 or not request_id.strip():raise RuleError('A valid creation request is required.',422)
+        payload=json.dumps({'name':name,'phone':phone,'email':email},sort_keys=True)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM patient_creations WHERE request_id=?',(request_id,)).fetchone()
+            if existing:
+                if existing['payload_json']!=payload:raise RuleError('This request was used for different patient details. Start a new patient form.')
+                return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(existing['user_id'],)).fetchone())
+            user_id='patient-'+str(uuid4());now=datetime.now(timezone.utc).isoformat()
+            db.execute("INSERT INTO user_profiles VALUES(?,'patient',?,?,?,0,?,?)",(user_id,name,phone,email,now,actor))
+            db.execute('INSERT INTO patient_creations VALUES(?,?,?,?)',(request_id,user_id,payload,now))
+            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
+
+    def save_user_profile(self, user_id, actor, name, phone, email, version):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        name,phone,email=self.normalise_user_information(name,phone,email)
         if type(version) is not int or version<0:raise RuleError('A valid reviewed version is required.',422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -656,7 +694,7 @@ class Store:
                    (str(uuid4()),patient,kind,source_id,target_id,title,message,datetime.now(timezone.utc).isoformat()))
 
     def notifications(self, patient, cursor=None):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -687,7 +725,7 @@ class Store:
                     'next_cursor':rows[99]['id'] if len(rows)>100 else None}
 
     def read_notification(self, notification_id, patient):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -701,7 +739,7 @@ class Store:
             return dict(db.execute('SELECT * FROM patient_notifications WHERE id=?',(notification_id,)).fetchone())
 
     def unread_notification(self, notification_id, patient):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -719,7 +757,7 @@ class Store:
             return {'item':saved,'unread_count':unread}
 
     def read_notifications(self, notification_ids, patient):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         if not notification_ids or len(notification_ids)>100:
             raise RuleError('Review between 1 and 100 displayed notifications.',400)
@@ -775,7 +813,7 @@ class Store:
             raise RuleError('This patient already has an active visit that overlaps this time. Choose another time. No bookings were changed.')
 
     def book(self, patient, slot_id, request_id, created_by=None, follow_up_source=None):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Choose a recognised demo patient.', 422)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -837,7 +875,7 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             visit=self.record(db,booking_id)
-            if patient not in PATIENTS or visit['patient_id']!=patient:
+            if not self.is_patient(patient,db) or visit['patient_id']!=patient:
                 raise RuleError('Visit unavailable for this patient.',404)
             note=db.execute('SELECT * FROM consultation_notes WHERE booking_id=?',(booking_id,)).fetchone()
             linked=[]
@@ -859,7 +897,7 @@ class Store:
         return dict(row,edit_deadline=(datetime.fromisoformat(row['created_at'])+timedelta(hours=24)).isoformat())
 
     def feedback(self, actor):
-        if actor not in {*PATIENTS,'staff-demo'}:
+        if (not self.is_patient(actor) and actor!='staff-demo'):
             raise RuleError('Patient or staff demo identity required.',403)
         with self.connect() as db:
             rows = db.execute('''SELECT * FROM visit_feedback WHERE (?='staff-demo' OR patient_id=?)
@@ -870,7 +908,7 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             visit=self.record(db,booking_id)
-            if patient not in PATIENTS or visit['patient_id']!=patient:
+            if not self.is_patient(patient,db) or visit['patient_id']!=patient:
                 raise RuleError('You cannot submit feedback for this visit.',403)
             if visit['status']!='completed':
                 raise RuleError('Feedback is available after the visit is completed.')
@@ -890,7 +928,7 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             visit=self.record(db,booking_id)
-            if patient not in PATIENTS or visit['patient_id']!=patient:
+            if not self.is_patient(patient,db) or visit['patient_id']!=patient:
                 raise RuleError('You cannot edit feedback for this visit.',403)
             if visit['status']!='completed':
                 raise RuleError('Feedback is available after the visit is completed.')
@@ -1531,7 +1569,7 @@ class Store:
         return self.assessment_history(patient)['items']
 
     def assessment_history(self, patient, cursor=None):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             boundary=''
@@ -1586,8 +1624,8 @@ class Store:
 
     def share_record(self, db, share_id, actor):
         row = db.execute('SELECT * FROM assessment_shares WHERE id=?', (share_id,)).fetchone()
-        if row is None or (actor in PATIENTS and row['patient_id'] != actor) or (
-            actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or actor not in {*PATIENTS, *DOCTORS}:
+        if row is None or (self.is_patient(actor,db) and row['patient_id'] != actor) or (
+            actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or (not self.is_patient(actor,db) and actor not in DOCTORS):
             raise RuleError('Shared assessment is unavailable for this identity.', 404)
         visit = self.record(db, row['booking_id']) if row['booking_id'] else None
         if actor in DOCTORS and visit and (visit['status'] in ('cancelled','missed') or visit['doctor_id'] != actor):
@@ -1597,7 +1635,7 @@ class Store:
                     review=dict(review) if review else None, visit=visit)
 
     def assessment_sharing_history(self, assessment_id, patient):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?',(assessment_id,patient)).fetchone():
@@ -1608,7 +1646,7 @@ class Store:
 
     def shares(self, actor):
         with self.connect() as db:
-            if actor in PATIENTS:
+            if self.is_patient(actor,db):
                 rows = db.execute('SELECT id FROM assessment_shares WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (actor,))
             elif actor in DOCTORS:
                 rows = db.execute('''SELECT s.id FROM assessment_shares s LEFT JOIN bookings b ON b.id=s.booking_id
@@ -1732,13 +1770,13 @@ class Store:
         return dict(row) if row else {'patient_id':patient,'allergies':'','medicines':'','conditions':'','version':0,'updated_at':None}
 
     def background(self, patient):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             return self.background_record(db,patient)
 
     def save_background(self, patient, allergies, medicines, conditions, version):
-        if patient not in PATIENTS:
+        if not self.is_patient(patient):
             raise RuleError('Patient identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1758,13 +1796,13 @@ class Store:
             return self.background_record(db,patient)
 
     def consultation_record(self, db, booking_id, actor, include_photo=False):
-        if actor not in {*PATIENTS,*DOCTORS}:
+        if (not self.is_patient(actor,db) and actor not in DOCTORS):
             raise RuleError('Patient or doctor identity required.', 403)
         visit = self.record(db, booking_id)
-        if (actor in PATIENTS and visit['patient_id'] != actor) or (actor in DOCTORS and visit['doctor_id'] != actor):
+        if (self.is_patient(actor,db) and visit['patient_id'] != actor) or (actor in DOCTORS and visit['doctor_id'] != actor):
             raise RuleError('Consultation unavailable for this identity.', 404)
         note = db.execute('SELECT * FROM consultation_notes WHERE booking_id=?', (booking_id,)).fetchone()
-        if (actor in PATIENTS and not note) or (actor in DOCTORS and visit['status'] not in ('called','completed')):
+        if (self.is_patient(actor,db) and not note) or (actor in DOCTORS and visit['status'] not in ('called','completed')):
             raise RuleError('Consultation not available yet.', 404)
         linked = None
         if actor in DOCTORS:
@@ -1782,10 +1820,10 @@ class Store:
         return result
 
     def consultations(self, actor):
-        if actor not in {*PATIENTS,*DOCTORS}:
+        if (not self.is_patient(actor) and actor not in DOCTORS):
             raise RuleError('Patient or doctor identity required.', 403)
         with self.connect() as db:
-            if actor in PATIENTS:
+            if self.is_patient(actor,db):
                 rows = db.execute('''SELECT b.id FROM bookings b JOIN consultation_notes n ON n.booking_id=b.id
                                     WHERE b.patient_id=? ORDER BY n.created_at DESC''', (actor,)).fetchall()
             else:
@@ -2019,12 +2057,12 @@ class Store:
         return dict(row, lines=[dict(line) for line in lines])
 
     def care(self, actor):
-        if actor not in {*PATIENTS,*DOCTORS,'staff-demo'}:raise RuleError('Patient, assigned doctor or staff identity required.',403)
+        if (not self.is_patient(actor) and actor not in DOCTORS and actor!='staff-demo'):raise RuleError('Patient, assigned doctor or staff identity required.',403)
         with self.connect() as db:
             records = []
             for row in db.execute('SELECT id FROM bookings ORDER BY created_at DESC').fetchall():
                 visit = self.record(db, row['id'])
-                if actor in PATIENTS and visit['patient_id'] != actor:
+                if self.is_patient(actor,db) and visit['patient_id'] != actor:
                     continue
                 if actor in DOCTORS and visit['doctor_id'] != actor:
                     continue
