@@ -1,11 +1,13 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,VisitSummary,VisitSummaryFilter} from "@smart-skin/shared";
 import {VisitAnalysis,VisitStatusChart,VisitTrendChart,bucketLabel,statusColumns} from "./VisitCharts";
 
 const months=Array.from({length:12},(_,index)=>new Date(Date.UTC(2000,index,1)).toLocaleDateString("en-GB",{month:"long",timeZone:"UTC"}));
 export default function VisitSummaryPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [filter,setFilter]=useState<VisitSummaryFilter>(()=>{const today=new Date(Date.now()+8*3600000);return {period:"month",year:today.getUTCFullYear(),month:today.getUTCMonth()+1};});
   const [period,setPeriod]=useState<VisitSummaryFilter["period"]>("month");
   const [report,setReport]=useState<VisitSummary|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
@@ -16,7 +18,7 @@ export default function VisitSummaryPage(){
   },[api,filter,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
     <nav className="flex flex-wrap gap-5"><a className="underline" href="/reports/billing">Billing analysis</a><a className="underline" href="/feedback/analysis">Feedback analysis</a><a className="underline" href="/stock/reports">Inventory analysis</a><a className="underline" href="/reports">Daily clinic report</a><a className="underline" href="/reports/weekly">Weekly visits</a></nav>
-    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Visit summary & analysis</h1><span className="badge">Staff Demo · synthetic data</span></div>
+    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Visit summary & analysis</h1><span className="badge">{staffNames[staffActor]||staffActor} · synthetic data</span></div>
     <section className="panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{
       e.preventDefault();const values=new FormData(e.currentTarget),year=Number(values.get("year"));
       setFilter(period==="month"?{period,year,month:Number(values.get("month"))}:period==="quarter"?{period,year,quarter:Number(values.get("quarter"))}:{period,year});setRetry(n=>n+1);

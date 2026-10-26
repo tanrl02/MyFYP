@@ -1,4 +1,5 @@
 "use client";
+import {useStaffIdentity} from "../StaffIdentity";
 import useDoctorNames from "../useDoctorNames";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Unavailability from "./Unavailability";
@@ -10,15 +11,17 @@ const sessionText=(hours:{start_time:string;end_time:string;second_start_time:st
 const patternText=(pattern:SchedulePatternInput)=>`${pattern.day_sessions.length?pattern.weekdays.map(day=>`${days[day]}: ${sessionText(pattern.day_sessions.find(item=>item.weekday===day)||pattern)}`).join("; "):`${pattern.weekdays.map(day=>days[day]).join(", ")} · ${sessionText(pattern)}`} · ${pattern.duration_minutes} minutes per slot · ${pattern.capacity} places per slot`;
 
 export default function SchedulesPage(){
+  const {actor:selectedStaff,names:staffNames,selectStaff}=useStaffIdentity();
   const doctorNames=useDoctorNames();
-  const [role,setRole]=useState<DemoActor>("staff-demo"),[busy,setBusy]=useState(false);
+  const [role,setRole]=useState<DemoActor>(selectedStaff),[busy,setBusy]=useState(false);
+  useEffect(()=>{setRole(current=>current.startsWith("staff-")?selectedStaff:current);},[selectedStaff]);
   const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",role),[role]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
     <nav className="mb-6 flex flex-wrap gap-5 text-sm underline"><a href="/">Patient queue</a><a href="/slots">Individual appointment slots</a><a href="/consultations">Consultation notes</a></nav>
     <h1 className="text-3xl font-semibold">Doctor schedules</h1><p className="muted my-4">Staff manage weekly working patterns and confirm dated slots. Doctors can view their own schedule. All dates and times are in Malaysia time.</p>
     <p className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Demo identities only. Use fictional records. Existing slots and appointments are retained when a weekly pattern changes.</p>
-    <label className="mb-6 block max-w-md text-sm font-semibold">Demo role<select aria-label="Schedule demo role" value={role} disabled={busy} onChange={e=>setRole(e.target.value as DemoActor)}><option value="staff-demo">Staff Demo · manage schedules</option>{Object.entries(doctorNames).map(([id,name])=><option key={id} value={id}>{name} · view own schedule</option>)}</select></label>
-    {role==="staff-demo"?<StaffSchedules key={role} api={api} busy={busy} onBusy={setBusy}/>:<DoctorWeek key={role} api={api}/>}
+    <label className="mb-6 block max-w-md text-sm font-semibold">Demo role<select aria-label="Schedule demo role" value={role} disabled={busy} onChange={e=>{const id=e.target.value as DemoActor;setRole(id);if(id.startsWith("staff-"))selectStaff(id as `staff-${string}`);}}>{Object.entries(staffNames).map(([id,name])=><option key={id} value={id}>{name} · manage schedules</option>)}{Object.entries(doctorNames).map(([id,name])=><option key={id} value={id}>{name} · view own schedule</option>)}</select></label>
+    {role.startsWith("staff-")?<StaffSchedules key={role} api={api} busy={busy} onBusy={setBusy}/>:<DoctorWeek key={role} api={api}/>}
   </main>;
 }
 

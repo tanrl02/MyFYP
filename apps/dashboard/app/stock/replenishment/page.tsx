@@ -1,9 +1,11 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {DemoApi,Medicine,medicineLabel} from "@smart-skin/shared";
 
 export default function ReplenishmentPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [snapshot,setSnapshot]=useState<{items:Medicine[];refreshedAt:string}|null>(null),[error,setError]=useState(""),[retry,setRetry]=useState(0);
   const printing=useRef(false);
   useEffect(()=>{
@@ -22,7 +24,7 @@ export default function ReplenishmentPage(){
   const total=snapshot?.items.reduce((sum,item)=>sum+Math.max(0,(item.target_stock??item.stock)-item.stock),0)??0;
   return <main className={`replenishment-list mx-auto max-w-5xl px-5 py-8 ${snapshot?"replenishment-ready":""}`}>
     <nav className="replenishment-actions flex flex-wrap gap-5"><a className="underline" href="/stock">← Pharmacy stock</a><a className="underline" href="/stock/reports">Inventory analysis</a></nav>
-    <header className="my-6"><h1 className="text-3xl font-semibold">Stock replenishment list</h1><p className="muted mt-3">Staff Demo · synthetic items · current stock</p></header>
+    <header className="my-6"><h1 className="text-3xl font-semibold">Stock replenishment list</h1><p className="muted mt-3">{staffNames[staffActor]||staffActor} · synthetic items · current stock</p></header>
     <p className="mb-4">Active items at or below their saved alert level, including out-of-stock items. Units to replenish = target stock minus current stock, with a minimum of zero. Items without a target need staff review.</p>
     <p className="muted mb-5 text-sm">The alert level decides when an item appears here; the target decides the replenishment quantity. Targets equal to the alert level leave stock at its alert boundary. Review quantities before ordering.</p>
     <div className="replenishment-actions mb-5 flex flex-wrap gap-3"><button className="btn" disabled={!snapshot} onClick={()=>window.print()}>Print replenishment list</button><button className="btn secondary" onClick={()=>{setSnapshot(null);setError("");setRetry(value=>value+1);}}>Refresh list</button></div>

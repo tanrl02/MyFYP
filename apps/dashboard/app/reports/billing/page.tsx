@@ -1,11 +1,13 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,BillingSummary,ReportPeriodFilter,money} from "@smart-skin/shared";
 import {downloadBillingReport} from "./billingReportCsv";
 
 const months=Array.from({length:12},(_,i)=>new Date(Date.UTC(2000,i,1)).toLocaleDateString("en-GB",{month:"long",timeZone:"UTC"}));
 export default function BillingAnalysisPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [filter,setFilter]=useState<ReportPeriodFilter>(()=>{const now=new Date(Date.now()+8*3600000);return {period:"month",year:now.getUTCFullYear(),month:now.getUTCMonth()+1};});
   const [period,setPeriod]=useState<ReportPeriodFilter["period"]>("month");
   const [report,setReport]=useState<BillingSummary|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
@@ -16,7 +18,7 @@ export default function BillingAnalysisPage(){
   },[api,filter,retry]);
   return <main className={`billing-print ${report&&!loading&&!error?"billing-ready":""} mx-auto max-w-5xl px-5 py-8`}>
     <nav className="billing-actions flex flex-wrap gap-5"><a className="underline" href="/care">Care & bills</a><a className="underline" href="/reports/summary">Visit analysis</a><a className="underline" href="/reports">Daily clinic report</a></nav>
-    <header className="billing-header my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Billing analysis</h1><span className="badge">Staff Demo · synthetic data</span></header>
+    <header className="billing-header my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Billing analysis</h1><span className="badge">{staffNames[staffActor]||staffActor} · synthetic data</span></header>
     <p className="billing-print-unavailable">Billing analysis is unavailable. Load a report successfully before printing.</p>
     <section className="billing-actions panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{
       e.preventDefault();const data=new FormData(e.currentTarget),year=Number(data.get("year"));

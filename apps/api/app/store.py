@@ -1,5 +1,6 @@
 """Local synthetic demo storage. Keep SQL and transactions out of screens/routes."""
 from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 import re
@@ -12,6 +13,7 @@ from .scheduling import MALAYSIA, pattern_values, week_slots, preview_hash
 PATIENTS = {'patient-ava': 'Ava Demo', 'patient-noah': 'Noah Demo'}
 DOCTORS = {'doctor-lim': 'Dr. Lim (demo)', 'doctor-anita': 'Dr. Anita (demo)'}
 USER_ROLES = {**dict.fromkeys(PATIENTS,'patient'), **dict.fromkeys(DOCTORS,'doctor'), 'staff-demo':'staff', 'admin-demo':'admin'}
+STAFF_REQUEST = ContextVar('staff_request',default=None)
 DOCTOR_CONCERNS = {'general', 'acne', 'eczema', 'psoriasis'}
 # Reminder rows are retained, but only currently upcoming waiting visits are visible.
 NOTIFICATION_VISIBLE = """(n.kind!='appointment_reminder' OR EXISTS (
@@ -39,6 +41,12 @@ class Store:
                 CREATE TABLE IF NOT EXISTS doctor_creations (
                   request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
                   payload_json TEXT NOT NULL, queue_prefix TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS staff_creations (
+                  request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
+                  payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS staff_activity (
+                  id TEXT PRIMARY KEY, staff_id TEXT NOT NULL REFERENCES user_profiles(id),
+                  action TEXT NOT NULL, created_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS doctor_profiles (
                   doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT);
@@ -281,6 +289,17 @@ class Store:
     def is_doctor(self, actor, db=None):
         return self.user_role(actor,db)=='doctor'
 
+    def is_staff(self, actor, db=None):
+        return self.user_role(actor,db)=='staff'
+
+    def demo_staff(self):
+        with self.connect() as db:
+            return [dict(row) for row in db.execute("SELECT id,name FROM user_profiles WHERE role='staff' ORDER BY rowid")]
+
+    def acting_staff(self, db):
+        context=STAFF_REQUEST.get()
+        return context[0] if context and self.is_staff(context[0],db) else 'staff-demo'
+
     def doctor_names(self, db):
         return {row['id']:row['name'] for row in db.execute("SELECT id,name FROM user_profiles WHERE role='doctor' ORDER BY rowid")}
 
@@ -350,6 +369,22 @@ class Store:
             db.execute("INSERT INTO user_profiles VALUES(?,'doctor',?,?,?,0,?,?)",(user_id,name,phone,email,now,actor))
             db.execute('INSERT INTO doctor_profiles VALUES(?,?,?,?,NULL)',(user_id,'Not specified','[]',0))
             db.execute('INSERT INTO doctor_creations VALUES(?,?,?,?,?)',(request_id,user_id,payload,prefix,now))
+            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
+
+    def create_staff(self, actor, name, phone, email, request_id):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        name,phone,email=self.normalise_user_information(name,phone,email)
+        if not 8<=len(request_id)<=100 or not request_id.strip():raise RuleError('A valid creation request is required.',422)
+        payload=json.dumps({'name':name,'phone':phone,'email':email},sort_keys=True)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM staff_creations WHERE request_id=?',(request_id,)).fetchone()
+            if existing:
+                if existing['payload_json']!=payload:raise RuleError('This request was used for different staff details. Start a new staff form.')
+                return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(existing['user_id'],)).fetchone())
+            user_id='staff-'+str(uuid4());now=datetime.now(timezone.utc).isoformat()
+            db.execute("INSERT INTO user_profiles VALUES(?,'staff',?,?,?,0,?,?)",(user_id,name,phone,email,now,actor))
+            db.execute('INSERT INTO staff_creations VALUES(?,?,?,?)',(request_id,user_id,payload,now))
             return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
 
     def save_user_profile(self, user_id, actor, name, phone, email, version):
@@ -440,6 +475,10 @@ class Store:
         db.execute('PRAGMA foreign_keys=ON')
         try:
             yield db
+            context=STAFF_REQUEST.get()
+            if context and context[1]=='POST' and db.total_changes and self.is_staff(context[0],db):
+                db.execute('INSERT INTO staff_activity VALUES(?,?,?,?)',
+                    (str(uuid4()),context[0],context[1]+' '+context[2],datetime.now(timezone.utc).isoformat()))
             db.commit()
         except BaseException:
             db.rollback()
@@ -636,7 +675,7 @@ class Store:
             db.execute('''INSERT INTO doctor_schedule_patterns VALUES(?,?,?,?,?)
                 ON CONFLICT(doctor_id) DO UPDATE SET pattern_json=excluded.pattern_json,version=excluded.version,
                 updated_at=excluded.updated_at,actor_id=excluded.actor_id''',
-                (doctor,json.dumps(values,sort_keys=True),version+1,datetime.now(timezone.utc).isoformat(),'staff-demo'))
+                (doctor,json.dumps(values,sort_keys=True),version+1,datetime.now(timezone.utc).isoformat(),self.acting_staff(db)))
             return self.schedule_pattern(db,doctor)
 
     def schedule_preview_record(self, db, doctor, week_start, version):
@@ -938,11 +977,11 @@ class Store:
         return dict(row,edit_deadline=(datetime.fromisoformat(row['created_at'])+timedelta(hours=24)).isoformat())
 
     def feedback(self, actor):
-        if (not self.is_patient(actor) and actor!='staff-demo'):
+        if (not self.is_patient(actor) and not self.is_staff(actor)):
             raise RuleError('Patient or staff demo identity required.',403)
         with self.connect() as db:
-            rows = db.execute('''SELECT * FROM visit_feedback WHERE (?='staff-demo' OR patient_id=?)
-                ORDER BY created_at DESC LIMIT 100''',(actor,actor)).fetchall()
+            rows = db.execute('''SELECT * FROM visit_feedback WHERE (?=1 OR patient_id=?)
+                ORDER BY created_at DESC LIMIT 100''',(int(self.is_staff(actor,db)),actor)).fetchall()
             return [dict(self.feedback_metadata(row),visit=self.record(db,row['booking_id'])) for row in rows]
 
     def submit_feedback(self, booking_id, patient, rating, comment):
@@ -998,7 +1037,7 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             old = self.record(db, booking_id)
-            if actor != 'staff-demo' and actor != old['patient_id']:
+            if not self.is_staff(actor,db) and actor != old['patient_id']:
                 raise RuleError('You cannot reschedule this booking.', 403)
             retry = db.execute('SELECT * FROM reschedules WHERE actor_id=? AND request_id=?', (actor,request_id)).fetchone()
             if retry:
@@ -1090,7 +1129,7 @@ class Store:
             return self.record(db, row['id'])
 
     def mark_missed(self, booking_id, staff):
-        if staff!='staff-demo':
+        if not self.is_staff(staff):
             raise RuleError('Staff demo identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1108,7 +1147,7 @@ class Store:
             return self.record(db,booking_id)
 
     def restore_waiting(self, booking_id, missed_event_id, staff):
-        if staff!='staff-demo':
+        if not self.is_staff(staff):
             raise RuleError('Staff demo identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1452,7 +1491,7 @@ class Store:
                 'untracked_receipts':counts['untracked'] or 0,'items':rows[:200],'has_more':len(rows)>200}
 
     def receive_stock(self, medicine_id, quantity, reason, request_id, staff, batch_number=None, expiry_date=None):
-        if staff!='staff-demo':
+        if not self.is_staff(staff):
             raise RuleError('Staff demo identity required.',403)
         if type(quantity) is not int or not 1<=quantity<=1000 or not reason.strip() or len(reason)>300:
             raise RuleError('Enter a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
@@ -1543,7 +1582,7 @@ class Store:
             return rows
 
     def record_stock_loss(self, medicine_id, quantity, kind, reason, request_id, staff, receipt_id=None):
-        if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
+        if not self.is_staff(staff):raise RuleError('Staff demo identity required.',403)
         if type(quantity) is not int or not 1<=quantity<=1000 or kind not in ('damaged','lost') or not reason.strip() or len(reason)>300:
             raise RuleError('Choose damaged or lost, a whole quantity from 1 to 1000 and a reason up to 300 characters.',422)
         reason=reason.strip()
@@ -2102,7 +2141,7 @@ class Store:
         return dict(row, lines=[dict(line) for line in lines])
 
     def care(self, actor):
-        if (not self.is_patient(actor) and not self.is_doctor(actor) and actor!='staff-demo'):raise RuleError('Patient, assigned doctor or staff identity required.',403)
+        if (not self.is_patient(actor) and not self.is_doctor(actor) and not self.is_staff(actor)):raise RuleError('Patient, assigned doctor or staff identity required.',403)
         with self.connect() as db:
             records = []
             for row in db.execute('SELECT id FROM bookings ORDER BY created_at DESC').fetchall():
@@ -2168,7 +2207,7 @@ class Store:
                     'allocations':saved_allocations(db,prescription_id),'status':prescription['status']}
 
     def dispense(self, prescription_id, staff, allocations=None, prescription_version=None):
-        if staff!='staff-demo':raise RuleError('Staff demo identity required.',403)
+        if not self.is_staff(staff):raise RuleError('Staff demo identity required.',403)
         from .batch_inventory import allocate,saved_allocations
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -2233,7 +2272,7 @@ class Store:
             if not row:
                 raise RuleError('Bill not found.', 404)
             visit = self.record(db, row['booking_id'])
-            if actor != 'staff-demo' and visit['patient_id'] != actor:
+            if not self.is_staff(actor,db) and visit['patient_id'] != actor:
                 raise RuleError('You cannot pay this bill.', 403)
             invoice = self.invoice(db, row['booking_id'])
             if invoice['status'] == 'paid':

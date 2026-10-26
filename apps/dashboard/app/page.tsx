@@ -1,4 +1,5 @@
 "use client";
+import {useStaffIdentity} from "./StaffIdentity";
 import useDoctorNames from "./useDoctorNames";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Booking, DemoApi, queueToken, visitTime } from "@smart-skin/shared";
@@ -9,8 +10,9 @@ import RescheduleVisit from "./RescheduleVisit";
 import MissedVisitReview from "./MissedVisitReview";
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function QueuePage() {
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
   const doctorNames=useDoctorNames();
-  const api = useMemo(() => new DemoApi(base, "staff-demo"), []);
+  const api = useMemo(() => new DemoApi(base, staffActor), [staffActor]);
   const [doctor, setDoctor] = useState("doctor-lim");
   const [date, setDate] = useState("");
   const [checkoutTarget,setCheckoutTarget]=useState<CheckoutTarget|null>(null);
@@ -53,7 +55,7 @@ export default function QueuePage() {
   const called = records.find(r => r.status === "called");
   const waiting = records.filter(r => r.status === "waiting");
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10">
-    <header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="rounded-xl bg-[#176f5e] px-3 py-2 text-xl font-bold text-white">S+</span><div><strong className="text-lg">Smart Skin</strong><p className="muted text-xs">Care coordination dashboard</p></div></div><span className="badge">Staff Demo · synthetic data</span></header>
+    <header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3"><span className="rounded-xl bg-[#176f5e] px-3 py-2 text-xl font-bold text-white">S+</span><div><strong className="text-lg">Smart Skin</strong><p className="muted text-xs">Care coordination dashboard</p></div></div><span className="badge">{staffNames[staffActor]||staffActor} · synthetic data</span></header>
     <div className="mb-7 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Local demonstration — demo identities are not secure login. Use synthetic records only. Queue actions apply to the selected clinic date.</div>
     <div className="mb-7 flex flex-wrap items-end justify-between gap-4"><div><p className="muted mb-2 text-xs font-semibold tracking-widest">REGISTRATION / VISIT QUEUE</p><h1 className="text-3xl font-semibold">Keep every visit moving.</h1><p className="muted mt-2">Bookings from the patient app appear here automatically.</p></div><button className="btn secondary" disabled={!date || busy} onClick={() => refresh().catch(e => setError(e.message))}>Refresh queue</button></div>
     <CounterBooking api={api} onBooked={booking=>{setCompletion(null);setDoctor(booking.doctor_id);setDate(booking.clinic_date);}}/>

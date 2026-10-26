@@ -9,7 +9,7 @@ from .photo_checks import check_photo
 from .disease_model import predict_disease
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
-from .store import RuleError, Store
+from .store import RuleError, Store, STAFF_REQUEST
 
 class RestoreWaitingInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
@@ -248,6 +248,11 @@ def create_app(path=None,photo_checker=None,predictor=None):
     predictor=predictor or predict_disease
     store = Store(path or os.getenv('DEMO_DATABASE', str(Path(__file__).parents[1] / 'data/demo.sqlite3')))
     api = FastAPI(title='Smart Skin - LOCAL DEMO API', version='0.1.0')
+    @api.middleware('http')
+    async def staff_request_context(request,call_next):
+        token=STAFF_REQUEST.set((request.headers.get('X-Demo-Actor',''),request.method,request.url.path))
+        try:return await call_next(request)
+        finally:STAFF_REQUEST.reset(token)
     api.add_middleware(CORSMiddleware,
         allow_origins=['http://localhost:3000','http://127.0.0.1:3000','http://localhost:8081','http://127.0.0.1:8081'],
         allow_methods=['GET','POST'], allow_headers=['Content-Type','X-Demo-Actor'])
@@ -273,7 +278,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return who
 
     def staff(who=Depends(actor)):
-        if who != 'staff-demo':
+        if not store.is_staff(who):
             raise HTTPException(403, 'Staff demo identity required.')
         return who
 
@@ -283,12 +288,12 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return who
 
     def operational(who=Depends(actor)):
-        if not store.is_doctor(who) and who!='staff-demo':
+        if not store.is_doctor(who) and not store.is_staff(who):
             raise HTTPException(403, 'Doctor or staff demo identity required.')
         return who
 
     def payer(who=Depends(actor)):
-        if not store.is_patient(who) and who!='staff-demo':
+        if not store.is_patient(who) and not store.is_staff(who):
             raise HTTPException(403, 'Patient or staff demo identity required.')
         return who
 
@@ -317,6 +322,15 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/admin/doctors',status_code=201)
     def create_doctor(payload: PatientCreateInput,who=Depends(admin)):
         return run(lambda:store.create_doctor(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.post('/admin/staff',status_code=201)
+    def create_staff(payload: PatientCreateInput,who=Depends(admin)):
+        return run(lambda:store.create_staff(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.get('/demo/staff')
+    def demo_staff(who=Depends(user_actor)):
+        if who!='admin-demo' and not store.is_staff(who):raise HTTPException(403,'Admin or staff identity required.')
+        return store.demo_staff()
 
     @api.get('/demo/doctors')
     def demo_doctors(who=Depends(user_actor)):
@@ -430,7 +444,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/bookings/{booking_id}/reschedule')
     def reschedule(booking_id: str, payload: BookingInput, who=Depends(actor)):
-        if not store.is_patient(who) and who!='staff-demo':
+        if not store.is_patient(who) and not store.is_staff(who):
             raise HTTPException(403,'Patient or staff demo identity required.')
         return run(lambda: store.reschedule(booking_id,who,payload.slot_id,payload.request_id))
 
@@ -498,7 +512,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.get('/medicines')
     def medicines(who=Depends(operational)):
-        return store.catalog(active_only=who!='staff-demo')
+        return store.catalog(active_only=not store.is_staff(who))
 
     @api.post('/medicines',status_code=201)
     def add_medicine(payload: MedicineInput,who=Depends(staff)):

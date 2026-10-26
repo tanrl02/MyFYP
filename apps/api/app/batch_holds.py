@@ -4,7 +4,7 @@ from datetime import datetime,timezone
 
 
 def change(db,medicine_id,receipt_id,held,reason,version,request_id,staff,error):
-    if staff!='staff-demo':raise error('Staff demo identity required.',403)
+    if not db.execute("SELECT 1 FROM user_profiles WHERE id=? AND role='staff'",(staff,)).fetchone():raise error('Staff demo identity required.',403)
     if type(held) is not bool or type(version) is not int or version<0 or not isinstance(reason,str) or not reason.strip() or len(reason)>300:
         raise error('Choose a hold state, current version and reason up to 300 characters.',422)
     reason=reason.strip()

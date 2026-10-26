@@ -1,11 +1,13 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import BatchHoldForm from "./BatchHoldForm";
 import BatchMovementHistory from "./BatchMovementHistory";
 import {BatchStockOverview,DemoApi,Medicine,medicineLabel} from "@smart-skin/shared";
 
 export default function BatchStockPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [holdBatch,setHoldBatch]=useState<BatchStockOverview["batches"][number]|null>(null),[holdBusy,setHoldBusy]=useState(false);
   const [historyReceipt,setHistoryReceipt]=useState("");
   const [medicines,setMedicines]=useState<Medicine[]>([]),[item,setItem]=useState(""),[data,setData]=useState<BatchStockOverview|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
@@ -22,7 +24,7 @@ export default function BatchStockPage(){
   const expired=data?.batches.reduce((total,batch)=>total+(batch.expired?batch.remaining_units:0),0)??0;
   const usable=data?.batches.reduce((total,batch)=>total+(!batch.expired&&!batch.held?batch.remaining_units:0),0)??0;
   return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex flex-wrap gap-5"><a className="underline" href="/stock">← Pharmacy stock</a><a className="underline" href="/stock/usable-alerts">Low usable-stock alerts</a><a className="underline" href="/stock/expiry">Batch expiry review</a><a className="underline" href="/care">Dispensing & billing</a></nav>
-    <h1 className="my-6 text-3xl font-semibold">Batch stock overview</h1><p className="mb-4">Staff Demo · synthetic items. Select a medicine to see tracked batches and its separate untracked stock.</p>
+    <h1 className="my-6 text-3xl font-semibold">Batch stock overview</h1><p className="mb-4">{staffNames[staffActor]||staffActor} · synthetic items. Select a medicine to see tracked batches and its separate untracked stock.</p>
     <section className="panel mb-5"><label className="block font-semibold">Medicine<select disabled={holdBusy} aria-label="Batch overview medicine" className="mt-2" value={item} onChange={e=>{setData(null);setError("");setLoading(true);setHistoryReceipt("");setHoldBatch(null);setItem(e.target.value);}}><option value="">Choose a medicine</option>{medicines.map(medicine=><option value={medicine.id} key={medicine.id}>{medicineLabel(medicine)}{medicine.active?"":" · Inactive"}</option>)}</select></label><button className="btn secondary mt-4" disabled={holdBusy} onClick={()=>setRetry(value=>value+1)}>Refresh batch stock</button><p className="muted mt-3 text-sm">Refreshes every five seconds. Inactive catalogue items are included.</p></section>
     {error?<p role="alert" className="panel mb-5 text-red-800">{error} Use Refresh batch stock to retry.</p>:null}
     {loading?<p role="status">Loading batch stock…</p>:null}

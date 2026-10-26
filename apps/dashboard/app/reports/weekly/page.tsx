@@ -1,4 +1,5 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,WeeklyVisitReport} from "@smart-skin/shared";
 
@@ -6,7 +7,8 @@ const columns=[["total","Total records"],["waiting","Waiting"],["called","Called
 const dayLabel=(day:string)=>new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
 
 export default function WeeklyReportsPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [weekOf,setWeekOf]=useState(()=>new Date(Date.now()+8*3600000).toISOString().slice(0,10));
   const [report,setReport]=useState<WeeklyVisitReport|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[retry,setRetry]=useState(0);
   useEffect(()=>{
@@ -23,7 +25,7 @@ export default function WeeklyReportsPage(){
   },[api,weekOf,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
     <p className="mb-4"><a className="underline" href="/reports/summary">Monthly / quarterly / yearly analysis →</a></p><a href="/reports" className="underline">← Daily clinic report</a>
-    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Weekly visit summary</h1><span className="badge">Staff Demo · synthetic data</span></div>
+    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Weekly visit summary</h1><span className="badge">{staffNames[staffActor]||staffActor} · synthetic data</span></div>
     <section className="panel mb-5">
       <form className="flex flex-wrap items-end gap-4" onSubmit={e=>{e.preventDefault();setWeekOf(String(new FormData(e.currentTarget).get("week_of")||""));setRetry(n=>n+1);}}>
         <label className="block max-w-xs font-semibold">Week containing<input name="week_of" aria-label="Week containing" type="date" required defaultValue={weekOf} className="mt-2 w-full rounded-lg border p-3"/></label>

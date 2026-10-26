@@ -1,4 +1,5 @@
 "use client";
+import {useStaffIdentity} from "../StaffIdentity";
 import useDoctorNames from "../useDoctorNames";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {DemoActor,DemoApi,UserProfile,visitTime} from "@smart-skin/shared";
@@ -9,9 +10,10 @@ const roles={all:"All roles",patient:"Patient",doctor:"Doctor",staff:"Staff",adm
 const fields=[{key:"name",label:"Name",max:100},{key:"phone",label:"Phone",max:30},{key:"email",label:"Email",max:254}] as const;
 type Draft={original:UserProfile;name:string;phone:string;email:string;review:boolean};
 export default function UsersPage(){
+  const {names:staffNames}=useStaffIdentity();
   const doctorNames=useDoctorNames();
-  const [creating,setCreating]=useState<"patient"|"doctor"|null>(null);
-  const identities={...initialIdentities,...doctorNames};
+  const [creating,setCreating]=useState<"patient"|"doctor"|"staff"|null>(null);
+  const identities={...initialIdentities,...doctorNames,...staffNames};
   const [actor,setActor]=useState<DemoActor>("admin-demo");
   const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",actor),[actor]);
   const admin=actor==="admin-demo";
@@ -58,7 +60,8 @@ export default function UsersPage(){
     {profile?<section aria-label="My basic information" className="panel mb-5"><h2 className="text-lg font-semibold">My basic information</h2><p className="my-2">{profile.name} · {roles[profile.role]} · {profile.id}</p><p>Phone: {profile.phone||"Not provided"}</p><p>Email: {profile.email||"Not provided"}</p></section>:null}
     {admin&&!draft&&!creating?<button className="btn mb-4" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating("patient");}}>Add patient</button>:null}
     {admin&&!draft&&!creating?<button className="btn secondary mb-4 ml-3" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating("doctor");}}>Add doctor</button>:null}
-    {admin&&creating?<AddUser role={creating} api={api} busy={busy} onBusy={value=>{saving.current=value;epoch.current++;setBusy(value);}} onClose={()=>setCreating(null)} onSaved={user=>{setUsers(rows=>[...rows.filter(row=>row.id!==user.id),user]);setCreating(null);setQuery("");setRole(user.role);setNotice(`${user.role==="doctor"?"Doctor":"Patient"} added: ${user.name} · ${user.id}. ${user.role==="doctor"?"Staff can now configure the doctor profile and schedule.":"Available in the demo patient selector."}`);}}/>:null}
+    {admin&&!draft&&!creating?<button className="btn secondary mb-4 ml-3" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating("staff");}}>Add staff</button>:null}
+    {admin&&creating?<AddUser role={creating} api={api} busy={busy} onBusy={value=>{saving.current=value;epoch.current++;setBusy(value);}} onClose={()=>setCreating(null)} onSaved={user=>{setUsers(rows=>[...rows.filter(row=>row.id!==user.id),user]);setCreating(null);setQuery("");setRole(user.role);setNotice(`${user.role==="staff"?"Staff":user.role==="doctor"?"Doctor":"Patient"} added: ${user.name} · ${user.id}. ${user.role==="doctor"?"Staff can now configure the doctor profile and schedule.":user.role==="staff"?"Available in the operational staff selector.":"Available in the demo patient selector."}`);}}/>:null}
     {!admin?<p className="panel">Only Admin Demo can view the user directory or edit basic information. You can view your own information above.</p>:<>
       <section aria-label="User directory filters" className="panel mb-5"><div className="flex flex-wrap gap-5"><label className="grow">Search users<input aria-label="Search users" placeholder="Name, user ID, phone or email" maxLength={100} className="mt-2 block w-full rounded-lg border p-3" value={query} onChange={event=>setQuery(event.target.value)}/></label><label>Role<select aria-label="Filter user role" className="mt-2 block rounded-lg border p-3" value={role} onChange={event=>setRole(event.target.value as keyof typeof roles)}>{Object.entries(roles).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label></div><p className="muted mt-3">Showing {visible.length} of {users.length} users. Roles and user IDs stay fixed.</p></section>
       {draft?<section aria-label="Edit user information" className="panel mb-5"><h2 ref={heading} tabIndex={-1} className="text-xl font-semibold">{draft.review?"Review user information":"Edit user information"}</h2><p className="my-3">{draft.original.id} · {roles[draft.original.role]} · version {draft.original.version}</p>

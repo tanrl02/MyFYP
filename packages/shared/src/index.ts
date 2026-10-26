@@ -8,7 +8,8 @@ export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPa
 export type DemoPatient = `patient-${string}`;
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
-export type DemoActor = DemoPatient | DemoDoctor | "staff-demo" | "admin-demo";
+export type DemoStaff = `staff-${string}`;
+export type DemoActor = DemoPatient | DemoDoctor | DemoStaff | "admin-demo";
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
@@ -88,6 +89,8 @@ export type UserProfile={id:string;role:"patient"|"doctor"|"staff"|"admin";name:
 export type DemoDoctorIdentity={id:DemoDoctor;name:string};
 export type DemoPatientIdentity={id:DemoPatient;name:string};
 export class DemoApi {
+  demoStaff() { return this.request<{id:DemoStaff;name:string}[]>("/demo/staff"); }
+  createStaff(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/staff",body); }
   demoDoctors() { return this.request<DemoDoctorIdentity[]>("/demo/doctors"); }
   createDoctor(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/doctors",body); }
   demoPatients() { return this.request<DemoPatientIdentity[]>("/demo/patients"); }

@@ -1,13 +1,15 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,UsableStockAlerts,medicineLabel} from "@smart-skin/shared";
 
 export default function UsableStockAlertsPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [data,setData]=useState<UsableStockAlerts|null>(null),[error,setError]=useState(""),[retry,setRetry]=useState(0);
   useEffect(()=>{let active=true,fetching=false;setData(null);setError("");async function load(){if(fetching)return;fetching=true;try{const result=await api.usableStockAlerts();if(active){setData(result);setError("");}}catch(e){if(active){setData(null);setError(e instanceof Error?e.message:"Cannot load usable-stock alerts.");}}finally{fetching=false;}}void load();const timer=setInterval(load,5000);return()=>{active=false;clearInterval(timer);};},[api,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex flex-wrap gap-5"><a className="underline" href="/stock">← Pharmacy stock</a><a className="underline" href="/stock/batches">Batch stock overview</a><a className="underline" href="/stock/replenishment">Physical-stock replenishment</a></nav>
-    <h1 className="my-6 text-3xl font-semibold">Low usable-stock alerts</h1><p className="mb-3">Staff Demo · synthetic items. Active items whose usable tracked units are at or below their saved alert level.</p>
+    <h1 className="my-6 text-3xl font-semibold">Low usable-stock alerts</h1><p className="mb-3">{staffNames[staffActor]||staffActor} · synthetic items. Active items whose usable tracked units are at or below their saved alert level.</p>
     <p className="muted mb-5 text-sm">Usable tracked stock excludes expired and held batches. Untracked stock is shown separately because its physical batch and expiry need checking. An alert does not mean there is no physical stock or automatically recommend an order.</p>
     <button className="btn secondary mb-5" onClick={()=>setRetry(value=>value+1)}>Refresh usable-stock alerts</button>
     {error?<p role="alert" className="panel mb-5 text-red-800">{error} Use Refresh usable-stock alerts to retry.</p>:null}

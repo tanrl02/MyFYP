@@ -1,11 +1,13 @@
 "use client";
+import {useStaffIdentity} from "../../StaffIdentity";
 import {useEffect,useMemo,useState} from "react";
 import {DemoApi,InventorySummary,ReportPeriodFilter,medicineLabel} from "@smart-skin/shared";
 import InventoryTrend,{activityLabel,movementColumns} from "./InventoryTrend";
 
 const months=Array.from({length:12},(_,i)=>new Date(Date.UTC(2000,i,1)).toLocaleDateString("en-GB",{month:"long",timeZone:"UTC"}));
 export default function InventoryReportPage(){
-  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
+  const {actor:staffActor,names:staffNames}=useStaffIdentity();
+  const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",staffActor),[staffActor]);
   const [filter,setFilter]=useState<ReportPeriodFilter>(()=>{const today=new Date(Date.now()+8*3600000);return {period:"month",year:today.getUTCFullYear(),month:today.getUTCMonth()+1};});
   const [period,setPeriod]=useState<ReportPeriodFilter["period"]>("month");
   const [data,setData]=useState<InventorySummary|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
@@ -16,7 +18,7 @@ export default function InventoryReportPage(){
   },[api,filter,retry]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
     <nav className="flex flex-wrap gap-5"><a href="/stock" className="underline">← Pharmacy stock</a><a href="/stock/replenishment" className="underline">Replenishment list</a><a href="/reports" className="underline">Daily clinic report</a><a href="/reports/summary" className="underline">Visit analysis</a></nav>
-    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Inventory summary & analysis</h1><span className="badge">Staff Demo · synthetic items</span></div>
+    <div className="my-6 flex flex-wrap justify-between gap-3"><h1 className="text-3xl font-semibold">Inventory summary & analysis</h1><span className="badge">{staffNames[staffActor]||staffActor} · synthetic items</span></div>
     <section className="panel mb-5"><form className="flex flex-wrap items-end gap-4" onSubmit={e=>{e.preventDefault();const form=new FormData(e.currentTarget),year=Number(form.get("year"));setFilter(period==="month"?{period,year,month:Number(form.get("month"))}:period==="quarter"?{period,year,quarter:Number(form.get("quarter"))}:{period,year});setRetry(n=>n+1);}}>
       <label className="font-semibold">Period<select aria-label="Inventory period" value={period} onChange={e=>setPeriod(e.target.value as typeof period)} className="mt-2 block rounded-lg border p-3"><option value="month">Monthly</option><option value="quarter">Quarterly</option><option value="year">Yearly</option></select></label>
       <label className="font-semibold">Year<input aria-label="Inventory year" type="number" name="year" required min="2" max="9998" step="1" defaultValue={filter.year} className="mt-2 block w-32 rounded-lg border p-3"/></label>
