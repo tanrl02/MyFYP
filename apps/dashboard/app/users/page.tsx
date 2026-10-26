@@ -1,14 +1,17 @@
 "use client";
+import useDoctorNames from "../useDoctorNames";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {DemoActor,DemoApi,UserProfile,visitTime} from "@smart-skin/shared";
-import AddPatient from "./AddPatient";
+import AddUser from "./AddUser";
 
-const identities:Partial<Record<DemoActor,string>>={"admin-demo":"Admin Demo","staff-demo":"Staff Demo","doctor-lim":"Dr. Lim (demo)","doctor-anita":"Dr. Anita (demo)","patient-ava":"Ava Demo","patient-noah":"Noah Demo"};
+const initialIdentities:Partial<Record<DemoActor,string>>={"admin-demo":"Admin Demo","staff-demo":"Staff Demo","doctor-lim":"Dr. Lim (demo)","doctor-anita":"Dr. Anita (demo)","patient-ava":"Ava Demo","patient-noah":"Noah Demo"};
 const roles={all:"All roles",patient:"Patient",doctor:"Doctor",staff:"Staff",admin:"Admin"} as const;
 const fields=[{key:"name",label:"Name",max:100},{key:"phone",label:"Phone",max:30},{key:"email",label:"Email",max:254}] as const;
 type Draft={original:UserProfile;name:string;phone:string;email:string;review:boolean};
 export default function UsersPage(){
-  const [creating,setCreating]=useState(false);
+  const doctorNames=useDoctorNames();
+  const [creating,setCreating]=useState<"patient"|"doctor"|null>(null);
+  const identities={...initialIdentities,...doctorNames};
   const [actor,setActor]=useState<DemoActor>("admin-demo");
   const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",actor),[actor]);
   const admin=actor==="admin-demo";
@@ -18,7 +21,7 @@ export default function UsersPage(){
   const [error,setError]=useState(""),[notice,setNotice]=useState(""),[retry,setRetry]=useState(0);
   const epoch=useRef(0),saving=useRef(false),heading=useRef<HTMLHeadingElement>(null);
   useEffect(()=>{
-    let active=true,fetching=false;setUsers([]);setOwn(null);setDraft(null);setCreating(false);setQuery("");setRole("all");setError("");setNotice("");setLoading(true);
+    let active=true,fetching=false;setUsers([]);setOwn(null);setDraft(null);setCreating(null);setQuery("");setRole("all");setError("");setNotice("");setLoading(true);
     async function load(){if(fetching||saving.current)return;fetching=true;const revision=epoch.current;
       try{const [profile,list]=await Promise.all([api.me(),actor==="admin-demo"?api.users():Promise.resolve([])]);if(active&&revision===epoch.current){setOwn({actor,profile});setUsers(list);setError("");}}
       catch(e){if(active&&revision===epoch.current)setError(e instanceof Error?e.message:"Cannot load user information.");}
@@ -53,8 +56,9 @@ export default function UsersPage(){
     {notice?<p role="status" className="my-4 rounded-lg bg-emerald-50 p-3 text-emerald-800">{notice}</p>:null}
     {!draft&&!creating?<button className="btn secondary mb-4" disabled={busy} onClick={()=>setRetry(value=>value+1)}>Refresh user information</button>:null}
     {profile?<section aria-label="My basic information" className="panel mb-5"><h2 className="text-lg font-semibold">My basic information</h2><p className="my-2">{profile.name} · {roles[profile.role]} · {profile.id}</p><p>Phone: {profile.phone||"Not provided"}</p><p>Email: {profile.email||"Not provided"}</p></section>:null}
-    {admin&&!draft&&!creating?<button className="btn mb-4" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating(true);}}>Add patient</button>:null}
-    {admin&&creating?<AddPatient api={api} busy={busy} onBusy={value=>{saving.current=value;epoch.current++;setBusy(value);}} onClose={()=>setCreating(false)} onSaved={user=>{setUsers(rows=>[...rows.filter(row=>row.id!==user.id),user]);setCreating(false);setQuery("");setRole("patient");setNotice(`Patient added: ${user.name} · ${user.id}. Available in the demo patient selector.`);}}/>:null}
+    {admin&&!draft&&!creating?<button className="btn mb-4" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating("patient");}}>Add patient</button>:null}
+    {admin&&!draft&&!creating?<button className="btn secondary mb-4 ml-3" disabled={busy||loading} onClick={()=>{setError("");setNotice("");setCreating("doctor");}}>Add doctor</button>:null}
+    {admin&&creating?<AddUser role={creating} api={api} busy={busy} onBusy={value=>{saving.current=value;epoch.current++;setBusy(value);}} onClose={()=>setCreating(null)} onSaved={user=>{setUsers(rows=>[...rows.filter(row=>row.id!==user.id),user]);setCreating(null);setQuery("");setRole(user.role);setNotice(`${user.role==="doctor"?"Doctor":"Patient"} added: ${user.name} · ${user.id}. ${user.role==="doctor"?"Staff can now configure the doctor profile and schedule.":"Available in the demo patient selector."}`);}}/>:null}
     {!admin?<p className="panel">Only Admin Demo can view the user directory or edit basic information. You can view your own information above.</p>:<>
       <section aria-label="User directory filters" className="panel mb-5"><div className="flex flex-wrap gap-5"><label className="grow">Search users<input aria-label="Search users" placeholder="Name, user ID, phone or email" maxLength={100} className="mt-2 block w-full rounded-lg border p-3" value={query} onChange={event=>setQuery(event.target.value)}/></label><label>Role<select aria-label="Filter user role" className="mt-2 block rounded-lg border p-3" value={role} onChange={event=>setRole(event.target.value as keyof typeof roles)}>{Object.entries(roles).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label></div><p className="muted mt-3">Showing {visible.length} of {users.length} users. Roles and user IDs stay fixed.</p></section>
       {draft?<section aria-label="Edit user information" className="panel mb-5"><h2 ref={heading} tabIndex={-1} className="text-xl font-semibold">{draft.review?"Review user information":"Edit user information"}</h2><p className="my-3">{draft.original.id} · {roles[draft.original.role]} · version {draft.original.version}</p>
@@ -62,7 +66,7 @@ export default function UsersPage(){
         {draft.review?<><dl>{fields.map(field=><div key={field.key} className="my-3 rounded-lg bg-[#f4f7f6] p-3"><dt className="font-semibold">{field.label}</dt><dd className="break-words">Previous: {draft.original[field.key]||"Not provided"}</dd><dd className="break-words">New: {draft[field.key]||"Not provided"}</dd></div>)}</dl><p className="muted my-3">Updates basic information for the same user ID. Existing bookings and clinical records remain linked. Saved historical messages keep their original text.</p><button className="btn" disabled={busy||changed||!!error} onClick={save}>{busy?"Saving…":"Confirm user information"}</button><button className="btn secondary ml-3" disabled={busy||changed} onClick={()=>{setError("");setDraft({...draft,review:false});}}>Keep editing</button></>:<fieldset disabled={busy||changed}>{fields.map(field=><label key={field.key} className="my-3 block font-semibold">{field.label}<input aria-label={`Edit ${field.label.toLowerCase()}`} maxLength={field.max} type={field.key==="email"?"email":field.key==="phone"?"tel":"text"} className="mt-2 block w-full rounded-lg border p-3 font-normal" value={draft[field.key]} onChange={event=>{setError("");setDraft({...draft,[field.key]:event.target.value});}}/></label>)}<button className="btn" onClick={review}>Review user information</button></fieldset>}
         <button className="btn secondary mt-4" disabled={busy} onClick={()=>{setDraft(null);setError("");}}>Cancel user editing</button>
       </section>:null}
-      <section aria-label="User directory" className="grid gap-4 md:grid-cols-2">{visible.map(user=><article key={user.id} className="panel min-w-0"><h2 className="break-words text-lg font-semibold">{user.name}</h2><p className="muted my-2">{roles[user.role]} · {user.id}</p><p className="break-words">Phone: {user.phone||"Not provided"}</p><p className="break-words">Email: {user.email||"Not provided"}</p><p className="muted my-3 text-sm">{user.updated_at?`Updated ${visitTime(user.updated_at)} · version ${user.version}`:"No edits recorded"}</p><button className="btn secondary" disabled={busy||!!draft||creating} onClick={()=>{setError("");setNotice("");setDraft({original:user,name:user.name,phone:user.phone,email:user.email,review:false});}}>Edit {user.name}</button></article>)}</section>
+      <section aria-label="User directory" className="grid gap-4 md:grid-cols-2">{visible.map(user=><article key={user.id} className="panel min-w-0"><h2 className="break-words text-lg font-semibold">{user.name}</h2><p className="muted my-2">{roles[user.role]} · {user.id}</p><p className="break-words">Phone: {user.phone||"Not provided"}</p><p className="break-words">Email: {user.email||"Not provided"}</p><p className="muted my-3 text-sm">{user.updated_at?`Updated ${visitTime(user.updated_at)} · version ${user.version}`:"No edits recorded"}</p><button className="btn secondary" disabled={busy||!!draft||!!creating} onClick={()=>{setError("");setNotice("");setDraft({original:user,name:user.name,phone:user.phone,email:user.email,review:false});}}>Edit {user.name}</button></article>)}</section>
       {!loading&&!visible.length?<p className="panel">No matching users. Change the search or role filter.</p>:null}
     </>}
   </main>;

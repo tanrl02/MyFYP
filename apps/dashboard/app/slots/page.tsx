@@ -1,9 +1,11 @@
 "use client";
+import useDoctorNames from "../useDoctorNames";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { DemoApi, DemoDoctor, ManagedSlot, doctorNames, visitTime, visitWindow } from "@smart-skin/shared";
+import { DemoApi, DemoDoctor, ManagedSlot, visitTime, visitWindow } from "@smart-skin/shared";
 type Draft={doctor_id:DemoDoctor;clinic_date:string;time:string;capacity:number;duration_minutes:number;request_id:string};
 const today=()=>new Date(Date.now()+8*3600000).toISOString().slice(0,10);
 export default function SlotsPage(){
+  const doctorNames=useDoctorNames();
   const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000","staff-demo"),[]);
   const [slots,setSlots]=useState<ManagedSlot[]>([]),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false);
   const [draft,setDraft]=useState<Draft|null>(null),[closing,setClosing]=useState<ManagedSlot|null>(null);

@@ -8,7 +8,7 @@ export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPa
 export type DemoPatient = `patient-${string}`;
 export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
-export type DemoActor = DemoPatient | "staff-demo" | "doctor-lim" | "doctor-anita" | "admin-demo";
+export type DemoActor = DemoPatient | DemoDoctor | "staff-demo" | "admin-demo";
 export type Medicine = { id: string; name: string; strength: string; form: string; price_cents: number; stock: number; version:number; updated_at:string|null; active:boolean; low_stock_threshold:number; target_stock:number|null };
 export const medicineLabel = (item: Pick<Medicine,"name"|"strength"|"form">) => [item.name,item.strength,item.form].filter(Boolean).join(" · ");
 export type StockReceipt = { id: string; medicine_id: string; quantity: number; reason: string; stock_before: number; stock_after: number; actor_id: string; created_at: string; name?: string; batch_number?:string|null; expiry_date?:string|null };
@@ -40,7 +40,7 @@ export type AssessmentSymptoms={body_area:string;onset:string;itching:"yes"|"no"
 export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; symptoms:AssessmentSymptoms|null; message: string; photo_uri?: string;review_summary?:{published_reviews:number;awaiting_reviews:number} };
 export const assessmentCategory=(assessment:Assessment)=>assessment.prediction?.top_predictions[0]?.label??assessment.example_category??"No suggestion";
 export const assessmentOrigin=(assessment:Assessment)=>assessment.origin==="experimental_ai"?"Experimental AI":"Simulation";
-export type DemoDoctor = "doctor-lim" | "doctor-anita";
+export type DemoDoctor = `doctor-${string}`;
 export const concernLabels = {general:"General skin concerns / not sure",acne:"Acne",eczema:"Eczema",psoriasis:"Psoriasis"};
 export type DoctorConcern = keyof typeof concernLabels;
 export type DoctorProfile = {doctor_id:DemoDoctor;doctor_name:string;specialty:string;expertise:DoctorConcern[];version:number;updated_at:string|null};
@@ -65,16 +65,16 @@ export const money = (cents: number) => `RM ${(cents / 100).toFixed(2)}`;
 export type Slot = { id: string; doctor_id: string; doctor_name: string; starts_at: string;ends_at:string;duration_minutes:number; clinic_date: string; capacity: number; available: number };
 export type ManagedSlot = Slot & {closed:number;booking_count:number;unavailable?:boolean};
 export type DaySession={weekday:number;start_time:string;end_time:string;second_start_time:string|null;second_end_time:string|null};
-export type SchedulePattern = {doctor_id:DemoDoctor;doctor_name:string;weekdays:number[];day_sessions:DaySession[];start_time:string;end_time:string;second_start_time:string|null;second_end_time:string|null;duration_minutes:number;capacity:number;version:number;updated_at:string|null};
+export type SchedulePattern = {queue_prefix?:string;doctor_id:DemoDoctor;doctor_name:string;weekdays:number[];day_sessions:DaySession[];start_time:string;end_time:string;second_start_time:string|null;second_end_time:string|null;duration_minutes:number;capacity:number;version:number;updated_at:string|null};
 export type SchedulePatternInput=Pick<SchedulePattern,"day_sessions"|"weekdays"|"start_time"|"end_time"|"second_start_time"|"second_end_time"|"duration_minutes"|"capacity"|"version">;
 export type SchedulePreview={doctor_id:DemoDoctor;doctor_name:string;week_start:string;pattern_version:number;new_count:number;existing_count:number;conflict_count:number;unavailable_count:number;preview_token:string;slots:{starts_at:string;ends_at:string;clinic_date:string;duration_minutes:number;capacity:number;status:"new"|"existing"|"conflict"|"unavailable";reason:string;slot_id?:string}[]};
 export type ScheduleGeneration={id:string;doctor_id:DemoDoctor;week_start:string;pattern_version:number;created_count:number;existing_count:number;unavailable_count?:number;slot_ids:string[];created_at:string};
 export type DoctorUnavailability={id:string;doctor_id:DemoDoctor;clinic_date:string;reason:string;created_at:string;cancelled_at:string|null;start_time:string|null;end_time:string|null};
 export type DoctorSchedule={pattern:SchedulePattern;week_start:string;unavailability:DoctorUnavailability[];slots:(ManagedSlot & {visits:{id:string;queue_number:number;status:Status;patient_name:string}[]})[]};
-export type Booking = { id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; consultation_finished_at?:string|null; missed_event_id?:string|null; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
+export type Booking = { queue_prefix?:string; id: string; patient_id: DemoPatient; patient_name: string; slot_id: string; queue_number: number; status: Status; consultation_finished_at?:string|null; missed_event_id?:string|null; doctor_id: string; doctor_name: string; starts_at: string;ends_at?:string;duration_minutes?:number; clinic_date: string; created_at: string; rescheduled_to_id: string | null;follow_up_source_id?:string|null;follow_up_date?:string|null };
 export const patientNames: Record<DemoPatient, string> = { "patient-ava": "Ava Demo", "patient-noah": "Noah Demo" };
 export const statusLabels: Record<Status, string> = { waiting: "Waiting", called: "Called — please approach the counter", completed: "Completed", cancelled: "Cancelled", missed: "Missed" };
-export const queueToken = (booking: Booking) => `${booking.doctor_id === "doctor-lim" ? "L" : "A"}${String(booking.queue_number).padStart(3, "0")}`;
+export const queueToken = (booking: Pick<Booking,"doctor_id"|"queue_number"|"queue_prefix">) => { const prefix=booking.queue_prefix||(booking.doctor_id==="doctor-lim"?"L":booking.doctor_id==="doctor-anita"?"A":"D");return `${prefix}${prefix==="L"||prefix==="A"?"":"-"}${String(booking.queue_number).padStart(3,"0")}`; };
 export const visitTime = (iso: string) => new Date(iso).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
   if(!slot.ends_at)return visitTime(slot.starts_at);
@@ -85,8 +85,11 @@ export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
 
 export type PhotoCheck = {accepted:boolean;version:string;skin_content:"likely_skin"|"not_skin"|"uncertain"|"not_checked";reasons:string[];message:string};
 export type UserProfile={id:string;role:"patient"|"doctor"|"staff"|"admin";name:string;phone:string;email:string;version:number;updated_at:string|null;updated_by:string|null};
+export type DemoDoctorIdentity={id:DemoDoctor;name:string};
 export type DemoPatientIdentity={id:DemoPatient;name:string};
 export class DemoApi {
+  demoDoctors() { return this.request<DemoDoctorIdentity[]>("/demo/doctors"); }
+  createDoctor(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/doctors",body); }
   demoPatients() { return this.request<DemoPatientIdentity[]>("/demo/patients"); }
   createPatient(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/patients",body); }
   me() { return this.request<UserProfile>("/me"); }

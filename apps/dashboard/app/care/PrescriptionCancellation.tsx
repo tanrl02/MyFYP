@@ -4,7 +4,7 @@ import {Care,DemoActor,DemoApi,Prescription,PrescriptionCancellation as Cancella
 
 export default function PrescriptionCancellation({api,actor,record,busy,onBusy,onSaved}:{api:DemoApi;actor:DemoActor;record:Care;busy:boolean;onBusy:(value:boolean)=>void;onSaved:(value:Prescription)=>void}){
   const {visit,prescription,invoice}=record;
-  const allowed=(actor==="doctor-lim"||actor==="doctor-anita")&&actor===visit.doctor_id;
+  const allowed=actor.startsWith("doctor-")&&actor===visit.doctor_id;
   const [draft,setDraft]=useState<{version:number;reason:string;review:boolean}|null>(null);
   const [error,setError]=useState("");
   const [audit,setAudit]=useState<Cancellation|null>(null);

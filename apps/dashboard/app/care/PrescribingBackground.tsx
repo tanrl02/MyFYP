@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Booking, DemoActor, DemoApi, visitTime } from "@smart-skin/shared";
 
 export default function PrescribingBackground({ api, actor, visit, busy }: { api: DemoApi; actor: DemoActor; visit: Booking; busy: boolean }) {
-  const allowed = (actor === "doctor-lim" || actor === "doctor-anita") && visit.doctor_id === actor;
+  const allowed = actor.startsWith("doctor-") && visit.doctor_id === actor;
   const [data, setData] = useState<{ allergies: string; medicines: string; updated_at: string | null } | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);

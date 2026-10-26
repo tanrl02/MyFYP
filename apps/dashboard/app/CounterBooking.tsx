@@ -1,9 +1,11 @@
 "use client";
+import useDoctorNames from "./useDoctorNames";
 import { useEffect, useState } from "react";
-import { Booking, DemoApi, DemoDoctor, DemoPatient, DemoPatientIdentity, Slot, doctorNames, patientNames, queueToken, visitTime,visitWindow } from "@smart-skin/shared";
+import { Booking, DemoApi, DemoDoctor, DemoPatient, DemoPatientIdentity, Slot, patientNames, queueToken, visitTime,visitWindow } from "@smart-skin/shared";
 
 const requestKey=()=>`counter-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export default function CounterBooking({api,onBooked}:{api:DemoApi;onBooked:(booking:Booking)=>void}){
+  const doctorNames=useDoctorNames();
   const [patients,setPatients]=useState<DemoPatientIdentity[]>(Object.entries(patientNames).map(([id,name])=>({id:id as DemoPatient,name})));
   const [open,setOpen]=useState(false),[patient,setPatient]=useState<DemoPatient>("patient-ava"),[doctor,setDoctor]=useState<DemoDoctor>("doctor-lim");
   const [slots,setSlots]=useState<Slot[]>([]),[slotId,setSlotId]=useState(""),[request,setRequest]=useState(requestKey);

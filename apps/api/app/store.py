@@ -36,6 +36,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS patient_creations (
                   request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
                   payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS doctor_creations (
+                  request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
+                  payload_json TEXT NOT NULL, queue_prefix TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS doctor_profiles (
                   doctor_id TEXT PRIMARY KEY, specialty TEXT NOT NULL, expertise TEXT NOT NULL,
                   version INTEGER NOT NULL, updated_at TEXT);
@@ -275,6 +278,26 @@ class Store:
     def is_patient(self, actor, db=None):
         return self.user_role(actor,db)=='patient'
 
+    def is_doctor(self, actor, db=None):
+        return self.user_role(actor,db)=='doctor'
+
+    def doctor_names(self, db):
+        return {row['id']:row['name'] for row in db.execute("SELECT id,name FROM user_profiles WHERE role='doctor' ORDER BY rowid")}
+
+    def demo_doctors(self):
+        with self.connect() as db:
+            return [{'id':id,'name':name} for id,name in self.doctor_names(db).items()]
+
+    def queue_prefix(self, db, doctor):
+        if doctor=='doctor-lim':return 'L'
+        if doctor=='doctor-anita':return 'A'
+        row=db.execute('SELECT queue_prefix FROM doctor_creations WHERE user_id=?',(doctor,)).fetchone()
+        return row['queue_prefix'] if row else 'D'
+
+    def queue_token(self, db, visit):
+        prefix=self.queue_prefix(db,visit['doctor_id'])
+        return f"{prefix}{'-' if prefix not in ('L','A') else ''}{visit['queue_number']:03d}"
+
     def demo_patients(self):
         with self.connect() as db:
             return [dict(row) for row in db.execute("SELECT id,name FROM user_profiles WHERE role='patient' ORDER BY rowid")]
@@ -309,6 +332,24 @@ class Store:
             user_id='patient-'+str(uuid4());now=datetime.now(timezone.utc).isoformat()
             db.execute("INSERT INTO user_profiles VALUES(?,'patient',?,?,?,0,?,?)",(user_id,name,phone,email,now,actor))
             db.execute('INSERT INTO patient_creations VALUES(?,?,?,?)',(request_id,user_id,payload,now))
+            return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
+
+    def create_doctor(self, actor, name, phone, email, request_id):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        name,phone,email=self.normalise_user_information(name,phone,email)
+        if not 8<=len(request_id)<=100 or not request_id.strip():raise RuleError('A valid creation request is required.',422)
+        payload=json.dumps({'name':name,'phone':phone,'email':email},sort_keys=True)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            existing=db.execute('SELECT * FROM doctor_creations WHERE request_id=?',(request_id,)).fetchone()
+            if existing:
+                if existing['payload_json']!=payload:raise RuleError('This request was used for different doctor details. Start a new doctor form.')
+                return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(existing['user_id'],)).fetchone())
+            user_id='doctor-'+str(uuid4());now=datetime.now(timezone.utc).isoformat()
+            prefix=f"D{db.execute('SELECT COUNT(*) FROM doctor_creations').fetchone()[0]+1:03d}"
+            db.execute("INSERT INTO user_profiles VALUES(?,'doctor',?,?,?,0,?,?)",(user_id,name,phone,email,now,actor))
+            db.execute('INSERT INTO doctor_profiles VALUES(?,?,?,?,NULL)',(user_id,'Not specified','[]',0))
+            db.execute('INSERT INTO doctor_creations VALUES(?,?,?,?,?)',(request_id,user_id,payload,prefix,now))
             return dict(db.execute('SELECT * FROM user_profiles WHERE id=?',(user_id,)).fetchone())
 
     def save_user_profile(self, user_id, actor, name, phone, email, version):
@@ -505,10 +546,10 @@ class Store:
             return self.managed_slot(db,slot_id)
 
     def schedule_pattern(self, db, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor,db):
             raise RuleError('Doctor not found.',404)
         row=db.execute('SELECT * FROM doctor_schedule_patterns WHERE doctor_id=?',(doctor,)).fetchone()
-        return {'doctor_id':doctor,'doctor_name':self.user_name(db,doctor),'day_sessions':[],'second_start_time':None,'second_end_time':None,
+        return {'doctor_id':doctor,'doctor_name':self.user_name(db,doctor),'queue_prefix':self.queue_prefix(db,doctor),'day_sessions':[],'second_start_time':None,'second_end_time':None,
                 **(json.loads(row['pattern_json']) if row else {'weekdays':[],'start_time':'09:00','end_time':'12:00','duration_minutes':30,'capacity':2}),
                 'version':row['version'] if row else 0,'updated_at':row['updated_at'] if row else None}
 
@@ -520,14 +561,14 @@ class Store:
             (doctor,(start+timedelta(minutes=duration)).isoformat(),start.isoformat())).fetchone()
 
     def unavailability(self, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor not found.',404)
         with self.connect() as db:
             return [dict(row) for row in db.execute('SELECT id,doctor_id,clinic_date,reason,created_at,cancelled_at,start_time,end_time FROM doctor_unavailability WHERE doctor_id=? ORDER BY clinic_date DESC,created_at DESC,id',
                         (doctor,)).fetchall()]
 
     def add_unavailability(self, doctor, clinic_date, reason, request_id, start_time=None, end_time=None):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor not found.',404)
         if not reason.strip() or len(reason)>300:
             raise RuleError('Enter a reason up to 300 characters.',422)
@@ -563,7 +604,7 @@ class Store:
             return result
 
     def cancel_unavailability(self, doctor, absence_id):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor not found.',404)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -580,7 +621,7 @@ class Store:
 
     def schedule_patterns(self):
         with self.connect() as db:
-            return [self.schedule_pattern(db,doctor) for doctor in DOCTORS]
+            return [self.schedule_pattern(db,doctor) for doctor in self.doctor_names(db)]
 
     def save_schedule_pattern(self, doctor, weekdays, start_time, end_time, duration_minutes, capacity, version, second_start_time=None, second_end_time=None, day_sessions=None):
         try:values=pattern_values(weekdays,start_time,end_time,duration_minutes,capacity,second_start_time,second_end_time,day_sessions)
@@ -663,7 +704,7 @@ class Store:
             return result
 
     def doctor_schedule(self, doctor, week_start):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor identity required.',403)
         monday=date.fromisoformat(week_start)
         if monday.weekday()!=0:
@@ -705,7 +746,7 @@ class Store:
                 AND julianday(s.starts_at)>julianday(?) AND julianday(s.starts_at)<=julianday(?)''',
                 (patient,*window)).fetchall()
             for visit in visits:
-                token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+                token=self.queue_token(db,visit)
                 local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
                 self.notify(db,patient,'appointment_reminder',visit['id'],visit['id'],'Upcoming appointment',
                             f"{token} with {self.user_name(db,visit['doctor_id'])} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open the visit to check its latest details.")
@@ -794,7 +835,7 @@ class Store:
         if r['status']=='missed':
             event=db.execute("SELECT id FROM events WHERE booking_id=? AND action='missed' ORDER BY rowid DESC LIMIT 1",(booking_id,)).fetchone()
             attendance={'missed_event_id':event['id'] if event else None}
-        return dict(r, **attendance, doctor_name=self.user_name(db,r['doctor_id']), patient_name=self.user_name(db,r['patient_id']),
+        return dict(r, **attendance, queue_prefix=self.queue_prefix(db,r['doctor_id']), doctor_name=self.user_name(db,r['doctor_id']), patient_name=self.user_name(db,r['patient_id']),
                     ends_at=(datetime.fromisoformat(r['starts_at'])+timedelta(minutes=r['duration_minutes'])).isoformat(),
                     rescheduled_to_id=replacement['new_booking_id'] if replacement else None,
                     follow_up_source_id=follow_up['source_booking_id'] if follow_up else None,
@@ -1004,6 +1045,7 @@ class Store:
 
     def queue(self, doctor, date):
         with self.connect() as db:
+            if not self.is_doctor(doctor,db):raise RuleError('Choose a recognised doctor.',422)
             ids = db.execute('''SELECT b.id FROM bookings b JOIN slots s ON s.id=b.slot_id
                 WHERE s.doctor_id=? AND s.clinic_date=? ORDER BY s.starts_at, b.queue_number''', (doctor, date)).fetchall()
             return [self.record(db, r['id']) for r in ids]
@@ -1029,6 +1071,7 @@ class Store:
     def call_next(self, doctor, date, staff):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
+            if not self.is_doctor(doctor,db):raise RuleError('Choose a recognised doctor.',422)
             active = db.execute('''SELECT b.id FROM bookings b JOIN slots s ON s.id=b.slot_id
                 WHERE s.doctor_id=? AND s.clinic_date=? AND b.status='called' ''', (doctor, date)).fetchone()
             if active:
@@ -1041,7 +1084,7 @@ class Store:
             db.execute("UPDATE bookings SET status='called' WHERE id=?", (row['id'],))
             self.event(db, row['id'], staff, 'called')
             visit=self.record(db,row['id'])
-            token=f"{'L' if doctor=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            token=self.queue_token(db,visit)
             self.notify(db,visit['patient_id'],'queue_called',row['id'],row['id'],'Your queue number was called',
                         f"{token} with {self.user_name(db,doctor)} was called. Open the visit to check its current status.")
             return self.record(db, row['id'])
@@ -1090,7 +1133,7 @@ class Store:
             return self.record(db,booking_id)
 
     def finish_consultation(self, booking_id, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1318,7 +1361,8 @@ class Store:
         with self.connect() as db:
             db.execute('BEGIN')
             visits={key:0 for key in ('waiting','called','completed','cancelled','missed','rescheduled')}
-            doctor_visits={doctor:dict(visits,total=0) for doctor in DOCTORS}
+            doctors=self.doctor_names(db)
+            doctor_visits={doctor:dict(visits,total=0) for doctor in doctors}
             for row in db.execute('''SELECT s.doctor_id,CASE WHEN EXISTS(SELECT 1 FROM reschedules r WHERE r.old_booking_id=b.id)
                     THEN 'rescheduled' ELSE b.status END AS state,COUNT(*) AS total
                 FROM bookings b JOIN slots s ON s.id=b.slot_id WHERE s.clinic_date=? GROUP BY s.doctor_id,state''',(clinic_date,)):
@@ -1342,7 +1386,7 @@ class Store:
                 movements.append({'medicine_id':medicine['id'],'name':medicine['name'],'received':received,'dispensed':dispensed,'lost':lost})
             feedback=db.execute("SELECT COUNT(*) AS total,AVG(rating) AS average FROM visit_feedback WHERE date(created_at,'+8 hours')=?",(clinic_date,)).fetchone()
             return {'clinic_date':clinic_date,'timezone':'Asia/Kuala_Lumpur','generated_at':datetime.now(timezone.utc).isoformat(),
-                    'visits':visits,'visits_by_doctor':[{'doctor_id':doctor,'doctor_name':name,'visits':doctor_visits[doctor]} for doctor,name in DOCTORS.items()],
+                    'visits':visits,'visits_by_doctor':[{'doctor_id':doctor,'doctor_name':name,'visits':doctor_visits[doctor]} for doctor,name in doctors.items()],
                     'billing':billing,'stock':{'items':movements,'received_units':sum(m['received'] for m in movements),'dispensed_units':sum(m['dispensed'] for m in movements),'lost_units':sum(m['lost'] for m in movements)},
                     'feedback':{'count':feedback['total'],'average_rating':round(feedback['average'],2) if feedback['average'] is not None else None}}
 
@@ -1625,10 +1669,10 @@ class Store:
     def share_record(self, db, share_id, actor):
         row = db.execute('SELECT * FROM assessment_shares WHERE id=?', (share_id,)).fetchone()
         if row is None or (self.is_patient(actor,db) and row['patient_id'] != actor) or (
-            actor in DOCTORS and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or (not self.is_patient(actor,db) and actor not in DOCTORS):
+            self.is_doctor(actor,db) and (row['doctor_id'] != actor or row['revoked_at'] is not None)) or (not self.is_patient(actor,db) and not self.is_doctor(actor,db)):
             raise RuleError('Shared assessment is unavailable for this identity.', 404)
         visit = self.record(db, row['booking_id']) if row['booking_id'] else None
-        if actor in DOCTORS and visit and (visit['status'] in ('cancelled','missed') or visit['doctor_id'] != actor):
+        if self.is_doctor(actor,db) and visit and (visit['status'] in ('cancelled','missed') or visit['doctor_id'] != actor):
             raise RuleError('Appointment access is no longer available.', 404)
         review = db.execute('SELECT * FROM assessment_reviews WHERE share_id=?', (share_id,)).fetchone()
         return dict(row, patient_name=self.user_name(db,row['patient_id']), doctor_name=self.user_name(db,row['doctor_id']),
@@ -1648,7 +1692,7 @@ class Store:
         with self.connect() as db:
             if self.is_patient(actor,db):
                 rows = db.execute('SELECT id FROM assessment_shares WHERE patient_id=? ORDER BY created_at DESC LIMIT 100', (actor,))
-            elif actor in DOCTORS:
+            elif self.is_doctor(actor,db):
                 rows = db.execute('''SELECT s.id FROM assessment_shares s LEFT JOIN bookings b ON b.id=s.booking_id
                     WHERE s.doctor_id=? AND s.revoked_at IS NULL AND (s.booking_id IS NULL OR b.status NOT IN ('cancelled','missed'))
                     ORDER BY s.created_at DESC LIMIT 100''', (actor,))
@@ -1659,6 +1703,7 @@ class Store:
     def share_assessment(self, assessment_id, patient, doctor, message, request_id):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
+            if not self.is_doctor(doctor,db):raise RuleError('Choose a recognised doctor.',422)
             if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?', (assessment_id,patient)).fetchone():
                 raise RuleError('Assessment not found for this patient.', 404)
             existing = db.execute('SELECT * FROM assessment_shares WHERE patient_id=? AND request_id=?', (patient,request_id)).fetchone()
@@ -1718,7 +1763,7 @@ class Store:
                 'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')})
 
     def review_draft_record(self, db, share_id, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor,db):
             raise RuleError('Doctor identity required.',403)
         share=self.share_record(db,share_id,doctor)
         if share['review']:
@@ -1796,16 +1841,16 @@ class Store:
             return self.background_record(db,patient)
 
     def consultation_record(self, db, booking_id, actor, include_photo=False):
-        if (not self.is_patient(actor,db) and actor not in DOCTORS):
+        if (not self.is_patient(actor,db) and not self.is_doctor(actor,db)):
             raise RuleError('Patient or doctor identity required.', 403)
         visit = self.record(db, booking_id)
-        if (self.is_patient(actor,db) and visit['patient_id'] != actor) or (actor in DOCTORS and visit['doctor_id'] != actor):
+        if (self.is_patient(actor,db) and visit['patient_id'] != actor) or (self.is_doctor(actor,db) and visit['doctor_id'] != actor):
             raise RuleError('Consultation unavailable for this identity.', 404)
         note = db.execute('SELECT * FROM consultation_notes WHERE booking_id=?', (booking_id,)).fetchone()
-        if (self.is_patient(actor,db) and not note) or (actor in DOCTORS and visit['status'] not in ('called','completed')):
+        if (self.is_patient(actor,db) and not note) or (self.is_doctor(actor,db) and visit['status'] not in ('called','completed')):
             raise RuleError('Consultation not available yet.', 404)
         linked = None
-        if actor in DOCTORS:
+        if self.is_doctor(actor,db):
             share = db.execute('SELECT id FROM assessment_shares WHERE booking_id=? AND revoked_at IS NULL', (booking_id,)).fetchone()
             if share:
                 linked = self.share_record(db, share['id'], actor)
@@ -1820,7 +1865,7 @@ class Store:
         return result
 
     def consultations(self, actor):
-        if (not self.is_patient(actor) and actor not in DOCTORS):
+        if (not self.is_patient(actor) and not self.is_doctor(actor)):
             raise RuleError('Patient or doctor identity required.', 403)
         with self.connect() as db:
             if self.is_patient(actor,db):
@@ -1851,7 +1896,7 @@ class Store:
             raise RuleError('Choose the recommending doctor on or after the recommended follow-up date.')
 
     def recommend_follow_up(self, booking_id, doctor, recommended_date, reason):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1866,7 +1911,7 @@ class Store:
                 raise RuleError('Choose a follow-up date after today and after this appointment date.',422)
             db.execute('INSERT INTO follow_up_recommendations VALUES(?,?,?,?,?)',
                        (booking_id,doctor,recommended_date,reason,datetime.now(timezone.utc).isoformat()))
-            token=f"{'L' if doctor=='doctor-lim' else 'A'}{source['queue_number']:03d}"
+            token=self.queue_token(db,source)
             visit_date=datetime.fromisoformat(source['starts_at']).astimezone(timezone(timedelta(hours=8)))
             earliest=date.fromisoformat(recommended_date)
             self.notify(db,source['patient_id'],'follow_up_recommended',booking_id,booking_id,'Follow-up visit recommended',
@@ -1874,7 +1919,7 @@ class Store:
             return self.follow_up_record(db,booking_id)
 
     def consultation_history(self, booking_id, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN')
@@ -1896,7 +1941,7 @@ class Store:
             return {'current_visit_id':booking_id,'items':items,'limit':50}
 
     def consultation_draft_record(self, db, booking_id, doctor):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor,db):
             raise RuleError('Doctor identity required.',403)
         record=self.consultation_record(db,booking_id,doctor)
         if record['note']:
@@ -1926,7 +1971,7 @@ class Store:
             return self.consultation_draft_record(db,booking_id,doctor)
 
     def publish_consultation(self, booking_id, doctor, findings, follow_up, draft_version=None):
-        if doctor not in DOCTORS:
+        if not self.is_doctor(doctor):
             raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -1965,7 +2010,7 @@ class Store:
             {key:row[key] for key in fields} for row in rows if row['medicine_id'] is not None]}
 
     def prescription_directions_history(self, booking_id, doctor):
-        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        if not self.is_doctor(doctor):raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             db.execute('BEGIN')
             visit=self.record(db,booking_id)
@@ -1979,7 +2024,7 @@ class Store:
                  'directions':json.loads(row['directions_json'])} for row in rows]}
 
     def correct_prescription_directions(self, booking_id, doctor, version, reason, items):
-        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        if not self.is_doctor(doctor):raise RuleError('Doctor identity required.',403)
         reason=reason.strip()
         directions=sorted([{'medicine_id':item['medicine_id'],'directions':item['directions'].strip()} for item in items],key=lambda item:item['medicine_id'])
         if not 1<=len(reason)<=300 or not directions or any(not 1<=len(item['directions'])<=300 for item in directions):
@@ -2011,7 +2056,7 @@ class Store:
             return self.prescription(db,booking_id)
 
     def prescription_cancellation(self, booking_id, doctor):
-        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        if not self.is_doctor(doctor):raise RuleError('Doctor identity required.',403)
         with self.connect() as db:
             visit=self.record(db,booking_id)
             if visit['doctor_id']!=doctor:raise RuleError('This visit belongs to another doctor.',403)
@@ -2021,7 +2066,7 @@ class Store:
             return dict(row) if row else None
 
     def cancel_prescription(self, booking_id, doctor, version, reason):
-        if doctor not in DOCTORS:raise RuleError('Doctor identity required.',403)
+        if not self.is_doctor(doctor):raise RuleError('Doctor identity required.',403)
         reason=reason.strip()
         if type(version) is not int or version<1 or not 1<=len(reason)<=300:
             raise RuleError('Enter a cancellation reason within 300 characters and the reviewed revision.',422)
@@ -2043,7 +2088,7 @@ class Store:
             db.execute('INSERT INTO prescription_cancellations VALUES(?,?,?,?,?)',
                 (prescription['id'],doctor,reason,version,datetime.now(timezone.utc).isoformat()))
             self.event(db,booking_id,doctor,'prescription-cancelled')
-            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            token=self.queue_token(db,visit)
             local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
             self.notify(db,visit['patient_id'],'prescription_cancelled',prescription['id'],booking_id,'Prescription cancelled',
                         f"The prescription for {token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time) was cancelled. Open Care & bills to check its latest status. Cancelled items are retained for history and are not an active prescription.")
@@ -2057,14 +2102,14 @@ class Store:
         return dict(row, lines=[dict(line) for line in lines])
 
     def care(self, actor):
-        if (not self.is_patient(actor) and actor not in DOCTORS and actor!='staff-demo'):raise RuleError('Patient, assigned doctor or staff identity required.',403)
+        if (not self.is_patient(actor) and not self.is_doctor(actor) and actor!='staff-demo'):raise RuleError('Patient, assigned doctor or staff identity required.',403)
         with self.connect() as db:
             records = []
             for row in db.execute('SELECT id FROM bookings ORDER BY created_at DESC').fetchall():
                 visit = self.record(db, row['id'])
                 if self.is_patient(actor,db) and visit['patient_id'] != actor:
                     continue
-                if actor in DOCTORS and visit['doctor_id'] != actor:
+                if self.is_doctor(actor,db) and visit['doctor_id'] != actor:
                     continue
                 records.append({'visit': visit, 'prescription': self.prescription(db, row['id']),
                                 'invoice': self.invoice(db, row['id'])})
@@ -2106,7 +2151,7 @@ class Store:
                 db.execute('INSERT INTO prescription_items(prescription_id,medicine_id,quantity,directions,name,price_cents,strength,form) VALUES(?,?,?,?,?,?,?,?)',
                            (prescription_id,item['medicine_id'],item['quantity'],item['directions'],medicine['name'],medicine['price_cents'],medicine['strength'],medicine['form']))
             self.event(db, booking_id, doctor, 'prescription-issued')
-            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            token=self.queue_token(db,visit)
             local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
             self.notify(db,visit['patient_id'],'prescription_issued',prescription_id,booking_id,'Prescription issued',
                         f"A prescription was issued for {token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). Open Care & bills to view the saved medicines, directions and latest dispensing status.")
@@ -2175,7 +2220,7 @@ class Store:
             db.executemany('INSERT INTO invoice_lines VALUES(?,?,?,?,?)',
                 [(str(uuid4()), invoice_id, name, quantity, price) for name, quantity, price in lines])
             self.event(db, booking_id, staff, 'invoice-generated')
-            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            token=self.queue_token(db,visit)
             local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
             self.notify(db,visit['patient_id'],'bill_ready',invoice_id,booking_id,'Bill ready',
                         f"{token} with {visit['doctor_name']} on {local_start:%d %b %Y, %I:%M %p} (Malaysia time). A simulated bill of RM {total//100}.{total%100:02d} was generated. Open Care & bills to check the latest bill and payment status.")
@@ -2199,7 +2244,7 @@ class Store:
             db.execute("UPDATE invoices SET status='paid',paid_at=?,payment_mode='simulation' WHERE id=?",
                        (datetime.now(timezone.utc).isoformat(), invoice_id))
             self.event(db, row['booking_id'], actor, 'payment-simulated')
-            token=f"{'L' if visit['doctor_id']=='doctor-lim' else 'A'}{visit['queue_number']:03d}"
+            token=self.queue_token(db,visit)
             local_start=datetime.fromisoformat(visit['starts_at']).astimezone(timezone(timedelta(hours=8)))
             total=invoice['total_cents']
             self.notify(db,visit['patient_id'],'payment_recorded',invoice_id,row['booking_id'],'Payment recorded · simulation',

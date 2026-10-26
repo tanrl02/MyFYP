@@ -9,7 +9,7 @@ from .photo_checks import check_photo
 from .disease_model import predict_disease
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
-from .store import DOCTORS, PATIENTS, USER_ROLES, RuleError, Store
+from .store import RuleError, Store
 
 class RestoreWaitingInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
@@ -39,7 +39,7 @@ class DoctorProfileInput(BaseModel):
     version: int = Field(strict=True,ge=0)
 
 class SlotInput(BaseModel):
-    doctor_id: Literal['doctor-lim','doctor-anita']
+    doctor_id: str = Field(min_length=1,max_length=100)
     clinic_date: date
     time: str = Field(pattern=r'^(?:[01]\d|2[0-3]):[0-5]\d$')
     capacity: int = Field(strict=True,ge=1,le=20)
@@ -89,7 +89,7 @@ class CounterBookingInput(BookingInput):
     patient_id: str = Field(min_length=1,max_length=100)
 
 class QueueInput(BaseModel):
-    doctor_id: Literal['doctor-lim', 'doctor-anita']
+    doctor_id: str = Field(min_length=1,max_length=100)
     clinic_date: date
 
 class PrescriptionItemInput(BaseModel):
@@ -131,7 +131,7 @@ class PatientCreateInput(BaseModel):
     request_id: str = Field(min_length=8,max_length=100,pattern=r'\S')
 
 class ShareInput(BaseModel):
-    doctor_id: Literal['doctor-lim', 'doctor-anita']
+    doctor_id: str = Field(min_length=1,max_length=100)
     patient_message: str = Field(max_length=1000)
     request_id: str = Field(min_length=8, max_length=100)
 
@@ -278,12 +278,12 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return who
 
     def doctor(who=Depends(actor)):
-        if who not in DOCTORS:
+        if not store.is_doctor(who):
             raise HTTPException(403, 'Doctor demo identity required.')
         return who
 
     def operational(who=Depends(actor)):
-        if who not in {*DOCTORS, 'staff-demo'}:
+        if not store.is_doctor(who) and who!='staff-demo':
             raise HTTPException(403, 'Doctor or staff demo identity required.')
         return who
 
@@ -313,6 +313,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/admin/patients',status_code=201)
     def create_patient(payload: PatientCreateInput,who=Depends(admin)):
         return run(lambda:store.create_patient(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.post('/admin/doctors',status_code=201)
+    def create_doctor(payload: PatientCreateInput,who=Depends(admin)):
+        return run(lambda:store.create_doctor(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.get('/demo/doctors')
+    def demo_doctors(who=Depends(user_actor)):
+        return store.demo_doctors()
 
     @api.get('/demo/patients')
     def demo_patients(who=Depends(user_actor)):
@@ -345,6 +353,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
 
     @api.post('/staff/slots',status_code=201)
     def add_slot(payload: SlotInput,who=Depends(staff)):
+        if not store.is_doctor(payload.doctor_id):raise HTTPException(422,"Choose a recognised doctor.")
         return run(lambda: store.add_slot(payload.doctor_id,payload.clinic_date.isoformat(),payload.time,payload.capacity,payload.request_id,payload.duration_minutes))
 
     @api.post('/staff/slots/{slot_id}/close')
@@ -426,7 +435,7 @@ def create_app(path=None,photo_checker=None,predictor=None):
         return run(lambda: store.reschedule(booking_id,who,payload.slot_id,payload.request_id))
 
     @api.get('/queue')
-    def queue(doctor_id: Literal['doctor-lim','doctor-anita'], clinic_date: date, who=Depends(staff)):
+    def queue(doctor_id: str, clinic_date: date, who=Depends(staff)):
         return store.queue(doctor_id, clinic_date.isoformat())
 
     @api.post('/queue/call-next')

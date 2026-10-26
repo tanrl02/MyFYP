@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { AssessmentShare, Booking, DemoApi, DemoDoctor, DemoPatient, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
+import { AssessmentShare, Booking, DemoApi, DemoDoctor, DemoPatient, doctorNames as initialDoctorNames, queueToken, visitTime } from "@smart-skin/shared";
 import PublishedReview from "./PublishedReview";
 import { apiBase } from "./apiConfig";
 
 const requestKey = () => `share-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export default function SharingView({ patient, assessmentId }: { patient: DemoPatient; assessmentId: string }) {
   const api = useMemo(() => new DemoApi(apiBase, patient), [patient]);
+  const [doctorNames,setDoctorNames]=useState<Record<DemoDoctor,string>>(initialDoctorNames);
   const [shares, setShares] = useState<AssessmentShare[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [mode, setMode] = useState<"doctor" | "appointment">("doctor"), [bookingId, setBookingId] = useState("");
@@ -22,7 +23,7 @@ export default function SharingView({ patient, assessmentId }: { patient: DemoPa
     async function load() {
       if (fetching||saving.current) return; fetching = true;
       const version=loadVersion.current;
-      try { const [data, visits] = await Promise.all([api.assessmentShares(assessmentId),api.bookings()]); if (active&&version===loadVersion.current) { setShares(data); setBookings(visits); setReady(true); setError(""); } }
+      try { const [data, visits, doctors] = await Promise.all([api.assessmentShares(assessmentId),api.bookings(),api.demoDoctors()]); if (active&&version===loadVersion.current) { setShares(data); setBookings(visits); setDoctorNames(Object.fromEntries(doctors.map(row=>[row.id,row.name])) as Record<DemoDoctor,string>); setReady(true); setError(""); } }
       catch (e) { if (active&&version===loadVersion.current) setError(e instanceof Error ? e.message : "Cannot load sharing history."); }
       finally { fetching = false; }
     }

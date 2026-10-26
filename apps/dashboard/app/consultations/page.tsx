@@ -1,12 +1,14 @@
 "use client";
+import useDoctorNames from "../useDoctorNames";
 import AssessmentResult from "../components/AssessmentResult";
 import { useEffect, useMemo, useState } from "react";
-import { Consultation, DemoApi, DemoDoctor, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
+import { Consultation, DemoApi, DemoDoctor, queueToken, visitTime } from "@smart-skin/shared";
 import ConsultationHistory from "./ConsultationHistory";
 import FollowUpRecommendation from "./FollowUpRecommendation";
 import ConsultationEditor from "./ConsultationEditor";
 const base=process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000";
 export default function ConsultationPage(){
+  const doctorNames=useDoctorNames();
   const [doctor,setDoctor]=useState<DemoDoctor>("doctor-lim");
   const [busy,setBusy]=useState(false);
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10"><header className="mb-7 flex flex-wrap items-center justify-between gap-4"><div><strong className="text-xl">Smart Skin</strong><p className="muted text-sm">Visit consultations</p></div><nav className="flex flex-wrap gap-3"><a className="btn secondary" href="/schedules">My schedule</a><a className="btn secondary" href="/">Patient queue</a><a className="btn secondary" href="/care">Prescriptions & billing</a></nav></header>

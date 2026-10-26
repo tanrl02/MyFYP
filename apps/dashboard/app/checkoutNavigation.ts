@@ -7,7 +7,7 @@ export function readCheckoutTarget(search: string): CheckoutTarget | null {
   const doctor = params.get("doctor") || "";
   const date = params.get("date") || "";
   const visit = params.get("checkout_visit") || "";
-  if (!["doctor-lim", "doctor-anita"].includes(doctor) || !/^\d{4}-\d{2}-\d{2}$/.test(date)
+  if (!/^doctor-(?:lim|anita|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i.test(doctor) || !/^\d{4}-\d{2}-\d{2}$/.test(date)
     || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(visit)) return null;
   const parsed = new Date(`${date}T00:00:00Z`);
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) return null;

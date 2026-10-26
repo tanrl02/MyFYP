@@ -1,7 +1,8 @@
 "use client";
+import useDoctorNames from "../useDoctorNames";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Unavailability from "./Unavailability";
-import { DemoActor, DemoApi, DemoDoctor, DaySession, DoctorSchedule, SchedulePattern, SchedulePatternInput, SchedulePreview, doctorNames, statusLabels, visitWindow, visitTime } from "@smart-skin/shared";
+import { DemoActor, DemoApi, DemoDoctor, DaySession, DoctorSchedule, SchedulePattern, SchedulePatternInput, SchedulePreview, statusLabels, queueToken, visitWindow, visitTime } from "@smart-skin/shared";
 
 const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const nextMonday=()=>{const now=new Date(Date.now()+8*3600000);const day=now.getUTCDay();now.setUTCDate(now.getUTCDate()+(day===1?7:(8-day)%7||7));return now.toISOString().slice(0,10);};
@@ -9,6 +10,7 @@ const sessionText=(hours:{start_time:string;end_time:string;second_start_time:st
 const patternText=(pattern:SchedulePatternInput)=>`${pattern.day_sessions.length?pattern.weekdays.map(day=>`${days[day]}: ${sessionText(pattern.day_sessions.find(item=>item.weekday===day)||pattern)}`).join("; "):`${pattern.weekdays.map(day=>days[day]).join(", ")} · ${sessionText(pattern)}`} · ${pattern.duration_minutes} minutes per slot · ${pattern.capacity} places per slot`;
 
 export default function SchedulesPage(){
+  const doctorNames=useDoctorNames();
   const [role,setRole]=useState<DemoActor>("staff-demo"),[busy,setBusy]=useState(false);
   const api=useMemo(()=>new DemoApi(process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000",role),[role]);
   return <main className="mx-auto max-w-6xl px-5 py-8">
@@ -21,11 +23,13 @@ export default function SchedulesPage(){
 }
 
 function StaffSchedules({api,busy,onBusy}:{api:DemoApi;busy:boolean;onBusy:(value:boolean)=>void}){
+  const doctorNames=useDoctorNames();
   const [doctor,setDoctor]=useState<DemoDoctor>("doctor-lim");
   return <><label className="mb-6 block max-w-md text-sm font-semibold">Doctor<select aria-label="Weekly schedule doctor" value={doctor} disabled={busy} onChange={e=>setDoctor(e.target.value as DemoDoctor)}>{Object.entries(doctorNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label><Unavailability key={`absence-${doctor}`} api={api} doctor={doctor} busy={busy} onBusy={onBusy}/><PatternEditor key={doctor} api={api} doctor={doctor} busy={busy} onBusy={onBusy}/></>;
 }
 
 function PatternEditor({api,doctor,busy,onBusy}:{api:DemoApi;doctor:DemoDoctor;busy:boolean;onBusy:(value:boolean)=>void}){
+  const doctorNames=useDoctorNames();
   const [saved,setSaved]=useState<SchedulePattern|null>(null),[form,setForm]=useState<SchedulePatternInput|null>(null),[review,setReview]=useState<SchedulePatternInput|null>(null);
   const [week,setWeek]=useState(nextMonday),[preview,setPreview]=useState<SchedulePreview|null>(null),[request,setRequest]=useState("");
   const [loading,setLoading]=useState(true),[reload,setReload]=useState(0),[error,setError]=useState(""),[notice,setNotice]=useState("");
@@ -71,6 +75,6 @@ function DoctorWeek({api}:{api:DemoApi}){
   const [week,setWeek]=useState(nextMonday),[data,setData]=useState<DoctorSchedule|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0);
   useEffect(()=>{let active=true,fetching=false;setData(null);setLoading(true);async function load(){if(fetching)return;fetching=true;try{const result=await api.doctorSchedule(week);if(active){setData(result);setError("");}}catch(e){if(active){setData(null);setError(e instanceof Error?e.message:"Cannot load schedule.");}}finally{fetching=false;if(active)setLoading(false);}}void load();const timer=setInterval(load,5000);return()=>{active=false;clearInterval(timer);};},[api,week,retry]);
   return <><label className="mb-5 block max-w-sm">Week starting Monday<input aria-label="Doctor schedule week" type="date" value={week} onChange={e=>setWeek(e.target.value)} className="mt-2 w-full rounded-lg border p-3"/></label><p className="muted mb-4 text-sm">Staff manages this schedule. This view shows your appointment times and booked visits; clinical records remain in the existing consultation workspace.</p>{loading?<p>Loading your schedule…</p>:null}{error?<p role="alert" className="my-4 text-red-800">{error}</p>:null}<button className="mb-5 text-sm underline" onClick={()=>setRetry(value=>value+1)}>Refresh schedule</button>
-    {data?<><section className="panel mb-5"><h2 className="text-xl font-semibold">{data.pattern.doctor_name}</h2><p className="muted mt-3">{data.pattern.version?patternText(data.pattern):"No weekly pattern saved by staff yet. Existing dated slots appear below."}</p></section>{data.unavailability.map(item=><section key={item.id} className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-semibold">{item.cancelled_at?"Absence cancelled":"Unavailable"} · {item.clinic_date} · {item.start_time?`${item.start_time}–${item.end_time} (Malaysia time)`:"All day"}</h3><p className="mt-2 whitespace-pre-wrap break-words">{item.reason}</p>{item.cancelled_at?<p className="mt-2 text-sm">Cancelled {visitTime(item.cancelled_at)}. Check the slots below for current availability.</p>:null}</section>)}{data.slots.map(slot=><section key={slot.id} className="panel mb-4"><div className="flex flex-wrap justify-between gap-3"><h3 className="font-semibold">{visitWindow(slot)}</h3><span className="badge">{slot.unavailable?"Doctor unavailable":slot.closed?"Closed":`${slot.available} of ${slot.capacity} places available`}</span></div>{slot.visits.length?<ul className="mt-4 space-y-2 text-sm">{slot.visits.map(visit=><li key={visit.id}>{data.pattern.doctor_id==="doctor-lim"?"L":"A"}{String(visit.queue_number).padStart(3,"0")} · {visit.patient_name} · {statusLabels[visit.status]}</li>)}</ul>:<p className="muted mt-3 text-sm">No bookings for this slot.</p>}</section>)}{!data.slots.length?<p className="panel">No dated slots for this week. Staff can generate them from the saved pattern.</p>:null}</>:null}
+    {data?<><section className="panel mb-5"><h2 className="text-xl font-semibold">{data.pattern.doctor_name}</h2><p className="muted mt-3">{data.pattern.version?patternText(data.pattern):"No weekly pattern saved by staff yet. Existing dated slots appear below."}</p></section>{data.unavailability.map(item=><section key={item.id} className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-semibold">{item.cancelled_at?"Absence cancelled":"Unavailable"} · {item.clinic_date} · {item.start_time?`${item.start_time}–${item.end_time} (Malaysia time)`:"All day"}</h3><p className="mt-2 whitespace-pre-wrap break-words">{item.reason}</p>{item.cancelled_at?<p className="mt-2 text-sm">Cancelled {visitTime(item.cancelled_at)}. Check the slots below for current availability.</p>:null}</section>)}{data.slots.map(slot=><section key={slot.id} className="panel mb-4"><div className="flex flex-wrap justify-between gap-3"><h3 className="font-semibold">{visitWindow(slot)}</h3><span className="badge">{slot.unavailable?"Doctor unavailable":slot.closed?"Closed":`${slot.available} of ${slot.capacity} places available`}</span></div>{slot.visits.length?<ul className="mt-4 space-y-2 text-sm">{slot.visits.map(visit=><li key={visit.id}>{queueToken({doctor_id:data.pattern.doctor_id,queue_prefix:data.pattern.queue_prefix,queue_number:visit.queue_number})} · {visit.patient_name} · {statusLabels[visit.status]}</li>)}</ul>:<p className="muted mt-3 text-sm">No bookings for this slot.</p>}</section>)}{!data.slots.length?<p className="panel">No dated slots for this week. Staff can generate them from the saved pattern.</p>:null}</>:null}
   </>;
 }

@@ -8,7 +8,7 @@ export default function PrescriptionDirections({ api, actor, record, busy, onBus
   api: DemoApi; actor: DemoActor; record: Care; busy: boolean; onBusy: (value: boolean) => void; onSaved: (prescription: Prescription) => void;
 }) {
   const { visit, prescription, invoice } = record;
-  const allowed = (actor === "doctor-lim" || actor === "doctor-anita") && visit.doctor_id === actor;
+  const allowed = actor.startsWith("doctor-") && visit.doctor_id === actor;
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState("");
   const [showHistory, setShowHistory] = useState(false);

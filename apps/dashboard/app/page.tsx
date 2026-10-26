@@ -1,4 +1,5 @@
 "use client";
+import useDoctorNames from "./useDoctorNames";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Booking, DemoApi, queueToken, visitTime } from "@smart-skin/shared";
 import { CheckoutTarget, checkoutLink, readCheckoutTarget } from "./checkoutNavigation";
@@ -8,6 +9,7 @@ import RescheduleVisit from "./RescheduleVisit";
 import MissedVisitReview from "./MissedVisitReview";
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export default function QueuePage() {
+  const doctorNames=useDoctorNames();
   const api = useMemo(() => new DemoApi(base, "staff-demo"), []);
   const [doctor, setDoctor] = useState("doctor-lim");
   const [date, setDate] = useState("");
@@ -58,7 +60,7 @@ export default function QueuePage() {
     {completion?<CompleteVisitReview key={completion.id} visit={completion} busy={busy} changed={completionChanged} unavailable={!!error||!queueLoaded} onCancel={()=>setCompletion(null)} onConfirm={()=>{if(busy||completionChanged||error||!queueLoaded)return;void action(()=>api.complete(completion.id),"Visit marked completed.");}}/>:null}
     {moving?<RescheduleVisit key={moving.id} api={api} booking={moving} onClose={()=>setMoving(null)} onSaved={saved=>{setMoving(null);setDoctor(saved.doctor_id);setDate(saved.clinic_date);setNotice(`Visit rescheduled: ${queueToken(saved)} · ${saved.patient_name} · ${visitTime(saved.starts_at)}.`);if(saved.doctor_id===doctor&&saved.clinic_date===date)void refresh().catch(e=>setError(e.message));}}/>:null}
     {attendance?<MissedVisitReview visit={attendance.visit} mode={attendance.mode} busy={busy} changed={attendanceChanged} onCancel={()=>{setAttendance(null);setError("");}} onConfirm={()=>{if(attendanceChanged)return;const {visit,mode}=attendance;void action(()=>mode==="restore"?api.restoreWaiting(visit.id,visit.missed_event_id!):api.markMissed(visit.id),mode==="restore"?"Visit restored to waiting with its original queue number.":"Appointment marked missed. The patient can book another visit.");}}/>:null}
-    <section className="panel mb-6 grid gap-5 md:grid-cols-3"><label className="text-sm font-semibold">Doctor<select className="mt-2" disabled={busy} value={doctor} onChange={e=>setDoctor(e.target.value)}><option value="doctor-lim">Dr. Lim (demo)</option><option value="doctor-anita">Dr. Anita (demo)</option></select></label><label className="text-sm font-semibold">Clinic date<input type="date" className="mt-2 block w-full rounded-lg border border-[#ccdcd4] bg-white p-3" disabled={busy} value={date} onChange={e=>setDate(e.target.value)}/><span className="muted mt-2 block text-xs font-normal">Malaysia date. Past dates are available for attendance review.</span></label><div className="flex flex-col justify-center text-sm"><span className="muted">Shared local API</span><span className="mt-2">{synced ? `Last checked ${synced}` : "Connecting…"}</span></div></section>
+    <section className="panel mb-6 grid gap-5 md:grid-cols-3"><label className="text-sm font-semibold">Doctor<select className="mt-2" disabled={busy} value={doctor} onChange={e=>setDoctor(e.target.value)}>{Object.entries(doctorNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label><label className="text-sm font-semibold">Clinic date<input type="date" className="mt-2 block w-full rounded-lg border border-[#ccdcd4] bg-white p-3" disabled={busy} value={date} onChange={e=>setDate(e.target.value)}/><span className="muted mt-2 block text-xs font-normal">Malaysia date. Past dates are available for attendance review.</span></label><div className="flex flex-col justify-center text-sm"><span className="muted">Shared local API</span><span className="mt-2">{synced ? `Last checked ${synced}` : "Connecting…"}</span></div></section>
     {checkoutTarget&&checkoutSelected?<section aria-label="Checkout visit navigation" className="panel mb-6 border border-[#176f5e]">
       <h2 className="font-semibold">Visit opened from checkout</h2>
       <p className="my-2 text-sm">{checkoutVisit?`${queueToken(checkoutVisit)} · ${checkoutVisit.patient_name} · ${visitTime(checkoutVisit.starts_at)}. The visit is highlighted in the list below.`:queueLoaded?"The linked visit is not in this doctor and date queue. Check the selection before taking any action.":"Loading the linked visit…"}</p>

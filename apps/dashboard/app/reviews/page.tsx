@@ -1,12 +1,14 @@
 "use client";
+import useDoctorNames from "../useDoctorNames";
 import AssessmentResult from "../components/AssessmentResult";
 import { useEffect, useMemo, useState } from "react";
-import { AssessmentShare, DemoApi, DemoDoctor, ReviewDraft, doctorNames, queueToken, visitTime } from "@smart-skin/shared";
+import { AssessmentShare, DemoApi, DemoDoctor, ReviewDraft, queueToken, visitTime } from "@smart-skin/shared";
 
 const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 const reviewFilters={all:"All",awaiting:"Awaiting review",reviewed:"Reviewed"} as const;
 type ReviewFilter=keyof typeof reviewFilters;
 export default function ReviewsPage() {
+  const doctorNames=useDoctorNames();
   const [doctor, setDoctor] = useState<DemoDoctor>("doctor-lim");
   const [busy,setBusy]=useState(false);
   return <main className="mx-auto max-w-6xl px-5 py-7 md:px-10">

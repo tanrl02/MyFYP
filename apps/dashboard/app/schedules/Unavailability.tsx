@@ -1,9 +1,11 @@
+import useDoctorNames from "../useDoctorNames";
 import { FormEvent, useEffect, useState } from "react";
-import { DemoApi, DemoDoctor, DoctorUnavailability, doctorNames, visitTime } from "@smart-skin/shared";
+import { DemoApi, DemoDoctor, DoctorUnavailability, visitTime } from "@smart-skin/shared";
 
 export const absencePeriod=(item:{start_time:string|null;end_time:string|null})=>item.start_time?`${item.start_time}–${item.end_time} (Malaysia time)`:"All day";
 const tomorrow=()=>new Date(Date.now()+8*3600000+86400000).toISOString().slice(0,10);
 export default function Unavailability({api,doctor,busy,onBusy}:{api:DemoApi;doctor:DemoDoctor;busy:boolean;onBusy:(value:boolean)=>void}){
+  const doctorNames=useDoctorNames();
   const [items,setItems]=useState<DoctorUnavailability[]>([]),[date,setDate]=useState(tomorrow),[reason,setReason]=useState("");
   const [draft,setDraft]=useState<{date:string;reason:string;request:string;start_time:string|null;end_time:string|null}|null>(null),[error,setError]=useState(""),[loadError,setLoadError]=useState(""),[notice,setNotice]=useState(""),[reload,setReload]=useState(0),[loading,setLoading]=useState(true);
   const [partial,setPartial]=useState(false),[start,setStart]=useState("14:00"),[end,setEnd]=useState("15:00");
