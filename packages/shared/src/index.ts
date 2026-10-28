@@ -218,3 +218,6 @@ export class DemoApi {
   invoice(id: string,review?:{prescription_id:string|null}) { return this.request<Invoice>(`/visits/${encodeURIComponent(id)}/invoice`, review??{}); }
   paySimulated(id: string) { return this.request<Invoice>(`/invoices/${encodeURIComponent(id)}/pay-simulated`, {}); }
 }
+
+export {conditionInformation,conditionInformationCheckedOn,conditionInformationNotice,getConditionInformation} from "./conditionInformation";
+export type {ConditionInformation} from "./conditionInformation";
