@@ -116,6 +116,12 @@ class PrescriptionCancellationInput(BaseModel):
     version: int = Field(strict=True,ge=1)
     reason: str = Field(min_length=1,max_length=300,pattern=r'\S')
 
+class StaffStatusInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    active: bool = Field(strict=True)
+    version: int = Field(strict=True,ge=0)
+    request_id: str = Field(min_length=8,max_length=100,pattern=r'\S')
+
 class UserProfileInput(BaseModel):
     model_config=ConfigDict(extra='forbid')
     name: str = Field(min_length=1,max_length=100,pattern=r'\S')
@@ -326,6 +332,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/admin/staff',status_code=201)
     def create_staff(payload: PatientCreateInput,who=Depends(admin)):
         return run(lambda:store.create_staff(who,payload.name,payload.phone,payload.email,payload.request_id))
+
+    @api.get('/admin/staff-status')
+    def staff_statuses(who=Depends(admin)):
+        return run(lambda:store.staff_statuses(who))
+
+    @api.post('/admin/staff/{staff_id}/status')
+    def save_staff_status(staff_id: str,payload: StaffStatusInput,who=Depends(admin)):
+        return run(lambda:store.save_staff_status(staff_id,who,payload.active,payload.version,payload.request_id))
 
     @api.get('/demo/staff')
     def demo_staff(who=Depends(user_actor)):

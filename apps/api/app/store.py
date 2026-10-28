@@ -44,6 +44,14 @@ class Store:
                 CREATE TABLE IF NOT EXISTS staff_creations (
                   request_id TEXT PRIMARY KEY, user_id TEXT NOT NULL UNIQUE REFERENCES user_profiles(id),
                   payload_json TEXT NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS staff_status (
+                  staff_id TEXT PRIMARY KEY REFERENCES staff_creations(user_id),
+                  active INTEGER NOT NULL CHECK(active IN (0,1)), version INTEGER NOT NULL,
+                  updated_at TEXT NOT NULL, updated_by TEXT NOT NULL REFERENCES user_profiles(id));
+                CREATE TABLE IF NOT EXISTS staff_status_changes (
+                  request_id TEXT PRIMARY KEY, staff_id TEXT NOT NULL REFERENCES staff_creations(user_id),
+                  from_version INTEGER NOT NULL, active INTEGER NOT NULL CHECK(active IN (0,1)),
+                  updated_at TEXT NOT NULL, updated_by TEXT NOT NULL REFERENCES user_profiles(id));
                 CREATE TABLE IF NOT EXISTS staff_activity (
                   id TEXT PRIMARY KEY, staff_id TEXT NOT NULL REFERENCES user_profiles(id),
                   action TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -274,13 +282,14 @@ class Store:
     def user_profile(self, actor):
         with self.connect() as db:
             row=db.execute('SELECT * FROM user_profiles WHERE id=?',(actor,)).fetchone()
-            if not row:raise RuleError('Recognised demo identity required.',403)
+            if not row or self.user_role(actor,db) is None:raise RuleError('Active recognised demo identity required.',403)
             return dict(row)
 
     def user_role(self, actor, db=None):
         if db is None:
             with self.connect() as connection:return self.user_role(actor,connection)
         row=db.execute('SELECT role FROM user_profiles WHERE id=?',(actor,)).fetchone()
+        if row and row['role']=='staff' and db.execute('SELECT 1 FROM staff_status WHERE staff_id=? AND active=0',(actor,)).fetchone():return None
         return row['role'] if row else None
 
     def is_patient(self, actor, db=None):
@@ -294,7 +303,39 @@ class Store:
 
     def demo_staff(self):
         with self.connect() as db:
-            return [dict(row) for row in db.execute("SELECT id,name FROM user_profiles WHERE role='staff' ORDER BY rowid")]
+            return [dict(row) for row in db.execute("SELECT id,name FROM user_profiles WHERE role='staff' AND NOT EXISTS (SELECT 1 FROM staff_status s WHERE s.staff_id=user_profiles.id AND s.active=0) ORDER BY rowid")]
+
+    def staff_statuses(self, actor):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        with self.connect() as db:return self.staff_status_rows(db)
+
+    def staff_status_rows(self, db, staff_id=None):
+        sql="""SELECT c.user_id AS staff_id,COALESCE(s.active,1) AS active,COALESCE(s.version,0) AS version,
+            s.updated_at,s.updated_by FROM staff_creations c LEFT JOIN staff_status s ON s.staff_id=c.user_id"""
+        rows=db.execute(sql+(' WHERE c.user_id=?' if staff_id else ' ORDER BY c.rowid'),(staff_id,) if staff_id else ())
+        return [dict(row,active=bool(row['active'])) for row in rows]
+
+    def save_staff_status(self, staff_id, actor, active, version, request_id):
+        if actor!='admin-demo':raise RuleError('Admin demo identity required.',403)
+        if type(active) is not bool or type(version) is not int or version<0 or not isinstance(request_id,str) or not 8<=len(request_id)<=100 or not request_id.strip():
+            raise RuleError('Choose an active state, reviewed version and valid request.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            rows=self.staff_status_rows(db,staff_id)
+            if not rows:raise RuleError('Only added staff accounts can change status.',404)
+            current=rows[0]
+            retry=db.execute('SELECT * FROM staff_status_changes WHERE request_id=?',(request_id,)).fetchone()
+            if retry:
+                if (retry['staff_id'],bool(retry['active']),retry['from_version'])!=(staff_id,active,version):
+                    raise RuleError('This request already saved a different staff status change.')
+                return current
+            if version!=current['version']:raise RuleError('Staff status changed. Reload and review the latest status.')
+            if active==current['active']:raise RuleError('This staff account already has that status.',422)
+            now=datetime.now(timezone.utc).isoformat()
+            db.execute('INSERT INTO staff_status VALUES(?,?,?,?,?) ON CONFLICT(staff_id) DO UPDATE SET active=excluded.active,version=excluded.version,updated_at=excluded.updated_at,updated_by=excluded.updated_by',
+                (staff_id,int(active),version+1,now,actor))
+            db.execute('INSERT INTO staff_status_changes VALUES(?,?,?,?,?,?)',(request_id,staff_id,version,int(active),now,actor))
+            return self.staff_status_rows(db,staff_id)[0]
 
     def acting_staff(self, db):
         context=STAFF_REQUEST.get()
@@ -476,6 +517,10 @@ class Store:
         try:
             yield db
             context=STAFF_REQUEST.get()
+            # Recheck after the write transaction: admission may have happened before
+            # an admin deactivated this staff member. Reject and roll back all writes.
+            if context and db.total_changes and db.execute('SELECT 1 FROM staff_status WHERE staff_id=? AND active=0',(context[0],)).fetchone():
+                raise RuleError('This staff account is inactive. Select an active staff identity.',403)
             if context and context[1]=='POST' and db.total_changes and self.is_staff(context[0],db):
                 db.execute('INSERT INTO staff_activity VALUES(?,?,?,?)',
                     (str(uuid4()),context[0],context[1]+' '+context[2],datetime.now(timezone.utc).isoformat()))

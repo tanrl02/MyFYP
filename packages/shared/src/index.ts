@@ -85,10 +85,13 @@ export const visitWindow = (slot:{starts_at:string;ends_at?:string}) => {
 };
 
 export type PhotoCheck = {accepted:boolean;version:string;skin_content:"likely_skin"|"not_skin"|"uncertain"|"not_checked";reasons:string[];message:string};
+export type StaffStatus={staff_id:DemoStaff;active:boolean;version:number;updated_at:string|null;updated_by:string|null};
 export type UserProfile={id:string;role:"patient"|"doctor"|"staff"|"admin";name:string;phone:string;email:string;version:number;updated_at:string|null;updated_by:string|null};
 export type DemoDoctorIdentity={id:DemoDoctor;name:string};
 export type DemoPatientIdentity={id:DemoPatient;name:string};
 export class DemoApi {
+  staffStatuses() { return this.request<StaffStatus[]>("/admin/staff-status"); }
+  saveStaffStatus(id:DemoStaff,body:{active:boolean;version:number;request_id:string}) { return this.request<StaffStatus>(`/admin/staff/${encodeURIComponent(id)}/status`,body); }
   demoStaff() { return this.request<{id:DemoStaff;name:string}[]>("/demo/staff"); }
   createStaff(body:{name:string;phone:string;email:string;request_id:string}) { return this.request<UserProfile>("/admin/staff",body); }
   demoDoctors() { return this.request<DemoDoctorIdentity[]>("/demo/doctors"); }

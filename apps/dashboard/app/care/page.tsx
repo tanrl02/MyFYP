@@ -20,7 +20,7 @@ export default function CarePage() {
   const {actor:selectedStaff,names:staffNames,selectStaff}=useStaffIdentity();
   const doctorNames=useDoctorNames();
   const [checkoutTarget,setCheckoutTarget]=useState<CheckoutTarget|null>(null);
-  useEffect(()=>{if(readCheckoutTarget(window.location.search)||selectedStaff!=="staff-demo")setActor(selectedStaff);},[selectedStaff]);
+  useEffect(()=>{setActor(current=>readCheckoutTarget(window.location.search)||selectedStaff!=="staff-demo"||current.startsWith("staff-")?selectedStaff:current);},[selectedStaff]);
   const [actor, setActor] = useState<DemoActor>("doctor-lim");
   const api = useMemo(() => new DemoApi(base, actor), [actor]);
   const careRevision=useRef(0);
