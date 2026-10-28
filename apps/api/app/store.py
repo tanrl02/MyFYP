@@ -148,6 +148,10 @@ class Store:
                   patient_id TEXT NOT NULL, doctor_id TEXT NOT NULL, patient_message TEXT NOT NULL,
                   request_id TEXT NOT NULL, created_at TEXT NOT NULL, revoked_at TEXT,
                   UNIQUE(patient_id,request_id));
+                CREATE TABLE IF NOT EXISTS photo_followup_requests (
+                  id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
+                  due_date TEXT NOT NULL, instructions TEXT NOT NULL, created_at TEXT NOT NULL,
+                  request_id TEXT NOT NULL UNIQUE);
                 CREATE TABLE IF NOT EXISTS assessment_reviews (
                   id TEXT PRIMARY KEY, share_id TEXT NOT NULL UNIQUE REFERENCES assessment_shares(id),
                   doctor_id TEXT NOT NULL, note TEXT NOT NULL, follow_up TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -1932,6 +1936,52 @@ class Store:
                 version=excluded.version,updated_at=excluded.updated_at,doctor_assessment=excluded.doctor_assessment''',
                 (share_id,doctor,note,follow_up,version+1,datetime.now(timezone.utc).isoformat(),doctor_assessment))
             return self.review_draft_record(db,share_id,doctor)
+
+    def photo_followup_record(self, db, row):
+        share=db.execute('SELECT assessment_id,patient_id,doctor_id FROM assessment_shares WHERE id=?',(row['share_id'],)).fetchone()
+        return dict(row,**dict(share),doctor_name=self.user_name(db,share['doctor_id']))
+
+    def doctor_photo_followup(self, share_id, doctor):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            if not self.is_doctor(doctor,db):raise RuleError('Doctor identity required.',403)
+            self.share_record(db,share_id,doctor)
+            row=db.execute('SELECT * FROM photo_followup_requests WHERE share_id=?',(share_id,)).fetchone()
+            return self.photo_followup_record(db,row) if row else None
+
+    def patient_photo_followups(self, assessment_id, patient, photo_request_id=None):
+        with self.connect() as db:
+            if not self.is_patient(patient,db):raise RuleError('Patient identity required.',403)
+            if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?',(assessment_id,patient)).fetchone():raise RuleError('Assessment not found for this patient.',404)
+            rows=db.execute('''SELECT r.* FROM photo_followup_requests r JOIN assessment_shares s ON s.id=r.share_id
+                WHERE s.assessment_id=? AND s.patient_id=?'''+(' AND r.id=?' if photo_request_id else '')+' ORDER BY r.created_at DESC,r.id DESC LIMIT 100',
+                (assessment_id,patient,photo_request_id) if photo_request_id else (assessment_id,patient)).fetchall()
+            if photo_request_id and not rows:raise RuleError('Photo follow-up request not found for this assessment.',404)
+            return [self.photo_followup_record(db,row) for row in rows]
+
+    def request_photo_followup(self, share_id, doctor, due_date, instructions, request_id):
+        if not isinstance(instructions,str) or not instructions.strip() or len(instructions)>1000 or any(ord(c)<32 and c not in '\n\r\t' for c in instructions):raise RuleError('Enter instructions within 1000 characters.',422)
+        instructions=instructions.strip()
+        if not isinstance(due_date,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}',due_date):raise RuleError('Choose a valid Malaysia date.',422)
+        try:due=date.fromisoformat(due_date)
+        except ValueError:raise RuleError('Choose a valid Malaysia date.',422)
+        if not isinstance(request_id,str) or not 8<=len(request_id)<=100 or not request_id.strip():raise RuleError('A valid photo follow-up request ID is required.',422)
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not self.is_doctor(doctor,db):raise RuleError('Doctor identity required.',403)
+            share=self.share_record(db,share_id,doctor)
+            old=db.execute('SELECT * FROM photo_followup_requests WHERE request_id=?',(request_id,)).fetchone()
+            if old:
+                if (old['share_id'],old['due_date'],old['instructions'])!=(share_id,due_date,instructions):raise RuleError('This request already saved different photo follow-up details.')
+                return self.photo_followup_record(db,old)
+            if db.execute('SELECT 1 FROM photo_followup_requests WHERE share_id=?',(share_id,)).fetchone():raise RuleError('A photo follow-up request is already saved for this share. Reload it.')
+            today=datetime.now(MALAYSIA).date()
+            if not today<due<=today+timedelta(days=365):raise RuleError('Choose a future Malaysia date within the next 365 days.',422)
+            id=str(uuid4());now=datetime.now(timezone.utc).isoformat()
+            db.execute('INSERT INTO photo_followup_requests VALUES(?,?,?,?,?,?)',(id,share_id,due_date,instructions,now,request_id))
+            self.notify(db,share['patient_id'],'photo_follow_up_requested',id,share['assessment_id'],'Skin photo follow-up requested',
+                f"{self.user_name(db,doctor)} requested a new skin photo for {due_date} (Malaysia date). Open the assessment to read the instructions and add a linked follow-up.")
+            return self.photo_followup_record(db,db.execute('SELECT * FROM photo_followup_requests WHERE id=?',(id,)).fetchone())
 
     def publish_review(self, share_id, doctor, note, follow_up, draft_version=None, doctor_assessment=''):
         with self.connect() as db:

@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
-import { Assessment, DemoApi, DemoPatient, PhotoCheck, assessmentCategory, assessmentOrigin, visitTime } from "@smart-skin/shared";
+import { Assessment, PhotoFollowupRequest, DemoApi, DemoPatient, PhotoCheck, assessmentCategory, assessmentOrigin, visitTime } from "@smart-skin/shared";
 
 import { apiBase as base } from "./apiConfig";
 import SharingView from "./SharingView";
+import PhotoFollowupRequests from "./PhotoFollowupRequests";
 import AssessmentComparisonView from "./AssessmentComparisonView";
 import AssessmentResult from "./AssessmentResult";
 import SymptomsForm,{emptySymptoms} from "./SymptomsForm";
@@ -24,7 +25,7 @@ function photoForm(photo:Draft) {
   }
   return form;
 }
-export default function SkinView({ patient, initialAssessmentId, onFindDoctor }: { patient: DemoPatient; initialAssessmentId?: string; onFindDoctor?:(assessmentId:string)=>void }) {
+export default function SkinView({ patient, initialAssessmentId, initialPhotoRequestId, onFindDoctor }: { patient: DemoPatient; initialAssessmentId?: string; initialPhotoRequestId?:string; onFindDoctor?:(assessmentId:string)=>void }) {
   const api = useMemo(() => new DemoApi(base, patient), [patient]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [history, setHistory] = useState<Assessment[]>([]);
@@ -36,6 +37,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   const [historySource,setHistorySource]=useState<AssessmentSource>("all");
   const [historyReview,setHistoryReview]=useState<AssessmentReviewStatus>("all");
   const visibleHistory=sortAssessmentHistory(filterAssessmentHistory(history,historyDate,historyQuery,historySource,historyReview),historyOrder);
+  const [requested,setRequested]=useState<PhotoFollowupRequest|null>(null);
   const [previous,setPrevious]=useState<Assessment|null>(null),[comparing,setComparing]=useState(false);
   const [result, setResult] = useState<Assessment | null>(null);
   const [busy, setBusy] = useState(false);
@@ -69,7 +71,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   function discard() {
     if (draft?.local?.exists) draft.local.delete();
-    setDraft(null);setPrevious(null);setPhotoCheck(null);setSymptoms(emptySymptoms());setSymptomsLocked(false); setNotice(symptomsLocked?"Preview discarded. Refresh history if you previously attempted to save.":"Photo discarded. No assessment was saved.");
+    setDraft(null);setPrevious(null);setRequested(null);setPhotoCheck(null);setSymptoms(emptySymptoms());setSymptomsLocked(false); setNotice(symptomsLocked?"Preview discarded. Refresh history if you previously attempted to save.":"Photo discarded. No assessment was saved.");
   }
   async function validate(selected:Draft) {
     setChecking(true);setPhotoCheck(null);
@@ -121,7 +123,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       form.append("symptoms",JSON.stringify({...symptoms,body_area:symptoms.body_area.trim(),onset:symptoms.onset.trim(),description:symptoms.description.trim()}));
       setSymptomsLocked(true);
       const saved = await api.saveAssessment(form);
-      setResult(saved);setComparing(!!saved.follow_up_of);setPrevious(null); setHistory(current => [saved, ...current.filter(r => r.id !== saved.id)]);
+      setResult(saved);setComparing(!!saved.follow_up_of);setPrevious(null);setRequested(null); setHistory(current => [saved, ...current.filter(r => r.id !== saved.id)]);
       if (draft.local?.exists) draft.local.delete();
       setDraft(null);setPhotoCheck(null); setNotice("Photo, symptom details and experimental AI suggestions saved. You can share them with a doctor for review.");
     } catch (e) { setPhotoCheck(null); setError(e instanceof Error ? e.message : "Unable to save. Refresh history before retrying."); }
@@ -129,7 +131,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
   }
   async function open(id: string) {
     if (busy) return; setBusy(true); setError("");
-    try { const saved=await api.assessment(id);if(!draft)setPrevious(null);setComparing(false);setResult(saved);setHistory(current=>current.map(item=>item.id===id?{...item,review_summary:saved.review_summary}:item)); }
+    try { const saved=await api.assessment(id);if(!draft){setPrevious(null);setRequested(null);}setComparing(false);setResult(saved);setHistory(current=>current.map(item=>item.id===id?{...item,review_summary:saved.review_summary}:item)); }
     catch (e) { setError(e instanceof Error ? e.message : "Cannot open assessment."); }
     finally { setBusy(false); }
   }
@@ -138,7 +140,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
     <View style={styles.warning}><Text style={styles.warningText}>EXPERIMENTAL AI — new assessments use a research model and can be wrong. Photo quality/skin checks are separate. A doctor should review the result. Older records remain labelled simulations.</Text></View>
     {error ? <View accessibilityRole="alert" style={styles.error}><Text>{error}</Text>{denied && Platform.OS !== "web" ? <Pressable accessibilityRole="button" onPress={() => Linking.openSettings()}><Text style={styles.link}>Open app settings</Text></Pressable> : null}</View> : null}
     {notice ? <Text style={styles.notice}>{notice}</Text> : null}
-    {previous?<View style={styles.card}><Text style={styles.subtitle}>New follow-up for {visitTime(previous.created_at)} · {previous.id.slice(0,8)}</Text><Text style={styles.muted}>Use the same skin area and enter fresh symptom details. This adds a separate assessment; the previous photo, symptoms and AI result stay saved. Sharing either assessment does not share the other.</Text>{!draft?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>{setPrevious(null);setResult(previous);}}><Text style={styles.link}>Cancel follow-up</Text></Pressable>:null}</View>:null}
+    {previous?<View style={styles.card}><Text style={styles.subtitle}>New follow-up for {visitTime(previous.created_at)} · {previous.id.slice(0,8)}</Text><Text style={styles.muted}>Use the same skin area and enter fresh symptom details. This adds a separate assessment; the previous photo, symptoms and AI result stay saved. Sharing either assessment does not share the other.</Text>{requested?<Text style={styles.muted}>Doctor request · {requested.due_date} (Malaysia date): {requested.instructions}</Text>:null}{!draft?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>{setPrevious(null);setRequested(null);setResult(previous);setNotice("Follow-up cancelled. No assessment was saved.");}}><Text style={styles.link}>Cancel follow-up</Text></Pressable>:null}</View>:null}
     <View style={styles.row}><Pressable accessibilityRole="button" disabled={busy} style={styles.button} onPress={() => pick(true)}><Text style={styles.buttonText}>Take photo</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} style={styles.secondary} onPress={() => pick(false)}><Text style={styles.link}>Choose photo</Text></Pressable></View>
     {draft ? <View style={styles.card}><Text style={styles.subtitle}>{checking?"Checking photo…":photoCheck?.accepted?"Photo checks passed":photoCheck?"Retake required":"Photo not checked"}</Text><Image accessibilityLabel="Selected photo preview" source={{ uri: draft.uri }} style={styles.photo} resizeMode="contain" />
       {checking?<Text accessibilityRole="alert" style={styles.muted}>Checking detail, lighting and skin content. The first check can take longer while the local model loads.</Text>:null}
@@ -148,7 +150,7 @@ export default function SkinView({ patient, initialAssessmentId, onFindDoctor }:
       {!photoCheck?.accepted&&!checking?<Pressable accessibilityRole="button" disabled={busy} onPress={retryCheck}><Text style={styles.link}>Retry photo check</Text></Pressable>:null}
       {photoCheck&&!photoCheck.accepted?<Pressable accessibilityRole="button" disabled={busy} onPress={()=>pick(true)}><Text style={styles.link}>Retake photo</Text></Pressable>:null}
       <Pressable accessibilityRole="button" disabled={busy||!photoCheck?.accepted||!symptomsComplete} style={[styles.button,(!photoCheck?.accepted||!symptomsComplete)&&styles.disabled]} onPress={save}><Text style={styles.buttonText}>{checking?"Checking…":busy?"Analysing & saving…":"Analyse & save assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={discard}><Text style={styles.link}>Discard preview</Text></Pressable></View> : null}
-    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><Pressable accessibilityRole="button" disabled={busy||!!draft} onPress={()=>{setPrevious(result);setResult(null);setComparing(false);setSymptoms(emptySymptoms());setSymptomsLocked(false);setError("");setNotice("Choose or take a new photo for this follow-up.");}}><Text style={styles.link}>Add follow-up assessment</Text></Pressable>
+    {result ? <View style={styles.card}><Text style={styles.subtitle}>Saved result · {assessmentOrigin(result)}</Text><Text style={styles.muted}>{visitTime(result.created_at)}</Text>{result.photo_uri ? <Image accessibilityLabel="Saved assessment photo" source={{ uri: result.photo_uri }} style={styles.photo} resizeMode="contain" /> : null}<AssessmentResult assessment={result}/><PhotoFollowupRequests key={result.id} api={api} id={result.id} requestId={result.id===initialAssessmentId?initialPhotoRequestId:undefined} busy={busy||!!draft} onStart={request=>{setRequested(request);setPrevious(result);setResult(null);setComparing(false);setSymptoms(emptySymptoms());setSymptomsLocked(false);setError("");setNotice("Choose or take a new photo for the doctor's request.");}}/><Pressable accessibilityRole="button" disabled={busy||!!draft} onPress={()=>{setRequested(null);setPrevious(result);setResult(null);setComparing(false);setSymptoms(emptySymptoms());setSymptomsLocked(false);setError("");setNotice("Choose or take a new photo for this follow-up.");}}><Text style={styles.link}>Add follow-up assessment</Text></Pressable>
       {result.follow_up_of?<><Pressable accessibilityRole="button" disabled={busy} onPress={()=>setComparing(value=>!value)}><Text style={styles.link}>{comparing?"Hide comparison":"Compare with previous assessment"}</Text></Pressable><Pressable accessibilityRole="button" disabled={busy||!!draft} onPress={()=>open(result.follow_up_of!)}><Text style={styles.link}>Open previous assessment</Text></Pressable>{comparing?<AssessmentComparisonView key={result.id} api={api} id={result.id}/>:null}</>:null}
       {result.follow_ups?.length?<View><Text style={styles.subtitle}>Linked follow-ups · latest 20</Text>{result.follow_ups.map(item=><Pressable accessibilityRole="button" disabled={busy||!!draft} key={item.id} onPress={()=>open(item.id)}><Text style={styles.link}>Open follow-up {visitTime(item.created_at)} · {item.id.slice(0,8)}</Text></Pressable>)}</View>:null}
       <Pressable accessibilityRole="button" disabled={busy||!onFindDoctor} style={styles.button} onPress={()=>onFindDoctor?.(result.id)}><Text style={styles.buttonText}>Find a suitable doctor</Text></Pressable><Text style={styles.muted}>Doctor suggestions use the saved result and staff-entered expertise. You can choose a different concern. Booking does not share the assessment; authorise access separately.</Text><SharingView key={result.id} patient={patient} assessmentId={result.id} /></View> : null}

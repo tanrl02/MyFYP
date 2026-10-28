@@ -136,6 +136,12 @@ class PatientCreateInput(BaseModel):
     email: str = Field(default='',max_length=254)
     request_id: str = Field(min_length=8,max_length=100,pattern=r'\S')
 
+class PhotoFollowupInput(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    due_date: str = Field(min_length=10,max_length=10)
+    instructions: str = Field(min_length=1,max_length=1000,pattern=r'\S')
+    request_id: str = Field(min_length=8,max_length=100,pattern=r'\S')
+
 class ShareInput(BaseModel):
     doctor_id: str = Field(min_length=1,max_length=100)
     patient_message: str = Field(max_length=1000)
@@ -649,6 +655,18 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.post('/assessments/{assessment_id}/link-appointment')
     def link_assessment(assessment_id: str, payload: AppointmentLinkInput, who=Depends(patient)):
         return run(lambda: store.link_assessment(assessment_id, who, payload.booking_id, payload.patient_message.strip(), payload.request_id))
+
+    @api.get('/assessments/{assessment_id}/photo-follow-up-requests')
+    def patient_photo_followups(assessment_id: str,photo_request_id: str | None=Query(default=None,min_length=1,max_length=100),who=Depends(patient)):
+        return run(lambda:store.patient_photo_followups(assessment_id,who,photo_request_id))
+
+    @api.get('/assessment-shares/{share_id}/photo-follow-up-request')
+    def doctor_photo_followup(share_id: str,who=Depends(doctor)):
+        return run(lambda:store.doctor_photo_followup(share_id,who))
+
+    @api.post('/assessment-shares/{share_id}/photo-follow-up-request',status_code=201)
+    def request_photo_followup(share_id: str,payload: PhotoFollowupInput,who=Depends(doctor)):
+        return run(lambda:store.request_photo_followup(share_id,who,payload.due_date,payload.instructions,payload.request_id))
 
     @api.get('/assessment-shares/{share_id}')
     def shared_assessment(share_id: str, who=Depends(doctor)):

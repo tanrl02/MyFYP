@@ -24,7 +24,7 @@ test("refreshed read status and incoming notifications update membership without
 
 
 test("each notification type combines with read status without changing order or data",()=>{
-  const kinds=["appointment_reminder","queue_called","review_published","follow_up_recommended"];
+  const kinds=["appointment_reminder","queue_called","review_published","follow_up_recommended","photo_follow_up_requested"];
   const items=kinds.flatMap(kind=>[{id:kind+"-read",kind,read_at:"2032-10-25T01:00:00Z"},{id:kind+"-unread",kind,read_at:null}]);
   const before=JSON.stringify(items);
   for(const kind of kinds){
@@ -32,8 +32,8 @@ test("each notification type combines with read status without changing order or
     assert.deepEqual(filterNotifications(items,"unread",kind).map(n=>n.id),[kind+"-unread"]);
     assert.deepEqual(filterNotifications(items,"read",kind).map(n=>n.id),[kind+"-read"]);
   }
-  assert.equal(filterNotifications(items,"all","all").length,8);
-  assert.equal(filterNotifications(items,"unread","all").length,4);
+  assert.equal(filterNotifications(items,"all","all").length,kinds.length*2);
+  assert.equal(filterNotifications(items,"unread","all").length,kinds.length);
   assert.equal(JSON.stringify(items),before);
 });
 

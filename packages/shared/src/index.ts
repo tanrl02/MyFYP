@@ -6,7 +6,7 @@ export type FollowUp = {source_booking_id:string;doctor_id:DemoDoctor;recommende
 export type Consultation = { visit: Booking; note: ConsultationNote | null; linked_share: AssessmentShare | null; background?: PatientBackground;follow_up?:FollowUp|null };
 export type VisitFeedback = { id: string; booking_id: string; patient_id: DemoPatient; rating: number; comment: string; created_at: string; version:number; edited_at:string|null;edit_deadline:string;visit: Booking };
 export type DemoPatient = `patient-${string}`;
-export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
+export type PatientNotification = {id:string;patient_id:DemoPatient;kind:"photo_follow_up_requested"|"queue_called"|"review_published"|"appointment_reminder"|"follow_up_recommended"|"bill_ready"|"payment_recorded"|"prescription_issued"|"prescription_cancelled";source_id:string;target_id:string;title:string;message:string;created_at:string;read_at:string|null};
 export type NotificationInbox = {items:PatientNotification[];unread_count:number;next_cursor:string|null};
 export type DemoStaff = `staff-${string}`;
 export type DemoActor = DemoPatient | DemoDoctor | DemoStaff | "admin-demo";
@@ -38,6 +38,7 @@ export type VisitSummary={period:VisitSummaryFilter["period"];start_date:string;
 export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: VisitCounts; visits_by_doctor: {doctor_id: DemoDoctor; doctor_name: string; visits: VisitCounts}[]; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; lost_units:number; items: { medicine_id: string; name: string; received: number; dispensed: number; lost:number }[] }; feedback: { count: number; average_rating: number | null } };
 export type DiseasePrediction = {model_id:string;checkpoint_sha256:string;preprocessing:string;dataset_version:string;validation_accuracy:number;validation_macro_f1:number;validation_cases:number;test_evaluated:boolean;input_sha256:string;created_at:string;top_predictions:{condition:string;label:string;score:number}[]};
 export type AssessmentSymptoms={body_area:string;onset:string;itching:"yes"|"no"|"not_sure";pain:"yes"|"no"|"not_sure";description:string};
+export type PhotoFollowupRequest={id:string;share_id:string;due_date:string;instructions:string;created_at:string;request_id:string;assessment_id:string;patient_id:DemoPatient;doctor_id:DemoDoctor;doctor_name:string};
 export type AssessmentComparison={previous:Assessment;current:Assessment};
 export type Assessment = { follow_up_of?:string|null;follow_ups?:{id:string;created_at:string}[]; id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; symptoms:AssessmentSymptoms|null; message: string; photo_uri?: string;review_summary?:{published_reviews:number;awaiting_reviews:number} };
 export const assessmentCategory=(assessment:Assessment)=>assessment.prediction?.top_predictions[0]?.label??assessment.example_category??"No suggestion";
@@ -168,6 +169,9 @@ export class DemoApi {
   consultationDraft(id:string) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`); }
   saveConsultationDraft(id:string,findings:string,followUp:string,version:number) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`,{findings,follow_up:followUp,version}); }
   publishConsultation(id: string, findings: string, followUp: string,draftVersion?:number) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp,draft_version:draftVersion }); }
+  photoFollowups(id:string,requestId?:string) { return this.request<PhotoFollowupRequest[]>(`/assessments/${encodeURIComponent(id)}/photo-follow-up-requests${requestId?`?photo_request_id=${encodeURIComponent(requestId)}`:""}`); }
+  doctorPhotoFollowup(share:string) { return this.request<PhotoFollowupRequest|null>(`/assessment-shares/${encodeURIComponent(share)}/photo-follow-up-request`); }
+  requestPhotoFollowup(share:string,body:{due_date:string;instructions:string;request_id:string}) { return this.request<PhotoFollowupRequest>(`/assessment-shares/${encodeURIComponent(share)}/photo-follow-up-request`,body); }
   assessmentComparison(id:string) { return this.request<AssessmentComparison>(`/assessments/${encodeURIComponent(id)}/comparison`); }
   sharedAssessmentComparison(id:string) { return this.request<AssessmentComparison>(`/assessment-shares/${encodeURIComponent(id)}/comparison`); }
   assessments() { return this.request<Assessment[]>("/assessments"); }

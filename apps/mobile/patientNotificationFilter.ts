@@ -6,6 +6,7 @@ export const notificationTypeLabels = {
   all: "All types",
   appointment_reminder: "Appointment reminders",
   queue_called: "Queue calls",
+  photo_follow_up_requested: "Photo follow-up requests",
   review_published: "Doctor reviews",
   follow_up_recommended: "Follow-up recommendations",
   prescription_issued: "Prescriptions",
