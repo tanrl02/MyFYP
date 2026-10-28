@@ -494,12 +494,20 @@ def create_app(path=None,photo_checker=None,predictor=None):
     def assessment_history(cursor: Annotated[str | None,Query(min_length=1,max_length=100)]=None,who=Depends(patient)):
         return run(lambda: store.assessment_history(who,cursor))
 
+    @api.get('/assessments/{assessment_id}/comparison')
+    def assessment_comparison(assessment_id: str,who=Depends(patient)):
+        return run(lambda:store.assessment_comparison(assessment_id,who))
+
+    @api.get('/assessment-shares/{share_id}/comparison')
+    def shared_assessment_comparison(share_id: str,who=Depends(doctor)):
+        return run(lambda:store.shared_assessment_comparison(share_id,who))
+
     @api.get('/assessments/{assessment_id}')
     def assessment(assessment_id: str, who=Depends(patient)):
         return run(lambda: store.assessment(assessment_id, who))
 
     @api.post('/assessments', status_code=201)
-    def save_assessment(photo: UploadFile = File(), request_id: str = Form(min_length=8, max_length=100), symptoms: str | None = Form(default=None,max_length=5000),who=Depends(patient)):
+    def save_assessment(photo: UploadFile = File(), request_id: str = Form(min_length=8, max_length=100), symptoms: str | None = Form(default=None,max_length=5000),previous_id: str | None = Form(default=None,min_length=1,max_length=100),who=Depends(patient)):
         try:
             content = photo.file.read(MAX_BYTES + 1)
         finally:
@@ -508,14 +516,16 @@ def create_app(path=None,photo_checker=None,predictor=None):
             try:reported=AssessmentSymptomsInput.model_validate_json(symptoms).model_dump() if symptoms is not None else None
             except ValidationError as error:
                 raise RuleError('Enter a body area (up to 80 characters), onset (up to 100), itching and pain choices, and an optional description up to 1000 characters.',422) from error
+            if previous_id is not None and reported is None:raise RuleError('Enter fresh symptom details for the follow-up assessment.',422)
+            store.validate_followup_parent(who,previous_id)
             source_hash=hashlib.sha256(content).hexdigest()
-            existing=store.assessment_retry(who,request_id,source_hash,symptoms=reported)
+            existing=store.assessment_retry(who,request_id,source_hash,symptoms=reported,previous_id=previous_id)
             if existing is not None:return existing
             checked=photo_checker(content)
             if not checked['accepted']:raise RuleError(' '.join(checked['reasons']),422)
             clean, width, height = normalise_photo(content)
             prediction=predictor(content)
-            return store.save_assessment(who,request_id,source_hash,clean,width,height,prediction=prediction,symptoms=reported)
+            return store.save_assessment(who,request_id,source_hash,clean,width,height,prediction=prediction,symptoms=reported,previous_id=previous_id)
         return run(save)
 
     @api.post('/photo-check')

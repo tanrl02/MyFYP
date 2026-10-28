@@ -38,7 +38,8 @@ export type VisitSummary={period:VisitSummaryFilter["period"];start_date:string;
 export type DailyReport = { clinic_date: string; timezone: string; generated_at: string; visits: VisitCounts; visits_by_doctor: {doctor_id: DemoDoctor; doctor_name: string; visits: VisitCounts}[]; billing: { invoice_count: number; billed_cents: number; paid_cents: number; unpaid_cents: number }; stock: { received_units: number; dispensed_units: number; lost_units:number; items: { medicine_id: string; name: string; received: number; dispensed: number; lost:number }[] }; feedback: { count: number; average_rating: number | null } };
 export type DiseasePrediction = {model_id:string;checkpoint_sha256:string;preprocessing:string;dataset_version:string;validation_accuracy:number;validation_macro_f1:number;validation_cases:number;test_evaluated:boolean;input_sha256:string;created_at:string;top_predictions:{condition:string;label:string;score:number}[]};
 export type AssessmentSymptoms={body_area:string;onset:string;itching:"yes"|"no"|"not_sure";pain:"yes"|"no"|"not_sure";description:string};
-export type Assessment = { id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; symptoms:AssessmentSymptoms|null; message: string; photo_uri?: string;review_summary?:{published_reviews:number;awaiting_reviews:number} };
+export type AssessmentComparison={previous:Assessment;current:Assessment};
+export type Assessment = { follow_up_of?:string|null;follow_ups?:{id:string;created_at:string}[]; id: string; patient_id: DemoPatient; width: number; height: number; created_at: string; origin: "simulation"|"experimental_ai"; example_category: string|null; prediction?:DiseasePrediction; symptoms:AssessmentSymptoms|null; message: string; photo_uri?: string;review_summary?:{published_reviews:number;awaiting_reviews:number} };
 export const assessmentCategory=(assessment:Assessment)=>assessment.prediction?.top_predictions[0]?.label??assessment.example_category??"No suggestion";
 export const assessmentOrigin=(assessment:Assessment)=>assessment.origin==="experimental_ai"?"Experimental AI":"Simulation";
 export type DemoDoctor = `doctor-${string}`;
@@ -167,6 +168,8 @@ export class DemoApi {
   consultationDraft(id:string) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`); }
   saveConsultationDraft(id:string,findings:string,followUp:string,version:number) { return this.request<ConsultationDraft>(`/visits/${encodeURIComponent(id)}/consultation/draft`,{findings,follow_up:followUp,version}); }
   publishConsultation(id: string, findings: string, followUp: string,draftVersion?:number) { return this.request<Consultation>(`/visits/${encodeURIComponent(id)}/consultation`, { findings, follow_up: followUp,draft_version:draftVersion }); }
+  assessmentComparison(id:string) { return this.request<AssessmentComparison>(`/assessments/${encodeURIComponent(id)}/comparison`); }
+  sharedAssessmentComparison(id:string) { return this.request<AssessmentComparison>(`/assessment-shares/${encodeURIComponent(id)}/comparison`); }
   assessments() { return this.request<Assessment[]>("/assessments"); }
   assessmentHistory(cursor?:string) { return this.request<{items:Assessment[];next_cursor:string|null}>(`/assessments/history${cursor?`?cursor=${encodeURIComponent(cursor)}`:""}`); }
   assessmentShares(id:string) { return this.request<AssessmentShare[]>(`/assessments/${encodeURIComponent(id)}/sharing-history`); }

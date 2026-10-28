@@ -1,0 +1,9 @@
+"use client";
+import {useEffect,useState} from "react";
+import {AssessmentComparison as Comparison,DemoApi,assessmentOrigin,visitTime} from "@smart-skin/shared";
+import AssessmentResult from "../components/AssessmentResult";
+export default function AssessmentComparison({api,share}:{api:DemoApi;share:string}){
+  const [data,setData]=useState<Comparison|null>(null),[error,setError]=useState("");
+  useEffect(()=>{let active=true,fetching=false;setData(null);setError("");async function load(){if(fetching)return;fetching=true;try{const value=await api.sharedAssessmentComparison(share);if(active){setData(value);setError("");}}catch{if(active){setData(null);setError("Comparison unavailable. The patient must actively share both assessments with you, including valid appointment access where linked.");}}finally{fetching=false;}}void load();const timer=setInterval(load,5000);return()=>{active=false;clearInterval(timer);};},[api,share]);
+  return <section aria-label="Assessment comparison" className="my-5 rounded-xl border p-4"><h3 className="text-lg font-semibold">Assessment comparison</h3><p className="muted my-3 text-sm">Each AI result is independent. Scores cannot measure improvement or worsening. Assess the photos and patient-reported symptoms clinically. Access refreshes every five seconds.</p>{error?<p role="alert">{error}</p>:!data?<p>Loading comparison…</p>:<div className="grid gap-4 md:grid-cols-2">{([['previous','Previous assessment'],['current','Follow-up assessment']] as const).map(([key,label])=>{const item=data[key];return <article key={key} className="min-w-0"><h4 className="font-semibold">{label}</h4><p className="muted my-2 text-sm">{visitTime(item.created_at)} · {assessmentOrigin(item)} · {item.id.slice(0,8)}</p>{item.photo_uri?<img alt={label+" photo"} src={item.photo_uri} className="h-52 w-full rounded-lg bg-[#f4f7f6] object-contain"/>:null}<AssessmentResult assessment={item}/></article>;})}</div>}</section>;
+}

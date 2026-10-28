@@ -138,6 +138,11 @@ class Store:
                   id TEXT PRIMARY KEY, patient_id TEXT NOT NULL, request_id TEXT NOT NULL,
                   source_hash TEXT NOT NULL, photo BLOB NOT NULL, width INTEGER NOT NULL,
                   height INTEGER NOT NULL, created_at TEXT NOT NULL, UNIQUE(patient_id, request_id));
+                CREATE TABLE IF NOT EXISTS assessment_followups (
+                  assessment_id TEXT PRIMARY KEY REFERENCES assessments(id),
+                  previous_id TEXT NOT NULL REFERENCES assessments(id),
+                  CHECK(assessment_id!=previous_id));
+                CREATE INDEX IF NOT EXISTS assessment_followups_previous ON assessment_followups(previous_id);
                 CREATE TABLE IF NOT EXISTS assessment_shares (
                   id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id),
                   patient_id TEXT NOT NULL, doctor_id TEXT NOT NULL, patient_message TEXT NOT NULL,
@@ -464,7 +469,7 @@ class Store:
                                (assessment_id,patient)).fetchone()
                 if row is None:
                     raise RuleError('Assessment not found for this patient.',404)
-                metadata=self.assessment_metadata(row)
+                metadata=self.assessment_metadata(row,db)
                 # Explicit categories only. Unknown/uncertain results use general support.
                 if metadata['origin']=='experimental_ai':
                     condition=metadata['prediction']['top_predictions'][0]['condition']
@@ -1007,7 +1012,7 @@ class Store:
             for row in db.execute('SELECT id FROM assessment_shares WHERE booking_id=? ORDER BY created_at DESC LIMIT 100',(booking_id,)).fetchall():
                 share=self.share_record(db,row['id'],patient)
                 assessment=db.execute('SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json FROM assessments WHERE id=?',(share['assessment_id'],)).fetchone()
-                linked.append(dict(share,assessment=self.assessment_metadata(assessment)))
+                linked.append(dict(share,assessment=self.assessment_metadata(assessment,db)))
             feedback=db.execute('SELECT * FROM visit_feedback WHERE booking_id=?',(booking_id,)).fetchone()
             replacement=self.record(db,visit['rescheduled_to_id']) if visit['rescheduled_to_id'] else None
             origin=db.execute('SELECT source_booking_id FROM follow_up_bookings WHERE booking_id=?',(booking_id,)).fetchone()
@@ -1669,8 +1674,11 @@ class Store:
                        (loss_id,medicine_id,quantity,kind,reason,medicine['stock'],after,staff,request_id,datetime.now(timezone.utc).isoformat(),label,receipt_id,receipt['batch_number'] if receipt else None,receipt['expiry_date'] if receipt else None))
             return dict(db.execute('SELECT * FROM stock_losses WHERE id=?',(loss_id,)).fetchone())
 
-    def assessment_metadata(self, row):
+    def assessment_metadata(self, row, db=None):
         metadata={key:row[key] for key in ('id','patient_id','width','height','created_at')}
+        if db is not None:
+            link=db.execute('SELECT previous_id FROM assessment_followups WHERE assessment_id=?',(row['id'],)).fetchone()
+            metadata['follow_up_of']=link['previous_id'] if link else None
         metadata['symptoms']=json.loads(row['symptoms_json']) if 'symptoms_json' in row.keys() and row['symptoms_json'] else None
         if 'prediction_json' in row.keys() and row['prediction_json']:
             return metadata | {'origin':'experimental_ai','example_category':None,
@@ -1711,7 +1719,7 @@ class Store:
             rows=db.execute(f'''SELECT id,patient_id,width,height,created_at,prediction_json,symptoms_json
                 FROM assessments WHERE patient_id=?{boundary} ORDER BY created_at DESC,id DESC LIMIT 101''',args).fetchall()
             summaries=self.assessment_review_summaries(db,[row['id'] for row in rows[:100]],patient)
-            return {'items':[self.assessment_metadata(row) | {'review_summary':summaries.get(row['id'],{'published_reviews':0,'awaiting_reviews':0})} for row in rows[:100]],
+            return {'items':[self.assessment_metadata(row,db) | {'review_summary':summaries.get(row['id'],{'published_reviews':0,'awaiting_reviews':0})} for row in rows[:100]],
                     'next_cursor':rows[99]['id'] if len(rows)>100 else None}
 
     def assessment(self, assessment_id, patient):
@@ -1721,22 +1729,71 @@ class Store:
             if row is None:
                 raise RuleError('Assessment not found for this patient.', 404)
             summary=self.assessment_review_summaries(db,[assessment_id],patient).get(assessment_id,{'published_reviews':0,'awaiting_reviews':0})
-            return self.assessment_metadata(row) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii'),'review_summary':summary}
+            return self.assessment_metadata(row,db) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii'),'review_summary':summary,'follow_ups':[dict(item) for item in db.execute('SELECT a.id,a.created_at FROM assessment_followups f JOIN assessments a ON a.id=f.assessment_id WHERE f.previous_id=? AND a.patient_id=? ORDER BY a.created_at DESC,a.id DESC LIMIT 20',(assessment_id,patient))]}
 
-    def assessment_retry(self,patient,request_id,source_hash,symptoms=None):
+    def validate_followup_parent(self, patient, previous_id, db=None):
+        if previous_id is None:return
+        if not isinstance(previous_id,str) or not 1<=len(previous_id)<=100:raise RuleError('Choose a saved assessment for the follow-up.',422)
+        if db is None:
+            with self.connect() as connection:return self.validate_followup_parent(patient,previous_id,connection)
+        if not self.is_patient(patient,db) or not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?',(previous_id,patient)).fetchone():
+            raise RuleError('Previous assessment not found for this patient.',404)
+
+    def check_assessment_followup_retry(self, db, assessment_id, previous_id):
+        link=db.execute('SELECT previous_id FROM assessment_followups WHERE assessment_id=?',(assessment_id,)).fetchone()
+        if (link['previous_id'] if link else None)!=previous_id:
+            raise RuleError('This request already saved a different follow-up link. Refresh history before starting again.')
+
+    def assessment_comparison_record(self, db, assessment_id, patient):
+        import base64
+        link=db.execute('SELECT previous_id FROM assessment_followups WHERE assessment_id=?',(assessment_id,)).fetchone()
+        if not link:raise RuleError('No linked previous assessment is available.',404)
+        result={}
+        for label,id in (('previous',link['previous_id']),('current',assessment_id)):
+            row=db.execute('SELECT * FROM assessments WHERE id=? AND patient_id=?',(id,patient)).fetchone()
+            if row is None:raise RuleError('Comparison unavailable for this patient.',404)
+            result[label]=self.assessment_metadata(row,db)|{'photo_uri':'data:image/jpeg;base64,'+base64.b64encode(row['photo']).decode('ascii')}
+        return result
+
+    def assessment_comparison(self, assessment_id, patient):
+        if not self.is_patient(patient):raise RuleError('Patient identity required.',403)
+        with self.connect() as db:
+            db.execute('BEGIN')
+            if not db.execute('SELECT 1 FROM assessments WHERE id=? AND patient_id=?',(assessment_id,patient)).fetchone():raise RuleError('Assessment not found for this patient.',404)
+            return self.assessment_comparison_record(db,assessment_id,patient)
+
+    def shared_assessment_comparison(self, share_id, doctor):
+        with self.connect() as db:
+            db.execute('BEGIN')
+            current=self.share_record(db,share_id,doctor)
+            if not self.is_doctor(doctor,db):raise RuleError('Doctor identity required.',403)
+            link=db.execute('SELECT previous_id FROM assessment_followups WHERE assessment_id=?',(current['assessment_id'],)).fetchone()
+            if link:
+                candidates=db.execute('SELECT id FROM assessment_shares WHERE assessment_id=? AND patient_id=? AND doctor_id=? AND revoked_at IS NULL',
+                    (link['previous_id'],current['patient_id'],doctor)).fetchall()
+                for candidate in candidates:
+                    try:self.share_record(db,candidate['id'],doctor)
+                    except RuleError:continue
+                    return self.assessment_comparison_record(db,current['assessment_id'],current['patient_id'])
+            raise RuleError('Comparison unavailable. Both assessments must have an active share with this doctor.',404)
+
+    def assessment_retry(self,patient,request_id,source_hash,symptoms=None,previous_id=None):
         with self.connect() as db:
             existing=db.execute('SELECT id,source_hash,symptoms_json FROM assessments WHERE patient_id=? AND request_id=?',(patient,request_id)).fetchone()
             if existing is None:return None
+            self.check_assessment_followup_retry(db,existing['id'],previous_id)
             if existing['source_hash']!=source_hash:raise RuleError('This request already saved a different photo. Refresh history.')
             if (json.loads(existing['symptoms_json']) if existing['symptoms_json'] else None)!=symptoms:
                 raise RuleError('This request already saved different symptom details. Refresh history before starting another assessment.')
         return self.assessment(existing['id'],patient)
 
-    def save_assessment(self, patient, request_id, source_hash, photo, width, height, prediction=None,symptoms=None):
+    def save_assessment(self, patient, request_id, source_hash, photo, width, height, prediction=None,symptoms=None,previous_id=None):
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
+            self.validate_followup_parent(patient,previous_id,db)
             existing = db.execute('SELECT id,source_hash,symptoms_json FROM assessments WHERE patient_id=? AND request_id=?', (patient, request_id)).fetchone()
             if existing:
+                self.check_assessment_followup_retry(db,existing['id'],previous_id)
                 if existing['source_hash'] != source_hash:
                     raise RuleError('This request already saved a different photo. Refresh history.')
                 if (json.loads(existing['symptoms_json']) if existing['symptoms_json'] else None)!=symptoms:
@@ -1748,6 +1805,8 @@ class Store:
                     (assessment_id,patient,request_id,source_hash,photo,width,height,datetime.now(timezone.utc).isoformat(),
                      json.dumps(prediction,allow_nan=False) if prediction is not None else None,
                      json.dumps(symptoms,allow_nan=False) if symptoms is not None else None))
+                if previous_id is not None:
+                    db.execute('INSERT INTO assessment_followups VALUES(?,?)',(assessment_id,previous_id))
         return self.assessment(assessment_id, patient)
 
     def share_record(self, db, share_id, actor):
@@ -1843,7 +1902,7 @@ class Store:
         with self.connect() as db:
             share = self.share_record(db, share_id, doctor)
             photo = db.execute('SELECT * FROM assessments WHERE id=?', (share['assessment_id'],)).fetchone()
-            return dict(share, assessment=self.assessment_metadata(photo) | {
+            return dict(share, assessment=self.assessment_metadata(photo,db) | {
                 'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')})
 
     def review_draft_record(self, db, share_id, doctor):
@@ -1941,7 +2000,7 @@ class Store:
                 if include_photo:
                     import base64
                     photo = db.execute('SELECT * FROM assessments WHERE id=?', (linked['assessment_id'],)).fetchone()
-                    linked['assessment'] = self.assessment_metadata(photo) | {'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')}
+                    linked['assessment'] = self.assessment_metadata(photo,db) | {'photo_uri':'data:image/jpeg;base64,' + base64.b64encode(photo['photo']).decode('ascii')}
         result = {'visit':visit, 'note':dict(note) if note else None, 'linked_share':linked}
         if include_photo:
             result['background'] = self.background_record(db,visit['patient_id'])
