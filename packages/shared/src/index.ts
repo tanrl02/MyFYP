@@ -51,6 +51,8 @@ export type DoctorMatchSource = {concern:DoctorConcern;assessmentId?:string};
 export type DoctorMatches = {concern:DoctorConcern;source:"manual"|"simulation"|"experimental_ai";assessment_id:string|null;message:string;doctors:(DoctorProfile & {match_level:"concern"|"general"|"none";match_reason:string})[]};
 export const doctorNames: Record<DemoDoctor, string> = { "doctor-lim": "Dr. Lim (demo)", "doctor-anita": "Dr. Anita (demo)" };
 export type AssessmentReview = { id: string; share_id: string; doctor_id: DemoDoctor; doctor_assessment:string; note: string; follow_up: string; created_at: string };
+export type AssessmentReport = {generated_at:string;scope:"patient"|"doctor";source_share_id:string|null;patient_name:string;assessment:Assessment;reviews:(AssessmentReview & {doctor_name:string;access_revoked:boolean})[]};
+export * from "./assessmentReport";
 export type ReviewDraft = {share_id:string;doctor_id:DemoDoctor;doctor_assessment:string;note:string;follow_up:string;version:number;updated_at:string|null};
 export type AssessmentShare = { id: string; assessment_id: string; patient_id: DemoPatient; patient_name: string; doctor_id: DemoDoctor; doctor_name: string; patient_message: string; request_id: string; created_at: string; revoked_at: string | null; review: AssessmentReview | null; assessment?: Assessment; booking_id: string | null; visit: Booking | null };
 export type PrescriptionItem = { medicine_id: string; quantity: number; directions: string };
@@ -185,6 +187,8 @@ export class DemoApi {
   revokeShare(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/revoke`, {}); }
   linkAssessment(id: string, booking: string, message: string, requestId: string) { return this.request<AssessmentShare>(`/assessments/${encodeURIComponent(id)}/link-appointment`, { booking_id: booking, patient_message: message, request_id: requestId }); }
   sharedAssessment(id: string) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}`); }
+  assessmentReport(id:string) { return this.request<AssessmentReport>(`/assessments/${encodeURIComponent(id)}/report`); }
+  sharedAssessmentReport(id:string) { return this.request<AssessmentReport>(`/assessment-shares/${encodeURIComponent(id)}/report`); }
   reviewDraft(id:string) { return this.request<ReviewDraft>(`/assessment-shares/${encodeURIComponent(id)}/draft`); }
   saveReviewDraft(id:string,note:string,followUp:string,version:number,doctorAssessment:string) { return this.request<ReviewDraft>(`/assessment-shares/${encodeURIComponent(id)}/draft`,{note,follow_up:followUp,version,doctor_assessment:doctorAssessment}); }
   publishReview(id: string, note: string, followUp: string,doctorAssessment:string, draftVersion?:number) { return this.request<AssessmentShare>(`/assessment-shares/${encodeURIComponent(id)}/review`, { note, follow_up: followUp,doctor_assessment:doctorAssessment, ...(draftVersion===undefined?{}:{draft_version:draftVersion}) }); }

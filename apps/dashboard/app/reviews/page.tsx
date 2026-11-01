@@ -3,6 +3,7 @@ import useDoctorNames from "../useDoctorNames";
 import PhotoFollowupRequest from "./PhotoFollowupRequest";
 import AssessmentComparison from "./AssessmentComparison";
 import AssessmentResult from "../components/AssessmentResult";
+import AssessmentReportPreview from "../components/AssessmentReportPreview";
 import { useEffect, useMemo, useState } from "react";
 import { AssessmentShare, DemoApi, DemoDoctor, ReviewDraft, queueToken, visitTime } from "@smart-skin/shared";
 
@@ -86,7 +87,7 @@ function ReviewInbox({ doctor,onBusy }: { doctor: DemoDoctor;onBusy:(busy:boolea
         <h2 className="text-xl font-semibold">{detail.patient_name} · assessment</h2><p className="muted mt-2 text-sm">Saved {detail.assessment ? visitTime(detail.assessment.created_at) : ""}</p>
         {detail.visit ? <p className="my-3 rounded-xl bg-[#edf4f1] p-3 text-sm">Linked appointment: {queueToken(detail.visit)} · {detail.visit.doctor_name} · {visitTime(detail.visit.starts_at)} · {detail.visit.status}</p> : <p className="muted mt-3 text-sm">Direct doctor share · no appointment linked</p>}
         {detail.assessment?.photo_uri ? <img alt="Patient-shared assessment photo" src={detail.assessment.photo_uri} className="my-5 max-h-80 w-full rounded-xl bg-[#f4f7f6] object-contain" /> : null}
-        {detail.assessment?<AssessmentResult assessment={detail.assessment}/>:null}
+        {detail.assessment?<><AssessmentResult assessment={detail.assessment}/><AssessmentReportPreview key={detail.id} api={api} shareId={detail.id}/></>:null}
         {detail.assessment?.follow_up_of?<><button className="btn secondary my-3" onClick={()=>setComparing(value=>!value)}>{comparing?"Hide comparison":"Compare with previous assessment"}</button>{comparing?<AssessmentComparison key={detail.id} api={api} share={detail.id}/>:null}</>:null}
         <PhotoFollowupRequest key={detail.id} api={api} share={detail.id} busy={busy} onBusy={setBusy}/><h3 className="font-semibold">Patient message</h3><p className="muted my-3 whitespace-pre-wrap">{detail.patient_message || "No message provided."}</p>
         {detail.review ? <div className="mt-5 border-t border-[#dce6e0] pt-5"><h3 className="font-semibold">Doctor’s assessment · published</h3><p className="my-3 whitespace-pre-wrap rounded-lg bg-emerald-50 p-3">{detail.review.doctor_assessment||"No separate assessment was recorded in this older review."}</p><p className="muted text-sm">Written by the reviewing doctor, separately from the experimental AI ranking.</p><h3 className="mt-4 font-semibold">Doctor’s notes</h3><p className="muted my-3 whitespace-pre-wrap">{detail.review.note}</p><h3 className="font-semibold">Follow-up</h3><p className="muted my-3 whitespace-pre-wrap">{detail.review.follow_up}</p><p className="muted text-xs">Published {visitTime(detail.review.created_at)} · saved reviews cannot be replaced.</p></div> : <div className="mt-5 border-t border-[#dce6e0] pt-5">

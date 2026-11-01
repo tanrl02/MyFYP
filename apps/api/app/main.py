@@ -263,7 +263,11 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.middleware('http')
     async def staff_request_context(request,call_next):
         token=STAFF_REQUEST.set((request.headers.get('X-Demo-Actor',''),request.method,request.url.path))
-        try:return await call_next(request)
+        try:
+            response=await call_next(request)
+            if request.url.path.endswith('/report'):
+                response.headers['Cache-Control']='no-store, private'
+            return response
         finally:STAFF_REQUEST.reset(token)
     api.add_middleware(CORSMiddleware,
         allow_origins=['http://localhost:3000','http://127.0.0.1:3000','http://localhost:8081','http://127.0.0.1:8081'],
@@ -507,6 +511,14 @@ def create_app(path=None,photo_checker=None,predictor=None):
     @api.get('/assessment-shares/{share_id}/comparison')
     def shared_assessment_comparison(share_id: str,who=Depends(doctor)):
         return run(lambda:store.shared_assessment_comparison(share_id,who))
+
+    @api.get('/assessments/{assessment_id}/report')
+    def assessment_report(assessment_id: str,who=Depends(patient)):
+        return run(lambda:store.assessment_report(assessment_id,who))
+
+    @api.get('/assessment-shares/{share_id}/report')
+    def shared_assessment_report(share_id: str,who=Depends(doctor)):
+        return run(lambda:store.assessment_report(None,who,share_id))
 
     @api.get('/assessments/{assessment_id}')
     def assessment(assessment_id: str, who=Depends(patient)):

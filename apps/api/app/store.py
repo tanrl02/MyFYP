@@ -1735,6 +1735,31 @@ class Store:
             summary=self.assessment_review_summaries(db,[assessment_id],patient).get(assessment_id,{'published_reviews':0,'awaiting_reviews':0})
             return self.assessment_metadata(row,db) | {'photo_uri': 'data:image/jpeg;base64,' + base64.b64encode(row['photo']).decode('ascii'),'review_summary':summary,'follow_ups':[dict(item) for item in db.execute('SELECT a.id,a.created_at FROM assessment_followups f JOIN assessments a ON a.id=f.assessment_id WHERE f.previous_id=? AND a.patient_id=? ORDER BY a.created_at DESC,a.id DESC LIMIT 20',(assessment_id,patient))]}
 
+    def assessment_report(self, assessment_id, actor, share_id=None):
+        """One read snapshot; private drafts and other doctors' reviews never enter a doctor copy."""
+        import base64
+        with self.connect() as db:
+            db.execute('BEGIN')
+            if share_id is not None:
+                if not self.is_doctor(actor,db):raise RuleError('Doctor identity required.',403)
+                shares=[self.share_record(db,share_id,actor)]
+                assessment_id=shares[0]['assessment_id']
+                patient=shares[0]['patient_id']
+            else:
+                if not self.is_patient(actor,db):raise RuleError('Patient identity required.',403)
+                patient=actor
+                shares=None
+            row=db.execute('SELECT * FROM assessments WHERE id=? AND patient_id=?',(assessment_id,patient)).fetchone()
+            if row is None:raise RuleError('Assessment not found for this patient.',404)
+            if shares is None:
+                ids=db.execute('SELECT id FROM assessment_shares WHERE assessment_id=? AND patient_id=? ORDER BY created_at,id',(assessment_id,patient)).fetchall()
+                shares=[self.share_record(db,item['id'],patient) for item in ids]
+            return {'generated_at':datetime.now(timezone.utc).isoformat(),'scope':'doctor' if share_id else 'patient',
+                'source_share_id':share_id,'patient_name':self.user_name(db,patient),
+                'assessment':self.assessment_metadata(row,db)|{'photo_uri':'data:image/jpeg;base64,'+base64.b64encode(row['photo']).decode('ascii')},
+                'reviews':[share['review']|{'doctor_name':share['doctor_name'],'access_revoked':share['revoked_at'] is not None}
+                    for share in shares if share['review'] is not None]}
+
     def validate_followup_parent(self, patient, previous_id, db=None):
         if previous_id is None:return
         if not isinstance(previous_id,str) or not 1<=len(previous_id)<=100:raise RuleError('Choose a saved assessment for the follow-up.',422)
